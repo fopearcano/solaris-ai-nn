@@ -7,6 +7,14 @@ Public surface:
 * :mod:`adapters` -- signal <-> dict conversion (the bridge seam).
 """
 
+from .adapters import (  # noqa: F401
+    SolarisSignalAdapter,
+    extract_payload,
+    extract_signal_type,
+    from_nn_action,
+    from_nn_desire,
+    to_nn_signal,
+)
 from .canonical import (  # noqa: F401
     Action,
     Desire,
@@ -31,4 +39,10 @@ __all__ = [
     "MapUpdate",
     "LogosTension",
     "EventEncoder",
+    "SolarisSignalAdapter",
+    "to_nn_signal",
+    "from_nn_action",
+    "from_nn_desire",
+    "extract_signal_type",
+    "extract_payload",
 ]

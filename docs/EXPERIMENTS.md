@@ -66,6 +66,9 @@ for absence vs presence.
 **Metrics.** absence-event count, reservoir state energy during silence vs
 stimulation, separability of absence vs presence states.
 
+> **Now realised through the bridge** — see *§7 Absence-Stimulus Bridge
+> Experiment* below for the implemented version driving `SolarisNeuralBridge`.
+
 ---
 
 ## 4. LogosTension-driven adaptation experiment (specified)
@@ -130,3 +133,68 @@ steps-per-second.
 **Failure modes to document.** state saturation (|state|→1 everywhere), weight
 collapse to zero from over-aggressive synthesis, and habit lock-in (exploration
 too low to recover from a flip).
+
+---
+
+# Phase-1 bridge experiments
+
+These exercise the `SolarisNeuralBridge` compatibility layer (Prompt 2): the NN
+substrate consuming Solaris_Ai-style signals and emitting suggestions.
+
+## 7. Absence-Stimulus Bridge Experiment ✅ (implemented)
+
+**File:** `src/solaris_ai_nn/experiments/absence_stimulus_bridge.py`
+**Run:** `python examples/run_absence_stimulus_bridge.py`
+
+**Setup.** Two phases through the bridge. *Presence:* external stimuli arrive and
+the bridge learns from `+1/−1` reactions. *Silence:* no external input; we
+synthesise escalating "I exist!" **absence** stimuli (`is_absence=True`) and feed
+them to the bridge, mirroring `core/aion_impulse.py`.
+
+**What it demonstrates.** The reservoir keeps evolving during silence — the
+substrate does **not** go inert without external drive.
+
+**Metrics.** presence/silence event counts, mean reservoir energy per phase,
+reservoir **state drift across silence**, `went_inert` flag, per-step silence
+energy trace.
+
+**Pass criteria (asserted in tests).** runs bounded (no infinite loop),
+`silence_state_drift > 0`, `energy_silence_mean > 0`, `went_inert is False`,
+silence energy trace is non-constant, and results are deterministic per seed.
+
+## 8. LogosTension Modulation Experiment (specified)
+
+**Goal.** Show that `LogosModulator` (`reservoir/modulation.py`) changes substrate
+behaviour as a function of Logos state — without any mysticism.
+
+**Setup.** Process the same stimulus stream through the bridge under three Logos
+regimes: (a) none, (b) high `division`, (c) high `union` / high `fracture`. Send
+a `LogosTension` to set the regime, then identical stimuli.
+
+**Expected.**
+- High **fracture** ⇒ larger input gain ⇒ higher reservoir state energy for the
+  same stimulus.
+- High **union** ⇒ more exploratory input noise ⇒ more variable tendencies.
+- High **division** ⇒ higher reported readout **confidence**;
+  high **union** ⇒ lower confidence.
+
+**Metrics.** reservoir energy vs fracture; tendency variance vs union; reported
+confidence vs division/union. (Modulation is the identity with no LogosTension,
+giving a clean control.)
+
+## 9. Reaction Feedback Experiment (specified)
+
+**Goal.** Isolate that `SolarisNeuralBridge.react()` is what drives learning —
+the bridge's analogue of Solaris_Ai's conceptual backpropagation.
+
+**Setup.** Run two matched bridges on the same stimulus stream and seed. One
+calls `react()` with informative `+1/−1` valence; the other never reacts (or
+reacts with `0.0`).
+
+**Expected.** The reacting bridge's readout weights move and its suggestions
+align with rewarded actions; the non-reacting bridge's readout stays at its
+initial state and its suggestions do not improve. Habit pathways grow only in the
+reacting bridge.
+
+**Metrics.** readout weight drift, suggestion accuracy over time, habit pathway
+count and mass — reacting vs non-reacting.

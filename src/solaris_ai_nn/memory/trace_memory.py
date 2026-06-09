@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from ..runtime.persistence import JsonlWriter
+if TYPE_CHECKING:  # Avoid importing runtime at load time (breaks an import cycle).
+    from ..runtime.persistence import JsonlWriter
 
 
 @dataclass
@@ -34,7 +35,7 @@ class TraceMemory:
     """
 
     capacity: int = 10_000
-    writer: Optional[JsonlWriter] = None
+    writer: Optional["JsonlWriter"] = None
     records: List[TraceRecord] = field(default_factory=list)
 
     def _append(self, record: TraceRecord) -> None:

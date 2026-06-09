@@ -8,17 +8,29 @@ followed by that kind of reaction".
 
 Vector layout (fixed, deterministic):
 
-    [ one-hot signal kind                    ]  len(KINDS)
-    [ intensity, valence, novelty, fracture  ]  4 scalar slots
-    [ one-hot payload category               ]  PAYLOAD_BUCKETS
-    [ heartbeat flag, normalised time delta  ]  2 temporal slots
+    [ one-hot signal kind                                ]  len(KINDS) = 8
+    [ intensity, valence, novelty,                       ]
+    [ division, union, fracture,                         ]  8 scalar slots
+    [ is_absence, time_delta                             ]
+    [ heartbeat flag                                     ]  1 slot
+    [ one-hot payload category                           ]  PAYLOAD_BUCKETS = 16
+    [ one-hot origin bucket                              ]  ORIGIN_BUCKETS = 8
+
+Why these features? They cover the Solaris signal spine and side-streams:
+intensity (Stimulus/Push drive), valence (Reaction reinforcement), novelty
+(MeaningEvent / Mysterium), division+union+fracture (LogosTension), is_absence
+(the Subtraction Principle), plus continuity slots (time delta, heartbeat) and
+coarse identity slots (payload category, origin).
 
 Payload categories use a small *dictionary* of known payloads (distinct slots
-for distinct words) plus a hashing fallback for anything unseen. A pure hash
-into a handful of buckets collides too easily (e.g. "light"/"noise"/"food" all
-land in the same bucket), which would make distinct stimuli indistinguishable to
-the substrate. The dictionary guarantees separation for a known small
-vocabulary, which is exactly the regime these first experiments live in.
+for distinct words) plus a hashing fallback for anything unseen -- a pure hash
+into a handful of buckets collides too readily, which would make distinct
+stimuli indistinguishable to the substrate.
+
+Note on return type: vectors are plain ``list[float]`` (not ``numpy.ndarray``).
+The reservoir, readout, and math helpers are deliberately pure-stdlib and
+list-based (see README / RESEARCH_NOTES); a list flows through them unchanged.
+A NumPy-backed backend remains an optional future step, not a requirement here.
 """
 
 from __future__ import annotations
@@ -41,7 +53,20 @@ KINDS: List[str] = [
     "LogosTension",
 ]
 
+# Scalar feature slots, in fixed order (after the kind one-hot block).
+SCALAR_FIELDS: List[str] = [
+    "intensity",
+    "valence",
+    "novelty",
+    "division",
+    "union",
+    "fracture",
+    "is_absence",
+    "time_delta",
+]
+
 PAYLOAD_BUCKETS = 16
+ORIGIN_BUCKETS = 8
 
 
 def _hash(text: str) -> int:
@@ -83,9 +108,17 @@ class EventEncoder:
         self._vocab_index = {word: i + 1 for i, word in enumerate(vocab)}
 
     @property
-    def dim(self) -> int:
+    def vector_size(self) -> int:
         """Length of every encoded vector."""
-        return len(KINDS) + 4 + PAYLOAD_BUCKETS + 2
+        return len(KINDS) + len(SCALAR_FIELDS) + 1 + PAYLOAD_BUCKETS + ORIGIN_BUCKETS
+
+    # Backwards-compatible alias used by the runtime loop / existing code.
+    @property
+    def dim(self) -> int:
+        """Alias of :attr:`vector_size`."""
+        return self.vector_size
+
+    # -- payload / origin bucketing ----------------------------------------
 
     def _payload_category(self, payload: object) -> int:
         """Map a payload to a payload-bucket index (see class docstring)."""
@@ -102,21 +135,42 @@ class EventEncoder:
             return _hash(text) % PAYLOAD_BUCKETS
         return reserved + (_hash(text) % tail)
 
+    def _origin_bucket(self, origin: object) -> int:
+        """Map an origin label to one of ``ORIGIN_BUCKETS`` buckets."""
+        text = str(origin) if origin is not None else ""
+        if text == "":
+            return 0
+        return _hash(text) % ORIGIN_BUCKETS
+
     def _payload_of(self, signal: C.Signal) -> object:
         payload = getattr(signal, "payload", None)
         if payload is None:
             payload = getattr(signal, "meaning", None) or getattr(signal, "name", None)
         return payload
 
+    @staticmethod
+    def _fracture_of(signal: C.Signal) -> float:
+        """fracture = |division - union|, using the property when present."""
+        if hasattr(signal, "fracture"):
+            try:
+                return float(getattr(signal, "fracture"))
+            except (TypeError, ValueError):
+                pass
+        division = float(getattr(signal, "division", 0.0) or 0.0)
+        union = float(getattr(signal, "union", 0.0) or 0.0)
+        return abs(division - union)
+
+    # -- encoding -----------------------------------------------------------
+
     def encode(self, signal: C.Signal, dt: float = 0.0, heartbeat: bool = False) -> List[float]:
-        """Encode ``signal`` into a feature vector.
+        """Encode ``signal`` into a fixed-length feature vector (``list[float]``).
 
         Args:
             signal: Any canonical signal.
             dt: Seconds since the previous event (temporal continuity slot).
             heartbeat: Whether this event coincides with a heartbeat tick.
         """
-        vec = [0.0] * self.dim
+        vec = [0.0] * self.vector_size
 
         # --- one-hot signal kind ---
         kind = signal.kind
@@ -124,20 +178,33 @@ class EventEncoder:
             vec[KINDS.index(kind)] = 1.0
         offset = len(KINDS)
 
-        # --- scalar slots: intensity / valence / novelty / fracture ---
-        vec[offset + 0] = float(getattr(signal, "intensity", 0.0))
-        vec[offset + 1] = float(getattr(signal, "valence", 0.0))
-        vec[offset + 2] = float(getattr(signal, "novelty", 0.0))
-        vec[offset + 3] = float(getattr(signal, "fracture", 0.0)) if hasattr(signal, "fracture") else 0.0
-        offset += 4
+        # --- scalar slots (order = SCALAR_FIELDS) ---
+        time_delta = max(0.0, min(1.0, dt / self.max_dt)) if self.max_dt > 0 else 0.0
+        scalars = {
+            "intensity": float(getattr(signal, "intensity", 0.0) or 0.0),
+            "valence": float(getattr(signal, "valence", 0.0) or 0.0),
+            "novelty": float(getattr(signal, "novelty", 0.0) or 0.0),
+            "division": float(getattr(signal, "division", 0.0) or 0.0),
+            "union": float(getattr(signal, "union", 0.0) or 0.0),
+            "fracture": self._fracture_of(signal),
+            "is_absence": 1.0 if getattr(signal, "is_absence", False) else 0.0,
+            "time_delta": time_delta,
+        }
+        for i, name in enumerate(SCALAR_FIELDS):
+            vec[offset + i] = scalars[name]
+        offset += len(SCALAR_FIELDS)
+
+        # --- heartbeat flag ---
+        vec[offset] = 1.0 if heartbeat else 0.0
+        offset += 1
 
         # --- payload category one-hot ---
         vec[offset + self._payload_category(self._payload_of(signal))] = 1.0
         offset += PAYLOAD_BUCKETS
 
-        # --- temporal slots ---
-        vec[offset + 0] = 1.0 if heartbeat else 0.0
-        vec[offset + 1] = max(0.0, min(1.0, dt / self.max_dt)) if self.max_dt > 0 else 0.0
+        # --- origin bucket one-hot ---
+        vec[offset + self._origin_bucket(getattr(signal, "origin", None))] = 1.0
+        offset += ORIGIN_BUCKETS
 
         return vec
 

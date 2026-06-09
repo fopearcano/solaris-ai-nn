@@ -1,10 +1,13 @@
-"""Tests for canonical signals, the event encoder, and adapters."""
+"""Tests for canonical signals and low-level dict adapters.
+
+Event-encoder tests live in ``test_event_encoding.py``; the higher-level
+duck-typed adapter tests live in ``test_signal_adapter.py``.
+"""
 
 from __future__ import annotations
 
 from solaris_ai_nn.signals import canonical as C
 from solaris_ai_nn.signals.adapters import dict_to_signal, signal_to_dict
-from solaris_ai_nn.signals.encoding import KINDS, PAYLOAD_BUCKETS, EventEncoder
 
 
 def test_signal_creation_fields():
@@ -32,40 +35,6 @@ def test_logos_tension_fracture():
 def test_reaction_valence_range_is_caller_responsibility():
     r = C.Reaction(action_id=1, valence=-1.0)
     assert r.valence == -1.0
-
-
-def test_encoder_dimension_is_fixed():
-    enc = EventEncoder()
-    assert enc.dim == len(KINDS) + 4 + PAYLOAD_BUCKETS + 2
-
-
-def test_encode_stimulus_onehot_and_scalars():
-    enc = EventEncoder()
-    s = C.Stimulus(modality="sensor", payload="light", intensity=0.9)
-    vec = enc.encode(s, dt=0.5, heartbeat=True)
-    assert len(vec) == enc.dim
-    # Stimulus one-hot slot is set.
-    assert vec[KINDS.index("Stimulus")] == 1.0
-    # intensity scalar slot is right after the one-hot block.
-    assert vec[len(KINDS)] == 0.9
-    # heartbeat flag (second-to-last slot) is set.
-    assert vec[-2] == 1.0
-
-
-def test_encode_is_deterministic():
-    enc = EventEncoder()
-    s = C.Stimulus(payload="food", intensity=0.5)
-    assert enc.encode(s) == enc.encode(s)
-
-
-def test_pattern_key_groups_by_kind_and_payload():
-    enc = EventEncoder()
-    a = C.Stimulus(payload="light")
-    b = C.Stimulus(payload="light")
-    c = C.Stimulus(payload="noise")
-    assert enc.pattern_key(a) == enc.pattern_key(b)
-    # Different payloads may or may not collide in 8 buckets, but key format holds.
-    assert enc.pattern_key(c).startswith("Stimulus:")
 
 
 def test_adapter_roundtrip():

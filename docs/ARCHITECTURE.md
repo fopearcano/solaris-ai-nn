@@ -160,12 +160,68 @@ error, habit weight + change, pruning passes/count, memory trace length, and wal
 -clock duration. If you cannot see a concept in the telemetry, it is not real
 here.
 
-## 11. Future bridge to the real Solaris_Ai runtime
+## 11. Solaris compatibility bridge
 
-`bridges/` is the integration seam. `signals/adapters.py` handles dataclass↔dict
-conversion; `bridges/signal_bridge.py` is the runtime-facing bridge that will
-eventually subscribe to a live Solaris_Ai `Bus`, translate inbound signals into
-the NN vocabulary, drive an `ExperimentLoop`, and translate Actions/Desires back
-out. Today it operates on plain dicts so no dependency on the reference repo is
-introduced. `bridges/solaris_reference.py` records, in code, which reference
-module inspired each NN module. See ROADMAP Phases 1 and 7.
+`bridges/neural_bridge.py` (`SolarisNeuralBridge`) is the first concrete
+compatibility layer between Solaris_Ai's signal ecology and the neural substrate.
+It is the answer to "how does a Solaris_Ai signal become learning, and how does
+learning become a Solaris_Ai suggestion?"
+
+**Why the NN layer is not a replacement for Solaris_Ai.** Solaris_Ai is the
+conceptual system — the modular pub/sub network with AION, Logos, Inner MAP,
+Habit, Synthesis, and the rest. Solaris-AI-NN sits *beside/underneath* it as an
+adaptive substrate. The bridge consumes the same signals and emits *tendencies*,
+but it does not own the signal ecology and it does not decide. Solaris_Ai (or a
+future I/O / integration layer) remains the system; the NN layer is a learning
+organ it can consult.
+
+**How Solaris signals become vectors.** `SolarisSignalAdapter` accepts any of
+three shapes — native NN dataclasses, dicts, or attribute-bearing Solaris_Ai
+objects — entirely by duck typing (no import of `solaris-ai`). It resolves the
+signal type (explicit `kind`/`type`, class name, or field-based inference) and
+rebuilds a canonical NN signal, filling missing optional fields with defaults
+and preserving `is_absence`. The `EventEncoder` then turns that signal into a
+fixed-length `list[float]` (kind one-hot; intensity / valence / novelty /
+division / union / fracture / is_absence / time_delta; heartbeat; payload and
+origin one-hots). This is event-continuity encoding, not language understanding.
+
+**How reservoir state acts as a low-compute temporal substrate.** Each adapted,
+encoded signal advances the fixed ESN one cheap step. The reservoir state is a
+fading echo of the whole signal history — the bridge's continuous "nervous"
+state — from which the linear readout reads an action tendency. Only the readout
+learns (online NLMS from `Reaction` feedback); the recurrence is never trained.
+
+**How LogosTension modulates the reservoir/readout.** When the bridge receives a
+`LogosTension`, it stores it and `LogosModulator` (`reservoir/modulation.py`)
+modulates subsequent processing — a plain gain/noise mechanism, nothing mystical:
+
+- **high fracture → larger input gain** (`gain = 1 + k·fracture`): conflicting
+  pulls make the substrate react more strongly to the current event;
+- **high union → more exploratory input noise**: data-absence widens exploration;
+- **high division → steadier, more confident readout** (union lowers confidence):
+  rational grounding raises confidence in the suggested tendency.
+
+Modulation is the identity when no LogosTension has been seen, so it is always
+safe to apply.
+
+**Why Actions are suggestions, not autonomous decisions.** `process()` returns a
+tendency dict and `suggest_action()` / `suggest_desire()` expose proposals; the
+bridge never commits behaviour. This is a deliberate boundary: the NN layer
+proposes adaptive tendencies, and Solaris_Ai's I/O module or the future
+integration layer decides whether to accept them. The substrate informs the
+system; it does not seize it.
+
+The bridge's lifecycle per signal: `to_nn_signal` → `encode` → `LogosModulator`
+→ `ESN.update` → readout tendency (+ habit bias, epsilon-greedy) → return
+suggestion; and on feedback, `react()` runs the online update + habit
+reinforcement. `snapshot()` exposes current bridge state and telemetry.
+
+## 12. Future bridge to the live Solaris_Ai Bus
+
+`signals/adapters.py` also handles dataclass↔dict conversion, and
+`bridges/signal_bridge.py` holds the low-level inbound/outbound dict helpers that
+will eventually let `SolarisNeuralBridge` subscribe to a live Solaris_Ai `Bus`,
+translate inbound signals, drive the substrate, and translate suggestions back
+out — still without importing the reference repo. `bridges/solaris_reference.py`
+records, in code, which reference module inspired each NN module. See ROADMAP
+Phases 1 and 7.

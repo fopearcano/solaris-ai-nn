@@ -113,3 +113,47 @@ handler does not stop the network) and a birth/death lifecycle.
   swapped, benchmarked, or eventually mounted into the real Solaris_Ai runtime as
   an optional learning substrate (Phase 7).
 - **Never overwrite the reference.** All coupling happens through `bridges/`.
+
+---
+
+## Compatibility-bridge mapping (Phase 1)
+
+The first compatibility bridge (`bridges/neural_bridge.py`,
+`signals/adapters.py`, `reservoir/modulation.py`) makes the table above
+concrete. The bridge consumes Solaris_Ai-style signals (by duck typing — no
+import of `solaris-ai`), runs them through the substrate, and emits Action/Desire
+*suggestions*.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| `runtime/signals.py` | `signals/canonical.py` (+ `signals/adapters.py` `SolarisSignalAdapter` for duck-typed translation) |
+| `core/aion_impulse.py` (heartbeat / absence) | `experiments/absence_stimulus_bridge.py` (synthesised "I exist!" stimuli keep the reservoir alive in silence) |
+| `core/logos.py` (division / union / fracture) | `reservoir/modulation.py` (`LogosModulator`: fracture→input gain, union→noise, division→confidence) |
+| `modules/habit.py` | `plasticity/habit_reinforcement.py` (reinforced via `SolarisNeuralBridge.react`) |
+| `modules/synthesis.py` | `plasticity/synthesis_pruning.py` (synthesis through subtraction) |
+| `modules/backpropagation.py` | online readout feedback update — `reservoir/online_learning.py` driven by `SolarisNeuralBridge.react` |
+| `modules/inner_map.py` | future persistent state coupling — `memory/state_memory.py` + `memory/consolidation.py` (Phase 3) |
+| `conscience.py` topology (assembled bus network) | future bus bridge — `bridges/signal_bridge.py` (`inbound`/`outbound`) → live `Bus` subscription (Phase 7) |
+
+### The bridge data path
+
+```
+raw Solaris-like signal
+        │  SolarisSignalAdapter.to_nn_signal   (dataclass | dict | object)
+        ▼
+canonical NN Signal
+        │  EventEncoder.encode
+        ▼
+feature vector ──► LogosModulator.apply_to_input (gain + noise from LogosTension)
+        │
+        ▼
+ESN.update → reservoir state ──► LinearReadout → scores
+        │                              │  (+ habit bias, epsilon-greedy)
+        │                              ▼
+        │                    Action / Desire SUGGESTION  (not a decision)
+        ▼
+Reaction feedback ──► online NLMS update + habit reinforcement
+```
+
+Actions/Desires leave the bridge as **suggestions**; Solaris_Ai (or a future I/O
+layer) decides whether to commit them.
