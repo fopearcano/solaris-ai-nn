@@ -181,3 +181,24 @@ The Inner MAP observes the substrate, persists `inner_map.json` on every
 checkpoint, and restores its continuity section across restarts — providing the
 inspectable self-model and boundary registry that later self-modification work
 will depend on.
+
+---
+
+## Controlled plasticity mapping (Phase 5)
+
+Controlled, safe self-modification (`plasticity/` engine, policy, safety,
+rollback, audit) maps several Solaris_Ai concepts onto bounded runtime-parameter
+mutation. Re-expressed, never imported; no source-code rewriting.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| `modules/backpropagation.py` (responsibility / "who, how much") | online readout updates (`reservoir/online_learning.py`) **plus** plasticity policy triggers (`plasticity/policy.py`) that react to prediction error |
+| `modules/auto_regeneration.py` (rewrite/repair parameters) | controlled runtime parameter mutation — `plasticity/plasticity_engine.py` + `mutation.py` `TargetRegistry` (bounded, validated, logged, rollbackable; **never** source code) |
+| `modules/habit.py` | habit-reinforcement plasticity targets — `reinforcement_rate`, `max_habit_weight`, `decay_rate`, and individual `weight:<pattern>|<action>` |
+| `modules/synthesis.py` (subtraction) | synthesis pruning targets + `SubtractionReport` — `pruning_threshold`, `pruning_interval`, `max_prune_fraction` |
+| `modules/dimensional_comparison.py` (knowing one's edges) | plasticity **safety boundaries** — `plasticity/safety.py` `PlasticitySafetyValidator` + `SAFE_BOUNDS` + hard prohibitions |
+| `modules/inner_map.py` (self-state) | plasticity observability — Inner MAP `PlasticityState` (applied/rejected/rollback counts, last steps, mutable parameters, safety status, audit path) |
+
+Plasticity is **off by default**; when enabled it obeys the safety validator,
+supports a dry-run mode, persists mutable parameters across restarts, and can
+roll back any applied step from the audit log.

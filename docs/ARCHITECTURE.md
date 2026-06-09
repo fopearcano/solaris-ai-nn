@@ -337,3 +337,56 @@ must not cross (CPU-only, no heavy ML, no autonomous file deletion or source
 rewriting, no unbounded runs unless requested, and — crucially — *no autonomous
 action commitment*). The Inner MAP and `BoundaryRegistry` provide exactly that
 foundation: observe and constrain first, adapt second.
+
+## 15. Controlled plasticity and safe self-modification
+
+The plasticity controller (`plasticity/`, Prompt 5) lets the substrate modify its
+own **runtime parameters** over time. It is off by default and, when on, is safe,
+observable, bounded, and reversible.
+
+**It modifies runtime parameters, not source code.** Plasticity tunes things like
+the readout learning rate, reservoir leak/spectral radius/input gain, habit
+reinforcement rate and individual habit weights, synthesis pruning threshold, and
+exploration/stabilization tendencies. It never edits Python files, deletes files,
+installs dependencies, touches Git, or runs unbounded — those are hard
+prohibitions enforced by the safety validator, not conventions.
+
+**Every mutation is proposed, validated, logged, and rollbackable.** The flow per
+step:
+
+1. **Policy** (`policy.py`) reads telemetry, prediction error, Logos state, habit
+   stats, drift, and continuity, and *proposes* bounded changes via simple,
+   explicit rules (raise the learning rate under persistent error; lower it and
+   raise stabilization when error is low and stable; strengthen a
+   repeatedly-rewarded habit; prune unused pathways; explore more under high
+   Logos fracture; etc.). No black-box meta-learning.
+2. **Safety validator** (`safety.py`) checks every proposal: numeric bounds
+   (e.g. spectral radius 0.1–1.5, learning rate 1e-4–1.0), and hard invariants —
+   no source-code edits, no disabling persistence/continuity-logging/boundaries,
+   no autonomous action authority, no auto-`continuous`, no writes outside the
+   state dir, and no reservoir-size change during an active run.
+3. **Engine** (`plasticity_engine.py`) applies safe steps through the
+   `TargetRegistry` (the only thing that writes live parameters), rejects unsafe
+   ones with an explanation, and audits **every** proposal, rejection,
+   application, and rollback to `plasticity_audit.jsonl`.
+4. **Rollback** (`rollback.py`) stores each applied step's previous value, can
+   restore it through the same registry, and *verifies* the parameter returned to
+   its old value. Unknown step ids fail gracefully. History is rebuildable from
+   the audit log, so rollback works even in a fresh process.
+
+**Habit strengthens pathways; synthesis removes weak ones.** Plasticity does not
+replace these substrates — it tunes them. Habit reinforcement still moves
+`(situation, action)` biases toward reward; synthesis still subtracts weak
+readout/habit weights (now bounded by `max_prune_fraction`). The policy decides
+*when* to push each lever based on telemetry and the Inner MAP.
+
+**The policy decides from telemetry and the Inner MAP; the validator enforces
+boundaries; rollback protects continuity.** Plasticity is integrated into the
+`ContinuousRunner` behind `enable_plasticity` (default **False**),
+`plasticity_interval_steps`, and `plasticity_dry_run` (propose + log, apply
+nothing). Current mutable parameter values are saved in each checkpoint and
+restored on restart, so plasticity effects are durable; the Inner MAP exposes
+applied/rejected/rollback counts, the last steps, the current mutable parameters,
+and the audit path. Because every change is bounded, logged, and reversible, the
+system can adapt itself without ever crossing a safety boundary — and a single
+command (`--rollback-last`) undoes the most recent change.

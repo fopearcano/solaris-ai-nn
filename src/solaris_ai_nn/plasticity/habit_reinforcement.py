@@ -35,17 +35,21 @@ class HabitReinforcement:
 
     lr: float = 0.2
     bias_scale: float = 0.25
+    max_weight: float = 1.0
+    decay: float = 0.0
     weights: Dict[PathwayKey, float] = field(default_factory=dict)
     counts: Dict[PathwayKey, int] = field(default_factory=dict)
 
     def observe(self, pattern_key: str, action_label: str, valence: float) -> float:
         """Reinforce a pathway after an action received a reaction.
 
+        Applies optional decay (``decay``) toward zero before reinforcing, and
+        clamps to ``[-max_weight, +max_weight]`` -- both are plasticity-tunable.
         Returns the updated bias for the pathway.
         """
         key = (pattern_key, action_label)
-        old = self.weights.get(key, 0.0)
-        new = clamp(old + self.lr * valence, -1.0, 1.0)
+        old = self.weights.get(key, 0.0) * (1.0 - self.decay)
+        new = clamp(old + self.lr * valence, -self.max_weight, self.max_weight)
         self.weights[key] = new
         self.counts[key] = self.counts.get(key, 0) + 1
         return new

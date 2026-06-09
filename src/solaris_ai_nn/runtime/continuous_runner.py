@@ -84,6 +84,9 @@ class ContinuousRunner:
     silence_threshold: int = 5
     inner_map: bool = True
     inner_map_update_interval_steps: int = 10
+    enable_plasticity: bool = False
+    plasticity_interval_steps: int = 50
+    plasticity_dry_run: bool = False
 
     def __post_init__(self) -> None:
         if not self.continuous and self.max_steps is None and self.max_duration_s is None:
@@ -107,6 +110,23 @@ class ContinuousRunner:
             self.observer = InnerMapObserver(
                 bridge=self.bridge, runner=self, synthesis=self.synthesis
             )
+
+        # Optional controlled-plasticity engine (off by default).
+        self.plasticity_engine = None
+        if self.enable_plasticity:
+            from ..plasticity.plasticity_engine import PlasticityEngine  # local: avoid cycle
+
+            self.plasticity_engine = PlasticityEngine(
+                bridge=self.bridge, synthesis=self.synthesis, runner=self,
+                audit_path=str(self.pm.plasticity_audit_path),
+                run_id=self.run_id, session_id=self.session_id,
+                state_dir=str(self.pm.state_dir), dry_run=self.plasticity_dry_run,
+            )
+            # Restore mutable parameters saved by a previous session, if any.
+            if self._restored_mutable_params:
+                self.plasticity_engine.registry.apply_values(self._restored_mutable_params)
+            # Rebuild rollback history from the audit so cross-session rollback works.
+            self.plasticity_engine.load_history_from_audit()
 
     # -- startup / restore --------------------------------------------------
 
@@ -157,9 +177,11 @@ class ContinuousRunner:
         )
 
         # Restore substrate state (and pruning history) from the last checkpoint.
+        self._restored_mutable_params: List[List[Any]] = []
         if checkpoint is not None:
             checkpoint.restore_into(self.bridge)
             self.pruning_history = list(checkpoint.pruning_history)
+            self._restored_mutable_params = list(getattr(checkpoint, "mutable_params", []) or [])
 
         # Carry lifetime/restart counters into telemetry.
         self.telemetry.set_lifetime_steps(self.lifetime_base)
@@ -217,6 +239,12 @@ class ContinuousRunner:
                     and step % self.inner_map_update_interval_steps == 0
                 ):
                     self.observer.update()
+                if (
+                    self.plasticity_engine is not None
+                    and self.plasticity_interval_steps > 0
+                    and step % self.plasticity_interval_steps == 0
+                ):
+                    self.plasticity_engine.evaluate()
         except KeyboardInterrupt:  # graceful: a Ctrl-C is still a clean death
             self._stop_requested = True
             self._stop_reason = "keyboard interrupt"
@@ -286,6 +314,11 @@ class ContinuousRunner:
     def _checkpoint(self, reason: str, step: int, lifetime: int) -> None:
         self.lifecycle.checkpoint(reason, step=step, lifetime_step=lifetime)
         self.telemetry.checkpoint()
+        mutable_params = None
+        plasticity = None
+        if self.plasticity_engine is not None:
+            mutable_params = self.plasticity_engine.registry.snapshot_values()
+            plasticity = self.plasticity_engine.snapshot()
         cp = StateCheckpoint.capture(
             self.bridge,
             run_id=self.run_id,
@@ -294,6 +327,8 @@ class ContinuousRunner:
             lifetime_step=lifetime,
             last_heartbeat_ts=self.lifecycle.last_heartbeat_ts,
             pruning_history=self.pruning_history,
+            mutable_params=mutable_params,
+            plasticity=plasticity,
         )
         self.pm.save_checkpoint(cp)
         self._last_checkpoint_ts = time.time()
@@ -402,4 +437,21 @@ class ContinuousRunner:
             snap["inner_map"] = model_dict
             snap["memory"] = model_dict["memory"]
             snap["boundaries"] = self.observer.boundaries.to_dict()
+        if self.plasticity_engine is not None:
+            snap["plasticity"] = self.plasticity_engine.snapshot()
+            snap["plasticity_audit_path"] = str(self.pm.plasticity_audit_path)
         return snap
+
+    # -- plasticity rollback ------------------------------------------------
+
+    def rollback_last_plasticity(self):
+        """Roll back the most recent applied plasticity step (if any)."""
+        if self.plasticity_engine is None:
+            raise RuntimeError("plasticity is not enabled on this runner")
+        return self.plasticity_engine.rollback_last()
+
+    def rollback_plasticity(self, step_id: str):
+        """Roll back a specific plasticity step by id."""
+        if self.plasticity_engine is None:
+            raise RuntimeError("plasticity is not enabled on this runner")
+        return self.plasticity_engine.rollback(step_id)

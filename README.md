@@ -152,7 +152,18 @@ python examples/run_restart_demo.py --simulate-crash
 # Inner MAP: observe the substrate's evolving self-model; persists inner_map.json
 python examples/run_inner_map_evolution.py
 python examples/run_inner_map_evolution.py --steps 300 --state-dir .solaris_ai_nn_state/inner_map_demo
+
+# Controlled plasticity: propose-only dry run (applies nothing), and a real run
+python examples/run_plasticity_dry_run.py
+python examples/run_plasticity_adaptation.py --enable-plasticity --steps 500
+python examples/run_plasticity_adaptation.py --rollback-last   # undo the last applied step
 ```
+
+**Controlled plasticity** (`plasticity/`, off by default) lets the substrate tune
+its own *runtime parameters* — learning rate, habit weights, pruning threshold,
+exploration — based on telemetry and the Inner MAP. Every change is **proposed,
+safety-validated, logged (`plasticity_audit.jsonl`), and rollbackable**. It never
+edits source code, never runs unbounded, and never commits actions autonomously.
 
 The **Inner MAP** (`inner_map/`) is a read-only, persisted self-model: it observes
 the reservoir, readout tendencies, habits, synthesis/pruning, memory, continuity,
@@ -177,7 +188,8 @@ src/solaris_ai_nn/
   runtime/      adaptive loop, telemetry, persistence, lifecycle, continuous runner, replay
   bridges/      SolarisNeuralBridge + seam to the conceptual Solaris_Ai reference
   inner_map/    self-model (model, observer, boundaries, state graph, serialization)
-  experiments/  minimal ESN, absence bridge, soak continuity, restart recovery, inner map
+  plasticity/   habit, synthesis + controlled self-mod (engine, policy, safety, rollback, audit)
+  experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity adaptation
   utils/        pure-stdlib math, logging
 tests/          pytest suite
 examples/       runnable scripts

@@ -14,6 +14,11 @@ from .inner_map_evolution import (  # noqa: F401
     InnerMapEvolutionResult,
     run_inner_map_evolution,
 )
+from .plasticity_adaptation import (  # noqa: F401
+    PlasticityAdaptationResult,
+    rollback_last,
+    run_plasticity_adaptation,
+)
 from .soak_continuity import SoakResult, run_soak_continuity  # noqa: F401
 
 __all__ = [
@@ -27,4 +32,7 @@ __all__ = [
     "SoakResult",
     "run_inner_map_evolution",
     "InnerMapEvolutionResult",
+    "run_plasticity_adaptation",
+    "rollback_last",
+    "PlasticityAdaptationResult",
 ]

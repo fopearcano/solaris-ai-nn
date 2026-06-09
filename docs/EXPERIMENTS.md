@@ -349,3 +349,77 @@ without any external graph library.
 
 **Metrics.** node/edge counts; DOT begins with `digraph`; Mermaid begins with
 `flowchart LR`.
+
+---
+
+# Phase-5 plasticity experiments
+
+These exercise the controlled self-modification layer (Prompt 5): the engine,
+policy, safety validator, rollback manager, and audit log.
+
+## 18. Plasticity Adaptation Experiment ✅ (implemented)
+
+**File:** `src/solaris_ai_nn/experiments/plasticity_adaptation.py`
+**Run:** `python examples/run_plasticity_adaptation.py --enable-plasticity --steps 500`
+
+**Setup.** A bounded session whose reward rule **flips at the midpoint**. With
+plasticity enabled, the engine proposes/validates/applies bounded changes
+(learning rate, habit weights, pruning threshold, exploration) to help the
+substrate re-adapt after the inversion.
+
+**What it demonstrates.** Safe, observable self-modification under changing
+feedback: parameters drift within bounds, every step is audited, and behaviour
+can re-adapt after the flip.
+
+**Metrics.** applied/rejected counts, learning-rate before/after, exploration
+before/after, phase-1 vs after-flip accuracy, plasticity audit path.
+
+**Pass criteria (tested).** runs bounded; audit file written; applied ≥ 1;
+report carries before/after metrics; snapshot includes a `plasticity` section.
+
+## 19. Plasticity Dry-Run Experiment ✅ (implemented)
+
+**Run:** `python examples/run_plasticity_dry_run.py`
+
+**Setup.** Identical proposals, but `plasticity_dry_run=True`.
+
+**What it demonstrates.** Proposals are validated and logged but **never
+applied** — the safety story made concrete: 0 applied steps and unchanged
+parameters, with a non-empty audit of proposals.
+
+**Pass criteria (tested).** `applied_count == 0`; learning rate / exploration
+unchanged; audit still records proposals.
+
+## 20. Rollback Experiment ✅ (implemented)
+
+**Run:** `python examples/run_plasticity_adaptation.py --rollback-last`
+
+**Setup.** After an adaptation run, load the persisted brain and roll back the
+last applied plasticity step.
+
+**What it demonstrates.** Any applied change is reversible: the parameter is
+restored to its previous value and the restoration is verified; rollback history
+is reconstructed from the audit log so it works in a fresh process.
+
+**Pass criteria (tested).** `rolled_back is True`; value before ≠ value after;
+unknown step ids fail gracefully (manager-level test).
+
+## 21. Feedback Inversion Experiment (covered by §18)
+
+The midpoint reward flip in the adaptation experiment *is* the feedback-inversion
+test: it forces the substrate (and the plasticity policy) to cope with a world
+that changes its mind, quantifying re-adaptation under controlled mutation.
+
+## 22. Habit vs Synthesis Plasticity Benchmark (implemented)
+
+**Module:** `plasticity/benchmarks.py` (`PlasticityBenchmark`,
+`run_habit_vs_synthesis_benchmark`).
+
+**Setup.** Run the same feedback-inversion world twice — plasticity on vs off —
+on the same seed.
+
+**What it demonstrates.** The concrete effect of controlled self-modification:
+applied-step count, learning-rate / exploration drift, residual prediction error,
+and habit-pathway counts, side by side.
+
+**Metrics.** `with_plasticity` vs `without_plasticity` dicts of the above.

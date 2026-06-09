@@ -216,6 +216,10 @@ class StateCheckpoint:
     habit_counts: List[List[Any]]  # [[pattern_key, action_label, count], ...]
     pruning_history: List[Dict[str, Any]] = field(default_factory=list)
     telemetry: Dict[str, Any] = field(default_factory=dict)
+    # Controlled-plasticity state (Prompt 5): current mutable parameter values so
+    # plasticity effects survive a restart, plus the engine's summary.
+    mutable_params: List[List[Any]] = field(default_factory=list)
+    plasticity: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -236,6 +240,8 @@ class StateCheckpoint:
         lifetime_step: int,
         last_heartbeat_ts: float,
         pruning_history: Optional[List[Dict[str, Any]]] = None,
+        mutable_params: Optional[List[List[Any]]] = None,
+        plasticity: Optional[Dict[str, Any]] = None,
     ) -> "StateCheckpoint":
         """Build a checkpoint by reading the live state out of ``bridge``."""
         esn = bridge.esn
@@ -265,6 +271,8 @@ class StateCheckpoint:
             habit_counts=habit_counts,
             pruning_history=list(pruning_history or []),
             telemetry=dict(bridge.telemetry.to_dict()),
+            mutable_params=list(mutable_params or []),
+            plasticity=dict(plasticity or {}),
         )
 
     def restore_into(self, bridge: "SolarisNeuralBridge") -> None:
@@ -335,6 +343,10 @@ class PersistenceManager:
     @property
     def inner_map_path(self) -> Path:
         return self.state_dir / "inner_map.json"
+
+    @property
+    def plasticity_audit_path(self) -> Path:
+        return self.state_dir / "plasticity_audit.jsonl"
 
     # -- manifest -----------------------------------------------------------
 

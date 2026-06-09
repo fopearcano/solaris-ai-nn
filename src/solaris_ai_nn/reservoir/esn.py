@@ -162,3 +162,43 @@ class ESN:
     def features(self) -> List[float]:
         """Reservoir state augmented with a constant bias feature (1.0)."""
         return self.state + [1.0]
+
+    # -- controlled, recomputable parameter setters (used by plasticity) ----
+
+    def set_leak_rate(self, value: float) -> None:
+        """Set the leaky-integration rate (takes effect on the next update)."""
+        if not (0.0 < value <= 1.0):
+            raise ValueError("leak_rate must be in (0, 1]")
+        self.leak_rate = value
+
+    def set_input_scaling(self, value: float) -> None:
+        """Rescale the input weights so ``input_scaling`` becomes ``value``.
+
+        Rescales ``W_in`` by ``value / current`` so the change is immediate and
+        reversible (setting the old value back restores the original weights).
+        """
+        if value <= 0.0:
+            raise ValueError("input_scaling must be > 0")
+        current = self.input_scaling
+        if current == 0.0:
+            return
+        factor = value / current
+        self.W_in = [[w * factor for w in row] for row in self.W_in]
+        self.input_scaling = value
+
+    def set_spectral_radius(self, value: float) -> None:
+        """Rescale the recurrent matrix to a new spectral radius.
+
+        Scales ``W`` by ``value / achieved`` -- cheap and reversible, no eigen
+        recompute needed. Bounds are enforced by the plasticity safety validator.
+        """
+        if value <= 0.0:
+            raise ValueError("spectral_radius must be > 0")
+        achieved = self._achieved_radius
+        if achieved <= 0.0:
+            return
+        factor = value / achieved
+        self.W = [[w * factor for w in row] for row in self.W]
+        self._achieved_radius = value
+        self.spectral_radius = value
+

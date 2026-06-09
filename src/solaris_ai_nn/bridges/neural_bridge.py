@@ -67,6 +67,9 @@ class SolarisNeuralBridge:
     telemetry: Telemetry = field(default_factory=Telemetry)
     trace: TraceMemory = field(default_factory=TraceMemory)
     exploration: float = 0.1
+    stabilization: float = 0.0
+    confidence_threshold: float = 0.0
+    suggestion_threshold: float = 0.0
     seed: int = 0
 
     _logos: Optional[C.LogosTension] = field(default=None, init=False, repr=False)

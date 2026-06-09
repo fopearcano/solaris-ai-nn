@@ -206,7 +206,7 @@ class InnerMapObserver:
             total = readout.n_outputs * readout.n_features
             zeros = total - readout.nonzero_count()
             subtraction_ratio = zeros / total if total else 0.0
-        return PlasticityState(
+        state = PlasticityState(
             habit_pathways=len(habit.weights),
             strongest_habits=strongest,
             most_repeated_mappings=most_repeated,
@@ -218,6 +218,19 @@ class InnerMapObserver:
             removed_pathway_count=removed,
             subtraction_ratio=subtraction_ratio,
         )
+        # Controlled-plasticity observations (if a runner has an engine).
+        engine = getattr(self.runner, "plasticity_engine", None)
+        if engine is not None:
+            snap = engine.snapshot()
+            state.applied_plasticity_count = snap["applied_count"]
+            state.rejected_plasticity_count = snap["rejected_count"]
+            state.rollback_count = snap["rollback_count"]
+            state.last_applied_step = snap["last_applied"]
+            state.last_rejected_step = snap["last_rejected"]
+            state.mutable_parameters = snap["current_parameters"]
+            state.plasticity_safety_status = snap["safety_status"]
+            state.plasticity_audit_path = snap["audit_path"]
+        return state
 
     def _unknown(self, bridge: Optional["SolarisNeuralBridge"], memory_report) -> UnknownState:
         drift = 0.0

@@ -1,0 +1,127 @@
+"""PlasticitySafetyValidator -- the gate every mutation must pass.
+
+No plasticity step is applied without passing here. The validator enforces hard
+invariants (no source-code edits, no disabling persistence/continuity/boundaries,
+no autonomous action authority, no auto-continuous, no writes outside the state
+dir, bounded numeric parameters) and reports *why* a step was rejected.
+
+It is pure and side-effect-free: it inspects a step + a small ``current_state``
+dict and returns a :class:`SafetyReport`. It never mutates anything.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Tuple
+
+from .mutation import SUPPORTED_TARGETS, PlasticityStep
+
+# Safe numeric bounds per (component, parameter). (lo, hi) inclusive.
+SAFE_BOUNDS: Dict[Tuple[str, str], Tuple[float, float]] = {
+    ("reservoir", "spectral_radius"): (0.1, 1.5),
+    ("reservoir", "leak_rate"): (0.01, 1.0),
+    ("reservoir", "input_gain"): (0.01, 5.0),
+    ("readout", "learning_rate"): (1e-4, 1.0),
+    ("readout", "regularization"): (0.1, 100.0),
+    ("readout", "confidence_threshold"): (0.0, 1.0),
+    ("habit", "reinforcement_rate"): (0.001, 1.0),
+    ("habit", "max_habit_weight"): (0.1, 5.0),
+    ("habit", "decay_rate"): (0.0, 0.5),
+    ("synthesis", "pruning_threshold"): (0.0, 0.5),
+    ("synthesis", "pruning_interval"): (1, 1_000_000),
+    ("synthesis", "max_prune_fraction"): (0.0, 1.0),
+    ("experiment_loop", "silence_threshold"): (1, 10_000),
+    ("bridge", "exploration_tendency"): (0.0, 1.0),
+    ("bridge", "stabilization_tendency"): (0.0, 1.0),
+    ("bridge", "suggestion_threshold"): (0.0, 1.0),
+}
+
+# Parameters that plasticity may NEVER touch (regardless of value).
+FORBIDDEN_PARAMETERS = frozenset({
+    "source_code", "source", "source_file", "py_file",
+    "persistence", "persistence_enabled", "persist", "disable_persistence",
+    "continuity_logging", "continuity_log", "disable_continuity",
+    "boundaries", "boundary", "disable_boundaries",
+    "action_authority", "autonomous_action", "commit_actions", "action_commit",
+    "continuous", "continuous_mode",
+})
+
+
+@dataclass
+class SafetyReport:
+    """Result of validating one plasticity step."""
+
+    safe: bool
+    violations: List[str] = field(default_factory=list)
+    checks: List[Dict[str, Any]] = field(default_factory=list)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {"safe": self.safe, "violations": list(self.violations), "checks": self.checks}
+
+
+class PlasticitySafetyValidator:
+    """Validates proposed mutations against hard safety rules + numeric bounds."""
+
+    def validate(self, step: PlasticityStep, current_state: Dict[str, Any] | None = None) -> SafetyReport:
+        state = current_state or {}
+        violations: List[str] = []
+        checks: List[Dict[str, Any]] = []
+
+        component = step.target.component
+        parameter = step.target.parameter
+        new_value = step.change.new_value
+
+        def check(name: str, ok: bool, detail: str = "") -> None:
+            checks.append({"name": name, "passed": ok, "detail": detail})
+            if not ok:
+                violations.append(detail or name)
+
+        # 1. Known component.
+        check("known_component", component in SUPPORTED_TARGETS,
+              f"unknown target component {component!r}")
+
+        # 2. Forbidden parameters (source code, persistence, continuity, etc.).
+        pname = parameter.lower()
+        forbidden = (
+            pname in FORBIDDEN_PARAMETERS
+            or pname.endswith(".py")
+            or "source" in pname
+        )
+        check("not_forbidden_parameter", not forbidden,
+              f"parameter {parameter!r} may not be mutated by plasticity")
+
+        # 3. No mutation may alter Python source files (path heuristic on value).
+        if isinstance(new_value, str) and new_value.endswith(".py"):
+            check("no_source_file", False, "may not alter Python source files")
+
+        # 4. No write outside the configured state directory.
+        if isinstance(new_value, str) and ("/" in new_value or "\\" in new_value):
+            state_dir = str(state.get("state_dir", ""))
+            inside = bool(state_dir) and new_value.startswith(state_dir)
+            check("within_state_dir", inside,
+                  f"path {new_value!r} is outside the state directory")
+
+        # 5. Reservoir size cannot change during an active run unless experimental.
+        if parameter in ("reservoir_size", "n_reservoir"):
+            experimental = step.trigger_source == "experimental"
+            active = bool(state.get("active_run", False))
+            check("reservoir_size_locked", experimental or not active,
+                  "reservoir size cannot change during an active run unless experimental")
+
+        # 6. Numeric bounds.
+        bounds = SAFE_BOUNDS.get((component, parameter))
+        if bounds is not None and isinstance(new_value, (int, float)):
+            lo, hi = bounds
+            check(f"{parameter}_in_bounds", lo <= new_value <= hi,
+                  f"{component}.{parameter}={new_value} outside safe bounds [{lo}, {hi}]")
+
+        return SafetyReport(safe=not violations, violations=violations, checks=checks)
+
+    def is_safe(self, step: PlasticityStep, current_state: Dict[str, Any] | None = None) -> bool:
+        return self.validate(step, current_state).safe
+
+    def explain_rejection(self, step: PlasticityStep, current_state: Dict[str, Any] | None = None) -> str:
+        report = self.validate(step, current_state)
+        if report.safe:
+            return "step is safe"
+        return "; ".join(report.violations)

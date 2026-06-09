@@ -71,7 +71,7 @@ class MemoryState:
 
 @dataclass
 class PlasticityState:
-    """Habit + synthesis observations (sections E and F)."""
+    """Habit + synthesis observations (sections E and F) + controlled plasticity."""
 
     # Habit
     habit_pathways: int = 0
@@ -83,6 +83,15 @@ class PlasticityState:
     last_pruning_report: Optional[Dict[str, Any]] = None
     removed_pathway_count: int = 0
     subtraction_ratio: float = 0.0
+    # Controlled self-modification (Prompt 5)
+    applied_plasticity_count: int = 0
+    rejected_plasticity_count: int = 0
+    rollback_count: int = 0
+    last_applied_step: Optional[Dict[str, Any]] = None
+    last_rejected_step: Optional[Dict[str, Any]] = None
+    mutable_parameters: Dict[str, Any] = field(default_factory=dict)
+    plasticity_safety_status: str = "disabled"
+    plasticity_audit_path: Optional[str] = None
 
 
 @dataclass

@@ -77,6 +77,7 @@ class SynthesisPruner:
     readout_threshold: float = 0.01
     habit_threshold: float = 0.05
     detail_limit: int = 32
+    max_prune_fraction: float = 1.0  # cap on the fraction of readout weights zeroed per pass
 
     def prune(
         self,
@@ -86,8 +87,12 @@ class SynthesisPruner:
         """Run one synthesis pass over readout (and optionally habit) weights."""
         report = SubtractionReport(threshold=self.readout_threshold)
 
+        total_weights = sum(len(row) for row in readout.weights)
+        budget = int(self.max_prune_fraction * total_weights) if total_weights else 0
         for i, row in enumerate(readout.weights):
             for j, w in enumerate(row):
+                if report.readout_zeroed >= budget:
+                    break  # respect the max-prune-fraction safety cap
                 if w != 0.0 and abs(w) < self.readout_threshold:
                     if len(report.removed) < self.detail_limit:
                         report.removed.append(

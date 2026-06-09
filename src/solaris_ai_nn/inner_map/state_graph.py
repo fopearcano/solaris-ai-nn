@@ -101,4 +101,25 @@ def build_default_state_graph() -> StateGraph:
     g.add_edge("inner_map", "synthesis", "observes")
     g.add_edge("inner_map", "boundaries", "checks")
     g.nodes["inner_map"]["role"] = "self-observation"
+
+    # Controlled-plasticity subsystem (Prompt 5).
+    for name, role in [
+        ("plasticity_engine", "applies mutations"),
+        ("policy", "proposes mutations"),
+        ("safety_validator", "validates mutations"),
+        ("rollback_manager", "undoes mutations"),
+        ("audit_log", "records mutations"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("telemetry", "policy", "informs")
+    g.add_edge("inner_map", "policy", "informs")
+    g.add_edge("policy", "plasticity_engine", "proposes mutation")
+    g.add_edge("safety_validator", "plasticity_engine", "validates mutation")
+    g.add_edge("plasticity_engine", "readout", "applies mutation")
+    g.add_edge("plasticity_engine", "reservoir", "applies mutation")
+    g.add_edge("plasticity_engine", "habit", "applies mutation")
+    g.add_edge("plasticity_engine", "synthesis", "applies mutation")
+    g.add_edge("rollback_manager", "plasticity_engine", "restores previous state")
+    g.add_edge("audit_log", "plasticity_engine", "records every mutation")
+    g.add_edge("boundaries", "safety_validator", "defines limits")
     return g

@@ -76,16 +76,21 @@ memory, habits, synthesis, tendencies, boundaries, and unknowns across restarts.
 **Still ahead in this theme:** consolidation write-*back* into the substrate
 (currently observe-only) and a richer facts/boundaries self-representation.
 
-## Phase 4 — Online adaptation / habit / synthesis benchmarks
+## Phase 4 — Controlled plasticity + online adaptation benchmarks (in progress)
 
-- Benchmark suite quantifying adaptation speed, retention, and forgetting.
-- Compare learning rules (NLMS vs recursive least squares) and habit/synthesis
-  on/off ablations.
-- **Optional NumPy-backed reservoir backend** for larger reservoirs, behind a
-  feature flag — the first place NumPy is justified (throughput for benchmarks),
-  never required by the core logic.
+- ✅ Controlled, safe self-modification: a plasticity engine that proposes,
+  validates, applies, logs, and rolls back bounded runtime-parameter changes
+  (`plasticity/`), driven by a simple policy over telemetry + Inner MAP, with a
+  feedback-inversion adaptation experiment and a habit-vs-synthesis benchmark
+  (`plasticity/benchmarks.py`). Off by default; dry-run supported.
+- Still ahead: a broader benchmark suite quantifying adaptation speed, retention,
+  and forgetting; learning-rule comparison (NLMS vs recursive least squares); and
+  an **optional NumPy-backed reservoir backend** for larger reservoirs behind a
+  feature flag (the first place NumPy is justified — throughput for benchmarks —
+  never required by the core logic).
 
-**Exit criteria:** reproducible benchmark numbers and ablation tables.
+**Exit criteria:** reproducible benchmark numbers and ablation tables (controlled
+plasticity already ships and is fully audited/rollbackable).
 
 ## Phase 5 — Alternative substrates: Liquid State Machine / spiking simulation
 
