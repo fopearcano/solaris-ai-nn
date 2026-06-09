@@ -129,6 +129,32 @@ habit pathways learned: 9 (strong: 9)
 synthesis subtracted pathways: 62
 ```
 
+## Run the bridge, soak, and restart experiments
+
+The neural bridge consumes Solaris-style signals; the continuity machinery lets a
+run checkpoint, persist, and resume across restarts (all bounded by default).
+
+```bash
+# Solaris-compatible signal bridge: keeps evolving through silence (absence stimuli)
+python examples/run_absence_stimulus_bridge.py
+
+# Bounded soak run: checkpoints + continuity log under a per-brain state dir
+python examples/run_soak_continuity.py
+python examples/run_soak_continuity.py --steps 500 --state-dir .solaris_ai_nn_state/dev_soak
+
+# Restart recovery: run, persist, restart, and continue from saved state
+python examples/run_restart_demo.py
+python examples/run_restart_demo.py --state-dir .solaris_ai_nn_state/restart_demo
+
+# Simulate a crash: the restart then detects an ungraceful death + brain-death gap
+python examples/run_restart_demo.py --simulate-crash
+```
+
+Runtime state (manifest, checkpoint, telemetry, continuity log, replayable trace)
+is written under `state_dir` as plain JSON/JSONL — fully inspectable, no database,
+and git-ignored. A continuous (unbounded) run requires an explicit `--continuous`
+flag and must be stopped manually.
+
 ---
 
 ## Repository layout
@@ -136,12 +162,12 @@ synthesis subtracted pathways: 62
 ```
 src/solaris_ai_nn/
   signals/      canonical signal vocabulary, event encoder, adapters
-  reservoir/    ESN substrate, linear readout, online (NLMS) learning, state
+  reservoir/    ESN substrate, linear readout, online (NLMS) learning, LogosModulator
   plasticity/   habit reinforcement, synthesis-through-subtraction, drift
-  memory/       chronological trace, reservoir-state snapshots, consolidation
-  runtime/      the adaptive event loop, telemetry, optional JSONL persistence
-  bridges/      seam to the conceptual Solaris_Ai reference
-  experiments/  runnable experiments (minimal continuous ESN)
+  memory/       chronological trace (JSONL), reservoir-state snapshots, consolidation
+  runtime/      adaptive loop, telemetry, persistence, lifecycle, continuous runner, replay
+  bridges/      SolarisNeuralBridge + seam to the conceptual Solaris_Ai reference
+  experiments/  minimal ESN, absence bridge, soak continuity, restart recovery
   utils/        pure-stdlib math, logging
 tests/          pytest suite
 examples/       runnable scripts

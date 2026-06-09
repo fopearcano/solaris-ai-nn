@@ -18,6 +18,10 @@ htmlcov/
 runs/
 artifacts/
 
+# Persistent runtime state (manifests, checkpoints, continuity logs, traces).
+# A running "brain" lives here; it is reproducible from code and must not be committed.
+.solaris_ai_nn_state/
+
 # Editor / OS
 .idea/
 .vscode/

@@ -225,3 +225,62 @@ translate inbound signals, drive the substrate, and translate suggestions back
 out — still without importing the reference repo. `bridges/solaris_reference.py`
 records, in code, which reference module inspired each NN module. See ROADMAP
 Phases 1 and 7.
+
+## 13. Continuity, death, and persistence
+
+Solaris_Ai is built around *continuous operation*. For the NN substrate to be a
+faithful experimental partner, it must be able to run for a long time, stop, and
+resume — and it must be honest about the gaps. This is the Phase-2 machinery, in
+`runtime/persistence.py`, `runtime/lifecycle.py`, and `runtime/continuous_runner.py`.
+
+**Why continuity is central.** The interesting behaviour of a low-compute,
+continually-learning substrate is not any single step but *what it becomes after
+running for a long time* under a stream of events. That only matters if the
+substrate's evolving state can be carried forward — across checkpoints and across
+process restarts — rather than reset on every launch.
+
+**Why death is a first-class event.** A process ending is not a neutral
+non-event; it is a discontinuity in the substrate's life. We model it explicitly:
+`RuntimeLifecycle` has `born → running → (sleeping/checkpointing) → dying → dead`
+states, and every shutdown is recorded as a `graceful_death` (clean) or inferred
+as an `unexpected_death_detected` (the previous manifest never recorded a graceful
+shutdown). Treating death as data is what makes restart analysable.
+
+**How restart differs from uninterrupted continuity.** Within one process, the
+reservoir state flows unbroken from step to step. Across a restart, the substrate
+is *reconstructed*: the runner rebuilds the bridge with the saved seed (so the
+fixed reservoir matrices are regenerated identically), then restores the evolving
+reservoir state vector, the learned readout weights, and the habit weights from
+`latest_checkpoint.json`. Lifetime step count and restart count accumulate via the
+manifest. Continuity is therefore *recovered*, not *unbroken* — and the difference
+is logged.
+
+**What a brain-death gap means operationally.** On startup, the runner compares
+the wall-clock time now against the `last_heartbeat_ts` persisted by the previous
+session and logs a `brain_death_gap` with that duration. It is simply: *how long
+was this brain not running?* It carries no mystical weight — it is a measurable
+interruption interval, useful for reasoning about soak-test continuity and for
+distinguishing a quick restart from a long outage.
+
+**What state is persisted.** Under a per-brain `state_dir`:
+
+- `manifest.json` — identity (run id), lifetime step count, restart count, last
+  heartbeat timestamp, last-graceful-shutdown flag, seed.
+- `latest_checkpoint.json` — reservoir state vector, readout weights + labels,
+  habit weights/counts, synthesis/pruning history, telemetry counters, step ids.
+- `telemetry.json` — the latest telemetry snapshot.
+- `continuity_log.jsonl` — append-only birth/heartbeat/checkpoint/death/restart/
+  brain-death-gap/soak/reaction/synthesis/habit events.
+- `trace_events.jsonl` — append-only, replayable input-signal trace
+  (`runtime/replay.py` feeds it back into a fresh bridge for reproducibility).
+
+State is plain JSON/JSONL — fully inspectable, no database. Reservoir matrices
+are *not* stored (regenerated from the seed); only the evolving state is.
+
+**What is deliberately not persisted yet.** The reservoir's random matrices
+(reconstructed from the seed, by design); the rolling prediction-error window
+(only cumulative counters survive a restart); any Inner-MAP-style consolidated
+self-model (Phase 3); and binary `.npz` arrays (reserved for a future
+NumPy-backed reservoir backend — JSON is used now for inspectability and zero
+dependencies). Continuity mode can run unbounded only with an explicit
+`continuous=True`; everything else is bounded by steps and/or duration.

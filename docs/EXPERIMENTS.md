@@ -198,3 +198,83 @@ reacting bridge.
 
 **Metrics.** readout weight drift, suggestion accuracy over time, habit pathway
 count and mass — reacting vs non-reacting.
+
+---
+
+# Phase-2 continuity experiments
+
+These exercise the continuity / persistence / restart machinery (Prompt 3):
+`ContinuousRunner`, `RuntimeLifecycle`, `PersistenceManager`, `EventReplay`. All
+are bounded; only an explicit `continuous=True` removes the bound.
+
+## 10. Soak Continuity Experiment ✅ (implemented)
+
+**File:** `src/solaris_ai_nn/experiments/soak_continuity.py`
+**Run:** `python examples/run_soak_continuity.py --steps 500 --state-dir .solaris_ai_nn_state/dev_soak`
+
+**Setup.** A bounded `ContinuousRunner` drives the bridge over the tiny world,
+with periodic external stimuli, silence windows (the runner synthesises
+continuity/absence stimuli), `+1/−1` reactions, periodic checkpoints, and
+occasional synthesis pruning. Telemetry and a continuity log are written to a
+state directory.
+
+**What it demonstrates.** A long-running, low-compute substrate that persists its
+state and logs its life events — the seed of the 24-hour / 30-day soak tests.
+
+**Metrics.** session/lifetime steps, checkpoints, pruning passes, habit pathways,
+reservoir norm, recent prediction error, events/sec, continuity event count.
+
+**Pass criteria (tested).** runs bounded, checkpoint files created, lifecycle ends
+`dead`/graceful, snapshot exposes the expected fields.
+
+## 11. Restart Recovery Experiment ✅ (implemented)
+
+**File:** `src/solaris_ai_nn/experiments/restart_recovery.py`
+**Run:** `python examples/run_restart_demo.py --state-dir .solaris_ai_nn_state/restart_demo`
+
+**Setup.** Run a bounded session and checkpoint; then construct a *new* runner
+over the same state directory, which restores the persisted substrate and
+continues.
+
+**What it demonstrates.** The reservoir state, readout weights, and habit weights
+survive shutdown/restart; lifetime steps and restart count accumulate.
+
+**Metrics.** restart count, total lifetime steps, restored reservoir norm,
+restored habit-weight count, continuity log path.
+
+**Pass criteria (tested).** `lifetime == session1 + session2`, restored reservoir
+norm > 0, restored habit count > 0, and a clean restart logs no unexpected death.
+
+## 12. Simulated Brain-Death Gap Experiment ✅ (implemented)
+
+**Run:** `python examples/run_restart_demo.py --simulate-crash`
+
+**Setup.** Identical to the restart demo, but between sessions the first
+session's manifest is rewritten to look like an ungraceful exit (no graceful
+flag, backdated last heartbeat). This reproduces a crash's *on-disk condition
+without killing the Python process*.
+
+**What it demonstrates.** On the next startup the runner logs
+`unexpected_death_detected` and a `brain_death_gap` whose duration is the time
+since the last heartbeat — death treated as a first-class, measurable event.
+
+**Pass criteria (tested).** unexpected death detected, brain-death gap ≈ the
+backdated interval, both events present in the continuity log, and the process
+returns normally (never killed).
+
+## 13. Replay Experiment ✅ (implemented)
+
+**File:** `src/solaris_ai_nn/runtime/replay.py`
+
+**Setup.** A recorded `trace_events.jsonl` (written during a soak/restart run) is
+loaded by `EventReplay` and fed back into a fresh, identically-seeded bridge.
+
+**What it demonstrates.** Long-running behaviour is reproducible enough to study:
+replaying the same trace into two identically-seeded fresh bridges yields
+identical telemetry and identical reservoir state.
+
+**Metrics.** events replayed, equality of telemetry (events, readout updates,
+average prediction error) and of final reservoir state across replays.
+
+**Pass criteria (tested).** deterministic telemetry within tolerance, `max_events`
+honoured, replayed event count matches the trace's signal rows.

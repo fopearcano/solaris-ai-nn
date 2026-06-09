@@ -32,16 +32,30 @@ remain central throughout.
 **Exit criteria:** a recorded Solaris_Ai signal stream replays through an
 `ExperimentLoop` and produces compatible Actions.
 
-## Phase 2 — Long-running soak tests
+## Phase 2 — Continuity, persistence, and restart recovery ✅ (this release)
 
-- Multi-hour runs via `run_until` with bounded memory (ring buffers, JSONL
-  rotation).
-- Stability metrics: state energy, weight drift, prediction-error trend, pruning
-  cadence over time.
-- Detect and document failure modes (state saturation, weight collapse,
-  habit lock-in).
+- Persistent runtime state (`runtime/persistence.py`): `PersistenceManager`,
+  `StateCheckpoint`, `ContinuityLog` — manifest, checkpoint, telemetry, and
+  append-only logs as plain JSON/JSONL under a per-brain `state_dir`.
+- Lifecycle (`runtime/lifecycle.py`): `RuntimeLifecycle` with born/running/
+  sleeping/checkpointing/dying/dead states and continuity-event logging.
+- Continuous runner (`runtime/continuous_runner.py`): bounded (or explicitly
+  `continuous=True`) loop that processes stimuli, heartbeats, checkpoints,
+  restores prior state on startup, detects ungraceful shutdowns, and records
+  brain-death gaps.
+- Replay (`runtime/replay.py`): feed a recorded `trace_events.jsonl` back into a
+  fresh bridge; deterministic given the seed.
+- Telemetry expanded with lifetime/continuity metrics + `save_json`/`load_json`.
+- Trace memory gains JSONL append / load / tail / count / explicit clear.
+- Experiments: soak continuity, restart recovery, simulated brain-death gap;
+  examples `run_soak_continuity.py` and `run_restart_demo.py`.
 
-**Exit criteria:** a documented soak run that stays stable and bounded for hours.
+**Exit criteria (met):** a bounded soak run checkpoints and logs continuity; a
+restart restores reservoir/readout/habit state and accumulates lifetime steps; a
+simulated crash is detected with a brain-death gap; a trace replays deterministically.
+
+**Still ahead in this theme:** multi-hour real-time soak runs with JSONL rotation
+and documented failure modes (state saturation, weight collapse, habit lock-in).
 
 ## Phase 3 — Persistent memory and Inner MAP coupling
 
@@ -49,11 +63,12 @@ remain central throughout.
   (distil trace/state memory into stabler structure).
 - Couple consolidation to an Inner-MAP-like self-representation (facts +
   boundaries), mirroring `solaris/modules/inner_map.py`.
-- Durable save/restore of substrate state across process restarts (still no
-  database — JSONL/structured files only).
+- Build on Phase-2 persistence: also checkpoint the consolidated self-model and
+  reservoir-state snapshot history (basic substrate save/restore already ships).
 
 **Exit criteria:** a substrate that can be stopped, restored, and continue
-learning where it left off.
+learning where it left off, *with its consolidated self-model intact* (the raw
+substrate restore already works as of Phase 2).
 
 ## Phase 4 — Online adaptation / habit / synthesis benchmarks
 
