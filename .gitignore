@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# Test / cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Experiment output (JSONL telemetry/traces)
+*.jsonl
+runs/
+artifacts/
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store

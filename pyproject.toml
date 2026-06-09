@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "solaris-ai-nn"
+version = "0.1.0"
+description = "Low-compute, continuous-learning neural substrate laboratory for Solaris_Ai."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "fopearcano" }]
+keywords = [
+    "reservoir-computing",
+    "echo-state-network",
+    "continual-learning",
+    "online-learning",
+    "low-compute",
+    "solaris",
+]
+# Deliberately zero runtime dependencies: the first version is pure stdlib.
+# NumPy is intentionally NOT required (see README / docs/RESEARCH_NOTES.md).
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[project.scripts]
+solaris-nn-demo = "solaris_ai_nn.experiments.minimal_continuous_esn:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+pythonpath = ["src"]
