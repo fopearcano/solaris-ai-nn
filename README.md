@@ -148,7 +148,16 @@ python examples/run_restart_demo.py --state-dir .solaris_ai_nn_state/restart_dem
 
 # Simulate a crash: the restart then detects an ungraceful death + brain-death gap
 python examples/run_restart_demo.py --simulate-crash
+
+# Inner MAP: observe the substrate's evolving self-model; persists inner_map.json
+python examples/run_inner_map_evolution.py
+python examples/run_inner_map_evolution.py --steps 300 --state-dir .solaris_ai_nn_state/inner_map_demo
 ```
+
+The **Inner MAP** (`inner_map/`) is a read-only, persisted self-model: it observes
+the reservoir, readout tendencies, habits, synthesis/pruning, memory, continuity,
+boundaries, and drift, and can export a self-state graph (DOT/Mermaid). It does
+not make the system conscious — it is structured self-*observation*.
 
 Runtime state (manifest, checkpoint, telemetry, continuity log, replayable trace)
 is written under `state_dir` as plain JSON/JSONL — fully inspectable, no database,
@@ -164,10 +173,11 @@ src/solaris_ai_nn/
   signals/      canonical signal vocabulary, event encoder, adapters
   reservoir/    ESN substrate, linear readout, online (NLMS) learning, LogosModulator
   plasticity/   habit reinforcement, synthesis-through-subtraction, drift
-  memory/       chronological trace (JSONL), reservoir-state snapshots, consolidation
+  memory/       chronological trace (JSONL), state snapshots, structural consolidation
   runtime/      adaptive loop, telemetry, persistence, lifecycle, continuous runner, replay
   bridges/      SolarisNeuralBridge + seam to the conceptual Solaris_Ai reference
-  experiments/  minimal ESN, absence bridge, soak continuity, restart recovery
+  inner_map/    self-model (model, observer, boundaries, state graph, serialization)
+  experiments/  minimal ESN, absence bridge, soak continuity, restart recovery, inner map
   utils/        pure-stdlib math, logging
 tests/          pytest suite
 examples/       runnable scripts

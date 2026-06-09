@@ -332,6 +332,10 @@ class PersistenceManager:
     def trace_path(self) -> Path:
         return self.state_dir / "trace_events.jsonl"
 
+    @property
+    def inner_map_path(self) -> Path:
+        return self.state_dir / "inner_map.json"
+
     # -- manifest -----------------------------------------------------------
 
     def has_previous_state(self) -> bool:
@@ -378,6 +382,18 @@ class PersistenceManager:
         if not self.telemetry_path.exists():
             return None
         with open(self.telemetry_path, "r", encoding="utf-8") as fh:
+            return json.load(fh)
+
+    # -- inner map ----------------------------------------------------------
+
+    def save_inner_map(self, inner_map: Dict[str, Any]) -> None:
+        """Persist the Inner MAP self-model as ``inner_map.json``."""
+        self._write_json(self.inner_map_path, inner_map)
+
+    def load_inner_map(self) -> Optional[Dict[str, Any]]:
+        if not self.inner_map_path.exists():
+            return None
+        with open(self.inner_map_path, "r", encoding="utf-8") as fh:
             return json.load(fh)
 
     # -- continuity log -----------------------------------------------------

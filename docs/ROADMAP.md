@@ -57,18 +57,24 @@ simulated crash is detected with a brain-death gap; a trace replays deterministi
 **Still ahead in this theme:** multi-hour real-time soak runs with JSONL rotation
 and documented failure modes (state saturation, weight collapse, habit lock-in).
 
-## Phase 3 — Persistent memory and Inner MAP coupling
+## Phase 3 — Persistent memory and Inner MAP coupling ✅ (this release)
 
-- Turn `memory/consolidation.py` from a stub into a real consolidation step
-  (distil trace/state memory into stabler structure).
-- Couple consolidation to an Inner-MAP-like self-representation (facts +
-  boundaries), mirroring `solaris/modules/inner_map.py`.
-- Build on Phase-2 persistence: also checkpoint the consolidated self-model and
-  reservoir-state snapshot history (basic substrate save/restore already ships).
+- `memory/consolidation.py` upgraded from a stub to a real structural
+  consolidation step (`MemoryConsolidator`: repeated-pattern / absence-cycle /
+  reaction-feedback / stable-action analysis — no LLM, no embeddings).
+- Inner MAP self-model implemented (`inner_map/`): `InnerMapObserver` produces an
+  `InnerMapModel` (identity, continuity, neural, memory, plasticity, boundaries,
+  tendencies, unknown, modules), with a `BoundaryRegistry` and a DOT/Mermaid
+  `StateGraph`, mirroring `solaris/modules/inner_map.py`.
+- Persistence extended: `inner_map.json` is written on every checkpoint and the
+  self-model's continuity section is restored across restarts.
 
-**Exit criteria:** a substrate that can be stopped, restored, and continue
-learning where it left off, *with its consolidated self-model intact* (the raw
-substrate restore already works as of Phase 2).
+**Exit criteria (met):** the substrate stops, restores, and continues, and a
+persisted, inspectable self-model (`inner_map.json`) tracks its continuity,
+memory, habits, synthesis, tendencies, boundaries, and unknowns across restarts.
+
+**Still ahead in this theme:** consolidation write-*back* into the substrate
+(currently observe-only) and a richer facts/boundaries self-representation.
 
 ## Phase 4 — Online adaptation / habit / synthesis benchmarks
 

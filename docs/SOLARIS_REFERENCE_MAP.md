@@ -93,7 +93,7 @@ handler does not stop the network) and a birth/death lifecycle.
 | Typed pub/sub Bus | `runtime/bus.py` | `runtime/experiment_loop.py` | NN uses a single in-process loop, not a bus; the loop is the seam where a real Bus could drive it. |
 | AION/Impulse heartbeat + absence | `core/aion_impulse.py` | `runtime/experiment_loop.py` | Loop emits continuity heartbeats and synthesises escalating absence stimuli after silence. |
 | Logos division/union/fracture | `core/logos.py` | `signals/canonical.py::LogosTension` + encoder | `LogosTension.fracture` is consumed as a scalar input feature; NN does not re-run the opposition engine. |
-| Inner MAP (self-representation) | `modules/inner_map.py` | `memory/state_memory.py` | State snapshots are the NN analogue of self-state; real MAP coupling is Phase 3. |
+| Inner MAP (self-representation) | `modules/inner_map.py` | `inner_map/model.py` + `inner_map/observer.py` | Implemented (Phase 4): a read-only self-model observing the substrate; `memory/state_memory.py` snapshots feed it. See the Inner MAP mapping below. |
 | Habit (bias reinforcement) | `modules/habit.py` | `plasticity/habit_reinforcement.py` | Same `[−1,+1]` bias-toward-valence rule, reframed as `(situation, action)` pathway reinforcement that nudges the readout. |
 | Synthesis through subtraction | `modules/synthesis.py` | `plasticity/synthesis_pruning.py` | Directly realised: prunes weak readout/habit weights, emits a `SubtractionReport`. Subtraction, not compression. |
 | Backpropagation (responsibility) | `modules/backpropagation.py` | `reservoir/online_learning.py` | A literal-but-tiny delta rule on the readout only (no BPTT); local, online credit assignment matching "who / how much". |
@@ -157,3 +157,27 @@ Reaction feedback ──► online NLMS update + habit reinforcement
 
 Actions/Desires leave the bridge as **suggestions**; Solaris_Ai (or a future I/O
 layer) decides whether to commit them.
+
+---
+
+## Inner MAP mapping (Phase 4)
+
+The Inner MAP self-observation layer maps several Solaris_Ai concepts onto
+concrete NN modules. As always: re-expressed, never imported; the reference repo
+is untouched.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| `modules/inner_map.py` (self-model: facts + boundaries) | `inner_map/model.py` (`InnerMapModel` + section dataclasses) and `inner_map/observer.py` (`InnerMapObserver`, read-only) |
+| `modules/dimensional_comparison.py` (knowing one's own edges) | `inner_map/boundaries.py` (`BoundaryRegistry`: hard/soft boundaries + violation checks) |
+| `modules/memory_senses.py` (distilling experience) | `memory/trace_memory.py` (episodic trace) + `memory/consolidation.py` (`MemoryConsolidator`: structural/statistical, no LLM/embeddings) |
+| `conscience.py` topology (assembled network) | `inner_map/state_graph.py` (`StateGraph` → DOT/Mermaid self-map) |
+| `core/aion_impulse.py` absence stimuli | Inner MAP **absence-cycle tracking** — `MemoryConsolidator.absence_cycles` + `MemoryState.recent_absence_count` |
+| `modules/habit.py` | Inner MAP **habit state** — `PlasticityState.{habit_pathways, strongest_habits, most_repeated_mappings}` |
+| `modules/synthesis.py` (subtraction) | Inner MAP **synthesis/subtraction state** — `PlasticityState.{pruning_count, last_pruning_report, removed_pathway_count, subtraction_ratio}` |
+| `modules/mysterium.py` (unknown pressure) | Inner MAP `UnknownState.unknown_pressure` (placeholder) + drift/novelty estimates |
+
+The Inner MAP observes the substrate, persists `inner_map.json` on every
+checkpoint, and restores its continuity section across restarts — providing the
+inspectable self-model and boundary registry that later self-modification work
+will depend on.

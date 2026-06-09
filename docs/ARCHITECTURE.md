@@ -284,3 +284,56 @@ self-model (Phase 3); and binary `.npz` arrays (reserved for a future
 NumPy-backed reservoir backend — JSON is used now for inspectability and zero
 dependencies). Continuity mode can run unbounded only with an explicit
 `continuous=True`; everything else is bounded by steps and/or duration.
+
+## 14. Inner MAP as self-observation layer
+
+The Inner MAP (`inner_map/`) is Solaris-AI-NN's structured self-model. It mirrors
+Solaris_Ai's Inner MAP concept: a running, inspectable answer to *what is the
+system right now?* It is the Phase-3/4 self-observation layer.
+
+**It does not make the system conscious.** The Inner MAP is self-*observation*,
+not self-awareness. Every field is a concrete, measured property of the
+substrate. There is no introspective "experience" here — only a JSON document of
+metrics, counts, and tendencies. The vocabulary is consciousness-*inspired*; the
+content is telemetry.
+
+**It is a structured self-model.** `inner_map/model.py` defines plain dataclasses
+for each section: identity, continuity (B), neural substrate (C), memory (D),
+plasticity = habit + synthesis (E/F), boundaries (G), tendencies (H), and
+unknown/drift (I), plus a `modules` inventory ("what exists?"). The top-level
+`InnerMapModel` round-trips to/from JSON.
+
+**It observes the neural substrate.** `inner_map/observer.py`'s
+`InnerMapObserver` is strictly read-only. It inspects a `SolarisNeuralBridge`, a
+`ContinuousRunner`, telemetry, memory, habit, and synthesis, and assembles an
+`InnerMapModel`. It never calls anything that advances or mutates the substrate —
+a test asserts the bridge's reservoir state, weights, and step count are
+unchanged by observation. This matches Solaris_Ai's Inner MAP being a passive
+listener.
+
+**What it tracks.** Reservoir size/state-norm/sparsity, readout output size and
+weight norm, prediction confidence and average error; trace length, dominant
+recent signal type, absence-stimulus and reaction counts, and
+structurally-consolidated summaries (`memory/consolidation.py`'s
+`MemoryConsolidator` — counting only, no LLM/embeddings); habit pathways and
+strongest mappings; synthesis pruning count, last report, and *subtraction
+ratio*; the current suggested Desire/Action tendency (a suggestion, never a
+commitment); operational **boundaries** (`inner_map/boundaries.py`); and
+unknown/drift estimates (state drift, novelty, unexplained error, and a
+Mysterium-compatible `unknown_pressure` placeholder). `inner_map/state_graph.py`
+exports the component topology as DOT or Mermaid — a dependency-free visual
+self-map.
+
+**It is persisted across restarts.** The `ContinuousRunner` holds an
+`InnerMapObserver`, updates it every `inner_map_update_interval_steps`, and writes
+`inner_map.json` on every checkpoint via the `PersistenceManager`. After a
+restart the rebuilt model reflects the accumulated lifetime steps and restart
+count — the self-model's continuity section survives the gap.
+
+**Why it is required before later work.** Self-rewriting and richer plasticity
+(future phases) are only safe and analysable if the system already has a
+faithful, inspectable model of its own state and a registry of the boundaries it
+must not cross (CPU-only, no heavy ML, no autonomous file deletion or source
+rewriting, no unbounded runs unless requested, and — crucially — *no autonomous
+action commitment*). The Inner MAP and `BoundaryRegistry` provide exactly that
+foundation: observe and constrain first, adapt second.

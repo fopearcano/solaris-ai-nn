@@ -82,6 +82,8 @@ class ContinuousRunner:
     stimulus_provider: Optional[StimulusProvider] = None
     reaction_provider: Optional[ReactionProvider] = None
     silence_threshold: int = 5
+    inner_map: bool = True
+    inner_map_update_interval_steps: int = 10
 
     def __post_init__(self) -> None:
         if not self.continuous and self.max_steps is None and self.max_duration_s is None:
@@ -95,8 +97,16 @@ class ContinuousRunner:
         self._silence = 0
         self._absence_intensity = 0.0
         self._last_hb_log = 0.0
+        self._last_checkpoint_ts = 0.0
         self.pruning_history: List[Dict[str, Any]] = []
         self._init_session()
+        self.observer = None
+        if self.inner_map:
+            from ..inner_map.observer import InnerMapObserver  # local: avoid cycle
+
+            self.observer = InnerMapObserver(
+                bridge=self.bridge, runner=self, synthesis=self.synthesis
+            )
 
     # -- startup / restore --------------------------------------------------
 
@@ -201,6 +211,12 @@ class ContinuousRunner:
                     self._checkpoint("interval", step, lifetime)
                 if self.prune_interval_steps > 0 and step % self.prune_interval_steps == 0:
                     self._prune(step, lifetime)
+                if (
+                    self.observer is not None
+                    and self.inner_map_update_interval_steps > 0
+                    and step % self.inner_map_update_interval_steps == 0
+                ):
+                    self.observer.update()
         except KeyboardInterrupt:  # graceful: a Ctrl-C is still a clean death
             self._stop_requested = True
             self._stop_reason = "keyboard interrupt"
@@ -280,6 +296,10 @@ class ContinuousRunner:
             pruning_history=self.pruning_history,
         )
         self.pm.save_checkpoint(cp)
+        self._last_checkpoint_ts = time.time()
+        # Persist the Inner MAP self-model alongside the checkpoint.
+        if self.observer is not None:
+            self.pm.save_inner_map(self.observer.update().to_dict())
         self._save_manifest(lifetime, graceful=False)
 
     def _prune(self, step: int, lifetime: int) -> None:
@@ -354,12 +374,16 @@ class ContinuousRunner:
         self.pm.save_manifest(manifest)
 
     def snapshot(self) -> Dict[str, Any]:
-        """Return a JSON-friendly view of the runner's current state."""
-        return {
+        """Return a JSON-friendly view of the runner's current state.
+
+        Includes telemetry, lifecycle, bridge, memory, inner_map, and boundaries.
+        """
+        snap: Dict[str, Any] = {
             "run_id": self.run_id,
             "session_id": self.session_id,
             "state_dir": str(self.pm.state_dir),
             "continuity_log_path": str(self.pm.continuity_log_path),
+            "inner_map_path": str(self.pm.inner_map_path),
             "lifecycle": self.lifecycle.snapshot(),
             "session_steps": self.telemetry.steps,
             "lifetime_steps": self.telemetry.lifetime_steps,
@@ -371,4 +395,11 @@ class ContinuousRunner:
             "habit_pathways": len(self.bridge.habit.weights),
             "pruning_passes": len(self.pruning_history),
             "telemetry": self.telemetry.to_dict(),
+            "bridge": self.bridge.snapshot(),
         }
+        if self.observer is not None:
+            model_dict = self.observer.update().to_dict()
+            snap["inner_map"] = model_dict
+            snap["memory"] = model_dict["memory"]
+            snap["boundaries"] = self.observer.boundaries.to_dict()
+        return snap

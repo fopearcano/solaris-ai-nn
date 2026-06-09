@@ -1,6 +1,11 @@
-"""Memory: chronological trace, reservoir-state snapshots, consolidation stub."""
+"""Memory: chronological trace, reservoir-state snapshots, and consolidation."""
 
-from .consolidation import ConsolidationSummary, consolidate  # noqa: F401
+from .consolidation import (  # noqa: F401
+    ConsolidationReport,
+    ConsolidationSummary,
+    MemoryConsolidator,
+    consolidate,
+)
 from .state_memory import StateMemory  # noqa: F401
 from .trace_memory import TraceMemory, TraceRecord  # noqa: F401
 
@@ -10,4 +15,6 @@ __all__ = [
     "StateMemory",
     "consolidate",
     "ConsolidationSummary",
+    "MemoryConsolidator",
+    "ConsolidationReport",
 ]

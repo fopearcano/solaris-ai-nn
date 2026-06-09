@@ -278,3 +278,74 @@ average prediction error) and of final reservoir state across replays.
 
 **Pass criteria (tested).** deterministic telemetry within tolerance, `max_events`
 honoured, replayed event count matches the trace's signal rows.
+
+---
+
+# Phase-4 Inner MAP experiments
+
+These exercise the Inner MAP self-observation layer (Prompt 4): `InnerMapObserver`,
+`InnerMapModel`, `BoundaryRegistry`, `StateGraph`, and `MemoryConsolidator`.
+
+## 14. Inner MAP Evolution Experiment ✅ (implemented)
+
+**File:** `src/solaris_ai_nn/experiments/inner_map_evolution.py`
+**Run:** `python examples/run_inner_map_evolution.py --steps 300 --state-dir .solaris_ai_nn_state/inner_map_demo`
+
+**Setup.** A bounded `ContinuousRunner` with periodic stimuli, silence windows
+(absence stimuli), mixed `+1/−1` reactions, habit reinforcement, and occasional
+synthesis pruning. The Inner MAP is updated every `inner_map_update_interval_steps`
+and persisted to `inner_map.json` on each checkpoint.
+
+**What it demonstrates.** The self-model evolves as the substrate runs: reservoir
+norm moves, habits strengthen, synthesis subtracts, absence cycles appear, and
+tendencies settle — all observable and persisted.
+
+**Metrics / output.** reservoir state norm, strongest habits, pruning count,
+recent signal dominance, brain-death gap, hard boundaries, suggested
+action/desire, path to `inner_map.json`, and a Mermaid self-map preview.
+
+**Pass criteria (tested).** runs bounded (no infinite loop); the report and the
+runner snapshot contain the expected sections (telemetry, lifecycle, bridge,
+memory, inner_map, boundaries); `inner_map.json` is written.
+
+## 15. Memory Consolidation Experiment (specified + unit-tested)
+
+**Module:** `memory/consolidation.py` (`MemoryConsolidator`).
+
+**Setup.** Feed a trace with repeated event patterns, absence-stimulus cycles,
+actions, and reactions; consolidate over a window.
+
+**Expected.** Structural (not LLM/embedding) consolidation counts repeated
+patterns, identifies the dominant signal type, counts absence cycles, summarises
+reaction feedback (positive/negative), and finds the stable action tendency — then
+emits a `MemoryState` into the Inner MAP.
+
+**Metrics.** `kind_counts`, `dominant_signal_type`, `absence_cycles`,
+`reaction_count`, `stable_action` + ratio, `repeated_patterns`.
+
+## 16. Boundary Violation Simulation (specified + unit-tested)
+
+**Module:** `inner_map/boundaries.py` (`BoundaryRegistry`).
+
+**Setup.** Pass simulated state dicts to `check_violation` (e.g. an unbounded run
+without an explicit `continuous=True`, or a committed Action).
+
+**Expected.** Hard-boundary violations are reported for: unbounded-without-request,
+autonomous action commitment, heavy-ML usage, GPU usage, autonomous file deletion,
+and source rewriting. A clean state yields no violations.
+
+**Metrics.** list of `BoundaryViolation` (boundary name + kind + detail).
+
+## 17. State Graph Export Experiment (specified + unit-tested)
+
+**Module:** `inner_map/state_graph.py` (`StateGraph`, `build_default_state_graph`).
+
+**Setup.** Build the default self-map and export it.
+
+**Expected.** The graph contains the runtime/reservoir/readout/memory/habit/
+synthesis/telemetry/continuity/bridge/boundaries/tendencies/unknown nodes plus an
+`inner_map` observer node, and renders to both Graphviz **DOT** and **Mermaid**
+without any external graph library.
+
+**Metrics.** node/edge counts; DOT begins with `digraph`; Mermaid begins with
+`flowchart LR`.
