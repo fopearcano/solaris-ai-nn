@@ -17,6 +17,8 @@ DESCRIPTIONS = {
     "plasticity_dry_run": "proposals logged, nothing applied",
     "synthesis_pruning": "weak pathways pruned, strong survive",
     "language_trace": "explanations grounded in actual trace fields",
+    "pilot_readiness": "safe manifest, readiness report, bounded dry pilot, "
+                       "scanned pilot report",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {

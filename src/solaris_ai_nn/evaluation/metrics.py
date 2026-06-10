@@ -236,3 +236,37 @@ def language_metrics(language: Optional[Dict[str, Any]],
             min(1.0, atoms / max(1, int(_get(trace, "atom_count", atoms) or 1)))),
         "report_completeness_score": (grounded / total) if total else None,
     }
+
+
+# -- K. Pilot-0 deployment (Prompt 13) -------------------------------------------------
+
+def pilot_metrics(pilot: Optional[Dict[str, Any]],
+                  ingestion: Optional[Dict[str, Any]] = None,
+                  artifacts_report: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Objective pilot metrics: readiness, ingestion validity, completeness."""
+    if not pilot:
+        return {"present": False}
+    ingestion = ingestion or {}
+    artifacts_report = artifacts_report or {}
+    readiness = pilot.get("readiness") or {}
+    checks = readiness.get("checks") or []
+    passed = sum(1 for c in checks if c.get("passed"))
+    accepted = int(_get(ingestion, "events_accepted", 0))
+    rejected = int(_get(ingestion, "events_rejected", 0))
+    expected = artifacts_report.get("expected") or []
+    missing = artifacts_report.get("missing") or []
+    return {
+        "present": True,
+        "profile": pilot.get("profile"),
+        "pilot_readiness_score": (passed / len(checks)) if checks else None,
+        "readiness_ready": readiness.get("ready"),
+        "ingestion_validity_rate": (
+            accepted / (accepted + rejected)) if (accepted + rejected) else None,
+        "stream_rejection_count": rejected,
+        "safety_block_count": len((pilot.get("safety") or {}).get(
+            "violations", [])),
+        "pilot_artifact_completeness": (
+            (len(expected) - len(missing)) / len(expected)) if expected else None,
+        "pilot_recommendation_status": (
+            pilot.get("registry_entry") or {}).get("final_recommendation"),
+    }

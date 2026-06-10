@@ -195,6 +195,13 @@ python examples/run_governed_plasticity_request.py
 python examples/run_emergency_stop_demo.py
 python examples/generate_runbook.py --type bounded
 python examples/run_claim_guard_demo.py
+
+# Pilot-0: governed bounded deployments (simulated / read-only stream / sidecar)
+python examples/run_pilot_simulated.py --steps 100
+python examples/run_pilot_stream.py --input examples/sample_streams/sensory_events.jsonl --format jsonl --steps 100
+python examples/run_pilot_sidecar_fake.py --steps 100
+python examples/run_pilot_readiness.py --profile simulated
+python examples/generate_pilot_runbook.py --profile simulated
 ```
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
@@ -224,6 +231,17 @@ gates every run through this layer and leaves a governance trail under
 `.solaris_ai_nn_governance/`; governance status feeds the Inner MAP and the
 evaluation reports. Nothing here bypasses a human, and nothing escalates
 automatically.
+
+The **pilot layer** (`pilot/`) is Pilot-0: controlled deployment, not
+autonomy. Three sanctioned profiles — `simulated` (GridWorld, the default),
+`read_only_stream` (explicit local JSONL/text files become sensory Stimuli
+through validated data contracts; the world is read, never acted on), and
+`solaris_sidecar_observe` (bounded observation of a Solaris_Ai-like bus;
+suggestions only). Every pilot is bounded unless governance-approved, gated
+by the `PilotSafetyValidator` and a six-area readiness check, run under the
+operational supervisor, and accounted for with a registry entry, input
+summary, pilot-aware Inner MAP, and a ClaimGuard-scanned pilot report ending
+in one human recommendation. Evidence lands under `.solaris_ai_nn_pilots/`.
 
 The **evaluation layer** (`evaluation/`) is the measurement harness: nine
 registered protocols (absence, feedback inversion, reward/danger, restart
@@ -301,6 +319,8 @@ src/solaris_ai_nn/
   ops/          supervisor, watchdog, health, budgets, incidents, soak plans, status
   governance/   policy, permissions, approvals, risk, emergency stop, runbooks,
                 checklists, claim guard, post-run review, governance audit
+  pilot/        Pilot-0: profiles, manifests, data contracts, read-only stream
+                ingestion, sensors, safety, readiness, deployment, reports
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

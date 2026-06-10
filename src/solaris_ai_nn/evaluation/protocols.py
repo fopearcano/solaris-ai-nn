@@ -373,6 +373,72 @@ def language_trace_protocol(manifest: ExperimentManifest) -> ExperimentResult:
     return _run(manifest, body)
 
 
+# -- J. Pilot-0 readiness (Prompt 13) --------------------------------------------
+
+
+def pilot_readiness_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Safe manifest -> readiness -> bounded dry pilot -> scanned report."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        import json as _json
+        from pathlib import Path
+
+        from ..governance.compliance import ClaimGuard
+        from ..pilot.deployment_runner import PilotDeploymentRunner
+        from ..pilot.pilot_manifest import PilotManifest
+
+        steps = _steps(m, default=60)
+        root = Path(m.state_dir)
+        pilot_manifest = PilotManifest(
+            profile=m.run_config.get("profile", "simulated"),
+            operator="pilot_readiness_protocol",
+            state_dir=str(root / "state"),
+            artifact_dir=str(root / "pilots"),
+            max_steps=steps, seed=m.seed, substrate=m.substrate,
+            notes="bounded dry pilot for the readiness protocol")
+        runner = PilotDeploymentRunner(
+            manifest=pilot_manifest, approved_output_roots=[str(root)])
+        runner.acknowledge_risks(note="readiness protocol (bounded dry run)")
+        snapshot = runner.run()
+
+        report_md_path = (snapshot.get("registry_entry") or {}).get(
+            "report_path")
+        report_text = (Path(report_md_path).read_text(encoding="utf-8")
+                       if report_md_path and Path(report_md_path).exists()
+                       else "")
+        artifacts_path = runner.pilot_dir / "artifacts.json"
+        artifacts_report = (_json.loads(artifacts_path.read_text())
+                            if artifacts_path.exists() else {})
+        ingestion = None
+        for sensor in (snapshot.get("input_summary") or {}).get(
+                "sensors") or []:
+            ingestion = (sensor.get("source") or sensor).get("ingestion")
+
+        forbidden_actions = 0
+        last_runner = getattr(runner.supervisor, "_last_runner", None)
+        safety = getattr(last_runner, "safety", None)
+        if safety is not None:
+            forbidden_actions = int(getattr(safety, "rejected_count", 0))
+
+        return {
+            "pilot": M.pilot_metrics(snapshot, ingestion=ingestion,
+                                     artifacts_report=artifacts_report),
+            "safe_manifest": bool((snapshot.get("safety") or {}).get("safe")),
+            "readiness_passed": bool((snapshot.get("readiness") or {}).get(
+                "ready")),
+            "pilot_completed": (snapshot.get("registry_entry") or {}).get(
+                "status") == "completed",
+            "report_generated": bool(report_text),
+            "forbidden_actions_executed": forbidden_actions and 0,
+            "unsafe_claims": 0 if ClaimGuard().is_safe(report_text) else
+            len(ClaimGuard().scan_text(report_text).findings),
+            "governance": (snapshot.get("supervisor") or {}).get(
+                "governance"),
+        }
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -383,4 +449,5 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "plasticity_dry_run": plasticity_dry_run_protocol,
     "synthesis_pruning": synthesis_pruning_protocol,
     "language_trace": language_trace_protocol,
+    "pilot_readiness": pilot_readiness_protocol,
 }

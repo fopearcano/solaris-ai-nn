@@ -203,6 +203,11 @@ class InnerMapModel:
     # policy_violation_count, last_policy_violation, governance_audit_path,
     # operator_session, runbook_path, claim_guard_status.
     governance: Optional[Dict[str, Any]] = None
+    # Pilot-0 deployment status (Prompt 13); None outside a pilot.
+    # Keys: pilot_mode_active, pilot_profile, pilot_readiness_status,
+    # input_source_count, stream_ingestion_count, pilot_safety_status,
+    # pilot_incident_count, pilot_recommendation, pilot_report_path.
+    pilot: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

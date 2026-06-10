@@ -202,6 +202,19 @@ def assess_manifest(manifest: Any,
         "artifact rotation may archive/compress old evidence",
         "rotation preserves incident evidence; nothing silently deleted"))
 
+    # Pilot-0 profiles (Prompt 13): named risk for what the pilot touches.
+    pilot_profile = ctx.get("pilot_profile")
+    if pilot_profile == "read_only_stream":
+        items.append(RiskItem(
+            "external_stream_ingestion", RiskLevel.MEDIUM,
+            "external (local-file) sensory data enters the substrate",
+            "data contracts validate every line; read-only by construction"))
+    elif pilot_profile == "solaris_sidecar_observe":
+        items.append(RiskItem(
+            "sidecar_observation_pilot", RiskLevel.MEDIUM,
+            "an external Solaris_Ai-like runtime is observed live",
+            "observe-only; suggestions stay local without approval"))
+
     if ctx.get("real_world_actuation"):
         items.append(RiskItem(
             "real_world_actuation", RiskLevel.PROHIBITED,

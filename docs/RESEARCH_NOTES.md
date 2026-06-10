@@ -339,3 +339,37 @@ checkpoints and records why it stopped, reachable out-of-band via a sentinel
 file, and structurally incapable of killing the process or deleting data. A
 system intended to run continuously must have a stop you can trust before it is
 allowed to run long — so the stop is designed first, not last.
+
+**Pilot design for adaptive systems.** An adaptive system's first deployment
+should change the *environment*, not the system: Pilot-0 runs exactly the
+substrate that passed the benchmarks, inside a harness that adds governance,
+supervision, readiness gates, and reporting. If a pilot needs new capability
+to succeed, that is a finding about scope, not a reason to patch capability
+into the pilot layer.
+
+**Read-only sensing before action.** The ladder matters: simulate, then
+observe real data without acting, and only much later consider acting. The
+read-only stream profile is the second rung — external structure enters the
+substrate (real timing, real gaps, real noise) while the action surface stays
+exactly zero. Most of what one wants to learn about an adaptive system in the
+wild (does it stay healthy? does it stay bounded? does its learning signal
+survive contact with messy data?) is observable from this rung.
+
+**Staged deployment.** Each profile is a stage with its own risk level,
+permissions, checklist, runbook, and exit criterion (the pilot report's
+recommendation). Graduation is a human decision over recorded evidence —
+`ready_for_next_stage` is a string in a report, not a transition the system
+can take by itself.
+
+**Bounded real-world observation.** Even pure observation is bounded here:
+explicit input files only, line-size limits, validated contracts, bounded
+tails, and a supervised step budget. Unbounded observation is a resource
+leak at best and an unreviewable experiment at worst; bounding it keeps every
+pilot a finite object that can be replayed, audited, and compared.
+
+**Why a controlled pilot harness comes before autonomy.** Autonomy is not a
+feature to add; it is a set of controls to *remove*, one at a time, with
+evidence. Building the pilot harness first inverts the usual failure mode:
+instead of an autonomous system retrofitted with brakes, this is a braking
+system into which capability is gradually admitted. The harness — not the
+substrate — owns the run modes, and that ownership is structural.

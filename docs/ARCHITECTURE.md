@@ -796,3 +796,68 @@ generates the written operator procedure for each experiment type
 (bounded / plasticity / sidecar / sensorimotor / 24h / 30d soak), and
 `PostRunReview` recommends what to do next (repeat / extend / reduce scope /
 investigate / stop) — a recommendation for a human, never an automatic action.
+
+## Pilot-0 deployment profiles
+
+**Pilot-0 is controlled deployment, not autonomy.** The `pilot/` package is a
+harness for running the existing substrate in controlled environments under
+everything the previous layers built: a pilot is governed (policy, risk,
+approvals, operator acknowledgement), supervised (health, watchdog, incidents,
+emergency-stop sentinel), bounded (an unbounded `PilotManifest` cannot even be
+constructed without governance approval ids), and accounted for (readiness
+report before, registry entry during, ClaimGuard-scanned pilot report after).
+Nothing in the pilot layer adds capability — it adds the conditions under
+which capability is allowed to run.
+
+**The simulated pilot remains the safest default.** Profile `simulated`
+(`PilotProfileType.DEFAULT`) wraps the GridWorld sensorimotor sandbox: fully
+internal, nothing external read or touched. The other two profiles must be
+chosen deliberately, and `PilotProfileRegistry` refuses to register any
+profile that fails to forbid real-world actuation, network calls, OS
+commands, browser automation, committed Solaris Actions, source-code writes,
+or writes outside approved directories.
+
+**The read-only stream pilot ingests external sensory data without acting.**
+Local JSONL/text files — explicitly named by the operator, no globs, no
+recursive crawling — are read by the `ReadOnlyStreamIngestor` and validated
+line by line against the data contracts: command-shaped payloads, shell-like
+instructions, URLs or paths posed as action requests, action-request keys,
+binary data, and oversized payloads are rejected, counted, and never
+partially trusted. Accepted events become canonical Stimuli through the
+stream sensors (`JsonlStreamSensor` / `TextStreamSensor`, plus
+`SyntheticHeartbeatSensor` and a `SilenceWindowSensor` that turns stream
+pauses into absence Stimuli — the Subtraction Principle at the stream level)
+and feed the ordinary `ContinuousRunner`. Input files are never modified;
+tailing is bounded by lines and/or duration, always.
+
+**The Solaris sidecar pilot observes only.** Profile
+`solaris_sidecar_observe` attaches the Prompt-7 sidecar beside a
+Solaris_Ai-like runtime (fake or real) for a bounded observation window:
+signals are mirrored, suggestions are produced locally, publishing them
+requires a separate approval, and committing Actions or touching the
+runtime's lifecycle remains structurally absent.
+
+**Every pilot runs the full stack.** `PilotDeploymentRunner` refuses an
+unsafe manifest (`PilotSafetyValidator`: contract intact, bounded-or-approved,
+approved output roots, real input files, no forbidden features, no sidecar
+action authority), generates a `PilotReadinessReport` across six areas
+(governance, operations, evaluation, safety, recovery, documentation — skips
+must be explicit), then drives the profile's thin adapter through the
+`OperationalSupervisor`, whose own governance gate enforces approvals and
+operator risk acknowledgement. The run ends with `input_summary.json`, a
+pilot-aware Inner MAP snapshot, a pilot report with a single recommendation
+(`repeat_pilot` / `extend_duration` / `reduce_scope` / `investigate_failure`
+/ `ready_for_next_stage` — for a human, never acted on), an `artifacts.json`
+completeness record, and a `PilotRegistry` entry under
+`.solaris_ai_nn_pilots/`. The `pilot_readiness` evaluation protocol runs this
+whole loop as a benchmark, and `pilot_metrics` exposes readiness score,
+ingestion validity rate, rejection counts, safety blocks, and artifact
+completeness.
+
+**Pilot state feeds Inner MAP.** The deployment runner's `pilot_summary()`
+(mode active, profile, readiness status, input/ingestion counts, safety
+status, incident count, recommendation, report path) lands in
+`InnerMapModel.pilot`, and the state graph gains the pilot nodes
+(PilotProfile, PilotManifest, PilotSafetyValidator, PilotDeploymentRunner,
+PilotReadinessReport, PilotReport, ReadOnlyStreamIngestor, StreamSensor)
+with their gating and feeding edges.

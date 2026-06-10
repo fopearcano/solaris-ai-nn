@@ -870,3 +870,57 @@ recommendation — `repeat`, `extend_duration`, `reduce_scope`,
 extending duration; an emergency stop or unexplained critical recommends
 investigating; repeated failed runs recommend stopping the line of work. The
 review recommends only — it never escalates or acts automatically.
+
+## 62. Pilot-0 Simulated Deployment ✅ (implemented)
+
+**Run:** `python examples/run_pilot_simulated.py --steps 100`
+The default pilot: GridWorld sandbox under the full stack. The operator sees
+the risk assessment and acknowledges the medium embodiment risk explicitly;
+the manifest passes the PilotSafetyValidator; readiness is reported; the
+supervised bounded run executes; and the pilot ends with a registry entry,
+input summary, pilot-aware Inner MAP, and a ClaimGuard-scanned pilot report
+with a recommendation. Flags: `--language`, `--substrate`,
+`--enable-plasticity-dry-run`.
+
+## 63. Pilot-0 Read-Only Stream Deployment ✅ (implemented)
+
+**Run:** `python examples/run_pilot_stream.py --input examples/sample_streams/sensory_events.jsonl --format jsonl --steps 100`
+Local sensory streams enter the substrate, read-only: 40 sample JSONL events
+(audio/vision/temperature) validated line by line, turned into Stimuli, and
+processed by the ordinary continuous runner — with the SilenceWindowSensor
+emitting absence Stimuli once the stream runs dry. The input file is provably
+untouched, command-shaped lines are rejected and counted, and the input
+summary records the validity rate. Also works on plain text
+(`--input examples/sample_streams/text_stream.txt --format text`); `--tail`
+previews the file in bounded tail mode.
+
+## 64. Pilot-0 Solaris Sidecar Observation ✅ (implemented)
+
+**Run:** `python examples/run_pilot_sidecar_fake.py --steps 100`
+The sidecar pilot against a fake Solaris runtime: a bounded observation
+window in which the fake organism's bus is mirrored into the substrate and
+suggestions are produced locally. The run proves the invariants: 0
+suggestions published (approval-gated), 0 stimulate/react/death calls on the
+observed runtime, Solaris remains the action authority.
+
+## 65. Pilot Readiness Check ✅ (implemented)
+
+**Run:** `python examples/run_pilot_readiness.py --profile simulated`
+Generates the readiness report without running the pilot: governance,
+operations, evaluation, safety, recovery, and documentation checks, with
+explicit `"skipped"` for the quick suite and restart demo (skips are visible
+warnings, never silent passes). Output: ready/not-ready, blocking issues,
+warnings, and a recommended next step. Also registered as the
+`pilot_readiness` evaluation protocol, which additionally runs a bounded dry
+pilot and scans its report.
+
+## 66. Pilot Report Generation ✅ (implemented)
+
+**Run:** automatic at the end of every pilot (see `pilot_report.md` under
+`.solaris_ai_nn_pilots/runs/<pilot_id>/`).
+The report covers metadata, profile + safety contract, governance summary,
+run configuration, input sources, telemetry/substrate/Inner MAP summaries,
+profile-specific sections (embodiment / sidecar / stream ingestion),
+incidents, readiness, artifacts, mandatory limitations, and one
+recommendation. Saving goes through the language layer, so ClaimGuard scans
+every pilot report before it reaches disk.

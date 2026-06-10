@@ -279,4 +279,32 @@ def build_default_state_graph() -> StateGraph:
                "documents the procedure")
     g.add_edge("post_run_review", "governance_policy",
                "feeds the next run's evaluation")
+
+    # Pilot-0 deployment (Prompt 13). Controlled deployment, not autonomy.
+    for name, role in [
+        ("pilot_profile", "sanctioned deployment shape"),
+        ("pilot_manifest", "one pilot, fully pinned"),
+        ("pilot_safety_validator", "refuses unsafe pilots"),
+        ("pilot_deployment_runner", "governed bounded pilot"),
+        ("pilot_readiness_report", "ready or not, and why"),
+        ("pilot_report", "the written account"),
+        ("read_only_stream_ingestor", "reads local streams, only"),
+        ("stream_sensor", "events -> Stimuli"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("pilot_profile", "pilot_manifest", "pins defaults")
+    g.add_edge("pilot_manifest", "governance_policy",
+               "pilot manifest feeds governance")
+    g.add_edge("pilot_manifest", "risk_assessment", "feeds")
+    g.add_edge("pilot_safety_validator", "pilot_deployment_runner",
+               "safety gates deployment")
+    g.add_edge("read_only_stream_ingestor", "stream_sensor",
+               "validated events")
+    g.add_edge("stream_sensor", "bridge", "stream sensors feed neural bridge")
+    g.add_edge("operational_supervisor", "pilot_deployment_runner",
+               "supervises the pilot")
+    g.add_edge("pilot_readiness_report", "pilot_deployment_runner",
+               "gates the launch")
+    g.add_edge("evaluation_score", "pilot_report", "evaluation feeds report")
+    g.add_edge("pilot_report", "inner_map", "pilot state feeds Inner MAP")
     return g

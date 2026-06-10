@@ -39,3 +39,7 @@ artifacts/
 # records; regenerate per run. Commit a runbook only deliberately, under
 # docs/templates.
 .solaris_ai_nn_governance/
+
+# Pilot output (manifests, readiness/pilot reports, input summaries, registry).
+# Local research evidence; reproducible from code and sample inputs.
+.solaris_ai_nn_pilots/

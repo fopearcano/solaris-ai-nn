@@ -25,7 +25,9 @@ from .permissions import PermissionScope as S
 from .risk import RiskLevel
 
 RUNBOOK_TYPES = ("bounded", "plasticity", "sidecar", "sensorimotor",
-                 "soak24", "soak30")
+                 "soak24", "soak30",
+                 # Pilot-0 deployment profiles (Prompt 13).
+                 "pilot_simulated", "pilot_stream", "pilot_sidecar")
 
 _EMERGENCY_PROCEDURE = [
     "Create the sentinel file `<state_dir>/EMERGENCY_STOP` (any content). "
@@ -260,3 +262,75 @@ class RunbookBuilder:
 
     def _build_soak30(self) -> Runbook:
         return self._soak("soak30", "30-day", S.RUN_SOAK_30D, "soak_30d")
+
+    # -- Pilot-0 deployment runbooks (Prompt 13) -------------------------------
+
+    def _build_pilot_simulated(self) -> Runbook:
+        return self._runbook(
+            "pilot_simulated", "Pilot-0 simulated deployment",
+            ["Run a governed, supervised, bounded pilot entirely inside the "
+             "GridWorld sandbox. The safe default profile: nothing external "
+             "is read or touched."],
+            [S.RUN_BOUNDED, S.ENABLE_EMBODIMENT_SIMULATION],
+            RiskLevel.MEDIUM,
+            ["python examples/run_pilot_simulated.py --steps 100 "
+             "--operator <name>"],
+            extra_pre=["[ ] readiness report generated "
+                       "(examples/run_pilot_readiness.py --profile "
+                       "simulated)",
+                       "[ ] medium risks acknowledged by the named operator"],
+            extra_artifacts=["`.solaris_ai_nn_pilots/runs/<pilot_id>/` -- "
+                             "pilot manifest, safety contract, readiness "
+                             "report, input summary, pilot report, "
+                             "artifacts.json",
+                             "`.solaris_ai_nn_pilots/pilot_registry.json`"],
+            limitations=["A simulated pilot says nothing about behaviour on "
+                         "external data; graduate to the read-only stream "
+                         "profile for that."])
+
+    def _build_pilot_stream(self) -> Runbook:
+        return self._runbook(
+            "pilot_stream", "Pilot-0 read-only stream deployment",
+            ["Ingest explicitly-named local JSONL/text files as sensory "
+             "stimuli. The external world is read, validated line by line, "
+             "and never acted on -- no execution, no URLs, no writes "
+             "outside approved directories."],
+            [S.RUN_BOUNDED], RiskLevel.MEDIUM,
+            ["python examples/run_pilot_stream.py --input <file.jsonl> "
+             "--format jsonl --steps 100 --operator <name>"],
+            extra_pre=["[ ] every input file named explicitly (no globs, no "
+                       "recursive directories)",
+                       "[ ] input files reviewed: data only, no "
+                       "command-shaped content expected",
+                       "[ ] readiness report generated for the "
+                       "read_only_stream profile"],
+            extra_artifacts=["`input_summary.json` -- per-sensor ingestion "
+                             "counts, validity rate, rejected-line reasons"],
+            limitations=["Rejected lines are skipped and recorded, never "
+                         "partially trusted; a high rejection rate means "
+                         "the stream does not fit the sensory contract."])
+
+    def _build_pilot_sidecar(self) -> Runbook:
+        return self._runbook(
+            "pilot_sidecar", "Pilot-0 Solaris sidecar observation",
+            ["Attach the NN sidecar beside a Solaris_Ai-like runtime and "
+             "observe its bus for a bounded window. Suggestions stay local; "
+             "publishing them is a separate, approval-gated decision; "
+             "Actions are never committed."],
+            [S.RUN_BOUNDED, S.ENABLE_SIDECAR_OBSERVE,
+             f"{S.ENABLE_SIDECAR_SUGGESTIONS} (only if publishing, with "
+             "approval)"],
+            RiskLevel.MEDIUM,
+            ["python examples/run_pilot_sidecar_fake.py --steps 100 "
+             "--operator <name>"],
+            extra_pre=["[ ] compatibility report reviewed (probe level "
+                       "bus_observable or better)",
+                       "[ ] detach tested against the target runtime",
+                       "[ ] publishing OFF unless a matching approval "
+                       "record exists"],
+            extra_artifacts=["sidecar integration summary inside the pilot "
+                             "report (mirrored signals, suggestions "
+                             "produced vs published)"],
+            limitations=["The sidecar never calls stimulate/react/death on "
+                         "the observed runtime; Solaris_Ai remains the "
+                         "action authority throughout."])

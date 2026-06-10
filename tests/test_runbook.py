@@ -39,9 +39,10 @@ def test_soak_runbooks_include_emergency_stop_procedure():
         assert "soak_acknowledged=True" in md, runbook_type
 
 
-def test_all_six_types_build():
+def test_all_types_build():
     builder = RunbookBuilder()
-    assert len(RUNBOOK_TYPES) == 6
+    # 6 governance types (Prompt 12) + 3 Pilot-0 types (Prompt 13).
+    assert len(RUNBOOK_TYPES) == 9
     for runbook_type in RUNBOOK_TYPES:
         runbook = builder.build(runbook_type)
         assert runbook.runbook_type == runbook_type

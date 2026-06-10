@@ -53,6 +53,7 @@ class InnerMapObserver:
     evaluation: Any = None  # optional dict or object with evaluation_summary()
     operations: Any = None  # optional dict or object with operations_summary()
     governance: Any = None  # optional dict or object with governance_summary()
+    pilot: Any = None  # optional dict or object with pilot_summary()
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -326,6 +327,12 @@ class InnerMapObserver:
                 model.governance = self.governance.governance_summary()
             elif isinstance(self.governance, dict):
                 model.governance = dict(self.governance)
+        if self.pilot is not None:
+            # Pilot-0 deployment status (read-only).
+            if hasattr(self.pilot, "pilot_summary"):
+                model.pilot = self.pilot.pilot_summary()
+            elif isinstance(self.pilot, dict):
+                model.pilot = dict(self.pilot)
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder
