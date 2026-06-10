@@ -32,6 +32,12 @@ class PermissionScope:
     PERFORM_ARTIFACT_ROTATION = "perform_artifact_rotation"
     PERFORM_ROLLBACK = "perform_rollback"
     PERFORM_EMERGENCY_STOP = "perform_emergency_stop"
+    # Latent cognition (Prompt 14).
+    ENABLE_LATENT = "enable_latent"
+    ENABLE_LATENT_DRY_RUN = "enable_latent_dry_run"
+    ENABLE_LATENT_PLASTICITY = "enable_latent_plasticity"
+    RUN_DREAM_CYCLE = "run_dream_cycle"
+    RUN_COUNTERFACTUAL_REPLAY = "run_counterfactual_replay"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -40,6 +46,8 @@ class PermissionScope:
         ENABLE_SIDECAR_OBSERVE, ENABLE_SIDECAR_SUGGESTIONS,
         ENABLE_LOCAL_STATUS_SERVER,
         PERFORM_ARTIFACT_ROTATION, PERFORM_ROLLBACK, PERFORM_EMERGENCY_STOP,
+        ENABLE_LATENT, ENABLE_LATENT_DRY_RUN, ENABLE_LATENT_PLASTICITY,
+        RUN_DREAM_CYCLE, RUN_COUNTERFACTUAL_REPLAY,
     )
 
 
@@ -100,6 +108,20 @@ class PermissionSet:
                        note="undoing a mutation is always allowed"),
             Permission(S.PERFORM_EMERGENCY_STOP, granted=True,
                        note="always allowed; cannot be revoked"),
+            Permission(S.ENABLE_LATENT, granted=True,
+                       note="bounded offline cycles; never external "
+                            "actions"),
+            Permission(S.ENABLE_LATENT_DRY_RUN, granted=True,
+                       note="sandboxed replay/consolidation, nothing "
+                            "applied"),
+            Permission(S.ENABLE_LATENT_PLASTICITY, requires_approval=True,
+                       note="latent cycles mutating production state need "
+                            "human approval"),
+            Permission(S.RUN_DREAM_CYCLE, granted=True,
+                       note="sandboxed counterfactual replay; offline only"),
+            Permission(S.RUN_COUNTERFACTUAL_REPLAY, granted=True,
+                       note="labelled simulations, never real "
+                            "observations"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

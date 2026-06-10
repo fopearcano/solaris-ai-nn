@@ -104,6 +104,7 @@ SOAK_STOP = "soak_stop"
 REACTION_FEEDBACK = "reaction_feedback"
 SYNTHESIS_PRUNING = "synthesis_pruning"
 HABIT_REINFORCEMENT = "habit_reinforcement"
+LATENT_CYCLE = "latent_cycle"
 
 EVENT_TYPES = frozenset(
     {
@@ -118,6 +119,7 @@ EVENT_TYPES = frozenset(
         SOAK_STOP,
         REACTION_FEEDBACK,
         SYNTHESIS_PRUNING,
+        LATENT_CYCLE,
         HABIT_REINFORCEMENT,
     }
 )

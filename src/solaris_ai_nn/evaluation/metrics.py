@@ -270,3 +270,38 @@ def pilot_metrics(pilot: Optional[Dict[str, Any]],
         "pilot_recommendation_status": (
             pilot.get("registry_entry") or {}).get("final_recommendation"),
     }
+
+
+# -- L. latent cognition (Prompt 14) ---------------------------------------------------
+
+def latent_metrics(latent: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective latent metrics: cycles, anticipation, pressure, safety."""
+    if not latent:
+        return {"present": False}
+    mode_counts = latent.get("mode_counts") or {}
+    return {
+        "present": True,
+        "latent_cycle_count": (int(_get(latent, "sleep_cycle_count", 0))
+                               + int(_get(latent, "dream_cycle_count", 0))),
+        "sleep_consolidation_count": int(_get(latent, "sleep_cycle_count", 0)),
+        "replay_count": int(_get(latent, "replay_count", 0)),
+        "dream_counterfactual_count": int(_get(latent, "counterfactual_count",
+                                               0)),
+        "anticipation_accuracy": latent.get("anticipation_accuracy"),
+        "unknown_pressure": latent.get("mysterium_pressure"),
+        "unknown_pressure_trend": (latent.get("mysterium_trend")
+                                   or latent.get("trend")),
+        "counterfactual_divergence": latent.get("mean_divergence"),
+        "schema_consolidation_count": int(_get(latent,
+                                               "consolidated_schema_count",
+                                               0)),
+        "latent_safety_rejection_count": (
+            0 if str(latent.get("latent_safety_status", "ok")) == "ok"
+            else int(str(latent.get("latent_safety_status")).split()[0])),
+        "production_mutation_count": int(_get(latent,
+                                              "production_mutation_count",
+                                              0)),
+        "mode_counts": mode_counts,
+        "external_actions_during_latent": int(_get(
+            latent, "external_actions_during_latent", 0)),
+    }

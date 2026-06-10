@@ -202,6 +202,12 @@ python examples/run_pilot_stream.py --input examples/sample_streams/sensory_even
 python examples/run_pilot_sidecar_fake.py --steps 100
 python examples/run_pilot_readiness.py --profile simulated
 python examples/generate_pilot_runbook.py --profile simulated
+
+# Latent cognition: bounded offline replay, consolidation, anticipation, Mysterium
+python examples/run_latent_replay_demo.py --steps 200
+python examples/run_sleep_cycle_demo.py --steps 200
+python examples/run_counterfactual_dream_demo.py --steps 200
+python examples/run_mysterium_anticipation_demo.py --steps 200
 ```
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
@@ -242,6 +248,20 @@ by the `PilotSafetyValidator` and a six-area readiness check, run under the
 operational supervisor, and accounted for with a registry entry, input
 summary, pilot-aware Inner MAP, and a ClaimGuard-scanned pilot report ending
 in one human recommendation. Evidence lands under `.solaris_ai_nn_pilots/`.
+
+The **latent layer** (`latent/`) keeps the brain busy when input goes quiet —
+without ever acting. Bounded sleep/consolidation cycles distil the trace into
+schemas; dream cycles replay remembered windows into deterministic sandboxes
+and test labelled counterfactual variants (never real observations, never
+production mutation without an `enable_latent_plasticity` approval); an
+anticipation tracker scores simple one-step predictions; Mysterium estimates
+unknown pressure as a number with attributed reasons; a complexity monitor
+flags inertia/runaway and suggests (only suggests) internal responses. The
+scheduler respects governance, health, and the watchdog; every cycle is
+step-bounded; latent modes structurally cannot execute external actions; and
+the ClaimGuard-scanned latent report says "offline simulated replay", never
+"dreaming". This is sleep-*inspired* maintenance, not a claim about
+experience.
 
 The **evaluation layer** (`evaluation/`) is the measurement harness: nine
 registered protocols (absence, feedback inversion, reward/danger, restart
@@ -321,6 +341,8 @@ src/solaris_ai_nn/
                 checklists, claim guard, post-run review, governance audit
   pilot/        Pilot-0: profiles, manifests, data contracts, read-only stream
                 ingestion, sensors, safety, readiness, deployment, reports
+  latent/       sleep/wake modes, scheduler, sleep+dream cycles, offline replay,
+                counterfactuals, anticipation, Mysterium, complexity, latent memory
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

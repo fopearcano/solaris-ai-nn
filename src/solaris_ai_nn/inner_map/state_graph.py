@@ -307,4 +307,35 @@ def build_default_state_graph() -> StateGraph:
                "gates the launch")
     g.add_edge("evaluation_score", "pilot_report", "evaluation feeds report")
     g.add_edge("pilot_report", "inner_map", "pilot state feeds Inner MAP")
+
+    # Latent cognition (Prompt 14). Bounded offline processing; never acts.
+    for name, role in [
+        ("sleep_wake_controller", "mode state machine"),
+        ("latent_scheduler", "bounded cycle decisions"),
+        ("sleep_cycle", "maintenance + consolidation"),
+        ("dream_cycle", "sandboxed counterfactual replay"),
+        ("offline_replay_engine", "windows into sandboxes"),
+        ("counterfactual_generator", "labelled what-if variants"),
+        ("anticipation_tracker", "one-step predictions"),
+        ("mysterium_tracker", "numeric unknown pressure"),
+        ("complexity_pressure_monitor", "inertia/chaos detection"),
+        ("latent_safety_validator", "no actions while latent"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("memory", "offline_replay_engine", "trace memory feeds replay")
+    g.add_edge("offline_replay_engine", "dream_cycle",
+               "replay feeds substrate sandbox")
+    g.add_edge("counterfactual_generator", "dream_cycle",
+               "labelled variants")
+    g.add_edge("anticipation_tracker", "mysterium_tracker",
+               "compares prediction to actual")
+    g.add_edge("mysterium_tracker", "latent_scheduler",
+               "unknown pressure informs scheduling")
+    g.add_edge("complexity_pressure_monitor", "latent_scheduler",
+               "suggests latent action")
+    g.add_edge("latent_scheduler", "sleep_wake_controller", "drives modes")
+    g.add_edge("latent_safety_validator", "sleep_wake_controller",
+               "gates transitions")
+    g.add_edge("sleep_cycle", "memory", "consolidates")
+    g.add_edge("dream_cycle", "inner_map", "latent report feeds Inner MAP")
     return g

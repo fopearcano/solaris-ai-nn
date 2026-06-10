@@ -91,6 +91,13 @@ class ContinuousRunner:
     plasticity_dry_run: bool = False
     enable_language: bool = False
     report_interval_steps: int = 100
+    # Latent cognition (Prompt 14): bounded offline cycles during silence.
+    # Disabled by default; dry-run (sandbox-only) by default when enabled.
+    enable_latent: bool = False
+    latent_interval_steps: int = 100
+    latent_max_steps: int = 25
+    latent_dry_run: bool = True
+    allow_latent_plasticity: bool = False
 
     def __post_init__(self) -> None:
         if not self.continuous and self.max_steps is None and self.max_duration_s is None:
@@ -133,6 +140,18 @@ class ContinuousRunner:
                 self.plasticity_engine.registry.apply_values(self._restored_mutable_params)
             # Rebuild rollback history from the audit so cross-session rollback works.
             self.plasticity_engine.load_history_from_audit()
+
+        # Optional latent cognition (off by default; dry-run when on).
+        self.latent = None
+        if self.enable_latent:
+            from ..latent.coordinator import LatentCognition  # local: avoid cycle
+
+            self.latent = LatentCognition(
+                bridge=self.bridge, state_dir=self.pm.state_dir,
+                seed=self.seed, max_cycle_steps=self.latent_max_steps,
+                dry_run=self.latent_dry_run,
+                allow_plasticity=self.allow_latent_plasticity,
+                plasticity_engine=self.plasticity_engine)
 
     # -- startup / restore --------------------------------------------------
 
@@ -263,6 +282,12 @@ class ContinuousRunner:
                     and step % self.report_interval_steps == 0
                 ):
                     self._last_structural_summary = self._structural_summary()
+                if (
+                    self.latent is not None
+                    and self.latent_interval_steps > 0
+                    and step % self.latent_interval_steps == 0
+                ):
+                    self._latent_tick(step, lifetime)
         except KeyboardInterrupt:  # graceful: a Ctrl-C is still a clean death
             self._stop_requested = True
             self._stop_reason = "keyboard interrupt"
@@ -274,6 +299,10 @@ class ContinuousRunner:
         # so session steps == telemetry.steps; no separate session counter needed.
         stim, is_external = self._next_stimulus(step)
         result = self.bridge.process(stim)
+        if self.latent is not None:
+            self.latent.note_step(result, is_external)
+            if is_external:
+                self.latent.reset_cooldowns()
 
         valence: Optional[float] = None
         if is_external and self.reaction_provider is not None:
@@ -376,6 +405,38 @@ class ContinuousRunner:
             }
         )
 
+    # -- latent cognition (optional) ------------------------------------------
+
+    def _latent_tick(self, step: int, lifetime: int) -> None:
+        """One scheduler evaluation; runs a bounded latent cycle if due.
+
+        While a latent cycle runs, this loop is not processing external
+        input -- external action execution is paused by construction.
+        """
+        summary = self.latent.maybe_cycle(
+            step, silence=self._silence,
+            run_id=self.run_id)
+        if summary is not None:
+            cycle_types = [c["type"] for c in summary["cycles"]]
+            self.continuity.log(
+                P.LATENT_CYCLE,
+                f"latent cycle at step {step}: {', '.join(cycle_types) or 'none'}",
+                step=step, lifetime_step=lifetime,
+                cycles=cycle_types,
+                mysterium=summary.get("mysterium_pressure"),
+            )
+            # Wake transition: the changes are summarized into the Inner MAP.
+            if self.observer is not None:
+                self.observer.update()
+            self._save_latent_state()
+
+    def _save_latent_state(self) -> None:
+        if self.latent is None:
+            return
+        self.latent.save_report(
+            Path(self.pm.state_dir) / "latent_report.json",
+            Path(self.pm.state_dir) / "latent_report.md")
+
     def _maybe_log_reinforcement(self, step: int, lifetime: int, valence: float) -> None:
         # Throttle to one logged pair per checkpoint window to keep the log light.
         every = max(1, self.checkpoint_interval_steps)
@@ -397,6 +458,8 @@ class ContinuousRunner:
         self.pm.save_telemetry(self.telemetry.to_dict())
         if self.enable_language:
             self._save_session_report()
+        if self.latent is not None:
+            self._save_latent_state()
         self.continuity.close()
 
     # -- language layer (optional) ------------------------------------------
@@ -549,6 +612,8 @@ class ContinuousRunner:
         if self.plasticity_engine is not None:
             snap["plasticity"] = self.plasticity_engine.snapshot()
             snap["plasticity_audit_path"] = str(self.pm.plasticity_audit_path)
+        if self.latent is not None:
+            snap["latent"] = self.latent.summary()
         if self.enable_language and self.bridge.meaning_trace_builder is not None:
             ctx = self._language_context()
             engine = self.bridge.explanation_engine

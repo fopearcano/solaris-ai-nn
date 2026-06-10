@@ -71,7 +71,10 @@ def default_runner_factory(manifest: OperationalRunManifest,
         enable_language=manifest.enabled_features.get("language", False),
         enable_plasticity=manifest.enabled_features.get("plasticity", False),
         plasticity_dry_run=manifest.enabled_features.get(
-            "plasticity_dry_run", False))
+            "plasticity_dry_run", False),
+        enable_latent=manifest.enabled_features.get("latent", False),
+        allow_latent_plasticity=manifest.enabled_features.get(
+            "latent_plasticity", False))
 
 
 @dataclass
@@ -259,6 +262,39 @@ class OperationalSupervisor:
                                   "; ".join(c.detail for c in report.issues()),
                                   related_metric="health",
                                   suggested_debug_step="see health.jsonl")
+
+        # Latent monitoring: stuck cycles, dream-trace growth, Mysterium
+        # runaway (Prompt 14). Decisions only; the watchdog acts below.
+        latent = snapshot.get("latent") or {}
+        if latent:
+            stuck_after = max(60.0, m.watchdog_interval_s * 30)
+            if latent.get("mode") not in ("awake", "quiet", None) \
+                    and float(latent.get("mode_duration_s", 0.0) or 0.0) \
+                    > stuck_after:
+                self.incidents.record(
+                    I.LATENT_CYCLE_STUCK, "critical",
+                    f"latent mode {latent['mode']!r} has lasted "
+                    f"{latent['mode_duration_s']:.0f}s",
+                    related_metric="latent_mode_duration",
+                    suggested_debug_step="wake the cycle; check the latent "
+                                         "scheduler bounds")
+                self.shutdown_manager.request_shutdown(
+                    "latent cycle appears stuck")
+                self._stop_requested = True
+            if int(latent.get("dream_trace_count", 0) or 0) > 10_000:
+                self.incidents.record(
+                    I.DREAM_TRACE_OVERGROWTH, "warning",
+                    f"{latent['dream_trace_count']} dream traces recorded",
+                    related_metric="dream_trace_count",
+                    suggested_debug_step="rotate dream_traces.jsonl or "
+                                         "lower the dream cadence")
+            if float(latent.get("mysterium_pressure", 0.0) or 0.0) >= 0.95:
+                self.incidents.record(
+                    I.MYSTERIUM_RUNAWAY, "warning",
+                    "unknown pressure is pinned near maximum",
+                    related_metric="mysterium_pressure",
+                    suggested_debug_step="inspect the mysterium reasons in "
+                                         "the latent report")
 
         budget_report = self.budget.check_budget(
             {"telemetry": snapshot.get("telemetry"),
@@ -551,6 +587,9 @@ class OperationalSupervisor:
             snapshot["plasticity"] = engine.snapshot()
         if hasattr(runner, "embodiment_summary"):
             snapshot["embodiment"] = runner.embodiment_summary()
+        latent = getattr(runner, "latent", None)
+        if latent is not None:
+            snapshot["latent"] = latent.summary()
         return snapshot
 
     def _build_status(self) -> OperationalStatus:

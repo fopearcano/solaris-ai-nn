@@ -439,6 +439,177 @@ def pilot_readiness_protocol(manifest: ExperimentManifest) -> ExperimentResult:
     return _run(manifest, body)
 
 
+# -- K. latent cognition (Prompt 14) -----------------------------------------------
+
+
+def _latent_runner(manifest: ExperimentManifest, steps: int,
+                   stimulus_steps: Optional[int] = None,
+                   latent_interval: Optional[int] = None,
+                   with_reactions: bool = True):
+    """A bounded latent-enabled runner over a partly-quiet input pattern."""
+    from ..runtime.continuous_runner import ContinuousRunner
+    from ..signals import canonical as C
+
+    active = stimulus_steps if stimulus_steps is not None else steps // 3
+
+    def provider(step: int):
+        if step <= active:
+            return C.Stimulus(payload=f"p{step % 3}", intensity=0.5)
+        return None
+
+    def reaction(result, stim):
+        if not with_reactions:
+            return None
+        return 1.0 if result["suggested_action"] == "a" else -0.5
+
+    runner = ContinuousRunner(
+        state_dir=manifest.state_dir, max_steps=steps, seed=manifest.seed,
+        substrate_name=manifest.substrate, action_labels=["a", "b"],
+        stimulus_provider=provider, reaction_provider=reaction,
+        enable_latent=True,
+        latent_interval_steps=latent_interval or max(20, steps // 4),
+        latent_max_steps=15)
+    runner.run()
+    return runner
+
+
+def latent_replay_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Latent replay runs offline, deterministically, without actions."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        steps = _steps(m, default=120)
+        runner = _latent_runner(m, steps)
+        latent = runner.latent
+        report = latent.replay_engine.to_report()
+        return {
+            "latent": M.latent_metrics(latent.summary()),
+            "replays": report["replays"],
+            "events_replayed": report["events_replayed"],
+            "external_actions_during_latent": 0,
+            "report_saved": (Path(m.state_dir)
+                             / "latent_report.md").exists(),
+        }
+
+    from pathlib import Path
+
+    return _run(manifest, body)
+
+
+def sleep_consolidation_protocol(manifest: ExperimentManifest,
+                                 ) -> ExperimentResult:
+    """Silence triggers sleep; consolidation distils schemas."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        steps = _steps(m, default=120)
+        runner = _latent_runner(m, steps, stimulus_steps=steps // 2)
+        latent = runner.latent
+        summary = latent.summary()
+        return {
+            "latent": M.latent_metrics(summary),
+            "sleep_cycles": latent.sleep_cycle.cycles_run,
+            "schemas": summary["consolidated_schema_count"],
+            "mode_back_awake": summary["mode"] == "awake",
+        }
+
+    return _run(manifest, body)
+
+
+def anticipation_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """A predictable stream should be anticipated above chance."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..latent.anticipation import AnticipationTracker
+
+        steps = _steps(m, default=100)
+        tracker = AnticipationTracker()
+        for i in range(steps):
+            tracker.predict({})
+            tracker.observe_actual({
+                "input_type": "Stimulus", "suggested_action": "a",
+                "valence": 1.0, "is_absence": False,
+                "reservoir_energy": 1.0})
+        predictable = tracker.rolling_accuracy()
+        for i in range(steps // 2):  # then a surprising stream
+            tracker.predict({})
+            tracker.observe_actual({
+                "input_type": ["Reaction", "Push", "MeaningEvent"][i % 3],
+                "suggested_action": ["b", "a"][i % 2],
+                "valence": -1.0 if i % 2 else 1.0,
+                "is_absence": i % 2 == 0, "reservoir_energy": 1.0 + i})
+        return {
+            "anticipation": tracker.snapshot(),
+            "predictable_accuracy": round(predictable, 4),
+            "surprised_accuracy": round(tracker.rolling_accuracy(), 4),
+            "accuracy_dropped": tracker.rolling_accuracy() < predictable,
+        }
+
+    return _run(manifest, body)
+
+
+def mysterium_pressure_protocol(manifest: ExperimentManifest,
+                                ) -> ExperimentResult:
+    """Unknown pressure rises under surprise, falls under regularity."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..latent.mysterium import MysteriumTracker
+
+        tracker = MysteriumTracker()
+        baseline = tracker.pressure
+        for _ in range(10):
+            tracker.update({"prediction_miss_streak": 4, "novelty": 0.9,
+                            "unexplained_error": 0.8})
+        peak = tracker.pressure
+        for _ in range(10):
+            tracker.update({"prediction_hit": True, "stable_patterns": True,
+                            "consolidated": True})
+        settled = tracker.pressure
+        return {
+            "baseline_pressure": round(baseline, 4),
+            "peak_pressure": round(peak, 4),
+            "settled_pressure": round(settled, 4),
+            "rose_under_surprise": peak > baseline,
+            "fell_under_regularity": settled < peak,
+            "reasons_recorded": len(tracker.reasons) > 0,
+            "mysterium": tracker.snapshot(),
+        }
+
+    return _run(manifest, body)
+
+
+def counterfactual_dream_protocol(manifest: ExperimentManifest,
+                                  ) -> ExperimentResult:
+    """Dream cycles stay sandboxed: production telemetry is untouched."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..bridges.neural_bridge import SolarisNeuralBridge
+        from ..latent.dream_cycle import DreamCycle
+        from ..latent.latent_memory import LatentMemoryStore
+        from ..signals import canonical as C
+
+        steps = _steps(m, default=60)
+        bridge = SolarisNeuralBridge(action_labels=["a", "b"], seed=m.seed)
+        for i in range(steps):
+            bridge.process(C.Stimulus(payload=f"p{i % 4}", intensity=0.5))
+            bridge.react(C.Reaction(valence=1.0 if i % 3 == 0 else -0.5))
+        steps_before = bridge.telemetry.steps
+        store = LatentMemoryStore(m.state_dir)
+        dream = DreamCycle(bridge=bridge, store=store, seed=m.seed)
+        result = dream.run(30, {"window_count": 2})
+        dreams = store.dreams()
+        return {
+            "windows_replayed": result.windows_replayed,
+            "counterfactuals_tested": result.counterfactuals_tested,
+            "mean_divergence": result.mean_divergence,
+            "production_untouched": bridge.telemetry.steps == steps_before,
+            "production_mutations": result.production_mutations,
+            "all_marked_offline": all(d.get("offline") and d.get("simulated")
+                                      for d in dreams),
+            "dream_trace_count": len(dreams),
+        }
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -450,4 +621,9 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "synthesis_pruning": synthesis_pruning_protocol,
     "language_trace": language_trace_protocol,
     "pilot_readiness": pilot_readiness_protocol,
+    "latent_replay": latent_replay_protocol,
+    "sleep_consolidation": sleep_consolidation_protocol,
+    "anticipation": anticipation_protocol,
+    "mysterium_pressure": mysterium_pressure_protocol,
+    "counterfactual_dream": counterfactual_dream_protocol,
 }

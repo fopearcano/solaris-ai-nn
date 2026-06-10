@@ -924,3 +924,57 @@ profile-specific sections (embodiment / sidecar / stream ingestion),
 incidents, readiness, artifacts, mandatory limitations, and one
 recommendation. Saving goes through the language layer, so ClaimGuard scans
 every pilot report before it reaches disk.
+
+## 67. Latent Replay Demo ✅ (implemented)
+
+**Run:** `python examples/run_latent_replay_demo.py --steps 200`
+Input for the first third, then silence. The scheduler reacts on cue:
+quiet → sleep → consolidation → offline replay into sandboxes (dream if
+unknown pressure is elevated) → wake transition with a summary. Dry-run
+only; the output prints mode counts, replay/counterfactual counts,
+anticipation accuracy, unknown pressure, and the ClaimGuard-scanned latent
+report path. Production mutation is structurally zero.
+
+## 68. Sleep Cycle Demo ✅ (implemented)
+
+**Run:** `python examples/run_sleep_cycle_demo.py --steps 200`
+The mode ladder, printed transition by transition: awake input, a silence
+window, sleep/consolidation (habit pathways distilled into schemas), and the
+wake-transition summary that carries the latent changes back to awake (and
+the Inner MAP). The demo states explicitly that "sleep" is bounded
+maintenance, not human sleep.
+
+## 69. Counterfactual Dream Demo ✅ (implemented)
+
+**Run:** `python examples/run_counterfactual_dream_demo.py --steps 200`
+A bounded GridWorld session builds real reward/danger experience; a dream
+cycle then replays high-valence windows into sandboxes and tests the
+`swap_reward_danger` counterfactual. The output proves the invariants:
+0 actions during the dream, production telemetry untouched, 0 production
+mutations, every dream trace marked offline/simulated, ClaimGuard safe.
+
+## 70. Mysterium/Anticipation Demo ✅ (implemented)
+
+**Run:** `python examples/run_mysterium_anticipation_demo.py --steps 200`
+Phase 1 feeds a strictly repeating pattern: rolling accuracy reaches ~1.0
+and unknown pressure drains to ~0. Phase 2 scrambles kinds, actions, and
+valences: accuracy drops (~0.5) and Mysterium rises into "elevated", with
+every pressure change attributed to a named reason ("repeated prediction
+misses", "successful prediction", ...). Numeric unknown pressure, nothing
+mystical.
+
+## 71. Sleep Consolidation Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment sleep_consolidation --steps 120`
+The registered protocol: a latent-enabled bounded run over a half-quiet
+input pattern must produce at least one sleep cycle, distil schemas, and end
+back in awake mode. Latent metrics (cycle counts, anticipation accuracy,
+unknown pressure, safety rejections) land in the scorecard pipeline.
+
+## 72. Latent Safety Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment counterfactual_dream --steps 60`
+The safety-property protocol: dream cycles must leave production telemetry
+untouched, apply zero production mutations, and mark every trace offline.
+`latent_replay`, `anticipation`, and `mysterium_pressure` complete the
+latent protocol set (all five run inside `python -m pytest` too).

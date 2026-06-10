@@ -54,6 +54,7 @@ class InnerMapObserver:
     operations: Any = None  # optional dict or object with operations_summary()
     governance: Any = None  # optional dict or object with governance_summary()
     pilot: Any = None  # optional dict or object with pilot_summary()
+    latent: Any = None  # optional dict or LatentCognition (summary())
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -333,6 +334,15 @@ class InnerMapObserver:
                 model.pilot = self.pilot.pilot_summary()
             elif isinstance(self.pilot, dict):
                 model.pilot = dict(self.pilot)
+        latent = self.latent
+        if latent is None and self.runner is not None:
+            latent = getattr(self.runner, "latent", None)
+        if latent is not None:
+            # Latent cognition status (read-only; offline processing).
+            if hasattr(latent, "summary"):
+                model.latent = latent.summary()
+            elif isinstance(latent, dict):
+                model.latent = dict(latent)
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

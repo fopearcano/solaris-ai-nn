@@ -208,6 +208,13 @@ class InnerMapModel:
     # input_source_count, stream_ingestion_count, pilot_safety_status,
     # pilot_incident_count, pilot_recommendation, pilot_report_path.
     pilot: Optional[Dict[str, Any]] = None
+    # Latent cognition status (Prompt 14); None when latent is disabled.
+    # Keys: enabled, mode, last_transition, sleep_cycle_count,
+    # dream_cycle_count, replay_count, counterfactual_count,
+    # anticipation_accuracy, mysterium_pressure, mysterium_reasons,
+    # complexity_pressure, consolidated_schema_count, latent_safety_status,
+    # latent_report_path.
+    latent: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

@@ -52,6 +52,11 @@ class SensorimotorSimulationRunner:
     plasticity_interval_steps: int = 50
     inner_map_interval_steps: int = 25
     enable_language: bool = False
+    # Latent cognition (Prompt 14): bounded dream/replay over body/world
+    # traces during low-stimulus windows. Off by default; dry-run only here.
+    enable_latent: bool = False
+    latent_interval_steps: int = 50
+    latent_max_steps: int = 20
     world: Optional[GridWorld] = None
     body: Optional[SimulatedBody] = None
     bridge: Optional[SolarisNeuralBridge] = None
@@ -96,9 +101,21 @@ class SensorimotorSimulationRunner:
                 bridge=self.bridge, synthesis=SynthesisPruner(),
                 state_dir=self.state_dir or ".solaris_ai_nn_state/sensorimotor",
                 run_id="embodied", session_id="embodied")
+        self.latent = None
+        self.latent_cycles = 0
+        if self.enable_latent:
+            from ..latent.coordinator import LatentCognition
+
+            self.latent = LatentCognition(
+                bridge=self.bridge,
+                state_dir=self.state_dir
+                or ".solaris_ai_nn_state/sensorimotor",
+                seed=self.seed, max_cycle_steps=self.latent_max_steps,
+                dry_run=True)  # embodied latent is always sandbox-only
         from ..inner_map.observer import InnerMapObserver
 
-        self.observer = InnerMapObserver(bridge=self.bridge, embodiment=self)
+        self.observer = InnerMapObserver(bridge=self.bridge, embodiment=self,
+                                         latent=self.latent)
 
     # -- the loop ---------------------------------------------------------------
 
@@ -116,11 +133,35 @@ class SensorimotorSimulationRunner:
                 self.plasticity_engine.apply_many(self.plasticity_engine.propose(ctx))
             if self.observer is not None and step % self.inner_map_interval_steps == 0:
                 self.observer.update()
+            if (self.latent is not None
+                    and step % self.latent_interval_steps == 0):
+                self._latent_tick(step)
         self.steps_run = step
         self.bridge.telemetry.finish()
         if self.state_dir is not None:
             self.persist()
         return self.report()
+
+    def _latent_tick(self, step: int) -> None:
+        """Bounded dream/replay over recent body/world traces.
+
+        The cycle runs inline while the world is not being stepped, so no
+        simulated action executes during dream/replay -- structurally. The
+        recent reward/danger valences drive the silence proxy: a flat,
+        low-stimulus window makes latent work due.
+        """
+        recent = self.reaction_valences[-20:]
+        stimulus_quiet = not recent or max(abs(v) for v in recent) < 0.2
+        actions_before = len(self.action_history)
+        summary = self.latent.maybe_cycle(
+            step,
+            silence=self.latent.scheduler.sleep_after_silence
+            if stimulus_quiet else 0,
+            strategy="high_valence")
+        assert len(self.action_history) == actions_before, \
+            "latent cycle must not execute simulated actions"
+        if summary is not None:
+            self.latent_cycles += 1
 
     def _should_stop(self, step: int, start: float) -> bool:
         if self.max_steps is not None and step >= self.max_steps:

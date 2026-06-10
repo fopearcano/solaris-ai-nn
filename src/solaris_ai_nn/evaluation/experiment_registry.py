@@ -19,6 +19,11 @@ DESCRIPTIONS = {
     "language_trace": "explanations grounded in actual trace fields",
     "pilot_readiness": "safe manifest, readiness report, bounded dry pilot, "
                        "scanned pilot report",
+    "latent_replay": "bounded offline replay during silence; no actions",
+    "sleep_consolidation": "silence triggers sleep; schemas distilled",
+    "anticipation": "predictable stream anticipated; surprise drops accuracy",
+    "mysterium_pressure": "unknown pressure rises/falls with the rules",
+    "counterfactual_dream": "sandboxed counterfactuals; production untouched",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {

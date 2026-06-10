@@ -373,3 +373,49 @@ evidence. Building the pilot harness first inverts the usual failure mode:
 instead of an autonomous system retrofitted with brakes, this is a braking
 system into which capability is gradually admitted. The harness — not the
 substrate — owns the run modes, and that ownership is structural.
+
+**Memory replay.** Replaying remembered windows through the substrate is the
+cheapest way to squeeze more signal out of bounded experience: the same
+events, revisited under different selection pressure (recent, high-valence,
+high-error, silence), exercise pathways that a single pass touched once.
+Here replay runs in deterministic sandboxes — same seed, copied state — so
+the question "what would the substrate do with this again?" is answerable
+without contaminating what the substrate actually is.
+
+**Sleep-inspired consolidation.** Biological sleep consolidates; our
+engineering analogue distils the trace into explicit schemas (repeated
+pattern→action pathways with support counts and average valence) during
+windows when nothing external is happening anyway. The inspiration is the
+scheduling idea — use quiet time for maintenance — not the biology, and the
+docs say so at every opportunity.
+
+**Predictive processing.** A one-step frequency/recency predictor is almost
+embarrassingly simple, and that is the point: if rolling accuracy is high,
+the input has exploitable regularity; if it collapses, the world changed.
+Anticipation accuracy is therefore less a capability metric than a
+*world-regularity* metric — and its complement feeds directly into unknown
+pressure.
+
+**Counterfactual simulation.** "What if the valence had been inverted?" is a
+question a trace can answer offline: transform the window, replay both
+versions into twin sandboxes, measure divergence. High divergence means the
+behaviour hinges on that variable; low divergence means it is robust to it.
+The discipline is in the labels — every counterfactual is marked simulated
+and validated against leaking into real memory or outbound channels.
+
+**Uncertainty / unknown pressure.** Solaris_Ai's Mysterium names the pull of
+the unknown; the implementable core is a number with receipts: pressure
+rises for listed reasons (misses, novelty, unexplained error, divergence)
+and falls for listed reasons (hits, stability, consolidation). The receipts
+matter more than the number — "unknown pressure is 0.62" is only useful if
+the next line says why.
+
+**Why this is not a claim of subjective dreaming.** The dream cycle replays
+recorded data through a copy of a small recurrent network and measures
+numeric divergence. Nothing in that sentence involves experience, and the
+system never says otherwise: ClaimGuard scans every latent report, the
+mandatory limitations spell out the framing, and the language layer is
+hard-coded to say "during offline replay, the system simulated…" rather
+than "the system dreamed…". The sleep/dream vocabulary is an engineering
+mnemonic for *when* and *how* the processing runs — not a description of
+what it is like, because it is not like anything.

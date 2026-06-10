@@ -861,3 +861,67 @@ status, incident count, recommendation, report path) lands in
 (PilotProfile, PilotManifest, PilotSafetyValidator, PilotDeploymentRunner,
 PilotReadinessReport, PilotReport, ReadOnlyStreamIngestor, StreamSensor)
 with their gating and feeding edges.
+
+## Latent cognition: sleep, replay, anticipation, and Mysterium
+
+**Latent mode is bounded offline processing.** When external input goes
+quiet, the runner does not idle: the `latent/` package lets it enter
+quiet/sleep/consolidation/replay/dream modes for strictly bounded cycles
+(every cycle carries an explicit step bound, hard-capped at 500; there is no
+unbounded latent loop). The `SleepWakeController` is the state machine —
+every transition is validated, logged with its reason, and recorded; the
+`LatentScheduler` decides when (silence thresholds, trace size, unknown
+pressure) and refuses outright when health is critical, when governance
+disallows latent work, or when a sidecar is actively publishing.
+
+**Sleep means maintenance/consolidation, not human sleep.** A `SleepCycle`
+pauses external action (structurally — the loop processes nothing external
+during a cycle), keeps the heartbeat ticking, consolidates the trace into
+`ConsolidatedSchema` records (the strongest repeated pattern→action
+pathways), and lets runaway substrate activity settle. **Dream means
+sandboxed replay/counterfactual simulation, not subjective experience.** A
+`DreamCycle` replays remembered windows into deterministic sandbox copies of
+the bridge (`make_sandbox_bridge`: same seed and config, copied state —
+nothing flows back), generates labelled counterfactual variants
+(invert valence, remove a stimulus, lengthen silence, change fracture, swap
+reward/danger, suppress absence, amplify novelty), and measures how
+behaviour diverges. Every dream output is marked `offline=True,
+simulated=True`, and the language layer phrases it accordingly: "During
+offline replay, the system simulated…" — never "the system dreamed that…".
+
+**Anticipation tracks simple predictions.** The `AnticipationTracker`
+predicts the next signal kind, action tendency, valence bucket, absence
+probability, and activity trend from frequency/recency statistics (no deep
+learning), scores every prediction against what actually happened, and keeps
+hits, misses, streaks, rolling accuracy, and a surprise estimate.
+**Mysterium is numeric unknown pressure.** The `MysteriumTracker` holds one
+number in [0,1] that rises with novelty, miss streaks, unexplained error,
+Logos fracture, blocked actions, counterfactual divergence, and replay
+mismatches, and falls with successful prediction, stable patterns,
+consolidation, and reproduced replays — every change attributed to a named
+reason. Nothing mystical is measured. The `ComplexityPressureMonitor` rounds
+this out: inertia/chaos/deadlock scores and one bounded suggestion
+(exploration, rest, consolidation, replay, or a flag) — suggestions only.
+
+**Latent cycles cannot execute external actions, and latent plasticity
+requires governance approval.** The `LatentSafetyValidator` enforces the
+hard rules: no external action or sidecar publishing in latent modes, no
+unbounded cycles, counterfactual data never treated as real memory, and
+production mutation denied unless governance granted
+`enable_latent_plasticity` (a new approval-required scope; dry-run scopes
+are granted by default). The dream cycle's default is sandbox-only; even
+asking for production application is refused without the double gate
+(flag + governance). The supervisor watches for stuck latent cycles,
+dream-trace overgrowth, and pinned Mysterium (new incident types), and the
+five latent benchmark protocols (`latent_replay`, `sleep_consolidation`,
+`anticipation`, `mysterium_pressure`, `counterfactual_dream`) verify the
+behaviour objectively.
+
+**Latent state feeds Inner MAP.** The coordinator's `summary()` (mode, last
+transition, cycle/replay/counterfactual counts, anticipation accuracy,
+Mysterium pressure and reasons, complexity reading, schema count, safety
+status, report path) lands in `InnerMapModel.latent`; the state graph gains
+the ten latent nodes; durable evidence lives under the state dir
+(`latent_memory.jsonl`, `dream_traces.jsonl`, `replay_traces.jsonl`,
+`consolidated_schemas.json`, `latent_report.{json,md}` — the report is
+ClaimGuard-scanned with mandatory limitations).

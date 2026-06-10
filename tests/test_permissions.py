@@ -60,10 +60,20 @@ def test_grant_and_revoke():
     assert not ps.allows("run_continuous_explicit")
 
 
-def test_all_13_scopes_in_default_set():
+def test_all_scopes_in_default_set():
     ps = PermissionSet.default()
     assert set(ps.known_scopes()) == set(PermissionScope.ALL)
-    assert len(PermissionScope.ALL) == 13
+    # 13 governance scopes (Prompt 12) + 5 latent scopes (Prompt 14).
+    assert len(PermissionScope.ALL) == 18
+
+
+def test_latent_scope_defaults():
+    ps = PermissionSet.default()
+    assert ps.allows(PermissionScope.ENABLE_LATENT)
+    assert ps.allows(PermissionScope.ENABLE_LATENT_DRY_RUN)
+    assert ps.allows(PermissionScope.RUN_DREAM_CYCLE)
+    assert ps.allows(PermissionScope.RUN_COUNTERFACTUAL_REPLAY)
+    assert ps.requires_approval(PermissionScope.ENABLE_LATENT_PLASTICITY)
 
 
 def test_round_trip():

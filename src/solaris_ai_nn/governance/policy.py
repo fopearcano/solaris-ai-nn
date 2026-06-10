@@ -155,6 +155,21 @@ DEFAULT_RULES: List[PolicyRule] = [
     PolicyRule("no_unsupported_consciousness_claims", "language",
                "unsupported consciousness claims are flagged/blocked",
                forbidden=True),
+    # G. Latent cognition (Prompt 14)
+    PolicyRule("latent_dry_run_allowed", "latent",
+               "bounded latent dry-run cycles are allowed in bounded runs"),
+    PolicyRule("latent_mutation_requires_approval", "latent",
+               "latent production mutation requires explicit approval",
+               requires_approval_scope=
+               PermissionScope.ENABLE_LATENT_PLASTICITY),
+    PolicyRule("latent_forbidden_while_publishing", "latent",
+               "latent cycles are forbidden in sidecar publishing mode "
+               "(observe-only sidecars are fine)", forbidden=True),
+    PolicyRule("counterfactuals_are_not_observations", "latent",
+               "dream/counterfactual outputs are simulations, never real "
+               "observations", forbidden=True),
+    PolicyRule("latent_loops_bounded", "latent",
+               "every latent cycle carries an explicit step bound"),
 ]
 
 
@@ -278,6 +293,23 @@ class GovernancePolicy:
             if ctx.get("sidecar_publish"):
                 need_approval(PermissionScope.ENABLE_SIDECAR_SUGGESTIONS,
                               "publishing suggestions requires approval")
+
+        # G. Latent cognition: dry-run is fine; production mutation is not.
+        if features.get("latent"):
+            if not self._approved(PermissionScope.ENABLE_LATENT, ctx):
+                need_approval(PermissionScope.ENABLE_LATENT,
+                              "latent cycles are not permitted")
+            if features.get("latent_plasticity") \
+                    or ctx.get("latent_plasticity"):
+                need_approval(PermissionScope.ENABLE_LATENT_PLASTICITY,
+                              "latent production mutation requires explicit "
+                              "approval")
+            if ctx.get("sidecar_publish"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "latent_forbidden_while_publishing", "latent",
+                    "latent cycles are forbidden while sidecar publishing "
+                    "is active"))
 
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):

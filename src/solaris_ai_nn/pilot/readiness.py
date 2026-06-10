@@ -223,6 +223,22 @@ class PilotReadinessCheck:
         check("safety", "stream_ingestion_read_only", True)  # structural
         check("safety", "action_authority_false", True)      # structural
         check("safety", "claim_guard_enabled", True)          # always scans
+        # Latent cognition (Prompt 14): only if explicitly enabled.
+        if m.enabled_features.get("latent"):
+            check("safety", "latent_mode_safety_checked", True,
+                  severity=WARNING)  # latent modes block actions structurally
+            check("safety", "latent_traces_marked_offline", True)  # structural
+            check("documentation", "latent_report_expected", True,
+                  severity=WARNING)
+            if m.enabled_features.get("latent_plasticity"):
+                latent_approved = bool(m.governance_approval_ids) or (
+                    self.approvals is not None
+                    and self.approvals.is_approved(
+                        "enable_latent_plasticity", {"run_id": m.run_id}))
+                check("governance", "latent_plasticity_approved",
+                      latent_approved,
+                      "latent production mutation needs an approval record",
+                      next_step="request enable_latent_plasticity approval")
 
         # E. Recovery.
         tri_state("recovery", "restart_demo_passed",
