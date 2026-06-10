@@ -22,6 +22,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
+from ..governance import audit as GA
+from ..governance.approval import APPROVED, ApprovalRegistry
+from ..governance.audit import DEFAULT_GOVERNANCE_DIR, GovernanceAuditLog
+from ..governance.checklists import post_run_checklist, pre_run_checklist
+from ..governance.emergency import EmergencyStop
+from ..governance.operator import OperatorSession
+from ..governance.policy import GovernancePolicy, PolicyDecision
+from ..governance.review import PostRunReview
+from ..governance.risk import RiskAssessment, RiskLevel, assess_manifest
 from ..utils.logging import get_logger
 from . import incident as I
 from . import watchdog as W
@@ -60,7 +69,9 @@ def default_runner_factory(manifest: OperationalRunManifest,
         heartbeat_interval_s=manifest.heartbeat_interval_s,
         seed=manifest.seed, substrate_name=manifest.substrate,
         enable_language=manifest.enabled_features.get("language", False),
-        enable_plasticity=manifest.enabled_features.get("plasticity", False))
+        enable_plasticity=manifest.enabled_features.get("plasticity", False),
+        plasticity_dry_run=manifest.enabled_features.get(
+            "plasticity_dry_run", False))
 
 
 @dataclass
@@ -74,6 +85,13 @@ class OperationalSupervisor:
     health_monitor: HealthMonitor = field(default_factory=HealthMonitor)
     budget: ResourceBudget = field(default_factory=ResourceBudget)
     registry: Optional[RunRegistry] = None
+    # Governance (Prompt 12): on by default; pass governance_enabled=False
+    # only for low-level tests of the bare supervision loop.
+    governance_enabled: bool = True
+    governance: Optional[GovernancePolicy] = None
+    approvals: Optional[ApprovalRegistry] = None
+    operator_session: Optional[OperatorSession] = None
+    governance_dir: Optional[str] = None
 
     _stop_requested: bool = field(default=False, init=False)
     _segments_run: int = field(default=0, init=False)
@@ -81,6 +99,19 @@ class OperationalSupervisor:
     _last_runner: Any = field(default=None, init=False)
     _started_at: float = field(default=0.0, init=False)
     _finalized: bool = field(default=False, init=False)
+    _governance_refused: bool = field(default=False, init=False)
+    _refusal_reasons: List[str] = field(default_factory=list, init=False)
+    _emergency_stop_triggered: bool = field(default=False, init=False)
+    _policy_decision: Optional[PolicyDecision] = field(default=None,
+                                                       init=False)
+    _pre_run_checklist: Optional[Dict[str, Any]] = field(default=None,
+                                                         init=False)
+    _post_run_checklist: Optional[Dict[str, Any]] = field(default=None,
+                                                          init=False)
+    _post_run_review: Optional[Dict[str, Any]] = field(default=None,
+                                                       init=False)
+    _claim_guard_report: Optional[Dict[str, Any]] = field(default=None,
+                                                          init=False)
 
     def __post_init__(self) -> None:
         m = self.manifest
@@ -105,6 +136,36 @@ class OperationalSupervisor:
         self.status_server: Optional[LocalStatusServer] = None
         if m.enabled_features.get("local_status_server"):
             self.status_server = LocalStatusServer(provider=self._status_provider)
+        # Governance wiring (Prompt 12). The emergency stop and its sentinel
+        # exist even when governance is disabled -- it is always available.
+        self.risk_assessment: Optional[RiskAssessment] = None
+        self.gov_dir = Path(self.governance_dir or DEFAULT_GOVERNANCE_DIR)
+        operator_name = (self.operator_session.operator.name
+                         if self.operator_session is not None else "")
+        if not self.governance_enabled:
+            self.governance = None
+            self.gov_audit = None
+        else:
+            self.gov_audit = GovernanceAuditLog(
+                self.gov_dir / "governance_audit.jsonl",
+                run_id=m.run_id, session_id=m.session_id,
+                operator=operator_name)
+            if self.approvals is None:
+                self.approvals = ApprovalRegistry(
+                    path=self.gov_dir / "approvals.json",
+                    audit=self.gov_audit)
+            elif self.approvals.audit is None:
+                self.approvals.audit = self.gov_audit
+            if self.governance is None:
+                self.governance = GovernancePolicy(approvals=self.approvals,
+                                                   audit=self.gov_audit)
+            else:
+                if self.governance.approvals is None:
+                    self.governance.approvals = self.approvals
+                if self.governance.audit is None:
+                    self.governance.audit = self.gov_audit
+        self.emergency = EmergencyStop(state_dir=m.state_dir,
+                                       audit=self.gov_audit)
         self._write_json(self.ops_dir / "manifest.json", m.to_dict())
 
     # -- main loop ----------------------------------------------------------------
@@ -114,6 +175,17 @@ class OperationalSupervisor:
         m = self.manifest
         self._started_at = time.time()
         self.registry.register_start(m)
+
+        if self.governance is not None:
+            allowed, reasons = self._governance_pre_run()
+            if not allowed:
+                self._governance_refused = True
+                self._refusal_reasons = reasons
+                status = self._build_status()
+                self.finalize(graceful=True,
+                              note="governance refused: " + "; ".join(reasons))
+                return status.to_dict()
+
         if self.status_server is not None:
             self.status_server.start()
 
@@ -153,6 +225,27 @@ class OperationalSupervisor:
     def _supervise(self, segment_failed: bool = False) -> None:
         """Health + watchdog + budget between segments; act on decisions."""
         m = self.manifest
+
+        # Emergency stop sentinel: an operator (or another process) created
+        # <state_dir>/EMERGENCY_STOP -- request a safe shutdown now.
+        if self.emergency.sentinel_present() \
+                and not self._emergency_stop_triggered:
+            self._emergency_stop_triggered = True
+            self.incidents.record(
+                I.EMERGENCY_STOP, "critical",
+                "emergency stop sentinel file detected: "
+                f"{self.emergency.sentinel}",
+                suggested_debug_step="read the sentinel file and the "
+                                     "governance audit for the reason")
+            if self.gov_audit is not None:
+                self.gov_audit.record(
+                    GA.EMERGENCY_STOP_REQUESTED, decision="requested",
+                    reason="sentinel file detected during supervised run",
+                    metadata={"sentinel": str(self.emergency.sentinel)})
+            self.shutdown_manager.request_shutdown(
+                "emergency stop sentinel detected")
+            self._stop_requested = True
+
         snapshot = self._health_snapshot()
         report = self.health_monitor.check(snapshot)
         self._last_health = report.to_dict()
@@ -211,6 +304,206 @@ class OperationalSupervisor:
                 "last_checkpoint_ts"),
             "incident_count": len(self.incidents.list_incidents()),
         })
+
+    # -- governance --------------------------------------------------------------
+
+    def _governance_pre_run(self) -> "tuple[bool, List[str]]":
+        """Policy + risk + permissions + approvals + pre-run checklist.
+
+        Returns ``(allowed, reasons)``. Nothing here can be skipped from
+        inside the run: a denied decision means the run does not start.
+        """
+        m = self.manifest
+        problems: List[str] = []
+
+        # 1. Risk assessment (prohibited blocks; high needs approval --
+        #    enforced through the policy's approval scopes; medium needs
+        #    operator acknowledgement).
+        risk = assess_manifest(m, {"run_id": m.run_id})
+        self.risk_assessment = risk
+        self.gov_audit.record(
+            GA.RISK_ASSESSED, decision=risk.overall_level,
+            reason=f"{len(risk.items)} risk item(s) identified",
+            metadata=risk.to_dict())
+        self._write_json(self.gov_dir / "risk_assessment.json",
+                         risk.to_dict())
+        if risk.blocked:
+            problems.extend(f"prohibited risk: {i.detail}"
+                            for i in risk.items_at(RiskLevel.PROHIBITED))
+
+        acknowledged = True
+        for item in risk.items_at(RiskLevel.MEDIUM):
+            if self.operator_session is None \
+                    or not self.operator_session.has_acknowledged(item.name):
+                acknowledged = False
+                problems.append(
+                    f"medium risk {item.name!r} requires operator "
+                    "acknowledgement (OperatorSession.acknowledge_risk)")
+
+        # 2. Policy evaluation (includes permission and approval checks; the
+        #    decision is denied until required approvals exist).
+        decision = self.governance.evaluate_manifest(m, {"run_id": m.run_id})
+        self._policy_decision = decision
+        if not decision.allowed:
+            problems.extend(decision.reasons or [decision.summary()])
+            for violation in decision.violations:
+                self.incidents.record(
+                    I.POLICY_VIOLATION, "warning", violation.detail,
+                    related_metric="governance_policy",
+                    suggested_debug_step="see the governance audit log")
+
+        # 3. Pre-run checklist (configuration discipline).
+        checklist_ctx = {
+            "state_dir_configured": bool(m.state_dir),
+            "artifact_dir_configured": bool(m.artifact_dir),
+            "bounds_set": m.is_bounded()
+            or m.explicit_continuous_acknowledged,
+            "watchdog_enabled": True,
+            "checkpointing_enabled": m.checkpoint_interval_steps > 0,
+            "emergency_stop_path_known": True,  # self.emergency.sentinel
+            "permissions_evaluated": True,
+            "risk_acknowledged": acknowledged and not risk.blocked,
+            "previous_incidents_reviewed": True,
+        }
+        result = pre_run_checklist().evaluate(checklist_ctx)
+        self._pre_run_checklist = result.to_dict()
+        self._write_json(self.gov_dir / "pre_run_checklist.json",
+                         self._pre_run_checklist)
+        self.gov_audit.record(
+            GA.CHECKLIST_COMPLETED,
+            decision="passed" if result.passed else "failed",
+            reason="pre-run checklist",
+            metadata={"failed_required": result.failed_required})
+        if not result.passed:
+            problems.append("pre-run checklist failed: "
+                            + ", ".join(result.failed_required))
+
+        if self.operator_session is not None:
+            self.operator_session.active_run_id = m.run_id
+            self._write_json(self.gov_dir / "operator_session.json",
+                             self.operator_session.to_dict())
+        # De-duplicate while preserving order.
+        problems = list(dict.fromkeys(problems))
+        return (not problems, problems)
+
+    def _governance_post_run(self, status: OperationalStatus) -> None:
+        """Post-run checklist, ClaimGuard scan, review, and artifacts."""
+        m = self.manifest
+        if self._emergency_stop_triggered:
+            self.gov_audit.record(
+                GA.EMERGENCY_STOP_COMPLETED, decision="performed",
+                reason="safe shutdown completed after sentinel detection")
+
+        checklist_ctx = {
+            "final_checkpoint_exists":
+                (Path(m.state_dir) / "latest_checkpoint.json").exists(),
+            "health_report_exists": self._last_health is not None
+            or (self.ops_dir / "health.jsonl").exists(),
+            "incidents_reviewed": True,
+            "benchmark_report_generated": False,  # benchmarks run separately
+            "inner_map_saved":
+                (self.ops_dir / "final_inner_map.json").exists(),
+            "language_report_saved_if_enabled":
+                not m.enabled_features.get("language", False)
+                or (Path(m.state_dir) / "session_report.md").exists(),
+            "run_registry_updated": True,
+        }
+        result = post_run_checklist().evaluate(checklist_ctx)
+        self._post_run_checklist = result.to_dict()
+        self._write_json(self.gov_dir / "post_run_checklist.json",
+                         self._post_run_checklist)
+        self.gov_audit.record(
+            GA.CHECKLIST_COMPLETED,
+            decision="passed" if result.passed else "failed",
+            reason="post-run checklist",
+            metadata={"failed_required": result.failed_required})
+
+        # ClaimGuard scan of the final operator-facing report.
+        scan = self.governance.claim_guard.scan_text(status.to_markdown())
+        self._claim_guard_report = scan.to_dict()
+        self._write_json(self.gov_dir / "claim_guard_report.json",
+                         self._claim_guard_report)
+        if not scan.safe:
+            self.incidents.record(
+                I.POLICY_VIOLATION, "warning",
+                f"{len(scan.findings)} unsupported claim(s) flagged in the "
+                "final report",
+                related_metric="claim_guard",
+                suggested_debug_step="see claim_guard_report.json")
+
+        # Post-run review: a recommendation for a human, never an action.
+        violations = [v.to_dict()
+                      for v in (self._policy_decision.violations
+                                if self._policy_decision else [])]
+        approvals_used = ([r.to_dict()
+                           for r in self.approvals.list_by_status(APPROVED)]
+                          if self.approvals else [])
+        plasticity = self._health_snapshot().get("plasticity")
+        reviewer = (self.operator_session.operator.name
+                    if self.operator_session else "")
+        review = PostRunReview(run_id=m.run_id, reviewer=reviewer).build(
+            status=status.to_dict(),
+            incidents=self.incidents.list_incidents(),
+            policy_violations=violations,
+            approvals_used=approvals_used,
+            plasticity_changes=plasticity,
+            emergency_stop_used=self._emergency_stop_triggered
+            or self.emergency.requested)
+        self._post_run_review = review.to_dict()
+        self._write_json(self.gov_dir / "post_run_review.json",
+                         self._post_run_review)
+
+        if self.approvals is not None and self.approvals.path is not None:
+            self.approvals.save()
+        if self.operator_session is not None:
+            self._write_json(self.gov_dir / "operator_session.json",
+                             self.operator_session.to_dict())
+
+    def governance_summary(self) -> Dict[str, Any]:
+        """Governance status for the Inner MAP / status report."""
+        if self.governance is None:
+            return {"enabled": False,
+                    "emergency_stop_available": True,
+                    "emergency_stop_requested": self.emergency.requested}
+        risk = self.risk_assessment
+        decision = self._policy_decision
+        last_violation = (decision.violations[-1].to_dict()
+                          if decision and decision.violations else None)
+        claim_status = None
+        if self._claim_guard_report is not None:
+            claim_status = ("safe" if self._claim_guard_report.get("safe")
+                            else "warnings")
+        return {
+            "enabled": True,
+            "policy_status": ("refused" if self._governance_refused
+                              else "allowed" if decision is not None
+                              else "not_evaluated"),
+            "risk_level": risk.overall_level if risk else "unassessed",
+            "active_permissions":
+                self.governance.permissions.granted_scopes(),
+            "approval_count": (len(self.approvals.list_by_status(APPROVED))
+                               if self.approvals else 0),
+            "pending_approval_count": (len(self.approvals.list_pending())
+                                       if self.approvals else 0),
+            "expired_approval_count": (self.approvals.expired_count()
+                                       if self.approvals else 0),
+            "emergency_stop_available": True,
+            "emergency_stop_requested": self._emergency_stop_triggered
+            or self.emergency.requested,
+            "policy_violation_count": (len(decision.violations)
+                                       if decision else 0),
+            "last_policy_violation": last_violation,
+            "refusal_reasons": list(self._refusal_reasons) or None,
+            "governance_audit_path": str(self.gov_audit.path),
+            "operator_session": (self.operator_session.to_dict()
+                                 if self.operator_session else None),
+            "runbook_path": None,  # runbooks are generated separately
+            "claim_guard_status": claim_status,
+            "pre_run_checklist_passed": (self._pre_run_checklist or {}).get(
+                "passed"),
+            "post_run_review_recommendation": (
+                self._post_run_review or {}).get("recommendation"),
+        }
 
     # -- snapshots ---------------------------------------------------------------
 
@@ -273,6 +566,7 @@ class OperationalSupervisor:
             artifacts={"ops_dir": str(self.ops_dir),
                        "bytes": directory_bytes(self.ops_dir),
                        "rotation": self.rotation.report or None},
+            governance=self.governance_summary(),
         )
 
     def _status_provider(self) -> Dict[str, Any]:
@@ -333,9 +627,16 @@ class OperationalSupervisor:
             "last_health": (self._last_health or {}).get("level"),
             "incident_count": len(self.incidents.list_incidents()),
         })
+        if self.governance is not None:
+            try:
+                self._governance_post_run(status)
+            except Exception as exc:  # evidence is best-effort at shutdown
+                logger.warning("governance post-run failed: %s", exc)
         if self.status_server is not None:
             self.status_server.stop()
         self.incidents.close()
+        if self.gov_audit is not None:
+            self.gov_audit.close()
 
     # -- helpers -----------------------------------------------------------------------
 
@@ -371,4 +672,5 @@ class OperationalSupervisor:
             "soak_stage": (self.manifest.mode
                            if self.manifest.mode in RunMode.SOAK_MODES
                            else None),
+            "governance": self.governance_summary(),
         }

@@ -45,12 +45,36 @@ def save_explanations(explanations: Dict[str, Explanation],
 
 
 def save_report(report, json_path: Union[str, Path],
-                md_path: Union[str, Path]) -> None:
-    """Persist a SessionReport as JSON + Markdown."""
-    _write_json(json_path, report.to_dict())
+                md_path: Union[str, Path],
+                claim_guard=None, on_unsafe: str = "annotate"):
+    """Persist a SessionReport as JSON + Markdown, ClaimGuard-scanned.
+
+    Every report is scanned before save. If unsupported claims are found:
+
+    * ``on_unsafe="annotate"`` (default): the Markdown gains a
+      "Claim Guard Warnings" section and the JSON a ``claim_guard`` entry;
+    * ``on_unsafe="block"``: nothing is written and ``ValueError`` is raised.
+
+    Returns the :class:`ClaimGuardReport` of the scan.
+    """
+    from ..governance.compliance import ClaimGuard  # local: avoid cycles
+
+    guard = claim_guard or ClaimGuard()
+    markdown = report.to_markdown()
+    scan = guard.scan_text(markdown)
+    if not scan.safe:
+        if on_unsafe == "block":
+            raise ValueError(
+                f"report blocked: {len(scan.findings)} unsupported claim(s); "
+                + "; ".join(guard.suggest_replacements(markdown)))
+        markdown = markdown + "\n" + guard.warning_section(scan)
+    data = report.to_dict()
+    data["claim_guard"] = scan.to_dict()
+    _write_json(json_path, data)
     md_path = Path(md_path)
     md_path.parent.mkdir(parents=True, exist_ok=True)
-    md_path.write_text(report.to_markdown(), encoding="utf-8")
+    md_path.write_text(markdown, encoding="utf-8")
+    return scan
 
 
 def _write_json(path: Union[str, Path], data: Dict[str, Any]) -> None:

@@ -721,3 +721,78 @@ and the failure analyzer consumes ops incidents to produce next-debug-step
 findings. Staged soak plans (`SoakPlanBuilder`) document the escalation ladder
 from a 5-minute simulated soak to a 30-day soak; plans are documentation and
 never auto-launch.
+
+## Governance, operator control, and emergency stop
+
+**Governance is separate from cognition.** Everything in the
+`solaris_ai_nn.governance` package is control, not intelligence: it decides
+what a run is *allowed* to do, records who approved the risky parts, and
+provides the always-available stop — without touching how the substrate
+learns. The cognitive layers (bridge, plasticity, language) call into
+governance; governance never reaches back into them to make them smarter.
+
+**Policy controls run modes, plasticity, embodiment, sidecar, and reports.**
+`GovernancePolicy` evaluates manifests, simulated actions, plasticity steps,
+sidecar operations, and generated text against fixed rule categories: bounded
+runs are allowed by default while soaks and continuous mode require approval
+(and continuous mode also a configured emergency stop); plasticity is off
+unless enabled, dry-run is cheap, active mutation needs audit + rollback +
+approval, and source rewriting is forbidden absolutely; embodiment is
+simulation-only (real-world / network / filesystem effectors are forbidden);
+the sidecar may observe freely but publishing needs approval, and committing
+Actions or calling lifecycle death is forbidden; long runs need
+watchdog/checkpointing/incident logs and the status server stays
+localhost-only and read-only. A `PolicyDecision` that "requires approval" is
+*denied* until a matching record exists — there is no path that silently
+bypasses a human.
+
+**Permissions are deny-by-default; approvals are local research records, not
+security.** A `PermissionSet` grants explicit scopes (unknown scopes are
+denied); the default set allows bounded/simulation/observe-only/dry-run and
+marks active plasticity, long soaks, and outward suggestions as
+approval-required. The `ApprovalRegistry` is a plain JSON ledger: a named
+human deliberately approves a scope for a reason, optionally time-limited
+(approvals expire). There is no authentication and no secrets — it answers
+"who allowed what, and why?", not "are you authorized?".
+
+**Risk is named before the run.** `assess_manifest` / `assess_current_state`
+produce a `RiskAssessment` whose rules are fixed: prohibited blocks the run,
+high requires an approval record, medium requires operator acknowledgement
+(`OperatorSession.acknowledge_risk`), low is logged only. The supervisor runs
+this gate *before* the first segment; a blocked or unapproved/unacknowledged
+configuration never starts.
+
+**Emergency stop is always available.** `EmergencyStop` is invokable
+regardless of any permission. It works only through graceful interfaces
+(`SafeShutdownManager` / `stop()`), records an incident and governance audit
+events, writes a final health snapshot, and never deletes data — and never
+touches the process. A sentinel file (`<state_dir>/EMERGENCY_STOP`) gives an
+out-of-band path: an operator (or another process) creates it, and the
+supervised run requests safe shutdown at the next segment boundary. The
+sentinel is cleared only by a deliberate operator action; the evidence stays
+in incidents and the audit.
+
+**Unsupported claims are blocked or flagged.** `ClaimGuard` scans every
+generated report before save: "the system is conscious / understands / wants /
+is alive" is flagged with a grounded replacement ("consciousness-inspired",
+"produced a Desire signal", "maintained continuity metrics"). By default the
+warning is appended to the report; `on_unsafe="block"` refuses the save
+entirely. The project's own reports are written to pass this scan.
+
+**Governance feeds Inner MAP and evaluation.** The supervisor's
+`governance_summary()` (policy status, risk level, active permissions,
+approval counts, emergency-stop availability/request, last policy violation,
+audit path, operator session, claim-guard status, post-run recommendation)
+lands in `InnerMapModel.governance` and the state graph (GovernancePolicy,
+PermissionSet, ApprovalRegistry, RiskAssessment, EmergencyStop, ClaimGuard,
+Runbook, PostRunReview nodes). Evaluation reports carry the governance block,
+and the failure analyzer gained detectors for high-risk-without-approval,
+emergency-stop-used, unsafe-claim-generated, policy-violation, and
+approval-expired. Every supervised run leaves a governance trail under
+`.solaris_ai_nn_governance/`: `governance_audit.jsonl`, `approvals.json`,
+`operator_session.json`, `risk_assessment.json`, the pre/post-run checklists,
+`post_run_review.json`, and `claim_guard_report.json`. `RunbookBuilder`
+generates the written operator procedure for each experiment type
+(bounded / plasticity / sidecar / sensorimotor / 24h / 30d soak), and
+`PostRunReview` recommends what to do next (repeat / extend / reduce scope /
+investigate / stop) — a recommendation for a human, never an automatic action.

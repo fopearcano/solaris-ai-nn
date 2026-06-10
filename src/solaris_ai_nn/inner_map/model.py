@@ -196,6 +196,13 @@ class InnerMapModel:
     # incident_count, last_incident, graceful_shutdown_requested,
     # artifact_rotation, local_status_server, soak_stage.
     operations: Optional[Dict[str, Any]] = None
+    # Governance status (Prompt 12); None when ungoverned.
+    # Keys: enabled, policy_status, risk_level, active_permissions,
+    # approval_count, pending_approval_count, expired_approval_count,
+    # emergency_stop_available, emergency_stop_requested,
+    # policy_violation_count, last_policy_violation, governance_audit_path,
+    # operator_session, runbook_path, claim_guard_status.
+    governance: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

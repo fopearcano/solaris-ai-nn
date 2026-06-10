@@ -18,7 +18,7 @@ from .summarizer import STANDARD_LIMITATIONS
 SECTION_ORDER = [
     "metadata", "runtime", "signals", "substrate", "actions", "reactions",
     "habits", "synthesis", "plasticity", "memory", "inner_map", "embodiment",
-    "integration", "safety", "explanations",
+    "integration", "safety", "governance", "explanations",
 ]
 
 

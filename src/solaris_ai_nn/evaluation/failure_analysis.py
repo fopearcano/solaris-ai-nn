@@ -195,5 +195,62 @@ class FailureAnalyzer:
                 "acknowledge explicitly if a continuous run is intended"))
         return findings
 
+    def analyze_governance(self, governance: Dict[str, Any]) -> List[Finding]:
+        """Findings derived from a run's governance summary (Prompt 12)."""
+        findings: List[Finding] = []
+        governance = governance or {}
+
+        risk_level = governance.get("risk_level")
+        if governance.get("policy_status") == "refused":
+            severity = INFO if risk_level in ("high", "prohibited") else WARNING
+            findings.append(Finding(
+                "high_risk_run_without_approval", severity,
+                "a run was refused by governance: "
+                + "; ".join(governance.get("refusal_reasons") or ["see audit"]),
+                "a high-risk configuration was attempted without the "
+                "required approval/acknowledgement",
+                "request approval (ApprovalRegistry) or reduce the run's "
+                "scope, then re-run"))
+
+        if governance.get("emergency_stop_requested") \
+                or governance.get("emergency_stop_used"):
+            findings.append(Finding(
+                "emergency_stop_used", CRITICAL,
+                "an emergency stop was requested during or after the run",
+                "an operator (or the sentinel file) demanded an immediate "
+                "safe shutdown",
+                "read the sentinel file, incidents.jsonl, and the "
+                "governance audit before running again"))
+
+        if governance.get("claim_guard_status") == "warnings":
+            findings.append(Finding(
+                "unsafe_claim_generated", WARNING,
+                "ClaimGuard flagged unsupported claims in a generated report",
+                "report text asserted inner states the data cannot support",
+                "apply the suggested replacements in "
+                "claim_guard_report.json"))
+
+        if int(governance.get("policy_violation_count", 0) or 0) > 0 \
+                or governance.get("last_policy_violation"):
+            findings.append(Finding(
+                "policy_violation_occurred", WARNING,
+                f"{governance.get('policy_violation_count', '?')} policy "
+                "violation(s) recorded",
+                "the configuration or an operation broke a governance rule",
+                "read the policy_violation rows in the governance audit"))
+
+        if int(governance.get("expired_approval_count", 0) or 0) > 0:
+            findings.append(Finding(
+                "approval_expired", WARNING,
+                f"{governance['expired_approval_count']} approval(s) have "
+                "expired",
+                "a time-limited approval passed its deadline",
+                "re-request approval before relying on the expired scope"))
+        return findings
+
     def analyze_result(self, result: ExperimentResult) -> List[Finding]:
-        return self.analyze(result.metrics, result.artifacts, result.error)
+        findings = self.analyze(result.metrics, result.artifacts, result.error)
+        if result.metrics.get("governance"):
+            findings.extend(
+                self.analyze_governance(result.metrics["governance"]))
+        return findings

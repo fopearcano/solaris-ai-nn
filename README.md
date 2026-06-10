@@ -188,6 +188,13 @@ python examples/run_operational_supervisor.py --steps 300
 python examples/run_healthcheck_demo.py
 python examples/run_soak_plan.py
 python examples/run_status_server_demo.py --status-server
+
+# Governance: policy, approvals, risk, emergency stop, runbooks, claim guard
+python examples/run_governed_bounded_experiment.py --steps 100
+python examples/run_governed_plasticity_request.py
+python examples/run_emergency_stop_demo.py
+python examples/generate_runbook.py --type bounded
+python examples/run_claim_guard_demo.py
 ```
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
@@ -201,6 +208,22 @@ resource budgets, artifact rotation (gzip, dry-run, allowed-dirs-only),
 incident logs, a run registry, staged soak plans, and an optional read-only
 localhost status server. Every run leaves a full evidence bundle under
 `.solaris_ai_nn_ops/runs/<run_id>/`.
+
+The **governance layer** (`governance/`) is the control plane, deliberately
+separate from cognition. A deny-by-default `GovernancePolicy` decides what a
+run may do (bounded by default; soaks/continuous/active-plasticity/outward
+suggestions require explicit human approval; real-world actuation, source
+rewriting, and committed Solaris Actions are forbidden absolutely). It is
+backed by a `PermissionSet`, a local `ApprovalRegistry` (a research ledger, not
+authentication), a `RiskAssessment` that blocks/approves/acknowledges by level,
+an always-available `EmergencyStop` (sentinel file `<state_dir>/EMERGENCY_STOP`,
+routed through graceful shutdown — never a process kill), `ClaimGuard` (no
+unsupported consciousness claims survive into reports), `RunbookBuilder`,
+checklists, and a `PostRunReview` that recommends but never acts. The supervisor
+gates every run through this layer and leaves a governance trail under
+`.solaris_ai_nn_governance/`; governance status feeds the Inner MAP and the
+evaluation reports. Nothing here bypasses a human, and nothing escalates
+automatically.
 
 The **evaluation layer** (`evaluation/`) is the measurement harness: nine
 registered protocols (absence, feedback inversion, reward/danger, restart
@@ -276,6 +299,8 @@ src/solaris_ai_nn/
   language/     internal meaning trace, causal trace, explanations, queries, reports
   evaluation/   benchmarks, metrics, scorecards, baselines, reproducibility, failures
   ops/          supervisor, watchdog, health, budgets, incidents, soak plans, status
+  governance/   policy, permissions, approvals, risk, emergency stop, runbooks,
+                checklists, claim guard, post-run review, governance audit
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

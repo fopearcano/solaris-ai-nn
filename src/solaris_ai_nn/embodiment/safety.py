@@ -45,6 +45,10 @@ class EmbodimentSafety:
     """Validates simulated actions; rejects everything else."""
 
     rejected_count: int = 0
+    # Optional GovernanceAuditLog (Prompt 12): when set, every blocked or
+    # prohibited action also becomes a governance audit row. The wall itself
+    # does not depend on it.
+    governance_audit: Any = None
 
     def validate_action(self, action: str, state: Dict[str, Any] | None = None) -> SafetyReport:
         state = state or {}
@@ -74,6 +78,15 @@ class EmbodimentSafety:
 
         if violations:
             self.rejected_count += 1
+            if self.governance_audit is not None:
+                try:
+                    self.governance_audit.record(
+                        "policy_violation", decision="blocked",
+                        reason="; ".join(violations),
+                        metadata={"action": str(action),
+                                  "source": "embodiment_safety"})
+                except Exception:  # auditing never blocks the safety wall
+                    pass
         return SafetyReport(safe=not violations, violations=violations)
 
     def is_safe(self, action: str, state: Dict[str, Any] | None = None) -> bool:

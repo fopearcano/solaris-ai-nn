@@ -57,6 +57,12 @@ class SolarisNNSidecar:
     seed: int = 0
     suggestion_threshold: float = 0.5
     mirror_capacity: int = 5_000
+    # Optional GovernancePolicy (Prompt 12). When set, suggestion publishing
+    # additionally requires the enable_sidecar_suggestions scope (granted or
+    # approved); without it, publishing is downgraded to observe-only storage
+    # and the decision appears in the snapshot. Committed Actions and
+    # lifecycle calls stay structurally absent either way.
+    governance: Any = None
 
     probe: SolarisRuntimeProbe = field(default_factory=SolarisRuntimeProbe)
     report: Optional[SolarisCompatibilityReport] = field(default=None, init=False)
@@ -65,6 +71,8 @@ class SolarisNNSidecar:
     channel: Optional[SuggestionChannel] = field(default=None, init=False)
     _conscience: Any = field(default=None, init=False, repr=False)
     _started: bool = field(default=False, init=False)
+    _policy_decisions: List[Dict[str, Any]] = field(default_factory=list,
+                                                    init=False)
 
     def __post_init__(self) -> None:
         if self.bridge is None:
@@ -90,11 +98,25 @@ class SolarisNNSidecar:
                 "runtime is not observable: " + self.report.summary())
         self._conscience = conscience
         self.mirror = SignalMirror(capacity=self.mirror_capacity)
-        self.channel = SuggestionChannel(
-            publish_enabled=self.publish_suggestions and not self.observe_only)
+        publish = self.publish_suggestions and not self.observe_only
+        if self.governance is not None:
+            observe_decision = self.governance.evaluate_sidecar_operation(
+                "observe", {})
+            self._policy_decisions.append(observe_decision.to_dict())
+            if not observe_decision.allowed:
+                raise ValueError("governance denied sidecar observation: "
+                                 + observe_decision.summary())
+            if publish:
+                decision = self.governance.evaluate_sidecar_operation(
+                    "publish_suggestions", {})
+                self._policy_decisions.append(decision.to_dict())
+                if not decision.allowed:
+                    # Downgrade, never bypass: suggestions stay local.
+                    publish = False
+        self.channel = SuggestionChannel(publish_enabled=publish)
         self.connector = SolarisBusConnector(
             bridge=self.bridge,
-            publish_suggestions=self.publish_suggestions,
+            publish_suggestions=publish,
             observe_only=self.observe_only,
             suggestion_threshold=self.suggestion_threshold,
             mirror=self.mirror,
@@ -160,6 +182,12 @@ class SolarisNNSidecar:
             "connector": self.connector.snapshot() if self.connector else None,
             "bridge": self.bridge.substrate_summary(),
             "integration": self.integration_summary() if self.connector else None,
+            "governance": {
+                "enabled": self.governance is not None,
+                "publish_active": (self.channel.publish_enabled
+                                   if self.channel is not None else False),
+                "policy_decisions": list(self._policy_decisions),
+            },
         }
 
     def healthcheck(self) -> Dict[str, Any]:

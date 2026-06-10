@@ -24,6 +24,7 @@ class OperationalStatus:
     scorecard: Optional[Dict[str, Any]] = None
     inner_map_summary: Optional[Dict[str, Any]] = None
     language_summary: Optional[Dict[str, Any]] = None
+    governance: Optional[Dict[str, Any]] = None
     timestamp: float = field(default_factory=time.time)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -41,6 +42,7 @@ class OperationalStatus:
             "scorecard": self.scorecard,
             "inner_map_summary": self.inner_map_summary,
             "language_summary": self.language_summary,
+            "governance": self.governance,
         }
 
     def to_markdown(self) -> str:
@@ -65,6 +67,7 @@ class OperationalStatus:
                                 or ["none recorded"])
                    .add_section("scorecard", self.scorecard)
                    .add_section("inner_map", self.inner_map_summary)
+                   .add_section("governance", self.governance)
                    .add_section("artifacts", self.artifacts))
         if self.budget and (self.budget.get("last_report") or {}).get(
                 "violations"):

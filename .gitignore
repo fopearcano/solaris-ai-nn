@@ -33,3 +33,9 @@ artifacts/
 # Operations output (health logs, incidents, run registry, shutdown evidence).
 .solaris_ai_nn_ops/
 .solaris_ai_nn_runs/
+
+# Governance output (audit, approval records, operator sessions, risk
+# assessments, checklists, reviews, generated runbooks). Local research
+# records; regenerate per run. Commit a runbook only deliberately, under
+# docs/templates.
+.solaris_ai_nn_governance/

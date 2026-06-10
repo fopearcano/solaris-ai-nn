@@ -299,3 +299,43 @@ philosophy. Graceful death is a concrete sequence (checkpoint → reason →
 evidence → registry), ungraceful death is detectable (brain-death gap), and the
 watchdog exists to convert impending bad deaths into good ones. A system that
 cannot die well cannot be trusted to run long.
+
+**Safety governance for adaptive systems.** A system that can change its own
+parameters, run for days, and attach to another runtime needs a control layer
+that is explicit, fixed, and outside the learning loop. Governance here is
+deny-by-default: bounded/simulated/observe-only/dry-run are allowed; anything
+that adapts actively, runs long, or reaches outward is gated. The point is not
+to make the system safe by hoping — it is to make "what is this run allowed to
+do?" a question with a written, audited answer before the run starts.
+
+**Human-in-the-loop approval.** The hard rule is that nothing bypasses a human.
+High-risk capabilities (active plasticity, long soaks, publishing suggestions)
+produce a `PolicyDecision` that stays *denied* until a named operator records
+an approval. The approval ledger is deliberately not a security system — there
+is no authentication — because the threat model is "a researcher accidentally
+launches something they shouldn't", not "an attacker". For that threat,
+making the human step explicit and recorded is the right tool.
+
+**Auditability.** Every governance decision, approval, risk assessment,
+emergency stop, operator note, runbook, and checklist becomes a JSONL row.
+Combined with the operational incident log and the plasticity audit, a finished
+run can be fully reconstructed: what was allowed, who allowed it, what changed,
+what was blocked, and how it ended. Auditability is what lets a cautious
+project move toward longer runs — you can always answer "what happened?".
+
+**Claim discipline in consciousness-inspired AI.** The most likely failure of a
+project like this is not technical; it is rhetorical — quietly drifting from
+"consciousness-inspired signal flow" to "the system is conscious". `ClaimGuard`
+makes that drift mechanical to catch: it scans generated reports for
+unsupported claims about inner states and offers grounded replacements
+("produced a Desire signal", "maintained continuity metrics"). The discipline
+is structural, not a matter of remembering to be careful.
+
+**Why emergency stop is part of the architecture, not an accessory.** A stop
+button bolted on at the end tends to be the thing that does not work when it
+matters. Here the emergency stop is a first-class component: always available
+regardless of permissions, routed through the same graceful shutdown path that
+checkpoints and records why it stopped, reachable out-of-band via a sentinel
+file, and structurally incapable of killing the process or deleting data. A
+system intended to run continuously must have a stop you can trust before it is
+allowed to run long — so the stop is designed first, not last.

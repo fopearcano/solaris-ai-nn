@@ -248,4 +248,35 @@ def build_default_state_graph() -> StateGraph:
     g.add_edge("operational_supervisor", "run_registry", "updates")
     g.add_edge("artifact_rotation_policy", "incident_log", "preserves evidence")
     g.add_edge("operational_supervisor", "local_status_server", "owns (opt-in)")
+
+    # Governance / operator control (Prompt 12). Control layer, not cognition.
+    for name, role in [
+        ("governance_policy", "what is allowed"),
+        ("permission_set", "deny-by-default scopes"),
+        ("approval_registry", "local human approval ledger"),
+        ("risk_assessment", "named risks per run"),
+        ("emergency_stop", "always-available stop"),
+        ("claim_guard", "no unsupported claims"),
+        ("runbook", "written operator procedure"),
+        ("post_run_review", "human recommendation"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("runtime", "risk_assessment", "manifest feeds")
+    g.add_edge("risk_assessment", "approval_registry",
+               "high risks require approval")
+    g.add_edge("permission_set", "operational_supervisor",
+               "permissions feed supervisor")
+    g.add_edge("governance_policy", "operational_supervisor",
+               "evaluates manifest before run")
+    g.add_edge("approval_registry", "governance_policy",
+               "approvals satisfy required scopes")
+    g.add_edge("emergency_stop", "safe_shutdown_manager",
+               "requests safe shutdown")
+    g.add_edge("claim_guard", "report_builder", "scans reports before save")
+    g.add_edge("governance_policy", "inner_map",
+               "governance status feeds Inner MAP")
+    g.add_edge("runbook", "operational_supervisor",
+               "documents the procedure")
+    g.add_edge("post_run_review", "governance_policy",
+               "feeds the next run's evaluation")
     return g

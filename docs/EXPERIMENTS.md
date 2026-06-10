@@ -809,3 +809,64 @@ All of the 24-hour checklist, plus:
 4. Budget recomputed for 30 days of trace/report growth.
 5. Explicit `--include-30d` plan regenerated and reviewed; operator notes
    recorded in the manifest.
+
+## 56. Governed Bounded Experiment ✅ (implemented)
+
+**Run:** `python examples/run_governed_bounded_experiment.py --steps 100`
+A normal bounded run driven through the full governance layer: the manifest is
+risk-assessed (low) and policy-evaluated (allowed), the operator acknowledges
+any medium risks, the pre-run checklist passes, the run executes under
+supervision, and afterwards the post-run checklist, ClaimGuard scan, and
+PostRunReview are written under `.solaris_ai_nn_governance/`. Flags:
+`--embodied` / `--language` / `--enable-plasticity-dry-run` raise the risk
+profile but stay within the safe defaults (dry-run and simulation are
+acknowledged, not approval-gated).
+
+## 57. Governed Plasticity Approval Demo ✅ (implemented)
+
+**Run:** `python examples/run_governed_plasticity_request.py`
+Three acts that prove active plasticity cannot bypass a human: (1) an active
+mutation without approval is rejected by governance with the required scope
+named; (2) an `ApprovalRequest` is created and a named operator approves it
+locally (the deterministic stand-in for the human step); (3) the same mutation
+now applies, is audited, and is rollbackable. Dry-run proposals remain allowed
+throughout.
+
+## 58. Emergency Stop Demo ✅ (implemented)
+
+**Run:** `python examples/run_emergency_stop_demo.py`
+A supervised bounded run where an "operator" creates the
+`<state_dir>/EMERGENCY_STOP` sentinel mid-run. The supervisor detects it at the
+next segment boundary, records a critical `emergency_stop` incident plus
+`emergency_stop_requested` / `emergency_stop_completed` audit rows, performs a
+graceful safe shutdown (checkpoint + reason + final report), and stops early.
+The process is never killed; the sentinel is cleared only after review.
+
+## 59. Runbook Generation ✅ (implemented)
+
+**Run:** `python examples/generate_runbook.py --type bounded`
+(`--type bounded|plasticity|sidecar|sensorimotor|soak24|soak30`,
+`--output-dir`). Writes a deterministic Markdown runbook with purpose, required
+permissions, risk level, pre-run checklist, launch command, monitoring
+checklist, expected artifacts, emergency stop procedure, post-run review, a
+rollback procedure for plasticity, and known limitations. Runbooks themselves
+pass ClaimGuard.
+
+## 60. Claim Guard Demo ✅ (implemented)
+
+**Run:** `python examples/run_claim_guard_demo.py`
+Scans an unsafe sample ("the system is conscious", "it wants", "is alive") and
+prints each flagged claim, its grounded replacement, and a hedged rewrite, then
+shows a measured-and-honest report passing the scan. The discipline is
+structural: the same scan runs before any report is saved.
+
+## 61. Post-Run Review (documented)
+
+After every governed run the supervisor writes `post_run_review.json`: a run
+summary (mode, health, incidents, policy violations, approvals used,
+plasticity changes, rollback recommendations) and a single next-run
+recommendation — `repeat`, `extend_duration`, `reduce_scope`,
+`investigate_failure`, or `stop_line_of_work`. A clean healthy run recommends
+extending duration; an emergency stop or unexplained critical recommends
+investigating; repeated failed runs recommend stopping the line of work. The
+review recommends only — it never escalates or acts automatically.

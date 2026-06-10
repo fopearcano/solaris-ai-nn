@@ -81,8 +81,9 @@ class BenchmarkRunner:
                           duration_s=round(result.duration, 3))
             .add_section("metrics", {
                 k: v for k, v in result.metrics.items()
-                if k not in ("scores", "failure_findings")})
+                if k not in ("scores", "failure_findings", "governance")})
             .add_section("scorecard", result.metrics.get("scores"))
+            .add_section("governance", result.metrics.get("governance"))
             .add_section("failure_findings",
                          result.metrics.get("failure_findings") or
                          ["no findings"])

@@ -54,6 +54,14 @@ class PlasticityEngine:
     dry_run: bool = False
     policy: PlasticityPolicy = None  # type: ignore[assignment]
     validator: PlasticitySafetyValidator = None  # type: ignore[assignment]
+    # Optional governance gate (Prompt 12): a GovernancePolicy-like object.
+    # When set, active mutations additionally require the
+    # enable_plasticity_apply scope (granted or approved); dry-run proposals
+    # need only the dry-run scope. When None, the safety validator remains
+    # the gate (runs started through the OperationalSupervisor get the
+    # governance check at the manifest level too).
+    governance: Any = None
+    governance_context: Dict[str, Any] = None  # type: ignore[assignment]
 
     def __post_init__(self) -> None:
         self.registry = TargetRegistry(self.bridge, synthesis=self.synthesis, runner=self.runner)
@@ -66,6 +74,10 @@ class PlasticityEngine:
             self.audit_path or "plasticity_audit.jsonl",
             run_id=self.run_id, session_id=self.session_id,
         )
+        if self.governance_context is None:
+            self.governance_context = {}
+        self.governance_rejected_count = 0
+        self.last_governance_decision: Optional[Dict[str, Any]] = None
         self.applied_count = 0
         self.rejected_count = 0
         self.rollback_count = 0
@@ -176,6 +188,29 @@ class PlasticityEngine:
                 message=f"no mutable parameter {step.target.label()!r}",
                 safety=report.to_dict())
 
+        # Governance gate: active mutations need the apply scope (granted or
+        # human-approved); dry-run proposals need only the dry-run scope.
+        if self.governance is not None:
+            ctx = dict(self.governance_context)
+            ctx.setdefault("run_id", self.run_id)
+            ctx["dry_run"] = self.dry_run
+            ctx.setdefault("audit_enabled", self.audit is not None)
+            ctx.setdefault("rollback_enabled", True)
+            decision = self.governance.evaluate_plasticity_step(step, ctx)
+            self.last_governance_decision = decision.to_dict()
+            if not decision.allowed:
+                step.status = REJECTED
+                self.rejected_count += 1
+                self.governance_rejected_count += 1
+                self.last_rejected = step
+                self.audit.rejected(step)
+                return PlasticityResult(
+                    step_id=step.step_id, status=REJECTED, applied=False,
+                    message=f"governance: {decision.summary()}",
+                    old_value=step.change.old_value,
+                    new_value=step.change.new_value,
+                    safety=report.to_dict())
+
         if self.dry_run:
             return PlasticityResult(
                 step_id=step.step_id, status="proposed", applied=False,
@@ -269,4 +304,7 @@ class PlasticityEngine:
             "safety_status": "ok" if self.rejected_count == 0 else f"{self.rejected_count} rejected",
             "audit_path": self.audit_path,
             "rollback": self.rollback_manager.to_dict(),
+            "governance_enabled": self.governance is not None,
+            "governance_rejected_count": self.governance_rejected_count,
+            "last_governance_decision": self.last_governance_decision,
         }
