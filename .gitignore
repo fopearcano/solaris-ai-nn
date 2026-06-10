@@ -29,3 +29,7 @@ artifacts/
 
 # Benchmark runtime output (manifests, results, artifacts). Reproducible from code.
 .solaris_ai_nn_benchmarks/
+
+# Operations output (health logs, incidents, run registry, shutdown evidence).
+.solaris_ai_nn_ops/
+.solaris_ai_nn_runs/

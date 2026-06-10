@@ -226,4 +226,26 @@ def build_default_state_graph() -> StateGraph:
     g.add_edge("metric_collector", "evaluation_score", "metrics feed scorecard")
     g.add_edge("evaluation_score", "inner_map", "scorecard feeds Inner MAP")
     g.add_edge("failure_analyzer", "report_builder", "failure analysis feeds debugging")
+
+    # Operations / long-running supervision (Prompt 11).
+    for name, role in [
+        ("operational_supervisor", "segmented supervision"),
+        ("health_monitor", "domain health checks"),
+        ("watchdog", "requests safe shutdown"),
+        ("resource_budget", "soft limits"),
+        ("safe_shutdown_manager", "dying well"),
+        ("incident_log", "operational evidence"),
+        ("run_registry", "run history"),
+        ("artifact_rotation_policy", "bounded evidence"),
+        ("local_status_server", "read-only localhost status"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("runtime", "health_monitor", "runners feed")
+    g.add_edge("health_monitor", "watchdog", "feeds")
+    g.add_edge("watchdog", "safe_shutdown_manager", "can request safe shutdown")
+    g.add_edge("resource_budget", "incident_log", "feeds")
+    g.add_edge("incident_log", "inner_map", "feeds")
+    g.add_edge("operational_supervisor", "run_registry", "updates")
+    g.add_edge("artifact_rotation_policy", "incident_log", "preserves evidence")
+    g.add_edge("operational_supervisor", "local_status_server", "owns (opt-in)")
     return g

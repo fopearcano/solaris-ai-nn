@@ -265,3 +265,37 @@ every change. The same manifests scale to soak durations: the design rule is
 that a 24-hour run differs from a 150-step run only in its bound, never in its
 instrumentation — telemetry, artifacts, hashes, and failure analysis are
 identical at every scale.
+
+## Phase-11 operations notes
+
+**Long-running adaptive-system evaluation.** Short benchmarks measure
+mechanisms; long runs measure *stability of mechanisms under accumulation* —
+drift, growth, and slow leaks that no 150-step test can reveal. The design rule
+adopted here: instrumentation must be identical at every scale, so a 30-day run
+differs from a 5-minute run only in its bound.
+
+**Watchdog design.** The classic failure of watchdogs is having either too much
+power (killing processes mid-write) or too little (logging while the system
+burns). Ours sits deliberately in between: it can only *return decisions*, the
+supervisor acts at segment boundaries, and every stop path runs through the
+safe-shutdown manager — so even an emergency stop checkpoints first.
+
+**Operational safety for self-modifying systems.** A system that tunes its own
+parameters needs operations *more* than a static one: drift can be
+self-inflicted. The layered answer: plasticity is bounded (Phase 5), measured
+(Phase 10), and now supervised (Phase 11) — health checks watch rejection and
+rollback rates, budgets cap mutation counts, and incidents make every anomaly
+reviewable.
+
+**Why safe shutdown is part of continuity.** Continuity is not "never stops";
+it is "stops and resumes without losing itself". A run that ends with a
+checkpoint, a reason, a final health report, and a registry entry is continuous
+in the only sense that matters operationally: the next session can pick up the
+thread and explain the gap.
+
+**Why "able to die" must be operationally implemented.** Solaris_Ai treats
+death as a first-class concept; the ops layer is where that stops being
+philosophy. Graceful death is a concrete sequence (checkpoint → reason →
+evidence → registry), ungraceful death is detectable (brain-death gap), and the
+watchdog exists to convert impending bad deaths into good ones. A system that
+cannot die well cannot be trusted to run long.

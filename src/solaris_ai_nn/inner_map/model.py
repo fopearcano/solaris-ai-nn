@@ -191,6 +191,11 @@ class InnerMapModel:
     # Keys: last_run_id, last_scores, last_failure_findings,
     # reproducibility_status, comparison_summary, artifact_paths.
     evaluation: Optional[Dict[str, Any]] = None
+    # Operations status (Prompt 11); None when unsupervised.
+    # Keys: run_mode, health_level, watchdog_stop_requested, budget_within,
+    # incident_count, last_incident, graceful_shutdown_requested,
+    # artifact_rotation, local_status_server, soak_stage.
+    operations: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

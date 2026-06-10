@@ -146,5 +146,54 @@ class FailureAnalyzer:
 
         return findings
 
+    def analyze_incidents(self, incidents: List[Dict[str, Any]],
+                          status: Optional[Dict[str, Any]] = None) -> List[Finding]:
+        """Findings derived from operational incidents (Prompt 11)."""
+        findings: List[Finding] = []
+        status = status or {}
+        by_type: Dict[str, int] = {}
+        for row in incidents:
+            by_type[row.get("type", "?")] = by_type.get(row.get("type", "?"), 0) + 1
+
+        if by_type.get("health_critical"):
+            findings.append(Finding(
+                "health_critical_occurred", CRITICAL,
+                f"{by_type['health_critical']} critical health incident(s)",
+                "a health domain crossed its critical threshold",
+                "read health.jsonl around the incident timestamps"))
+        if by_type.get("watchdog_shutdown"):
+            findings.append(Finding(
+                "watchdog_shutdown_occurred", CRITICAL,
+                "the watchdog requested a safe shutdown",
+                "staleness, duration, growth, or repeated criticals",
+                "inspect the watchdog snapshot in status.json"))
+        checkpoint_age = float(status.get("checkpoint_age_s", 0.0) or 0.0)
+        if checkpoint_age > 600.0:
+            findings.append(Finding(
+                "checkpoint_too_old", WARNING,
+                f"last checkpoint is {checkpoint_age:.0f}s old",
+                "checkpoint interval too sparse for the run length",
+                "lower checkpoint_interval_steps in the manifest"))
+        if by_type.get("budget_violation"):
+            findings.append(Finding(
+                "artifact_growth_over_budget", WARNING,
+                f"{by_type['budget_violation']} budget violation(s)",
+                "artifact/trace growth outpaced the configured budget",
+                "enable artifact rotation or raise the budget deliberately"))
+        if by_type.get("substrate_inert", 0) >= 2:
+            findings.append(Finding(
+                "repeated_substrate_inert", CRITICAL,
+                f"{by_type['substrate_inert']} substrate-inert incidents",
+                "inputs repeatedly failed to drive the substrate",
+                "check encoder vocabulary and stimulus providers"))
+        if status.get("unsafe_continuous_refused"):
+            findings.append(Finding(
+                "unsafe_continuous_run_refused", INFO,
+                "an unbounded run was requested without acknowledgement and "
+                "correctly refused",
+                "the refusal is the safety system working",
+                "acknowledge explicitly if a continuous run is intended"))
+        return findings
+
     def analyze_result(self, result: ExperimentResult) -> List[Finding]:
         return self.analyze(result.metrics, result.artifacts, result.error)

@@ -660,3 +660,64 @@ traces, missing checkpoints, replay mismatch — and emits findings with
 severity, probable cause, and a *suggested next debug step*. Diagnosis only;
 nothing auto-fixes. The findings are exactly the queue future development
 should work through.
+
+## 21. Operations, watchdog, and long-running supervision
+
+The operations layer (`ops/`, Prompt 11) makes continuity *supervisable*. The
+project's premise is a system that runs for a long time — which is only safe if
+the run can know it is healthy, drift visibly toward failure, checkpoint, stop
+well, and resume.
+
+**Continuity requires supervision, and infinite mode is never default.** Every
+supervised run starts from an `OperationalRunManifest` that pins mode, safety
+mode, bounds, intervals, and features. `continuous_explicit` is refused without
+`explicit_continuous_acknowledged=True`; the 24h/30d soak modes are refused
+without `soak_acknowledged=True`; bounded mode demands a step or duration
+bound. There is no code path to an unacknowledged infinite loop.
+
+**Segmented supervision.** The supervisor splits a bounded run into
+health-check-interval segments; each segment is a fresh runner continuing from
+the same state directory (the Phase-2 restart machinery makes this exact), and
+between segments the full ops loop runs: health check → incident logging →
+budget check → watchdog tick → registry update. Existing runners are untouched;
+they are simply run in supervised slices.
+
+**How health checks work.** The `HealthMonitor` grades eight domains
+(lifecycle, telemetry progress, substrate sanity — finite/no-runaway/no-inert,
+persistence writability, memory bounds, plasticity rejection/rollback rates,
+embodiment block ratios, language trace size) into ok/warning/critical/unknown.
+It is stateful only enough to notice counters that stopped increasing.
+
+**How the watchdog requests safe shutdown.** The `Watchdog` returns decisions
+(`continue` / `checkpoint_now` / `warn` / `safe_shutdown` /
+`emergency_stop_requested`) from staleness, duration, artifact growth, repeated
+criticals, and repeated segment failures. It has no power of its own — it never
+touches the process; the supervisor acts on its decisions, and even an
+emergency stop goes through `SafeShutdownManager`, which checkpoints, records
+the reason, and writes the final health report, Inner MAP snapshot, and session
+report. Dying well is part of continuity.
+
+**Checkpoints and incidents preserve the evidence.** Every supervised run
+leaves `manifest.json` / `health.jsonl` / `incidents.jsonl` / `status.{json,md}`
+/ `shutdown.json` / `artifact_rotation.json` / `final_report.md` under
+`.solaris_ai_nn_ops/runs/<run_id>/`, plus an entry in the run registry.
+Artifact rotation compresses large JSONL logs (gzip, stdlib) and trims only
+rotated archives — strictly inside configured directories, with dry-run, never
+touching source files. The `ResourceBudget` keeps runtime, steps, traces,
+artifacts, mutations, and atom counts within soft limits, reporting violations
+as incidents.
+
+**Read-only, localhost-only status.** The optional `LocalStatusServer`
+(stdlib `http.server`, disabled by default) binds exclusively to 127.0.0.1 and
+serves JSON snapshots (`/health` `/status` `/manifest` `/latest-report`
+`/incidents`). No commands, no writes, no remote access; a busy port degrades
+to disabled-with-warning rather than failing the run.
+
+**Operational state feeds Inner MAP.** The supervisor's
+`operations_summary()` (mode, health level, watchdog status, budget status,
+incident count, shutdown state, rotation, status-server state, soak stage)
+lands in `InnerMapModel.operations` — supervision is part of the self-model,
+and the failure analyzer consumes ops incidents to produce next-debug-step
+findings. Staged soak plans (`SoakPlanBuilder`) document the escalation ladder
+from a 5-minute simulated soak to a 30-day soak; plans are documentation and
+never auto-launch.

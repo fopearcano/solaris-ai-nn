@@ -182,7 +182,25 @@ python examples/run_language_query_demo.py --steps 100
 python examples/run_single_benchmark.py --experiment absence_stimulus --steps 150
 python examples/run_benchmark_suite.py --quick --steps 150
 python examples/generate_benchmark_report.py --output-dir .solaris_ai_nn_benchmarks
+
+# Operations: supervised bounded runs, health checks, soak plans, status server
+python examples/run_operational_supervisor.py --steps 300
+python examples/run_healthcheck_demo.py
+python examples/run_soak_plan.py
+python examples/run_status_server_demo.py --status-server
 ```
+
+> **Warning:** long-running modes (24h/30d soak, explicit continuous) require
+> explicit acknowledgement flags in the run manifest and should only be
+> attempted after short bounded runs are clean. Nothing in this repo launches a
+> long run by default.
+
+The **operations layer** (`ops/`) supervises runs in segments: health checks
+across eight domains, a watchdog that *requests* (never forces) safe shutdown,
+resource budgets, artifact rotation (gzip, dry-run, allowed-dirs-only),
+incident logs, a run registry, staged soak plans, and an optional read-only
+localhost status server. Every run leaves a full evidence bundle under
+`.solaris_ai_nn_ops/runs/<run_id>/`.
 
 The **evaluation layer** (`evaluation/`) is the measurement harness: nine
 registered protocols (absence, feedback inversion, reward/danger, restart
@@ -257,6 +275,7 @@ src/solaris_ai_nn/
   embodiment/   simulated body + GridWorld: sensors, effectors, energy, safety, runner
   language/     internal meaning trace, causal trace, explanations, queries, reports
   evaluation/   benchmarks, metrics, scorecards, baselines, reproducibility, failures
+  ops/          supervisor, watchdog, health, budgets, incidents, soak plans, status
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

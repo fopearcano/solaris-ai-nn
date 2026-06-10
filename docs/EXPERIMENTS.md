@@ -750,3 +750,62 @@ after-flip accuracy feeds the adaptation score; optionally with plasticity on.
 `reward_danger` protocol wraps the embodied GridWorld experiment: embodiment
 metrics (collisions, blocked actions, useful-action ratio, exhaustion) plus the
 early/late valence shift feed the scorecard.
+
+---
+
+# Phase-11 operations experiments
+
+The long-running operations layer (`ops/`). All bounded; long modes are
+documented plans, never auto-launched.
+
+## 50. Operational Supervisor Demo ✅ (implemented)
+
+**Run:** `python examples/run_operational_supervisor.py --steps 300`
+Segmented supervised session: health checks, watchdog ticks, budget checks,
+incidents, registry, and the full evidence bundle under
+`.solaris_ai_nn_ops/runs/<run_id>/`. Tested end to end (bounded; status files
+written; failures become incidents, not crashes).
+
+## 51. Healthcheck Demo ✅ (implemented)
+
+**Run:** `python examples/run_healthcheck_demo.py`
+A clean health reading from a real run, then ONE intentionally simulated
+warning (stale heartbeat) so the warning path — report + incident — is shown
+end to end. The demo states explicitly that the warning was simulated.
+
+## 52. Soak Plan Generation ✅ (implemented)
+
+**Run:** `python examples/run_soak_plan.py [--include-24h --include-30d]`
+Writes the staged ladder (5-min simulated → 1h → 24h → 7d → 30d) as JSON +
+Markdown. Long stages require explicit flags; no stage ever auto-launches
+(tested).
+
+## 53. Status Server Demo ✅ (implemented)
+
+**Run:** `python examples/run_status_server_demo.py --status-server`
+Opt-in, read-only, 127.0.0.1-only JSON endpoints during a bounded run; clean
+shutdown. Without the flag the server provably stays off.
+
+## 54. 24-hour Soak Readiness Checklist (documented)
+
+Before launching stage 3 of the soak plan:
+1. Stage 1 (5-min) and stage 2 (1h) complete with health `ok` and zero
+   critical incidents.
+2. Artifact rotation verified on stage-2 output (dry-run, then real).
+3. Resource budget headroom: stage-2 artifact bytes × 24 fits the budget.
+4. Run registry shows graceful shutdown for all prior stages.
+5. `soak_acknowledged=True` set deliberately by an operator, with notes.
+6. Watchdog thresholds reviewed against stage-2 health.jsonl percentiles.
+
+## 55. 30-day Soak Readiness Checklist (documented)
+
+All of the 24-hour checklist, plus:
+1. The 24-hour soak completed with health `ok` and rotation keeping artifacts
+   bounded over the full day.
+2. Restart recovery verified mid-soak (stop at 12h, resume, verify lifetime
+   continuity and substrate restore).
+3. Incident review: every 24h-soak incident triaged with a documented next
+   step.
+4. Budget recomputed for 30 days of trace/report growth.
+5. Explicit `--include-30d` plan regenerated and reviewed; operator notes
+   recorded in the manifest.
