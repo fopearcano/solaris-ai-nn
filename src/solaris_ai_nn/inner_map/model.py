@@ -45,7 +45,12 @@ class ContinuityState:
 
 @dataclass
 class NeuralSubstrateState:
-    """Neural substrate metrics (section C)."""
+    """Neural substrate metrics (section C).
+
+    The "nervous layer" may be any registered substrate (ESN, liquid-state,
+    spiking-recurrent); the ``reservoir_*`` names are kept for continuity and
+    refer to the active substrate.
+    """
 
     reservoir_size: int = 0
     reservoir_state_norm: float = 0.0
@@ -55,6 +60,15 @@ class NeuralSubstrateState:
     readout_weight_norm: float = 0.0
     prediction_confidence: float = 0.0
     average_prediction_error: float = 0.0
+    # Substrate-laboratory observations (Prompt 6).
+    substrate_type: str = "esn"
+    substrate_activity_rate: float = 0.0
+    substrate_drift: float = 0.0
+    spike_rate: Optional[float] = None
+    silence_ratio: Optional[float] = None
+    saturation_ratio: Optional[float] = None
+    substrate_switch_history: List[Dict[str, Any]] = field(default_factory=list)
+    substrate_comparison: Optional[Dict[str, Any]] = None
 
 
 @dataclass

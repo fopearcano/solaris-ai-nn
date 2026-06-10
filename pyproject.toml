@@ -18,9 +18,11 @@ keywords = [
     "low-compute",
     "solaris",
 ]
-# Deliberately zero runtime dependencies: the first version is pure stdlib.
-# NumPy is intentionally NOT required (see README / docs/RESEARCH_NOTES.md).
-dependencies = []
+# Core layers (signals, ESN, readout, runtime) remain pure stdlib. NumPy joined
+# in Phase 6 for the substrate laboratory (liquid-state / spiking substrates,
+# .npz state persistence) -- the place dense vector math was always slated to
+# earn it (see README / docs/RESEARCH_NOTES.md).
+dependencies = ["numpy>=1.24"]
 
 [project.optional-dependencies]
 test = ["pytest>=7.0"]

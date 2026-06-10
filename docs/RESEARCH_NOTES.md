@@ -110,3 +110,51 @@ This is a *first-substrate* decision, not a permanent ban. The roadmap leaves ro
 for richer substrates (LSM/spiking, Phase 5) and an optional NumPy backend
 (Phase 4); any future transformer use would have to earn its place against the
 low-compute, continuous, transparent criteria above.
+
+## Phase-6 substrate laboratory notes
+
+**Liquid State Machines, realised (approximately).** The earlier LSM note
+described the idea; `substrates/liquid_state.py` now implements its low-compute
+spirit: membrane-like leaky integration, threshold crossings as spike events,
+refractory pauses, and an exponentially fading "liquid" trace as the readout's
+view. The reservoir-computing contract is preserved — train the readout, never
+the liquid.
+
+**Leaky integrate-and-fire inspiration.** Both new substrates borrow the LIF
+neuron's skeleton: integrate input into a decaying membrane potential, fire on
+threshold, reset, pause (refractory). That is the entire borrowing. There are no
+ion channels, no conductances, no spike-timing-dependent plasticity — just the
+cheapest dynamical motif that produces event-driven, sparse, history-dependent
+activity.
+
+**Reservoir vs spiking substrates.** The ESN is a *smooth* fading memory: dense
+analog state, every unit active, gentle drift. The spiking substrate is the
+opposite pole: instantaneous binary state, ~10% of units active, large per-step
+drift. The liquid-state substrate sits between (analog trace built from discrete
+spikes). Empirically (substrate comparison experiment), the spiking substrate's
+sparse binary features made the NLMS readout converge fastest on the toy world —
+a reminder that "richer state" is not automatically "easier to read out".
+
+**Why the project avoids biologically exact simulation.** Biological fidelity
+(Hodgkin-Huxley dynamics, conductance models, exact spike timing) costs orders
+of magnitude more compute and adds parameters whose values we could not justify
+— while the project's questions are about *continuity, adaptation, and
+observability*, not neuroscience. Exact simulation would also invite exactly the
+overclaiming this project forbids: the more brain-like the model looks, the
+easier it is to slide into consciousness language. Crude, honest mechanisms keep
+the claims honest too.
+
+**Why low-compute approximations are enough at this stage.** Every Phase-6
+question — does the substrate stay alive through silence? how fast does the
+readout adapt on top of it? what does long-running drift look like? what
+survives a restart or a substrate switch? — is answerable with a 96-unit
+NumPy loop running thousands of updates per second on one CPU core. Higher
+fidelity would change the numbers, not the questions. When a question genuinely
+needs more (Phase 6's neuromorphic/edge work), the substrate interface is the
+seam where a heavier implementation can slot in without touching the ecology
+around it.
+
+**NumPy's entry point.** Phases 0–5 stayed pure-stdlib by design. The substrate
+lab is where NumPy was always slated to arrive: dense membrane/spike vector math
+and `.npz` state persistence are exactly the workload it exists for. The core
+layers (signals, list-based ESN, readout, runtime) remain stdlib.

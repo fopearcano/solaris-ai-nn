@@ -92,14 +92,35 @@ memory, habits, synthesis, tendencies, boundaries, and unknowns across restarts.
 **Exit criteria:** reproducible benchmark numbers and ablation tables (controlled
 plasticity already ships and is fully audited/rollbackable).
 
-## Phase 5 — Alternative substrates: Liquid State Machine / spiking simulation
+## Phase 5 — Alternative substrates: Liquid State Machine / spiking simulation ✅ (this release)
 
-- Add a Liquid State Machine variant and a simple leaky integrate-and-fire
-  spiking reservoir behind the same loop interface.
-- Compare temporal-coding substrates against the ESN baseline.
+- Substrate laboratory (`substrates/`): a common `BaseSubstrate` interface
+  (update / reset / get_state / set_state / snapshot / save_npz / load_npz /
+  metrics), a `SubstrateRegistry` (`esn`, `liquid_state`, `spiking_recurrent`),
+  and shared metrics (norm, sparsity, activity, drift, entropy-like evenness,
+  saturation/silence, trace similarity).
+- `LiquidStateSubstrate`: leaky membranes, threshold spikes, refractory pauses,
+  fading analog liquid trace (LIF-inspired; NumPy; no spiking library).
+- `SpikingRecurrentSubstrate`: sparse **binary** spike events, hard reset,
+  refractory periods, optional seeded noise, per-unit spike-rate metrics.
+- Bridge accepts any substrate (`substrate_name` / `substrate_config` /
+  instance); ESN remains the default with full back-compat (`bridge.esn`).
+- Generic substrate persistence (`substrate_state.npz` + manifest), checkpointed
+  by the runner and restored across restarts (membranes included).
+- Inner MAP observes substrate type/activity/drift/spike metrics + switch
+  history; plasticity can tune substrate parameters within hard bounds; substrate
+  *switching* is explicit-only, checkpointed, and rollbackable
+  (`SubstrateSwitcher`) — never policy-driven.
+- Experiments: substrate comparison (same deterministic trace, side-by-side
+  table, energy proxy) and spiking silence (substrates stay alive through
+  absence-stimulus silence).
 
-**Exit criteria:** at least one alternative substrate runnable through the
-existing loop and telemetry.
+**Exit criteria (met):** all three substrates run through the same bridge,
+runner, telemetry, and Inner MAP; comparison and silence experiments ship with
+tests; switching is safety-bound.
+
+**Note:** NumPy entered the project here (the place Phase 4 reserved for it);
+the core stdlib layers are unchanged.
 
 ## Phase 6 — Optional neuromorphic / edge deployment
 

@@ -20,6 +20,11 @@ from .plasticity_adaptation import (  # noqa: F401
     run_plasticity_adaptation,
 )
 from .soak_continuity import SoakResult, run_soak_continuity  # noqa: F401
+from .spiking_silence import SilenceResult, run_spiking_silence  # noqa: F401
+from .substrate_comparison import (  # noqa: F401
+    SubstrateComparisonResult,
+    run_substrate_comparison,
+)
 
 __all__ = [
     "run_minimal_continuous_esn",
@@ -35,4 +40,8 @@ __all__ = [
     "run_plasticity_adaptation",
     "rollback_last",
     "PlasticityAdaptationResult",
+    "run_substrate_comparison",
+    "SubstrateComparisonResult",
+    "run_spiking_silence",
+    "SilenceResult",
 ]

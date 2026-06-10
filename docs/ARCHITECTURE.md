@@ -390,3 +390,72 @@ applied/rejected/rollback counts, the last steps, the current mutable parameters
 and the audit path. Because every change is bounded, logged, and reversible, the
 system can adapt itself without ever crossing a safety boundary — and a single
 command (`--rollback-last`) undoes the most recent change.
+
+## 16. Multiple low-compute neural substrates
+
+The substrate laboratory (`substrates/`, Prompt 6) detaches Solaris-AI-NN from
+any single neural mechanism. The system is now a *lab bench*: different
+continuous, event-driven, low-compute "nervous substrates" run under the exact
+same Solaris signal ecology and are compared with the same metrics.
+
+**Why the ESN is only the first baseline.** The Echo State Network was the
+right starting point — cheap, transparent, online-trainable — but it is one
+temporal character among several: a smooth, dense, fading analog echo. The
+project's question ("what does a low-compute substrate become under a long
+stream of Solaris signals?") deserves more than one answer. `EchoStateSubstrate`
+*wraps* the existing list-based ESN without duplicating it, so the baseline's
+numerics (and every Prompt 1–5 result) are unchanged.
+
+**What the Liquid-State-style substrate adds.** `LiquidStateSubstrate` gives
+each unit a leaky membrane potential; threshold crossings emit spike-like events
+that soft-reset the membrane, trigger a refractory pause, and feed an
+exponentially fading **liquid trace** — the analog state the readout sees. It
+trades the ESN's smooth echo for event-driven, thresholded dynamics with
+explicit spike counts.
+
+**What the spiking recurrent substrate adds.** `SpikingRecurrentSubstrate` goes
+to the discrete extreme: its state is the **instantaneous binary spike vector**
+(leaky integrate-and-fire inspired: decay, threshold, hard reset, refractory
+period, optional seeded noise). Maximally sparse, maximally event-like — and on
+the toy worlds its sparse binary features happen to make the NLMS readout
+converge strikingly fast.
+
+**Why none of these are trained like large neural networks.** No substrate
+trains its recurrent core — no backpropagation through time, no gradients, no
+surrogate-gradient spiking tricks. The recurrence is fixed at construction
+(deterministic seed, sparse connectivity, row-normalised gain). **The readout
+remains the only adaptive layer**, updated online (NLMS) from Reaction valence,
+exactly as before. That is the project's thesis applied consistently: cheap,
+weak, continuous adaptation on top of a fixed temporal substrate.
+
+**Common interface, registry, and metrics.** Every substrate implements
+`BaseSubstrate` (`update / reset / get_state / set_state / snapshot /
+save_npz / load_npz / metrics`) and is created by name through
+`SubstrateRegistry` (`esn`, `liquid_state`, `spiking_recurrent`). Shared metrics
+(`substrates/metrics.py`: norm, sparsity, activity rate, drift, entropy-like
+evenness, saturation/silence ratios, trace similarity) flow into the bridge
+snapshot and the Inner MAP, which now records substrate type, activity, drift,
+spike rate, silence/saturation ratios, and switch history — the substrate is
+part of the system's observable "nervous layer".
+
+**Why substrate switching is explicit and safety-bound.** Swapping the nervous
+substrate is the most invasive runtime change possible, so it can never happen
+through plasticity: `substrate_name`-style parameters are on the safety
+validator's forbidden list, and `SubstrateSwitcher.switch` raises unless called
+with `explicit=True`. A switch checkpoints the old substrate **before** anything
+changes (state is never discarded), verifies input compatibility, transfers
+state only when dimensions match (safe zero start otherwise), checkpoints the
+new substrate after, records the event for the Inner MAP, and supports
+`rollback_switch` back to the saved checkpoint. Substrate *parameters*
+(threshold, leak, refractory period, noise) remain plasticity-tunable within
+hard numeric bounds — thresholds stay sane, refractory periods stay
+non-negative, recurrent sparsity stays bounded, and state size can never explode
+past the configured maximum.
+
+**Persistence.** `PersistenceManager.save_substrate` writes
+`substrate_state.npz` (full fidelity: trace + membranes + refractory counters)
+plus `substrate_manifest.json` (name, config, sizes, seed, last saved step); the
+runner saves both at every checkpoint and restores them on restart. The original
+ESN-in-JSON checkpoint path keeps working unchanged. NumPy enters the project
+here — the place dense vector math and binary array persistence were always
+slated to earn it.

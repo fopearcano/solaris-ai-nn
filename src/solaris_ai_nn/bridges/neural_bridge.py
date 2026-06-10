@@ -38,6 +38,9 @@ from ..runtime.telemetry import Telemetry
 from ..signals import canonical as C
 from ..signals.adapters import SolarisSignalAdapter
 from ..signals.encoding import EventEncoder
+from ..substrates.base import BaseSubstrate
+from ..substrates.esn_substrate import EchoStateSubstrate
+from ..substrates.registry import SubstrateRegistry
 from ..utils.logging import get_logger
 from ..utils.math import clamp, norm
 
@@ -52,14 +55,22 @@ class SolarisNeuralBridge:
         action_labels: The discrete action tendencies the bridge can suggest.
         encoder / esn / readout / learner / habit / modulator / adapter:
             substrate components; sensible defaults are built if omitted.
+        substrate_name: Which substrate to build (``esn`` | ``liquid_state`` |
+            ``spiking_recurrent``). Default stays ``esn`` for compatibility.
+        substrate_config: Optional config dict (state_size, params...) for the
+            named substrate.
+        substrate: An already-built :class:`BaseSubstrate` to drive instead.
         exploration: Epsilon for epsilon-greedy tendency selection.
-        seed: Seed for the default ESN and the exploration RNG.
+        seed: Seed for the substrate and the exploration RNG.
     """
 
     action_labels: List[str]
     encoder: EventEncoder = field(default_factory=EventEncoder)
     esn: Optional[ESN] = None
     readout: Optional[LinearReadout] = None
+    substrate_name: str = "esn"
+    substrate_config: Optional[Dict[str, Any]] = None
+    substrate: Optional[BaseSubstrate] = None
     learner: DeltaRuleLearner = field(default_factory=DeltaRuleLearner)
     habit: HabitReinforcement = field(default_factory=HabitReinforcement)
     modulator: LogosModulator = field(default_factory=LogosModulator)
@@ -84,16 +95,68 @@ class SolarisNeuralBridge:
         if not self.action_labels:
             raise ValueError("at least one action label is required")
         self._rng = random.Random(self.seed)
-        if self.esn is None:
-            self.esn = ESN(n_inputs=self.encoder.dim, seed=self.seed)
-        if self.esn.n_inputs != self.encoder.dim:
-            raise ValueError("ESN n_inputs must match encoder.dim")
+
+        # Build the substrate: an explicit instance wins; a legacy explicit ESN
+        # is wrapped; otherwise the registry creates the named substrate.
+        if self.substrate is None:
+            if self.esn is not None:
+                self.substrate = EchoStateSubstrate.from_esn(self.esn)
+            else:
+                cfg = dict(self.substrate_config or {})
+                cfg.pop("input_size", None)
+                self.substrate = SubstrateRegistry.create(
+                    self.substrate_name,
+                    input_size=self.encoder.dim,
+                    state_size=cfg.pop("state_size", None),
+                    seed=int(cfg.pop("seed", self.seed)),
+                    **cfg,
+                )
+        self.substrate_name = self.substrate.name
+        # Keep ``bridge.esn`` alive on the ESN path (back-compat: runner,
+        # observer, plasticity targets, and older experiments all use it).
+        self.esn = self.substrate.esn if isinstance(self.substrate, EchoStateSubstrate) else None
+
+        if self.substrate.input_size != self.encoder.dim:
+            raise ValueError("substrate input_size must match encoder.dim")
         if self.readout is None:
             self.readout = LinearReadout(
-                n_features=self.esn.feature_size(),
+                n_features=self.substrate.state_size + 1,  # state + bias term
                 n_outputs=len(self.action_labels),
                 labels=list(self.action_labels),
             )
+
+    # -- substrate access -----------------------------------------------------
+
+    def _features(self) -> List[float]:
+        """Substrate state plus a constant bias feature (what the readout sees)."""
+        return [float(x) for x in self.substrate.get_state()] + [1.0]
+
+    def substrate_state_norm(self) -> float:
+        """L2 norm of the current substrate state."""
+        return norm([float(x) for x in self.substrate.get_state()])
+
+    def attach_substrate(self, substrate: BaseSubstrate) -> None:
+        """Swap in a different substrate (used by the explicit SubstrateSwitcher).
+
+        If the new substrate's state size differs, the readout is rebuilt (its
+        learned weights cannot be meaningfully mapped across dimensions); same
+        size keeps the readout. Pending reaction context is cleared either way
+        so feedback never lands on mismatched features.
+        """
+        if substrate.input_size != self.encoder.dim:
+            raise ValueError("substrate input_size must match encoder.dim")
+        self.substrate = substrate
+        self.substrate_name = substrate.name
+        self.esn = substrate.esn if isinstance(substrate, EchoStateSubstrate) else None
+        needed = substrate.state_size + 1
+        if self.readout.n_features != needed:
+            self.readout = LinearReadout(
+                n_features=needed,
+                n_outputs=len(self.action_labels),
+                labels=list(self.action_labels),
+            )
+        self._last_features = None
+        self._last_chosen = None
 
     # -- processing ---------------------------------------------------------
 
@@ -113,12 +176,12 @@ class SolarisNeuralBridge:
         if isinstance(signal, C.LogosTension):
             self._logos = signal
 
-        # Encode -> modulate (Logos) -> advance the reservoir.
+        # Encode -> modulate (Logos) -> advance the substrate.
         vector = self.encoder.encode(signal, heartbeat=True)
         vector = self.modulator.apply_to_input(vector, self._logos)
-        self.esn.update(vector)
+        self.substrate.update(vector)
         self.telemetry.reservoir_update()
-        features = self.esn.features()
+        features = self._features()
 
         # Form a tendency: readout score + light habit bias, epsilon-greedy.
         pattern_key = self.encoder.pattern_key(signal)
@@ -165,7 +228,8 @@ class SolarisNeuralBridge:
             "confidence": confidence,
             "explored": chosen != greedy,
             "scores": dict(zip(self.action_labels, scores)),
-            "reservoir_energy": norm(self.esn.state),
+            "substrate": self.substrate.name,
+            "reservoir_energy": self.substrate_state_norm(),
             "logos_fracture": self._logos.fracture if self._logos is not None else 0.0,
         }
 
@@ -217,10 +281,17 @@ class SolarisNeuralBridge:
                 "union": self._logos.union,
                 "fracture": self._logos.fracture,
             }
+        substrate_metrics = self.substrate.metrics()
         return {
             "steps": self._steps,
-            "reservoir_energy": norm(self.esn.state),
-            "reservoir_state_sample": self.esn.state[:5],
+            "substrate_type": self.substrate.name,
+            "substrate_config": self.substrate.config.to_dict(),
+            "substrate_metrics": substrate_metrics.to_dict(),
+            "substrate_state_norm": substrate_metrics.state_norm,
+            "substrate_activity_rate": substrate_metrics.activity_rate,
+            "substrate_switches": list(getattr(self, "substrate_switches", [])),
+            "reservoir_energy": self.substrate_state_norm(),
+            "reservoir_state_sample": [float(x) for x in self.substrate.get_state()[:5]],
             "logos": logos,
             "habit_pathways": len(self.habit.weights),
             "habit_total_weight": round(self.habit.total_weight(), 6),

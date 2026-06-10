@@ -77,6 +77,8 @@ class ContinuousRunner:
     seed: int = 0
     action_labels: List[str] = field(default_factory=lambda: ["approach", "withdraw", "consume"])
     vocabulary: Optional[List[str]] = None
+    substrate_name: str = "esn"
+    substrate_config: Optional[Dict[str, Any]] = None
     bridge: Optional[SolarisNeuralBridge] = None
     synthesis: SynthesisPruner = field(default_factory=SynthesisPruner)
     stimulus_provider: Optional[StimulusProvider] = None
@@ -156,14 +158,16 @@ class ContinuousRunner:
             last_hb = float(manifest.get("last_heartbeat_ts", 0.0) or 0.0)
             gap = max(0.0, time.time() - last_hb) if last_hb else 0.0
 
-        # Build the bridge (reuse saved seed so reservoir matrices are identical).
+        # Build the bridge (reuse saved seed so substrate matrices are identical).
         seed = int(checkpoint.reservoir_config["seed"]) if checkpoint else self.seed
         if self.bridge is None:
             from ..bridges.neural_bridge import SolarisNeuralBridge  # local: avoid cycle
 
             encoder = EventEncoder(vocabulary=self.vocabulary)
             self.bridge = SolarisNeuralBridge(
-                action_labels=self.action_labels, encoder=encoder, seed=seed
+                action_labels=self.action_labels, encoder=encoder, seed=seed,
+                substrate_name=self.substrate_name,
+                substrate_config=self.substrate_config,
             )
         self.telemetry: Telemetry = self.bridge.telemetry
 
@@ -182,6 +186,9 @@ class ContinuousRunner:
             checkpoint.restore_into(self.bridge)
             self.pruning_history = list(checkpoint.pruning_history)
             self._restored_mutable_params = list(getattr(checkpoint, "mutable_params", []) or [])
+        # Richer substrate state (membranes, refractory counters, ...) from the
+        # generic npz store, when it matches the substrate we just built.
+        self.pm.load_substrate_into(self.bridge.substrate)
 
         # Carry lifetime/restart counters into telemetry.
         self.telemetry.set_lifetime_steps(self.lifetime_base)
@@ -269,7 +276,7 @@ class ContinuousRunner:
 
         self.lifecycle.heartbeat(step, lifetime)
         self.telemetry.heartbeat()
-        self.telemetry.set_reservoir_norm(norm(self.bridge.esn.state))
+        self.telemetry.set_reservoir_norm(self.bridge.substrate_state_norm())
         self.telemetry.set_lifetime_steps(lifetime)
 
         now = time.perf_counter()
@@ -331,6 +338,7 @@ class ContinuousRunner:
             plasticity=plasticity,
         )
         self.pm.save_checkpoint(cp)
+        self.pm.save_substrate(self.bridge.substrate, step=lifetime)
         self._last_checkpoint_ts = time.time()
         # Persist the Inner MAP self-model alongside the checkpoint.
         if self.observer is not None:
@@ -402,7 +410,7 @@ class ContinuousRunner:
             "restart_count": self.restart_count,
             "last_graceful_shutdown": graceful,
             "last_heartbeat_ts": self.lifecycle.last_heartbeat_ts or time.time(),
-            "seed": int(self.bridge.esn.seed),
+            "seed": int(self.bridge.substrate.seed),
         }
         if shutdown:
             manifest["last_shutdown_ts"] = time.time()
@@ -426,7 +434,7 @@ class ContinuousRunner:
             "checkpoints": self.telemetry.checkpoints,
             "unexpected_deaths": self.telemetry.unexpected_deaths,
             "brain_death_gap_seconds": self.telemetry.brain_death_gap_seconds,
-            "reservoir_norm": norm(self.bridge.esn.state),
+            "reservoir_norm": self.bridge.substrate_state_norm(),
             "habit_pathways": len(self.bridge.habit.weights),
             "pruning_passes": len(self.pruning_history),
             "telemetry": self.telemetry.to_dict(),

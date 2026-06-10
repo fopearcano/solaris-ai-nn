@@ -75,19 +75,20 @@ on a plain CPU.
 
 ## A note on NumPy
 
-This first version deliberately uses **only the Python standard library** — *no
-NumPy*. The reservoir is small (64–128 units) and the priority is transparency
-and zero-dependency portability, so the linear algebra lives in
-`solaris_ai_nn/utils/math.py` (including a power-iteration spectral-radius
-estimator, which avoids needing an eigensolver). A NumPy-backed accelerated
-backend is a deliberate, optional future step (ROADMAP Phase 4), not a
-requirement for the substrate's logic.
+The core layers (signals, the list-based ESN, readout, runtime, plasticity)
+deliberately use **only the Python standard library** — the linear algebra lives
+in `solaris_ai_nn/utils/math.py` (including a power-iteration spectral-radius
+estimator). **NumPy joined in Phase 6 for the substrate laboratory**
+(`substrates/`): the liquid-state and spiking substrates are dense
+membrane/spike vector loops, and substrate state persists as `.npz` — exactly
+the workload NumPy exists for, and the place the roadmap always reserved for
+it. The original stdlib code paths are unchanged.
 
 ---
 
 ## Install
 
-Requires **Python 3.11+**. No runtime dependencies.
+Requires **Python 3.11+**. One runtime dependency: NumPy.
 
 ```bash
 # From a checkout — no install needed to run the example or tests:
@@ -157,7 +158,18 @@ python examples/run_inner_map_evolution.py --steps 300 --state-dir .solaris_ai_n
 python examples/run_plasticity_dry_run.py
 python examples/run_plasticity_adaptation.py --enable-plasticity --steps 500
 python examples/run_plasticity_adaptation.py --rollback-last   # undo the last applied step
+
+# Substrate laboratory: compare ESN / liquid-state / spiking on the same trace,
+# and test that spike-based substrates stay alive through silence
+python examples/run_substrate_comparison.py --steps 300
+python examples/run_spiking_silence.py --steps 300
 ```
+
+The **substrate laboratory** (`substrates/`) makes the nervous layer selectable:
+the same bridge runs on the ESN baseline, a Liquid-State-inspired substrate, or
+a binary spiking recurrent substrate (`--substrates esn,liquid_state,spiking_recurrent`).
+All consume the same encoded Solaris signals; only the readout learns. Substrate
+switching is explicit-only, checkpointed, and rollbackable — never automatic.
 
 **Controlled plasticity** (`plasticity/`, off by default) lets the substrate tune
 its own *runtime parameters* — learning rate, habit weights, pruning threshold,
@@ -189,7 +201,8 @@ src/solaris_ai_nn/
   bridges/      SolarisNeuralBridge + seam to the conceptual Solaris_Ai reference
   inner_map/    self-model (model, observer, boundaries, state graph, serialization)
   plasticity/   habit, synthesis + controlled self-mod (engine, policy, safety, rollback, audit)
-  experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity adaptation
+  substrates/   substrate lab: ESN wrapper, liquid-state, spiking, registry, switching (NumPy)
+  experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity, substrates
   utils/        pure-stdlib math, logging
 tests/          pytest suite
 examples/       runnable scripts

@@ -34,7 +34,20 @@ SAFE_BOUNDS: Dict[Tuple[str, str], Tuple[float, float]] = {
     ("bridge", "exploration_tendency"): (0.0, 1.0),
     ("bridge", "stabilization_tendency"): (0.0, 1.0),
     ("bridge", "suggestion_threshold"): (0.0, 1.0),
+    # Substrate-laboratory knobs (liquid-state / spiking-recurrent).
+    ("substrate", "threshold"): (0.05, 10.0),       # spiking thresholds stay sane
+    ("substrate", "leak_rate"): (0.01, 1.0),
+    ("substrate", "decay"): (0.0, 1.0),
+    ("substrate", "trace_decay"): (0.0, 1.0),
+    ("substrate", "refractory_period"): (0, 100),   # must remain non-negative
+    ("substrate", "noise_level"): (0.0, 1.0),
+    ("substrate", "sparsity"): (0.01, 0.9),         # recurrent density bounds
+    ("substrate", "density"): (0.01, 0.9),
 }
+
+# Largest substrate/reservoir the validator will ever allow ("state size cannot
+# explode beyond configured max"; overridable via current_state["max_state_size"]).
+DEFAULT_MAX_STATE_SIZE = 8192
 
 # Parameters that plasticity may NEVER touch (regardless of value).
 FORBIDDEN_PARAMETERS = frozenset({
@@ -44,6 +57,10 @@ FORBIDDEN_PARAMETERS = frozenset({
     "boundaries", "boundary", "disable_boundaries",
     "action_authority", "autonomous_action", "commit_actions", "action_commit",
     "continuous", "continuous_mode",
+    # Substrate switching is never a plasticity mutation: it requires the
+    # explicit SubstrateSwitcher (which checkpoints before/after and preserves
+    # the old substrate's state).
+    "substrate_name", "substrate_type", "substrate_switch", "switch_substrate",
 })
 
 
@@ -101,12 +118,17 @@ class PlasticitySafetyValidator:
             check("within_state_dir", inside,
                   f"path {new_value!r} is outside the state directory")
 
-        # 5. Reservoir size cannot change during an active run unless experimental.
-        if parameter in ("reservoir_size", "n_reservoir"):
+        # 5. Substrate/reservoir size cannot change during an active run unless
+        #    experimental, and may never explode beyond the configured maximum.
+        if parameter in ("reservoir_size", "n_reservoir", "state_size"):
             experimental = step.trigger_source == "experimental"
             active = bool(state.get("active_run", False))
-            check("reservoir_size_locked", experimental or not active,
-                  "reservoir size cannot change during an active run unless experimental")
+            check("state_size_locked", experimental or not active,
+                  "substrate state size cannot change during an active run unless experimental")
+            max_size = int(state.get("max_state_size", DEFAULT_MAX_STATE_SIZE))
+            if isinstance(new_value, (int, float)):
+                check("state_size_within_max", new_value <= max_size,
+                      f"state size {new_value} exceeds configured max {max_size}")
 
         # 6. Numeric bounds.
         bounds = SAFE_BOUNDS.get((component, parameter))

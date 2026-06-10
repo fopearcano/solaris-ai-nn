@@ -97,21 +97,28 @@ class InnerMapObserver:
     # -- builders (return dataclasses) -------------------------------------
 
     def _neural(self, bridge: "SolarisNeuralBridge") -> NeuralSubstrateState:
-        esn = bridge.esn
-        # Actual sparsity of the recurrent matrix (fraction non-zero).
-        total = esn.n_reservoir * esn.n_reservoir
-        nonzero = sum(1 for row in esn.W for w in row if w != 0.0)
-        sparsity = (nonzero / total) if total else 0.0
+        sub = bridge.substrate
+        m = sub.metrics()
+        # For the ESN keep the recurrent-matrix density as "sparsity" (the
+        # original meaning); other substrates report it via their extras too.
+        sparsity = float(m.extras.get("connection_density", m.sparsity))
         desire = bridge.suggest_desire()
         return NeuralSubstrateState(
-            reservoir_size=esn.n_reservoir,
-            reservoir_state_norm=norm(esn.state),
+            reservoir_size=sub.state_size,
+            reservoir_state_norm=m.state_norm,
             reservoir_sparsity=sparsity,
-            input_vector_size=esn.n_inputs,
+            input_vector_size=sub.input_size,
             readout_output_size=bridge.readout.n_outputs,
             readout_weight_norm=bridge.readout.weight_magnitude(),
             prediction_confidence=desire.confidence if desire else 0.0,
             average_prediction_error=bridge.telemetry.average_prediction_error,
+            substrate_type=sub.name,
+            substrate_activity_rate=m.activity_rate,
+            substrate_drift=m.drift,
+            spike_rate=m.spike_rate,
+            silence_ratio=m.silence_ratio,
+            saturation_ratio=m.saturation_ratio,
+            substrate_switch_history=list(getattr(bridge, "substrate_switches", [])),
         )
 
     def _tendencies(self, bridge: "SolarisNeuralBridge") -> TendencyState:
@@ -140,11 +147,19 @@ class InnerMapObserver:
         )
 
     def _bridge_modules(self, bridge: "SolarisNeuralBridge") -> List[ModuleState]:
-        esn = bridge.esn
+        sub = bridge.substrate
+        m = sub.metrics()
+        sub_metrics: Dict[str, Any] = {
+            "size": sub.state_size,
+            "state_norm": round(m.state_norm, 4),
+            "activity_rate": round(m.activity_rate, 4),
+        }
+        if m.spike_rate is not None:
+            sub_metrics["spike_rate"] = round(m.spike_rate, 4)
+        if bridge.esn is not None:
+            sub_metrics["spectral_radius"] = bridge.esn.achieved_spectral_radius
         return [
-            ModuleState("reservoir", "ESN temporal substrate", metrics={
-                "size": esn.n_reservoir, "state_norm": round(norm(esn.state), 4),
-                "spectral_radius": esn.achieved_spectral_radius}),
+            ModuleState("substrate", f"{sub.name} temporal substrate", metrics=sub_metrics),
             ModuleState("readout", "linear action tendencies", metrics={
                 "outputs": bridge.readout.n_outputs,
                 "weight_norm": round(bridge.readout.weight_magnitude(), 4),
@@ -173,7 +188,7 @@ class InnerMapObserver:
 
     def _boundaries(self, runner: "ContinuousRunner") -> BoundaryState:
         return BoundaryState(
-            max_reservoir_size=runner.bridge.esn.n_reservoir,
+            max_reservoir_size=runner.bridge.substrate.state_size,
             max_trace_length=runner.bridge.trace.capacity,
             max_runtime_duration=runner.max_duration_s,
             max_steps=runner.max_steps,
@@ -235,7 +250,7 @@ class InnerMapObserver:
     def _unknown(self, bridge: Optional["SolarisNeuralBridge"], memory_report) -> UnknownState:
         drift = 0.0
         if bridge is not None:
-            current = norm(bridge.esn.state)
+            current = bridge.substrate_state_norm()
             if self._prev_reservoir_norm is not None:
                 drift = abs(current - self._prev_reservoir_norm)
             self._prev_reservoir_norm = current
@@ -264,7 +279,7 @@ class InnerMapObserver:
             model.boundaries = self._boundaries(self.runner)
         elif self.bridge is not None:
             model.boundaries = BoundaryState(
-                max_reservoir_size=self.bridge.esn.n_reservoir,
+                max_reservoir_size=self.bridge.substrate.state_size,
                 max_trace_length=self.bridge.trace.capacity,
             )
 

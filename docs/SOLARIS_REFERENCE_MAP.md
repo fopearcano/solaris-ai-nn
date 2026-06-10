@@ -202,3 +202,24 @@ mutation. Re-expressed, never imported; no source-code rewriting.
 Plasticity is **off by default**; when enabled it obeys the safety validator,
 supports a dry-run mode, persists mutable parameters across restarts, and can
 roll back any applied step from the audit log.
+
+---
+
+## Substrate-laboratory mapping (Phase 6)
+
+The substrate lab (`substrates/`) generalises the nervous layer: ESN,
+liquid-state, and spiking-recurrent substrates all consume the same Solaris
+signal vectors. The conceptual correspondences:
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| `core/aion_impulse.py` continuous heartbeat | the substrate **update loop** — every substrate advances on every event/heartbeat via `BaseSubstrate.update`, so the nervous layer never sits still |
+| `core/aion_impulse.py` absence Stimulus ("I exist!") | `experiments/spiking_silence.py` — escalating absence stimuli drive the liquid/spiking substrates through silence; the experiment measures that they do not go inert |
+| `core/logos.py` LogosTension | substrate **modulation** — `LogosModulator` gain/noise shapes the encoded vector before *any* substrate consumes it (fracture→gain, union→noise, division→confidence) |
+| `modules/inner_map.py` | substrate **observability** — `NeuralSubstrateState` now records substrate type, activity rate, drift, spike rate, silence/saturation ratios, and switch history |
+| Plasticity (Habit/Synthesis/Auto-Regeneration family) | **safe substrate parameter mutation** — liquid/spiking knobs (threshold, leak, decay, refractory, noise) are registered plasticity targets under hard `SAFE_BOUNDS`; substrate *switching* is a forbidden mutation |
+| `modules/dimensional_comparison.py` (knowing one's edges) | substrate **boundary validation** — safety rules: thresholds within numeric bounds, refractory non-negative, recurrent sparsity bounded, state size capped, switches explicit + checkpointed |
+
+The substrates remain *consciousness-inspired mechanisms*: fixed recurrent
+cores, an external adaptive readout, and observable metrics — never a claim of
+experience.

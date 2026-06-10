@@ -245,15 +245,30 @@ class StateCheckpoint:
     ) -> "StateCheckpoint":
         """Build a checkpoint by reading the live state out of ``bridge``."""
         esn = bridge.esn
-        config = {
-            "n_inputs": esn.n_inputs,
-            "n_reservoir": esn.n_reservoir,
-            "spectral_radius": esn.spectral_radius,
-            "leak_rate": esn.leak_rate,
-            "input_scaling": esn.input_scaling,
-            "sparsity": esn.sparsity,
-            "seed": esn.seed,
-        }
+        if esn is not None:
+            # ESN path: keep the original field layout for full back-compat.
+            config = {
+                "n_inputs": esn.n_inputs,
+                "n_reservoir": esn.n_reservoir,
+                "spectral_radius": esn.spectral_radius,
+                "leak_rate": esn.leak_rate,
+                "input_scaling": esn.input_scaling,
+                "sparsity": esn.sparsity,
+                "seed": esn.seed,
+            }
+            reservoir_state = list(esn.state)
+        else:
+            # Generic substrate path: store name/shape/seed so the runner can
+            # rebuild an identical substrate and restore its state vector.
+            sub = bridge.substrate
+            config = {
+                "substrate": sub.name,
+                "n_inputs": sub.input_size,
+                "state_size": sub.state_size,
+                "seed": sub.seed,
+                "params": dict(sub.params),
+            }
+            reservoir_state = [float(x) for x in sub.get_state()]
         habit_weights = [[k[0], k[1], v] for k, v in bridge.habit.weights.items()]
         habit_counts = [[k[0], k[1], v] for k, v in bridge.habit.counts.items()]
         return cls(
@@ -263,7 +278,7 @@ class StateCheckpoint:
             lifetime_step=lifetime_step,
             timestamp=time.time(),
             last_heartbeat_ts=last_heartbeat_ts,
-            reservoir_state=list(esn.state),
+            reservoir_state=reservoir_state,
             reservoir_config=config,
             readout_weights=[list(row) for row in bridge.readout.weights],
             readout_labels=list(bridge.readout.labels),
@@ -283,13 +298,26 @@ class StateCheckpoint:
         state and learned weights are restored here.
         """
         esn = bridge.esn
-        if len(self.reservoir_state) != esn.n_reservoir:
-            raise ValueError(
-                "checkpoint reservoir size "
-                f"{len(self.reservoir_state)} != bridge {esn.n_reservoir}"
-            )
-        esn.reset(self.reservoir_state)
-        if len(self.readout_weights) == len(bridge.readout.weights):
+        if esn is not None:
+            if len(self.reservoir_state) != esn.n_reservoir:
+                raise ValueError(
+                    "checkpoint reservoir size "
+                    f"{len(self.reservoir_state)} != bridge {esn.n_reservoir}"
+                )
+            esn.reset(self.reservoir_state)
+        else:
+            sub = bridge.substrate
+            if len(self.reservoir_state) != sub.state_size:
+                raise ValueError(
+                    "checkpoint substrate size "
+                    f"{len(self.reservoir_state)} != bridge {sub.state_size}"
+                )
+            sub.set_state(self.reservoir_state)
+        if (
+            self.readout_weights
+            and len(self.readout_weights) == len(bridge.readout.weights)
+            and len(self.readout_weights[0]) == bridge.readout.n_features
+        ):
             bridge.readout.weights = [list(row) for row in self.readout_weights]
             if self.readout_labels:
                 bridge.readout.labels = list(self.readout_labels)
@@ -348,6 +376,14 @@ class PersistenceManager:
     def plasticity_audit_path(self) -> Path:
         return self.state_dir / "plasticity_audit.jsonl"
 
+    @property
+    def substrate_state_path(self) -> Path:
+        return self.state_dir / "substrate_state.npz"
+
+    @property
+    def substrate_manifest_path(self) -> Path:
+        return self.state_dir / "substrate_manifest.json"
+
     # -- manifest -----------------------------------------------------------
 
     def has_previous_state(self) -> bool:
@@ -395,6 +431,50 @@ class PersistenceManager:
             return None
         with open(self.telemetry_path, "r", encoding="utf-8") as fh:
             return json.load(fh)
+
+    # -- generic substrate state ---------------------------------------------
+
+    def save_substrate(self, substrate: Any, step: int = 0) -> None:
+        """Persist a substrate's full evolving state (npz) + manifest (json).
+
+        Works for any :class:`~solaris_ai_nn.substrates.base.BaseSubstrate`.
+        The old ESN-in-checkpoint path keeps working; this is the richer,
+        substrate-generic store (it also captures membranes/refractory arrays
+        that the JSON checkpoint state vector cannot).
+        """
+        substrate.save_npz(self.substrate_state_path)
+        manifest = {
+            "substrate": substrate.name,
+            "config": substrate.config.to_dict(),
+            "state_size": substrate.state_size,
+            "input_size": substrate.input_size,
+            "seed": substrate.seed,
+            "last_saved_step": int(step),
+        }
+        self._write_json(self.substrate_manifest_path, manifest)
+
+    def load_substrate_manifest(self) -> Optional[Dict[str, Any]]:
+        if not self.substrate_manifest_path.exists():
+            return None
+        with open(self.substrate_manifest_path, "r", encoding="utf-8") as fh:
+            return json.load(fh)
+
+    def load_substrate_into(self, substrate: Any) -> bool:
+        """Restore a saved substrate state into ``substrate`` if compatible.
+
+        Returns True if the state was loaded (name and shape matched).
+        """
+        manifest = self.load_substrate_manifest()
+        if manifest is None or not self.substrate_state_path.exists():
+            return False
+        if (
+            manifest.get("substrate") != substrate.name
+            or int(manifest.get("state_size", -1)) != substrate.state_size
+            or int(manifest.get("input_size", -1)) != substrate.input_size
+        ):
+            return False
+        substrate.load_npz(self.substrate_state_path)
+        return True
 
     # -- inner map ----------------------------------------------------------
 

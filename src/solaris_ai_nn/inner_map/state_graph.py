@@ -122,4 +122,23 @@ def build_default_state_graph() -> StateGraph:
     g.add_edge("rollback_manager", "plasticity_engine", "restores previous state")
     g.add_edge("audit_log", "plasticity_engine", "records every mutation")
     g.add_edge("boundaries", "safety_validator", "defines limits")
+
+    # Substrate laboratory (Prompt 6).
+    for name, role in [
+        ("substrate_registry", "selectable substrates"),
+        ("esn_substrate", "ESN baseline"),
+        ("liquid_state_substrate", "liquid-state inspired"),
+        ("spiking_recurrent_substrate", "binary spiking"),
+        ("substrate_metrics", "shared activity metrics"),
+        ("event_encoder", "signal -> vector"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("substrate_registry", "esn_substrate", "registers")
+    g.add_edge("substrate_registry", "liquid_state_substrate", "registers")
+    g.add_edge("substrate_registry", "spiking_recurrent_substrate", "registers")
+    # "reservoir" is the selected substrate node; it already feeds the readout.
+    g.add_edge("event_encoder", "reservoir", "feeds selected substrate")
+    g.add_edge("substrate_metrics", "inner_map", "feeds")
+    g.add_edge("plasticity_engine", "substrate_registry",
+               "may tune substrate parameters within safety bounds")
     return g

@@ -13,6 +13,13 @@ Rule summary (section 5):
     E. high Logos fracture         -> raise exploration
     F. division dominates, low err -> raise stabilization
     G. absence cycles dominate     -> lower exploration (reduce overreaction)
+
+Substrate rule: the policy may tune substrate *parameters* (threshold, leak,
+refractory, ... -- all bounded by the safety validator), but it must NEVER
+propose switching the substrate itself. Substrate switching is reserved for the
+explicit :class:`~solaris_ai_nn.substrates.switching.SubstrateSwitcher`, and the
+safety validator independently rejects any ``substrate_name``-style mutation as
+a forbidden parameter.
 """
 
 from __future__ import annotations

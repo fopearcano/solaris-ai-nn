@@ -423,3 +423,79 @@ applied-step count, learning-rate / exploration drift, residual prediction error
 and habit-pathway counts, side by side.
 
 **Metrics.** `with_plasticity` vs `without_plasticity` dicts of the above.
+
+---
+
+# Phase-6 substrate-laboratory experiments
+
+These exercise the interchangeable substrates (Prompt 6): `SubstrateRegistry`,
+`LiquidStateSubstrate`, `SpikingRecurrentSubstrate`, `SubstrateSwitcher`, and
+the shared metrics.
+
+## 23. Substrate Comparison Experiment ✅ (implemented)
+
+**File:** `src/solaris_ai_nn/experiments/substrate_comparison.py`
+**Run:** `python examples/run_substrate_comparison.py --steps 300`
+
+**Setup.** The *same deterministic event trace* (cycling stimuli, periodic
+silence with escalating absence stimuli, `+1/−1` reactions, identical synthesis
+cadence) is run through identical bridges that differ only in substrate.
+
+**What it demonstrates.** The substrates' different temporal characters under
+one signal ecology — e.g. the ESN's dense smooth activity vs the spiking
+substrate's sparse binary events (which, on the toy world, let the NLMS readout
+converge fastest).
+
+**Metrics.** activity rate, mean state drift, early/late accuracy + adaptation
+gain, recent prediction error, habit reinforcements/pathways, pruning
+passes/pruned pathways, spike rate, memory trace length, duration, updates/sec,
+and the **energy proxy** (updates/sec per average active unit — a crude
+indicator, not a power measurement).
+
+**Pass criteria (tested).** bounded run, full metric rows per substrate, table
+renders, unknown substrate rejected, deterministic per seed.
+
+## 24. Spiking Silence Experiment ✅ (implemented)
+
+**File:** `src/solaris_ai_nn/experiments/spiking_silence.py`
+**Run:** `python examples/run_spiking_silence.py --steps 300`
+
+**Setup.** Three equal phases per substrate (liquid-state, spiking-recurrent):
+external stimuli → silence with escalating "I exist!" absence stimuli → stimuli
+again.
+
+**What it demonstrates.** Spike-based substrates keep evolving through silence:
+non-zero activity, non-zero drift, and a measurable state shift across the
+silent phase. "Not inert" means non-zero changing numbers — no consciousness
+claim.
+
+**Pass criteria (tested).** bounded run; `silence_state_shift > 0`; per-phase
+drift > 0; `went_inert is False`; deterministic per seed.
+
+## 25. Substrate Switch/Rollback Experiment ✅ (implemented as tests)
+
+**Module:** `substrates/switching.py` (`SubstrateSwitcher`).
+
+**What it demonstrates.** A switch requires `explicit=True` (automatic/policy
+switching raises and is also a forbidden plasticity mutation); the old
+substrate is checkpointed *before* the switch and never discarded; state
+transfers only when dimensions match (safe zero start otherwise); the new
+substrate is checkpointed after; `rollback_switch` restores the previous
+substrate bit-for-bit from its checkpoint; the Inner MAP records switch history.
+
+## 26. Activity Drift Experiment (specified; metrics ship today)
+
+**Goal.** Characterise long-horizon drift per substrate: feed a stationary
+stimulus distribution for many steps and track `metrics().drift` and state-norm
+trajectories. Expected: the ESN settles into a tight orbit; the spiking
+substrate stays "twitchy" (high per-step drift, bounded norm). Builds directly
+on `substrates/metrics.py` — pair with the Phase-2 soak machinery for hours-long
+runs.
+
+## 27. Energy Proxy Experiment (specified; proxy ships today)
+
+**Goal.** Compare "work per active unit" across substrates and state sizes
+using `energy_proxy` (updates/sec ÷ average active units), explicitly labelled
+a crude software indicator. Expected: sparse spiking substrates sustain far more
+updates per active unit — the low-compute argument made measurable. Future:
+correlate with wall-clock CPU time per step at varying state sizes.

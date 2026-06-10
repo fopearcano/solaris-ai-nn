@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from ..bridges.neural_bridge import SolarisNeuralBridge
     from ..plasticity.synthesis_pruning import SynthesisPruner
 
-# Supported target components (section 3).
+# Supported target components (section 3 + Prompt-6 substrate lab).
 RESERVOIR = "reservoir"
 READOUT = "readout"
 HABIT = "habit"
@@ -28,9 +28,11 @@ BRIDGE = "bridge"
 EXPERIMENT_LOOP = "experiment_loop"
 INNER_MAP = "inner_map"
 BOUNDARIES = "boundaries"
+SUBSTRATE = "substrate"
 
 SUPPORTED_TARGETS = frozenset(
-    {RESERVOIR, READOUT, HABIT, SYNTHESIS, BRIDGE, EXPERIMENT_LOOP, INNER_MAP, BOUNDARIES}
+    {RESERVOIR, READOUT, HABIT, SYNTHESIS, BRIDGE, EXPERIMENT_LOOP, INNER_MAP,
+     BOUNDARIES, SUBSTRATE}
 )
 
 # Step status values.
@@ -145,11 +147,20 @@ class TargetRegistry:
         def reg(component: str, param: str, getter: Getter, setter: Setter) -> None:
             self._map[(component, param)] = (getter, setter)
 
-        # Reservoir (recomputable setters keep dynamics consistent).
-        reg(RESERVOIR, "leak_rate", lambda: esn.leak_rate, esn.set_leak_rate)
-        reg(RESERVOIR, "input_gain", lambda: esn.input_scaling, esn.set_input_scaling)
-        reg(RESERVOIR, "spectral_radius",
-            lambda: esn.achieved_spectral_radius, esn.set_spectral_radius)
+        # Reservoir (recomputable setters; only when the substrate is the ESN).
+        if esn is not None:
+            reg(RESERVOIR, "leak_rate", lambda: esn.leak_rate, esn.set_leak_rate)
+            reg(RESERVOIR, "input_gain", lambda: esn.input_scaling, esn.set_input_scaling)
+            reg(RESERVOIR, "spectral_radius",
+                lambda: esn.achieved_spectral_radius, esn.set_spectral_radius)
+
+        # Generic substrate knobs (liquid/spiking expose threshold, leak, ...).
+        # Switching the substrate itself is NOT a mutable parameter -- it can
+        # only happen through the explicit SubstrateSwitcher.
+        substrate = getattr(b, "substrate", None)
+        if substrate is not None and hasattr(substrate, "mutable_parameters"):
+            for pname, (getter, setter) in substrate.mutable_parameters().items():
+                reg(SUBSTRATE, pname, getter, setter)
 
         # Readout / online learner.
         reg(READOUT, "learning_rate", lambda: b.learner.lr,
