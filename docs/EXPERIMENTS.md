@@ -561,3 +561,75 @@ explicit opt-in) with JSONL export — the observability half.
 `runtime/replay.py`-style machinery to re-run an observed Solaris session into
 a fresh bridge, comparing suggestion streams across substrates — replaying the
 *organism's* history through different nervous layers.
+
+---
+
+# Phase-8 embodiment experiments
+
+These exercise the simulated body + GridWorld (`embodiment/`). All bounded; all
+simulation-only.
+
+## 32. Sensorimotor GridWorld Experiment ✅ (implemented)
+
+**File:** `src/solaris_ai_nn/experiments/sensorimotor_gridworld.py`
+**Run:** `python examples/run_sensorimotor_gridworld.py --steps 300`
+
+**Setup.** A simulated body in a 9×7 grid with signal/obstacle/reward/danger/
+unknown markers. Sensors emit Stimuli, the bridge suggests, safety validates,
+effectors act, feedback returns Reactions, the substrate adapts online
+(optional plasticity tunes within bounds).
+
+**Metrics / output.** final ASCII world, action counts, executed/blocked +
+collisions, reaction summary (±, mean valence), energy summary, rewards
+consumed, strongest habits, substrate metrics, Inner MAP embodiment view,
+persistence paths.
+
+**Pass criteria (tested).** bounded; report carries all summaries; persistence
+files written; observe-only executes zero actions; substrate selectable.
+
+## 33. Embodied Absence Experiment ✅ (implemented)
+
+**Run:** `python examples/run_embodied_absence.py --steps 300`
+
+**Setup.** A sparse world (almost no objects): the body lives in long
+low-stimulus windows; the AbsenceSensor fills the silence.
+
+**What it demonstrates.** Absence stimuli keep the substrate updating (non-zero
+updates and drift, never inert) and the silence-filling actions are graded —
+needed rest is useful, repetition is penalised.
+
+**Pass criteria (tested).** absence stimuli occur; substrate updates during
+low-stimulus windows; `went_inert is False`; bounded.
+
+## 34. Reward/Danger Adaptation Experiment ✅ (implemented)
+
+**Run:** `python examples/run_reward_danger_adaptation.py --steps 300`
+
+**Setup.** A world rich in reward and danger markers (rewards replenish so the
+gradient persists). Approaching/consuming reward earns +, approaching/standing
+on danger earns −.
+
+**What it demonstrates.** Early-vs-late comparison of mean valence and
+reward-vs-danger event balance. On the reference seed, tendencies measurably
+shift toward reward (e.g. mean valence ~0.03 → ~0.25); when they do not, the
+verdict says "no clear tendency change" honestly.
+
+**Pass criteria (tested).** bounded; feedback recorded; verdict explicit either
+way; adaptation observed on the reference seed.
+
+## 35. Energy Exhaustion Experiment (specified; model ships today)
+
+**Goal.** Drive the body to exhaustion (high-cost action sequences), confirm
+costly actions are blocked while rest stays available, and measure how quickly
+rest-feedback teaches an energy-management habit. Builds directly on
+`EnergyModel.exhaustion_events` and the `needed_rest` feedback rule (both
+already implemented and unit-tested).
+
+## 36. Observe-only Embodiment Experiment (implemented as a mode)
+
+**Run:** `python examples/run_sensorimotor_gridworld.py --observe-only`
+
+**What it demonstrates.** The strictest authority setting: the body perceives
+and the substrate learns state, but zero actions execute (`actions_executed ==
+0`, empty action counts) — the embodied analogue of the sidecar's observe-only
+mode. Tested.

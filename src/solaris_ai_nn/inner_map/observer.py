@@ -49,6 +49,7 @@ class InnerMapObserver:
     habit: Optional["HabitReinforcement"] = None
     synthesis: Optional["SynthesisPruner"] = None
     sidecar: Any = None  # optional SolarisNNSidecar (duck-typed; observe-only)
+    embodiment: Any = None  # optional object exposing embodiment_summary()
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -301,6 +302,9 @@ class InnerMapObserver:
         if self.sidecar is not None:
             # Read-only summary of the Solaris integration status.
             model.integration = self.sidecar.integration_summary()
+        if self.embodiment is not None:
+            # Read-only summary of the simulated body/world (simulation-only).
+            model.embodiment = self.embodiment.embodiment_summary()
         model.touch()
         self._model = model
         return model

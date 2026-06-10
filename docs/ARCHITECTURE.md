@@ -509,3 +509,51 @@ observe-only default, and a `detach()` that restores the world to exactly what
 it was. Solaris_Ai can ignore the sidecar entirely and lose nothing; it can
 consult the suggestions and gain a learner. That asymmetry — all of the option
 value, none of the coupling — is the point.
+
+## 18. Embodiment and sensorimotor loop
+
+The embodiment layer (`embodiment/`, Prompt 8) gives the substrate a minimal
+**simulated** body and world. Solaris_Ai's architecture presumes continuous
+I/O, sensing, reactivity, feedback, and boundaries — not text alone — so the NN
+laboratory needs a place where actions have consequences.
+
+**Why a body-like interface, and why simulated first.** Without consequences,
+the substrate only ever learns from scripted reactions; with a body in a world,
+its own choices generate the feedback it learns from — closing the
+`Stimulus → Push → Desire → Action → Reaction` spine end to end. The first body
+is simulated because the project's questions (does the loop close? does
+feedback shape tendencies? does the body manage its own energy?) are fully
+answerable in a 9×7 grid, and because real-world actuation before the safety,
+observability, and rollback machinery is proven would invert the project's
+entire safety posture.
+
+**Sensors → Stimulus.** `GridWorld` produces raw senses; six sensors
+(proximity, object/novelty, boundary, energy, absence, clock) convert them to
+canonical `Stimulus`/`MeaningEvent` signals — the *same* vocabulary everything
+else speaks. The AbsenceSensor embodies the Subtraction Principle: an empty
+neighbourhood is itself a stimulus.
+
+**Suggested Actions → simulated effector commands.** The bridge's suggestion is
+wrapped as an `EffectorCommand`, validated by `EmbodimentSafety` (closed action
+space, forbidden patterns for anything network/OS/browser/robot-shaped, no
+unbounded simulation, no out-of-simulation commitment), and executed by an
+effector **exclusively through the GridWorld API**. Blocked actions return
+explicit reasons; nothing touches the real world.
+
+**Feedback → Reaction.** `EmbodimentFeedback` grades consequences — closer to
+reward (+), collisions (−), touching the unknown (novelty +), needed rest (+),
+useless repetition (−) — into canonical `Reaction` events that drive the same
+online NLMS + habit learning as every earlier experiment.
+
+**Energy as internal Stimulus.** The `EnergyModel` is a simulated need:
+movement costs, rest restores, low energy emits an internal Stimulus, and
+exhaustion blocks costly actions (rest stays available). In practice the agent
+demonstrably learns to rest when depleted.
+
+**Inner MAP + authority.** The Inner MAP gains an `embodiment` section
+(position, energy, exhaustion, available/forbidden actions, last
+stimuli/action/reaction, boundaries, nearby objects, safety status) and records
+`action_authority: "simulation-only"` — the body acts in its grid and nowhere
+else. Plasticity may tune learning knobs from embodiment statistics (failure
+rate, collisions) but is hard-blocked from expanding action authority, adding
+actions, or disabling embodiment safety.

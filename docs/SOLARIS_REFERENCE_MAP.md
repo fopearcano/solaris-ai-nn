@@ -246,3 +246,21 @@ Compatibility grading (`integration/compatibility.py`): `unavailable → minimal
 → bus_observable → sidecar_ready → full_test_ready`; the sidecar requires at
 least `bus_observable`, plasticity requires `sidecar_ready` to even *propose*
 enabling real integration, and observe-only remains the default everywhere.
+
+---
+
+## Embodiment mapping (Phase 8)
+
+The sensorimotor sandbox (`embodiment/`) realises Solaris_Ai's embodiment-facing
+principles inside a bounded simulation. As always: concepts re-expressed as
+mechanisms; the reference repo untouched; no real-world actuation.
+
+| Solaris_Ai principle / concept | Solaris-AI-NN implementation |
+|---|---|
+| Sensory Integration principle | `embodiment/sensors.py` — proximity/object/boundary/energy/absence/clock sensors emitting canonical Stimulus/MeaningEvent |
+| Embodiment Interface | `embodiment/body.py` (`SimulatedBody`) + `embodiment/grid_world.py` (`GridWorld`) — a body with position/energy in a bounded, deterministic world |
+| Reactivity Engine | the sensorimotor loop (`embodiment/simulation_runner.py`): perceive → suggest → safety-validate → act → Reaction → learn, every step |
+| Inner MAP | body/world/energy observation — `InnerMapModel.embodiment` (position, energy, exhaustion, actions, boundaries, `action_authority: simulation-only`) |
+| Memory–Sensory Interaction | bounded sensor/action histories + feedback valence record (`embodiment/state.py` summaries persisted as `embodiment_state.json`) |
+| Action/Reaction concept | `embodiment/effectors.py` (simulated actions only) + `embodiment/feedback.py` (`EmbodimentFeedback` → canonical Reaction with explicit reasons) |
+| AION absence Stimulus | `AbsenceSensor` — an empty sensory neighbourhood emits "I sense nothing" (`is_absence=True`); the embodied absence experiment measures the result |

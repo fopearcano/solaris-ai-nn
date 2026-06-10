@@ -19,6 +19,15 @@ from .plasticity_adaptation import (  # noqa: F401
     rollback_last,
     run_plasticity_adaptation,
 )
+from .embodied_absence import EmbodiedAbsenceResult, run_embodied_absence  # noqa: F401
+from .reward_danger_adaptation import (  # noqa: F401
+    RewardDangerResult,
+    run_reward_danger_adaptation,
+)
+from .sensorimotor_gridworld import (  # noqa: F401
+    SensorimotorResult,
+    run_sensorimotor_gridworld,
+)
 from .soak_continuity import SoakResult, run_soak_continuity  # noqa: F401
 from .solaris_sidecar_observation import (  # noqa: F401
     SidecarObservationResult,
@@ -50,4 +59,10 @@ __all__ = [
     "SilenceResult",
     "run_sidecar_observation",
     "SidecarObservationResult",
+    "run_sensorimotor_gridworld",
+    "SensorimotorResult",
+    "run_embodied_absence",
+    "EmbodiedAbsenceResult",
+    "run_reward_danger_adaptation",
+    "RewardDangerResult",
 ]

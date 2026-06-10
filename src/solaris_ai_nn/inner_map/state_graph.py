@@ -165,4 +165,27 @@ def build_default_state_graph() -> StateGraph:
     g.add_edge("solaris_nn_sidecar", "bus_connector", "owns")
     g.add_edge("solaris_conscience_external", "solaris_conscience_external",
                "remains action authority")
+
+    # Embodiment / sensorimotor sandbox (Prompt 8). Simulation-only.
+    for name, role in [
+        ("simulated_body", "body in simulation"),
+        ("grid_world", "bounded 2D world"),
+        ("sensors", "simulated senses"),
+        ("effectors", "simulated actions"),
+        ("energy_model", "simulated metabolism"),
+        ("embodiment_safety", "simulation-only authority"),
+        ("sensorimotor_runner", "perceive/act/learn loop"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("grid_world", "sensors", "produces sensory data")
+    g.add_edge("sensors", "bridge", "emit Stimulus")
+    g.add_edge("bridge", "reservoir", "updates substrate")
+    g.add_edge("bridge", "effectors", "suggests Action")
+    g.add_edge("embodiment_safety", "effectors", "validates Action")
+    g.add_edge("effectors", "grid_world", "act in simulation")
+    g.add_edge("grid_world", "bridge", "feedback emits Reaction")
+    g.add_edge("energy_model", "sensors", "internal need Stimulus")
+    g.add_edge("sensorimotor_runner", "simulated_body", "drives")
+    g.add_edge("inner_map", "simulated_body", "observes body/world state")
+    g.add_edge("inner_map", "grid_world", "observes body/world state")
     return g

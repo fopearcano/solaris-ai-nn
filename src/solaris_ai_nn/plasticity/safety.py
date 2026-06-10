@@ -67,6 +67,11 @@ FORBIDDEN_PARAMETERS = frozenset({
     "observe_only", "conscience", "bus_subscription", "bus_subscriptions",
     "death", "lifecycle_death", "solaris_action", "commit_solaris_action",
     "publish_committed_action",
+    # Embodiment invariants (Prompt 8): plasticity may tune learning knobs but
+    # never expand action authority, add real-world actions, or disable the
+    # embodiment safety layer / simulation boundaries.
+    "action_authority", "action_space", "add_action", "real_world_actions",
+    "embodiment_safety", "simulation_boundaries", "disable_safety",
 })
 
 # Components that belong to the external Solaris_Ai runtime -- plasticity may

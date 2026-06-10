@@ -176,6 +176,12 @@ class InnerMapModel:
     # last_suggestion_confidence, action_authority (always False),
     # substrate_type, sidecar_health.
     integration: Optional[Dict[str, Any]] = None
+    # Embodiment status (Prompt 8); None when no simulated body exists.
+    # Keys: body, body_type, environment_type, position, energy, exhausted,
+    # available/forbidden_actions, last_stimulus_types, last_action,
+    # last_action_result, last_reaction_valence, environment_boundaries,
+    # nearby_objects, action_authority ("simulation-only"), safety_status.
+    embodiment: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

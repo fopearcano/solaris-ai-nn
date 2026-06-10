@@ -168,7 +168,19 @@ python examples/run_spiking_silence.py --steps 300
 python examples/run_fake_solaris_integration.py          # fake Conscience/Bus demo
 python examples/run_solaris_sidecar_observation.py       # bounded observation experiment
 python examples/run_real_solaris_integration_if_available.py  # see note below
+
+# Embodiment: a simulated body in a bounded GridWorld (simulation-only actions)
+python examples/run_sensorimotor_gridworld.py --steps 300
+python examples/run_embodied_absence.py --steps 300
+python examples/run_reward_danger_adaptation.py --steps 300
 ```
+
+The **embodiment sandbox** (`embodiment/`) closes the sensorimotor loop: sensors
+emit canonical Stimuli, the bridge suggests actions, a safety layer admits only
+the declared simulated action space (no network/OS/browser/robotics — ever),
+effectors act inside the GridWorld, and consequences return as Reactions the
+substrate learns from. Energy is a simulated need (movement costs, rest
+restores, exhaustion blocks). Action authority is **simulation-only**.
 
 The **sidecar integration** (`integration/`) attaches Solaris-AI-NN beside a
 Solaris_Ai-like runtime as an *optional, observe-first* adaptive substrate: it
@@ -217,7 +229,9 @@ src/solaris_ai_nn/
   plasticity/   habit, synthesis + controlled self-mod (engine, policy, safety, rollback, audit)
   substrates/   substrate lab: ESN wrapper, liquid-state, spiking, registry, switching (NumPy)
   integration/  optional Solaris_Ai sidecar: probe, bus connector, mirror, suggestions
-  experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity, substrates, sidecar
+  embodiment/   simulated body + GridWorld: sensors, effectors, energy, safety, runner
+  experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
+                substrates, sidecar, sensorimotor/absence/reward-danger embodiment
   utils/        pure-stdlib math, logging
 tests/          pytest suite
 examples/       runnable scripts

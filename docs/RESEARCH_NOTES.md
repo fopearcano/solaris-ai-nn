@@ -158,3 +158,38 @@ around it.
 lab is where NumPy was always slated to arrive: dense membrane/spike vector math
 and `.npz` state persistence are exactly the workload it exists for. The core
 layers (signals, list-based ESN, readout, runtime) remain stdlib.
+
+## Phase-8 embodiment notes
+
+**Embodiment in cognitive architectures.** A long-standing position in
+cognitive science holds that cognition is shaped by having a body whose actions
+have consequences — perception and action form one loop, not a pipeline. We take
+from this only the *architectural* lesson: a learner whose outputs feed back
+into its inputs through an environment learns about consequences, not just
+correlations. No stronger philosophical claim is made.
+
+**Sensorimotor loops.** The contingency between what the body does and what it
+next senses is itself a learnable signal. Closing the loop (perceive → act →
+consequence → perceive) is what turns our scripted-feedback experiments into a
+system whose own choices generate its training signal.
+
+**Active perception.** Sensing is an activity: `look`, `emit_ping`, and movement
+all change what the sensors report next. Even in a toy grid, the agent's policy
+partly determines its own sensory stream — the simplest honest version of
+"perception is something the agent does".
+
+**Internal energy/metabolism as simulated need.** The EnergyModel is a bounded
+scalar with costs and recovery — a *need* in the control-theoretic sense only.
+It creates internal stimuli (low energy), constrains action (exhaustion), and
+gives rest a learnable purpose. It is not hunger and it is not motivation; it is
+a deterministic resource loop that makes self-maintenance measurable.
+
+**Why simulated embodiment comes before physical embodiment.** Every question
+this phase asks — does the loop close? does feedback shape tendencies? does the
+body learn to manage energy? do absence regions keep the substrate alive? — is
+fully answerable in a deterministic ASCII grid at thousands of steps per second,
+with perfect reproducibility and zero risk. Physical embodiment would add cost,
+noise, and irreversibility while answering the same questions worse. The
+embodiment safety layer (closed action space, forbidden real-world patterns,
+simulation-only authority) is also the template any future physical interface
+would have to satisfy *before* existing.

@@ -158,6 +158,28 @@ class PlasticityPolicy:
                     "rational (division) dominates with low error",
                     "consolidate confident behaviour", "policy:division"))
 
+        # H. Embodiment feedback (Prompt 8): a body that mostly fails or keeps
+        #    colliding should explore more / demand more confident suggestions.
+        #    Keys default to 0 so non-embodied contexts never trigger this.
+        failure_rate = float(ctx.get("action_failure_rate", 0.0))
+        executed = float(ctx.get("action_success_rate", 0.0)) + failure_rate
+        if failure_rate >= 0.5 and executed > 0:
+            lo, hi = _bounds(BRIDGE, "exploration_tendency")
+            old = float(cur.get("bridge.exploration_tendency", 0.0))
+            new = clamp(old + self.explore_delta, lo, hi)
+            if new > old and not any(s.target.parameter == "exploration_tendency" for s in steps):
+                steps.append(self._mk(ctx, BRIDGE, "exploration_tendency", old, new,
+                    f"embodied action failure rate high ({failure_rate:.2f})",
+                    "explore alternative actions", "policy:embodiment"))
+        if int(ctx.get("collision_count", 0)) >= 5:
+            lo, hi = _bounds(BRIDGE, "suggestion_threshold")
+            old = float(cur.get("bridge.suggestion_threshold", 0.0))
+            new = clamp(old + 0.05, lo, hi)
+            if new > old:
+                steps.append(self._mk(ctx, BRIDGE, "suggestion_threshold", old, new,
+                    f"{ctx.get('collision_count')} repeated collisions",
+                    "require more confident suggestions", "policy:embodiment"))
+
         # G. Absence cycles dominate (and not rewarded) -> lower exploration.
         if absence_ratio >= self.absence_ratio_high and positive == 0:
             lo, hi = _bounds(BRIDGE, "exploration_tendency")

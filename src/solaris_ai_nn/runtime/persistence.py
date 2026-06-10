@@ -396,6 +396,18 @@ class PersistenceManager:
     def mirrored_signals_path(self) -> Path:
         return self.state_dir / "mirrored_signals.jsonl"
 
+    @property
+    def embodiment_state_path(self) -> Path:
+        return self.state_dir / "embodiment_state.json"
+
+    @property
+    def body_state_path(self) -> Path:
+        return self.state_dir / "body_state.json"
+
+    @property
+    def world_state_path(self) -> Path:
+        return self.state_dir / "world_state.json"
+
     # -- manifest -----------------------------------------------------------
 
     def has_previous_state(self) -> bool:
@@ -487,6 +499,24 @@ class PersistenceManager:
             return False
         substrate.load_npz(self.substrate_state_path)
         return True
+
+    # -- embodiment (simulated body + world) ----------------------------------
+
+    def save_embodiment_state(self, state: Dict[str, Any]) -> None:
+        """Persist aggregated embodiment state (summaries, not raw streams)."""
+        self._write_json(self.embodiment_state_path, state)
+
+    def save_body_state(self, state: Dict[str, Any]) -> None:
+        self._write_json(self.body_state_path, state)
+
+    def save_world_state(self, state: Dict[str, Any]) -> None:
+        self._write_json(self.world_state_path, state)
+
+    def load_embodiment_state(self) -> Optional[Dict[str, Any]]:
+        if not self.embodiment_state_path.exists():
+            return None
+        with open(self.embodiment_state_path, "r", encoding="utf-8") as fh:
+            return json.load(fh)
 
     # -- integration (Solaris sidecar) ---------------------------------------
 
