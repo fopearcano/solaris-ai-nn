@@ -141,4 +141,28 @@ def build_default_state_graph() -> StateGraph:
     g.add_edge("substrate_metrics", "inner_map", "feeds")
     g.add_edge("plasticity_engine", "substrate_registry",
                "may tune substrate parameters within safety bounds")
+
+    # Solaris sidecar integration (Prompt 7). External nodes are Solaris_Ai's;
+    # the sidecar only observes them and suggests -- action authority stays out.
+    for name, role in [
+        ("solaris_conscience_external", "Solaris_Ai organism (external)"),
+        ("solaris_bus_external", "Solaris_Ai bus (external)"),
+        ("solaris_nn_sidecar", "optional adaptive sidecar"),
+        ("bus_connector", "observe-first subscription"),
+        ("signal_mirror", "read-only signal mirror"),
+        ("suggestion_channel", "suggestions only, never committed"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("solaris_conscience_external", "solaris_bus_external", "owns")
+    g.add_edge("solaris_bus_external", "bus_connector", "emits observed signals")
+    g.add_edge("bus_connector", "bridge", "forwards to neural bridge")
+    g.add_edge("bridge", "reservoir", "updates substrate")
+    g.add_edge("bus_connector", "signal_mirror", "mirrors")
+    g.add_edge("bus_connector", "suggestion_channel", "routes suggestions")
+    g.add_edge("suggestion_channel", "solaris_bus_external",
+               "publishes suggestions (never Actions)")
+    g.add_edge("inner_map", "solaris_nn_sidecar", "observes sidecar state")
+    g.add_edge("solaris_nn_sidecar", "bus_connector", "owns")
+    g.add_edge("solaris_conscience_external", "solaris_conscience_external",
+               "remains action authority")
     return g

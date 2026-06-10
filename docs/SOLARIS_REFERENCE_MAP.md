@@ -223,3 +223,26 @@ signal vectors. The conceptual correspondences:
 The substrates remain *consciousness-inspired mechanisms*: fixed recurrent
 cores, an external adaptive readout, and observable metrics — never a claim of
 experience.
+
+---
+
+## Sidecar-integration mapping (Phase 7)
+
+The integration layer (`integration/`) is the first real seam to the actual
+reference runtime. As ever: duck-typed, optional, never imported as a hard
+dependency, and the reference repo is untouched.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| `conscience.py` (the assembled organism) | `integration/conscience_sidecar.py` — `SolarisNNSidecar` **attach point**: probe → attach → observe → suggest → detach; never stimulate/react/death |
+| `runtime/bus.py` (typed async pub/sub) | `integration/bus_connector.py` — `SolarisBusConnector`: subscribe_all (async-aware), forward to the bridge, reversible detach |
+| `runtime/signals.py` | `signals/adapters.py` + `signals/canonical.py` — observed signals adapt by name/fields; real classes detected via `integration/optional_imports.py` when present |
+| `core/logos.py` | `reservoir/modulation.py` — observed `LogosTension` modulates substrate input/confidence exactly as in Phase 1 |
+| `modules/inner_map.py` | Inner MAP **integration state** — `InnerMapModel.integration` (attached, observe-only, compatibility level, mirrored/suggestion counts, `action_authority: false`, sidecar health) |
+| `modules/io_module.py` (acting on the world) | **action authority remains outside the NN sidecar** — the `SuggestionChannel` emits `committed=False` suggestions only and rejects anything claiming otherwise |
+| `modules/language.py` | future: natural-language explanation of suggestions (the `reason` field on `NeuralSuggestion` is the seam where richer explanations will attach) |
+
+Compatibility grading (`integration/compatibility.py`): `unavailable → minimal
+→ bus_observable → sidecar_ready → full_test_ready`; the sidecar requires at
+least `bus_observable`, plasticity requires `sidecar_ready` to even *propose*
+enabling real integration, and observe-only remains the default everywhere.

@@ -384,6 +384,18 @@ class PersistenceManager:
     def substrate_manifest_path(self) -> Path:
         return self.state_dir / "substrate_manifest.json"
 
+    @property
+    def integration_state_path(self) -> Path:
+        return self.state_dir / "integration_state.json"
+
+    @property
+    def suggestions_path(self) -> Path:
+        return self.state_dir / "suggestions.jsonl"
+
+    @property
+    def mirrored_signals_path(self) -> Path:
+        return self.state_dir / "mirrored_signals.jsonl"
+
     # -- manifest -----------------------------------------------------------
 
     def has_previous_state(self) -> bool:
@@ -475,6 +487,18 @@ class PersistenceManager:
             return False
         substrate.load_npz(self.substrate_state_path)
         return True
+
+    # -- integration (Solaris sidecar) ---------------------------------------
+
+    def save_integration_state(self, state: Dict[str, Any]) -> None:
+        """Persist the sidecar's integration state (summaries, not raw payloads)."""
+        self._write_json(self.integration_state_path, state)
+
+    def load_integration_state(self) -> Optional[Dict[str, Any]]:
+        if not self.integration_state_path.exists():
+            return None
+        with open(self.integration_state_path, "r", encoding="utf-8") as fh:
+            return json.load(fh)
 
     # -- inner map ----------------------------------------------------------
 

@@ -61,6 +61,20 @@ FORBIDDEN_PARAMETERS = frozenset({
     # explicit SubstrateSwitcher (which checkpoints before/after and preserves
     # the old substrate's state).
     "substrate_name", "substrate_type", "substrate_switch", "switch_substrate",
+    # Solaris_Ai integration invariants (Prompt 7): plasticity may never touch
+    # the external runtime, its bus subscriptions, its lifecycle, or flip the
+    # sidecar out of observe-only / into action authority.
+    "observe_only", "conscience", "bus_subscription", "bus_subscriptions",
+    "death", "lifecycle_death", "solaris_action", "commit_solaris_action",
+    "publish_committed_action",
+})
+
+# Components that belong to the external Solaris_Ai runtime -- plasticity may
+# never target them (they are also not in SUPPORTED_TARGETS, but we reject them
+# with an explicit message rather than a generic "unknown component").
+SOLARIS_RUNTIME_COMPONENTS = frozenset({
+    "solaris", "solaris_ai", "solaris_runtime", "solaris_bus", "conscience",
+    "sidecar", "bus",
 })
 
 
@@ -93,9 +107,24 @@ class PlasticitySafetyValidator:
             if not ok:
                 violations.append(detail or name)
 
+        # 0. Solaris_Ai runtime objects are untouchable by plasticity.
+        if component in SOLARIS_RUNTIME_COMPONENTS:
+            check("no_solaris_runtime_mutation", False,
+                  f"plasticity cannot mutate Solaris_Ai runtime objects "
+                  f"(component {component!r})")
+
         # 1. Known component.
         check("known_component", component in SUPPORTED_TARGETS,
               f"unknown target component {component!r}")
+
+        # 1b. Real integration cannot be enabled below sidecar_ready.
+        if parameter in ("integration_enabled", "enable_integration",
+                         "real_integration"):
+            level = str(state.get("compatibility_level", "unavailable"))
+            check("integration_requires_sidecar_ready",
+                  level in ("sidecar_ready", "full_test_ready"),
+                  f"cannot enable real integration at compatibility level "
+                  f"{level!r} (requires sidecar_ready or better)")
 
         # 2. Forbidden parameters (source code, persistence, continuity, etc.).
         pname = parameter.lower()

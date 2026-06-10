@@ -129,11 +129,30 @@ the core stdlib layers are unchanged.
 
 **Exit criteria:** a documented edge-profile run within a defined compute budget.
 
-## Phase 7 — Integration back into Solaris_Ai as an optional learning substrate
+## Phase 7 — Integration back into Solaris_Ai as an optional learning substrate (first slice ✅)
 
-- Mount Solaris-AI-NN as an *optional* module inside the real Solaris_Ai runtime,
-  subscribing to the live `Bus` and emitting compatible Actions/Desires.
-- Strictly additive: Solaris_Ai runs unchanged with or without the NN substrate.
+Shipped in this release — the **observe-first sidecar** (`integration/`):
 
-**Exit criteria:** Solaris_Ai runs with the NN substrate attached, learning
-online from the live signal stream, with no modification to the reference repo.
+- Optional-import layer (`solaris` is never a dependency; everything degrades
+  gracefully with recorded errors).
+- `SolarisRuntimeProbe` + graded compatibility report (`unavailable` →
+  `full_test_ready`), pure duck typing.
+- `SolarisNNSidecar`: probe → attach → observe → suggest → detach, with
+  `SolarisBusConnector` (async-aware, reversible), `SignalMirror`
+  (read-only, bounded, JSONL export), and `SuggestionChannel`
+  (`committed=False` always; committed-looking suggestions rejected as unsafe).
+- Reactions on the bus drive online learning; Inner MAP exposes integration
+  state (`action_authority: false` invariant); plasticity is hard-blocked from
+  touching Solaris runtime objects, bus subscriptions, observe-only, or
+  enabling integration below `sidecar_ready`.
+- Fake Conscience/Bus runtime + bounded observation experiment; a real-Solaris
+  example that exits gracefully when the package is absent.
+
+**Still ahead in this phase:** mounting against the *live* async Solaris_Ai
+Bus with its event loop running (the connector already registers async
+handlers; an asyncio-driven soak against a real Conscience session is the
+remaining step), and richer suggestion consumption on the Solaris_Ai side.
+
+**Exit criteria (final):** Solaris_Ai runs with the NN sidecar attached,
+learning online from the live signal stream, with no modification to the
+reference repo — suggestions only, never committed Actions.

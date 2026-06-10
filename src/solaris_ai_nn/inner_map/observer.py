@@ -48,6 +48,7 @@ class InnerMapObserver:
     memory: Optional[TraceMemory] = None
     habit: Optional["HabitReinforcement"] = None
     synthesis: Optional["SynthesisPruner"] = None
+    sidecar: Any = None  # optional SolarisNNSidecar (duck-typed; observe-only)
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -297,6 +298,9 @@ class InnerMapObserver:
             model.plasticity = self._plasticity(self.habit, self.synthesis)
 
         model.unknown = self._unknown(self.bridge, memory_report)
+        if self.sidecar is not None:
+            # Read-only summary of the Solaris integration status.
+            model.integration = self.sidecar.integration_summary()
         model.touch()
         self._model = model
         return model

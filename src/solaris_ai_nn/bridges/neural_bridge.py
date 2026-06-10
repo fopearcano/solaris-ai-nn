@@ -272,6 +272,44 @@ class SolarisNeuralBridge:
         """The most recent suggested Desire (or ``None`` before any signal)."""
         return self._last_desire
 
+    # -- integration helpers (Solaris sidecar) -------------------------------
+
+    def process_raw_solaris_signal(self, raw_signal: Any) -> Dict[str, Any]:
+        """Process a raw Solaris_Ai signal (object/dict); alias of :meth:`process`.
+
+        Exists as an explicit, named seam for the integration layer; the
+        adapter inside :meth:`process` already accepts raw Solaris shapes.
+        """
+        return self.process(raw_signal)
+
+    def last_suggestion(self) -> Optional[Dict[str, Any]]:
+        """The most recent suggestion as a plain dict (or ``None``)."""
+        if self._last_action is None or self._last_desire is None:
+            return None
+        return {
+            "action": self._last_action.name,
+            "desire": self._last_desire.proposal,
+            "confidence": self._last_desire.confidence,
+            "motivation": self._last_desire.motivation,
+            "committed": False,  # the bridge never commits; suggestions only
+        }
+
+    def suggestion_confidence(self) -> float:
+        """Confidence of the most recent suggestion (0.0 before any signal)."""
+        return self._last_desire.confidence if self._last_desire else 0.0
+
+    def substrate_summary(self) -> Dict[str, Any]:
+        """Compact substrate description for suggestions / integration status."""
+        m = self.substrate.metrics()
+        return {
+            "name": self.substrate.name,
+            "state_size": self.substrate.state_size,
+            "state_norm": m.state_norm,
+            "activity_rate": m.activity_rate,
+            "spike_rate": m.spike_rate,
+            "updates": m.updates,
+        }
+
     def snapshot(self) -> Dict[str, Any]:
         """Return a JSON-friendly view of the bridge's current state."""
         logos = None

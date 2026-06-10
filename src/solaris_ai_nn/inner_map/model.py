@@ -170,6 +170,12 @@ class InnerMapModel:
     tendencies: TendencyState = field(default_factory=TendencyState)
     unknown: UnknownState = field(default_factory=UnknownState)
     modules: List[ModuleState] = field(default_factory=list)
+    # Solaris sidecar integration status (Prompt 7); None when no sidecar.
+    # Keys: attached, observing, observe_only, compatibility_level,
+    # mirrored_signals, suggestions_produced/published,
+    # last_suggestion_confidence, action_authority (always False),
+    # substrate_type, sidecar_health.
+    integration: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

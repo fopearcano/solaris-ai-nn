@@ -163,7 +163,21 @@ python examples/run_plasticity_adaptation.py --rollback-last   # undo the last a
 # and test that spike-based substrates stay alive through silence
 python examples/run_substrate_comparison.py --steps 300
 python examples/run_spiking_silence.py --steps 300
+
+# Solaris_Ai sidecar integration (works WITHOUT solaris-ai installed):
+python examples/run_fake_solaris_integration.py          # fake Conscience/Bus demo
+python examples/run_solaris_sidecar_observation.py       # bounded observation experiment
+python examples/run_real_solaris_integration_if_available.py  # see note below
 ```
+
+The **sidecar integration** (`integration/`) attaches Solaris-AI-NN beside a
+Solaris_Ai-like runtime as an *optional, observe-first* adaptive substrate: it
+mirrors bus signals, learns from Reactions, and emits clearly-marked
+**suggestions** (`committed=False`, always) — action authority never leaves
+Solaris_Ai. The real-integration example only does anything if
+`fopearcano/solaris-ai` is importable (e.g. `pip install -e /path/to/solaris-ai`);
+otherwise it prints instructions and exits 0. Nothing in this repo requires the
+real package — all tests and examples run against a shape-compatible fake.
 
 The **substrate laboratory** (`substrates/`) makes the nervous layer selectable:
 the same bridge runs on the ESN baseline, a Liquid-State-inspired substrate, or
@@ -202,7 +216,8 @@ src/solaris_ai_nn/
   inner_map/    self-model (model, observer, boundaries, state graph, serialization)
   plasticity/   habit, synthesis + controlled self-mod (engine, policy, safety, rollback, audit)
   substrates/   substrate lab: ESN wrapper, liquid-state, spiking, registry, switching (NumPy)
-  experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity, substrates
+  integration/  optional Solaris_Ai sidecar: probe, bus connector, mirror, suggestions
+  experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity, substrates, sidecar
   utils/        pure-stdlib math, logging
 tests/          pytest suite
 examples/       runnable scripts

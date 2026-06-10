@@ -459,3 +459,53 @@ runner saves both at every checkpoint and restores them on restart. The original
 ESN-in-JSON checkpoint path keeps working unchanged. NumPy enters the project
 here — the place dense vector math and binary array persistence were always
 slated to earn it.
+
+## 17. Solaris_Ai sidecar integration
+
+The integration layer (`integration/`, Prompt 7) is the first real seam to the
+actual `fopearcano/solaris-ai` runtime — built **observe-first** and entirely
+optional.
+
+**Solaris_Ai remains the primary organism/runtime.** The Conscience, its Bus,
+its modules, and its lifecycle are untouched. Solaris-AI-NN mounts *beside* it
+as `SolarisNNSidecar`: probe the runtime (`SolarisRuntimeProbe`, pure duck
+typing — no direct imports), attach to its bus, observe, learn, suggest,
+detach. The sidecar never calls `stimulate()`, `react()`, or any death/lifecycle
+method on the conscience, never alters its module wiring, and never touches its
+source files.
+
+**Integration is observe-first.** The default mode is `observe_only=True`:
+signals flow in, nothing flows out. Even with publishing enabled, the only
+objects that ever leave are `NeuralSuggestion`s — clearly typed, carrying
+`committed=False`, and rejected by the `SuggestionChannel` if anything claims
+otherwise. There is no code path that constructs a Solaris `Action` that looks
+committed. **Action authority stays with Solaris_Ai**, and the Inner MAP records
+`action_authority: false` as an invariant of the integration state.
+
+**Signals are mirrored and encoded.** Every observed signal is adapted to the
+canonical NN vocabulary, fed to the substrate, and mirrored (`SignalMirror`)
+with its original metadata, the adapted form, and a vector *summary* (norm +
+length; full vectors only with explicit opt-in). Reactions teach first
+(`bridge.react`) and then flow through as events, so feedback lands on the
+suggestion that earned it. The sidecar persists
+`integration_state.json` / `suggestions.jsonl` / `mirrored_signals.jsonl`.
+
+**Optionality is structural.** `integration/optional_imports.py` is the only
+place that ever imports `solaris`, always inside guarded, per-call imports with
+recorded error messages — the entire test suite and every example run without
+the real package (a fake Conscience/Bus ships in the observation experiment).
+Compatibility is graded (`unavailable → minimal → bus_observable →
+sidecar_ready → full_test_ready`) and plasticity may not enable real
+integration below `sidecar_ready`; plasticity also cannot mutate Solaris
+runtime objects, alter bus subscriptions, flip `observe_only`, or publish
+committed actions (hard validator rules).
+
+**Why the sidecar architecture is safer than merging too early.** A merged
+integration would entangle an experimental, self-modifying learner with the
+conceptual organism before either is proven — every NN bug would become a
+Solaris_Ai bug, and rollback would mean surgery. The sidecar keeps a hard
+process boundary in the design: one attach point, one suggestion channel, one
+observe-only default, and a `detach()` that restores the world to exactly what
+it was. Solaris_Ai can ignore the sidecar entirely and lose nothing; it can
+consult the suggestions and gain a learner. That asymmetry — all of the option
+value, none of the coupling — is the point.

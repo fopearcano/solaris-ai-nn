@@ -499,3 +499,65 @@ using `energy_proxy` (updates/sec ÷ average active units), explicitly labelled
 a crude software indicator. Expected: sparse spiking substrates sustain far more
 updates per active unit — the low-compute argument made measurable. Future:
 correlate with wall-clock CPU time per step at varying state sizes.
+
+---
+
+# Phase-7 integration experiments
+
+These exercise the optional Solaris_Ai sidecar (`integration/`). None require
+the real package; a fake Conscience/Bus ships with the observation experiment.
+
+## 28. Fake Solaris Sidecar Observation Experiment ✅ (implemented)
+
+**File:** `src/solaris_ai_nn/experiments/solaris_sidecar_observation.py`
+**Run:** `python examples/run_solaris_sidecar_observation.py` (also
+`examples/run_fake_solaris_integration.py` for the narrated demo)
+
+**Setup.** A FakeConscience (shape-compatible bus/lifecycle/stimulate/react/
+snapshot) emits a deterministic script of Stimulus / Push / LogosTension /
+MeaningEvent / Reaction beats. The sidecar attaches (observe-only by default),
+mirrors every signal, updates the substrate, learns from Reactions, and produces
+suggestions.
+
+**What it demonstrates.** The full integration seam without the real package —
+and the safety invariants as numbers: suggestions produced > 0, suggestions
+published = 0 in observe-only, **committed actions = 0 always**, conscience
+death calls = 0 always.
+
+**Pass criteria (tested).** bounded; observed == emitted; mirrored == observed;
+deterministic per seed; observe-only publishes nothing while publish mode
+publishes only `committed=False` suggestions; persistence files written.
+
+## 29. Real Solaris Optional Integration Smoke Test ✅ (implemented)
+
+**Run:** `python examples/run_real_solaris_integration_if_available.py`
+
+**Setup.** Checks `is_solaris_available()`. If the real package is absent
+(normal in CI), prints instructions and exits 0 — tested. If present: probes
+compatibility, attaches observe-only, prints the report + snapshot, detaches
+cleanly. No stimuli injected, no lifecycle started, nothing committed.
+
+**Pass criteria (tested).** exit code 0 either way; graceful-skip text or
+clean-detach text present.
+
+## 30. Suggestion Channel Experiment ✅ (implemented as tests)
+
+**Module:** `integration/suggestion_channel.py`.
+
+**What it demonstrates.** Every outbound object is a `NeuralSuggestion` with
+`committed=False`; anything claiming committed-ness is rejected as unsafe and
+recorded; confidence distribution (min/max/mean + 0.2-wide buckets) is
+exposed; publish-disabled mode stores without publishing; JSONL export works.
+
+## 31. Signal Mirror Replay Experiment ✅ (mirror implemented; replay specified)
+
+**Module:** `integration/signal_mirror.py`.
+
+**What it ships.** Bounded, filterable mirroring of observed Solaris signals
+(original metadata + adapted form + vector summary; full vectors only by
+explicit opt-in) with JSONL export — the observability half.
+
+**Specified next.** Feed `mirrored_signals.jsonl` back through
+`runtime/replay.py`-style machinery to re-run an observed Solaris session into
+a fresh bridge, comparing suggestion streams across substrates — replaying the
+*organism's* history through different nervous layers.

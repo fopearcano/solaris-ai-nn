@@ -20,6 +20,10 @@ from .plasticity_adaptation import (  # noqa: F401
     run_plasticity_adaptation,
 )
 from .soak_continuity import SoakResult, run_soak_continuity  # noqa: F401
+from .solaris_sidecar_observation import (  # noqa: F401
+    SidecarObservationResult,
+    run_sidecar_observation,
+)
 from .spiking_silence import SilenceResult, run_spiking_silence  # noqa: F401
 from .substrate_comparison import (  # noqa: F401
     SubstrateComparisonResult,
@@ -44,4 +48,6 @@ __all__ = [
     "SubstrateComparisonResult",
     "run_spiking_silence",
     "SilenceResult",
+    "run_sidecar_observation",
+    "SidecarObservationResult",
 ]
