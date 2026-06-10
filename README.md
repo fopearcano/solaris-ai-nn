@@ -173,7 +173,18 @@ python examples/run_real_solaris_integration_if_available.py  # see note below
 python examples/run_sensorimotor_gridworld.py --steps 300
 python examples/run_embodied_absence.py --steps 300
 python examples/run_reward_danger_adaptation.py --steps 300
+
+# Internal language layer: grounded explanations + deterministic queries (no LLM)
+python examples/run_language_trace_demo.py --steps 200
+python examples/run_language_query_demo.py --steps 100
 ```
+
+The **language layer** (`language/`) lets the system describe what happened
+inside itself: meaning atoms from a controlled vocabulary, hedged causal traces
+(confidence-tagged; hard causal verbs only for directly-coded paths), grounded
+deterministic explanations that say "does not know" when data is missing, a
+fixed query interface, and JSON/Markdown session reports with a mandatory
+limitations section. No external LLMs, no confabulated motivations.
 
 The **embodiment sandbox** (`embodiment/`) closes the sensorimotor loop: sensors
 emit canonical Stimuli, the bridge suggests actions, a safety layer admits only
@@ -230,8 +241,9 @@ src/solaris_ai_nn/
   substrates/   substrate lab: ESN wrapper, liquid-state, spiking, registry, switching (NumPy)
   integration/  optional Solaris_Ai sidecar: probe, bus connector, mirror, suggestions
   embodiment/   simulated body + GridWorld: sensors, effectors, energy, safety, runner
+  language/     internal meaning trace, causal trace, explanations, queries, reports
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
-                substrates, sidecar, sensorimotor/absence/reward-danger embodiment
+                substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging
 tests/          pytest suite
 examples/       runnable scripts

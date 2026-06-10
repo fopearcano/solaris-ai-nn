@@ -408,6 +408,26 @@ class PersistenceManager:
     def world_state_path(self) -> Path:
         return self.state_dir / "world_state.json"
 
+    @property
+    def meaning_trace_path(self) -> Path:
+        return self.state_dir / "meaning_trace.jsonl"
+
+    @property
+    def causal_trace_path(self) -> Path:
+        return self.state_dir / "causal_trace.json"
+
+    @property
+    def session_report_json_path(self) -> Path:
+        return self.state_dir / "session_report.json"
+
+    @property
+    def session_report_md_path(self) -> Path:
+        return self.state_dir / "session_report.md"
+
+    @property
+    def last_explanations_path(self) -> Path:
+        return self.state_dir / "last_explanations.json"
+
     # -- manifest -----------------------------------------------------------
 
     def has_previous_state(self) -> bool:

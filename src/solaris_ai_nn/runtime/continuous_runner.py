@@ -89,6 +89,8 @@ class ContinuousRunner:
     enable_plasticity: bool = False
     plasticity_interval_steps: int = 50
     plasticity_dry_run: bool = False
+    enable_language: bool = False
+    report_interval_steps: int = 100
 
     def __post_init__(self) -> None:
         if not self.continuous and self.max_steps is None and self.max_duration_s is None:
@@ -104,6 +106,8 @@ class ContinuousRunner:
         self._last_hb_log = 0.0
         self._last_checkpoint_ts = 0.0
         self.pruning_history: List[Dict[str, Any]] = []
+        self._last_structural_summary: Optional[Dict[str, Any]] = None
+        self._session_report = None
         self._init_session()
         self.observer = None
         if self.inner_map:
@@ -168,6 +172,7 @@ class ContinuousRunner:
                 action_labels=self.action_labels, encoder=encoder, seed=seed,
                 substrate_name=self.substrate_name,
                 substrate_config=self.substrate_config,
+                enable_language_trace=self.enable_language,
             )
         self.telemetry: Telemetry = self.bridge.telemetry
 
@@ -252,6 +257,12 @@ class ContinuousRunner:
                     and step % self.plasticity_interval_steps == 0
                 ):
                     self.plasticity_engine.evaluate()
+                if (
+                    self.enable_language
+                    and self.report_interval_steps > 0
+                    and step % self.report_interval_steps == 0
+                ):
+                    self._last_structural_summary = self._structural_summary()
         except KeyboardInterrupt:  # graceful: a Ctrl-C is still a clean death
             self._stop_requested = True
             self._stop_reason = "keyboard interrupt"
@@ -339,6 +350,8 @@ class ContinuousRunner:
         )
         self.pm.save_checkpoint(cp)
         self.pm.save_substrate(self.bridge.substrate, step=lifetime)
+        if self.enable_language:
+            self._save_language_artifacts()
         self._last_checkpoint_ts = time.time()
         # Persist the Inner MAP self-model alongside the checkpoint.
         if self.observer is not None:
@@ -382,7 +395,95 @@ class ContinuousRunner:
         self.telemetry.finish()
         self._save_manifest(lifetime, graceful=graceful, shutdown=True)
         self.pm.save_telemetry(self.telemetry.to_dict())
+        if self.enable_language:
+            self._save_session_report()
         self.continuity.close()
+
+    # -- language layer (optional) ------------------------------------------
+
+    def _language_context(self):
+        """ExplanationContext grounded in this runner's full state."""
+        extra: Dict[str, Any] = {}
+        if self.observer is not None:
+            extra["inner_map"] = self.observer.update().to_dict()
+        if self.plasticity_engine is not None:
+            extra["plasticity"] = self.plasticity_engine.snapshot()
+        extra["pruning"] = {
+            "passes": len(self.pruning_history),
+            "removed": sum(int(p.get("removed", 0)) for p in self.pruning_history),
+        }
+        extra["continuity"] = {
+            "restart_count": self.restart_count,
+            "brain_death_gap_seconds": self.telemetry.brain_death_gap_seconds,
+            "graceful_previous_shutdown": self.telemetry.unexpected_deaths == 0,
+            "lifetime_steps": self.telemetry.lifetime_steps,
+        }
+        return self.bridge.explanation_context(**extra)
+
+    def _structural_summary(self) -> Dict[str, Any]:
+        from ..language.summarizer import StructuralSummarizer
+
+        return StructuralSummarizer().summarize_session(self._language_context())
+
+    def _save_language_artifacts(self) -> None:
+        """Persist meaning trace (truncated), causal trace, and explanations."""
+        from ..language import serialization as LS
+        from ..language.causal_trace import CausalTraceBuilder
+
+        builder = self.bridge.meaning_trace_builder
+        if builder is not None:
+            LS.save_meaning_trace(builder.to_trace(), self.pm.meaning_trace_path)
+        causal = CausalTraceBuilder().build_from_recent_trace(self.bridge.trace)
+        LS.save_causal_trace(causal, self.pm.causal_trace_path)
+        engine = self.bridge.explanation_engine
+        if engine is not None:
+            ctx = self._language_context()
+            from ..language.schemas import Explanation  # typing only
+
+            explanations = {
+                "last_event": engine.explain_last_event(ctx),
+                "action_suggestion": engine.explain_action_suggestion(ctx),
+                "substrate": engine.explain_substrate(ctx),
+                "strongest_habit": engine.explain_strongest_habit(ctx),
+                "continuity": engine.explain_continuity(ctx),
+            }
+            LS.save_explanations(explanations, self.pm.last_explanations_path)
+
+    def _save_session_report(self) -> None:
+        """Build + persist the session report (JSON + Markdown)."""
+        from ..language import serialization as LS
+        from ..language.reporting import ExperimentReportBuilder
+
+        ctx = self._language_context()
+        summary = self._structural_summary()
+        builder = (
+            ExperimentReportBuilder(title="Solaris-AI-NN session report")
+            .add_metadata(run_id=self.run_id, session_id=self.session_id,
+                          substrate=self.bridge.substrate.name,
+                          state_dir=str(self.pm.state_dir))
+            .add_section("runtime", {
+                "steps": self.telemetry.steps,
+                "lifetime_steps": self.telemetry.lifetime_steps,
+                "duration_seconds": self.telemetry.to_dict()["duration_seconds"],
+                "restarts": self.restart_count,
+            })
+            .add_section("signals", summary.get("signals"))
+            .add_section("substrate", summary.get("substrate"))
+            .add_section("habits", {
+                "pathways": summary.get("habit_pathways"),
+                "strongest": summary.get("strongest_habits"),
+            })
+            .add_section("synthesis", summary.get("pruning"))
+            .add_section("plasticity", summary.get("plasticity"))
+            .add_section("memory", {"trace_length": len(self.bridge.trace)})
+            .add_section("inner_map", (ctx.inner_map or {}).get("continuity"))
+            .add_section("continuity", summary.get("continuity"))
+            .add_section("meaning_trace", summary.get("meaning_trace"))
+        )
+        self._session_report = builder.build()
+        LS.save_report(self._session_report,
+                       self.pm.session_report_json_path,
+                       self.pm.session_report_md_path)
 
     def stop(self, reason: str = "stopped") -> None:
         """Request a graceful stop at the next loop boundary."""
@@ -448,6 +549,17 @@ class ContinuousRunner:
         if self.plasticity_engine is not None:
             snap["plasticity"] = self.plasticity_engine.snapshot()
             snap["plasticity_audit_path"] = str(self.pm.plasticity_audit_path)
+        if self.enable_language and self.bridge.meaning_trace_builder is not None:
+            ctx = self._language_context()
+            engine = self.bridge.explanation_engine
+            snap["language"] = {
+                "enabled": True,
+                "meaning_atoms": len(self.bridge.meaning_trace_builder),
+                "structural_summary": self._last_structural_summary,
+                "last_event_explanation":
+                    engine.explain_last_event(ctx).to_dict() if engine else None,
+                "session_report_path": str(self.pm.session_report_md_path),
+            }
         return snap
 
     # -- plasticity rollback ------------------------------------------------

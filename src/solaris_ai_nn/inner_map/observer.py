@@ -305,6 +305,26 @@ class InnerMapObserver:
         if self.embodiment is not None:
             # Read-only summary of the simulated body/world (simulation-only).
             model.embodiment = self.embodiment.embodiment_summary()
+        if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
+                and self.bridge.meaning_trace_builder is not None:
+            builder = self.bridge.meaning_trace_builder
+            counts = builder.category_counts()
+            dominant = sorted(counts, key=counts.get, reverse=True)[:3]
+            last_atom = builder.atoms[-1].sentence() if builder.atoms else None
+            report_path = getattr(self.runner, "pm", None)
+            model.language = {
+                "enabled": True,
+                "meaning_atom_count": len(builder),
+                "causal_trace_count": len(getattr(
+                    getattr(self.bridge, "causal_builder", None), "traces", {}) or {}),
+                "last_explanation_summary": last_atom,
+                "dominant_categories": dominant,
+                "unknown_statements": counts.get("unknown", 0),
+                "queryable": True,
+                "last_session_report_path": (
+                    str(report_path.session_report_md_path)
+                    if report_path is not None else None),
+            }
         model.touch()
         self._model = model
         return model

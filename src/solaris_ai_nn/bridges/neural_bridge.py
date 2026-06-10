@@ -82,6 +82,9 @@ class SolarisNeuralBridge:
     confidence_threshold: float = 0.0
     suggestion_threshold: float = 0.0
     seed: int = 0
+    enable_language_trace: bool = False
+    meaning_trace_builder: Any = None  # language.MeaningTraceBuilder when enabled
+    explanation_engine: Any = None  # language.ExplanationEngine when enabled
 
     _logos: Optional[C.LogosTension] = field(default=None, init=False, repr=False)
     _steps: int = field(default=0, init=False)
@@ -90,6 +93,11 @@ class SolarisNeuralBridge:
     _last_pattern_key: Optional[str] = field(default=None, init=False, repr=False)
     _last_action: Optional[C.Action] = field(default=None, init=False, repr=False)
     _last_desire: Optional[C.Desire] = field(default=None, init=False, repr=False)
+    _last_signal_kind: Optional[str] = field(default=None, init=False, repr=False)
+    _last_signal_origin: Optional[str] = field(default=None, init=False, repr=False)
+    _last_signal_intensity: float = field(default=0.0, init=False, repr=False)
+    _last_signal_absence: bool = field(default=False, init=False, repr=False)
+    _last_signal_valence: Optional[float] = field(default=None, init=False, repr=False)
 
     def __post_init__(self) -> None:
         if not self.action_labels:
@@ -124,6 +132,14 @@ class SolarisNeuralBridge:
                 n_outputs=len(self.action_labels),
                 labels=list(self.action_labels),
             )
+        if self.enable_language_trace:
+            from ..language.explanation import ExplanationEngine  # local: optional layer
+            from ..language.meaning_trace import MeaningTraceBuilder
+
+            if self.meaning_trace_builder is None:
+                self.meaning_trace_builder = MeaningTraceBuilder()
+            if self.explanation_engine is None:
+                self.explanation_engine = ExplanationEngine()
 
     # -- substrate access -----------------------------------------------------
 
@@ -208,6 +224,12 @@ class SolarisNeuralBridge:
         self._last_pattern_key = pattern_key
         self._last_action = action
         self._last_desire = desire
+        # Last-signal facts for the language layer (grounded explanations).
+        self._last_signal_kind = signal.kind
+        self._last_signal_origin = getattr(signal, "origin", "unknown")
+        self._last_signal_intensity = float(getattr(signal, "intensity", 0.0) or 0.0)
+        self._last_signal_absence = bool(getattr(signal, "is_absence", False))
+        self._last_signal_valence = getattr(signal, "valence", None)
 
         self.trace.record_event(
             self._steps,
@@ -218,7 +240,7 @@ class SolarisNeuralBridge:
         self.trace.record_action(self._steps, label, confidence=round(confidence, 4))
         self.telemetry.set_trace_length(len(self.trace))
 
-        return {
+        result = {
             "step": self._steps,
             "input_type": signal.kind,
             "is_absence": bool(getattr(signal, "is_absence", False)),
@@ -232,6 +254,27 @@ class SolarisNeuralBridge:
             "reservoir_energy": self.substrate_state_norm(),
             "logos_fracture": self._logos.fracture if self._logos is not None else 0.0,
         }
+
+        # Optional language trace: atoms for received/encoded/updated/suggested.
+        if self.enable_language_trace and self.meaning_trace_builder is not None:
+            builder = self.meaning_trace_builder
+            vec_norm = norm(vector)
+            builder.append_atoms(builder.from_signal(
+                signal, {"vector_len": len(vector),
+                         "vector_norm": round(vec_norm, 4)}))
+            from ..language.meaning_trace import atom as _atom
+
+            builder.append_atoms([
+                _atom("substrate", f"{self.substrate.name} state", "updated",
+                      f"norm={result['reservoir_energy']:.4f}",
+                      source_module="bridge",
+                      source_signal_id=getattr(signal, "id", None)),
+                _atom("readout", "action tendency", "suggested",
+                      f"{label} (confidence {confidence:.4f})",
+                      source_module="readout",
+                      source_signal_id=getattr(signal, "id", None)),
+            ])
+        return result
 
     def process_many(self, raw_signals: List[Any]) -> List[Dict[str, Any]]:
         """Process a sequence of raw signals, returning one tendency dict each."""
@@ -310,7 +353,50 @@ class SolarisNeuralBridge:
             "updates": m.updates,
         }
 
-    def snapshot(self) -> Dict[str, Any]:
+    # -- language helpers (optional layer) -----------------------------------
+
+    def explanation_context(self, **extra: Any) -> Any:
+        """Build an ExplanationContext grounded in this bridge's state."""
+        from ..language.schemas import ExplanationContext
+
+        last_signal = None
+        if self._last_pattern_key is not None and self._last_desire is not None:
+            last_signal = {"kind": self._last_signal_kind,
+                           "origin": self._last_signal_origin,
+                           "intensity": self._last_signal_intensity,
+                           "is_absence": self._last_signal_absence,
+                           "valence": self._last_signal_valence}
+        habits = [{"pattern": k[0], "action": k[1], "weight": w}
+                  for k, w in self.habit.weights.items()]
+        trace_summary = None
+        if self.meaning_trace_builder is not None:
+            from ..language.summarizer import StructuralSummarizer
+
+            trace_summary = StructuralSummarizer().summarize_trace(
+                self.meaning_trace_builder.to_trace())
+        return ExplanationContext(
+            last_signal=last_signal,
+            bridge=self.snapshot(include_language=False),
+            telemetry=self.telemetry.report(),
+            habits=habits,
+            trace_summary=trace_summary,
+            **extra,
+        )
+
+    def last_explanations(self) -> Dict[str, Any]:
+        """Render the standard explanations for current state (dict form)."""
+        if self.explanation_engine is None:
+            return {}
+        ctx = self.explanation_context()
+        engine = self.explanation_engine
+        return {
+            "last_event": engine.explain_last_event(ctx).to_dict(),
+            "action_suggestion": engine.explain_action_suggestion(ctx).to_dict(),
+            "substrate": engine.explain_substrate(ctx).to_dict(),
+            "strongest_habit": engine.explain_strongest_habit(ctx).to_dict(),
+        }
+
+    def snapshot(self, include_language: bool = True) -> Dict[str, Any]:
         """Return a JSON-friendly view of the bridge's current state."""
         logos = None
         if self._logos is not None:
@@ -320,7 +406,7 @@ class SolarisNeuralBridge:
                 "fracture": self._logos.fracture,
             }
         substrate_metrics = self.substrate.metrics()
-        return {
+        snap: Dict[str, Any] = {
             "steps": self._steps,
             "substrate_type": self.substrate.name,
             "substrate_config": self.substrate.config.to_dict(),
@@ -338,3 +424,12 @@ class SolarisNeuralBridge:
             "exploration": self.exploration,
             "telemetry": self.telemetry.report(),
         }
+        if include_language and self.enable_language_trace \
+                and self.meaning_trace_builder is not None:
+            snap["language"] = {
+                "enabled": True,
+                "meaning_atoms": len(self.meaning_trace_builder),
+                "trace": self.meaning_trace_builder.snapshot(),
+                "last_explanations": self.last_explanations(),
+            }
+        return snap

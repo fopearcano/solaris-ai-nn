@@ -557,3 +557,50 @@ stimuli/action/reaction, boundaries, nearby objects, safety status) and records
 else. Plasticity may tune learning knobs from embodiment statistics (failure
 rate, collisions) but is hard-blocked from expanding action authority, adding
 actions, or disabling embodiment safety.
+
+## 19. Language as cross-module meaning trace
+
+The language layer (`language/`, Prompt 9) gives the system a structured way to
+describe what happened inside itself. It is **internal structure before
+external conversation** — Solaris_Ai's view of language as cross-functional
+meaning, not human speech.
+
+**What it records.** A `MeaningTraceBuilder` converts runtime happenings —
+signals received, vectors encoded, substrate updates, readout suggestions,
+reactions, habit/synthesis/plasticity events, Inner MAP changes, embodiment
+results — into `MeaningAtom`s: subject–predicate–value statements drawn from a
+**controlled vocabulary** (13 categories, 16 predicates; anything outside falls
+back to `unknown` / the hedged `influenced`). A `CausalTraceBuilder`
+reconstructs approximate chains from recorded order: only relations that are
+*directly coded* (a Reaction literally triggers the readout update and habit
+reinforcement) may carry `caused` at confidence 1.0 — everything else is
+`preceded` / `was_associated_with` / `influenced` with confidence below 1.0,
+and the builder downgrades any attempt to overclaim.
+
+**Explanation and debugging.** The `ExplanationEngine` renders deterministic
+templates over an `ExplanationContext` (bridge/telemetry/Inner-MAP/embodiment/
+plasticity snapshots). Every explanation lists the concrete fields it is
+`grounded_in`; when data is absent it says **"the system does not know"** and
+names the missing piece. A fixed `QueryInterface` (normalized string matching,
+eleven queries, no NLP) routes internal questions to the engine. The
+`StructuralSummarizer` counts — it never generates — and the report builder
+renders JSON/Markdown session reports whose **Limitations and Unknowns**
+section is mandatory.
+
+**What it is not.** It does not make the system conscious — an atom is a
+record and an explanation is a rendering of records; motivational language
+("wanted") is excluded by rule and test. It does not use LLMs: no external
+APIs, no transformers, no embeddings (statically verified by test). Every
+statement reduces to trace/telemetry/Inner-MAP data, which is exactly what
+makes the layer useful for debugging: when the report says "synthesis removed
+281 weak pathways", that number came from the pruning history, nowhere else.
+
+**Integration.** The bridge optionally records atoms per processed signal
+(`enable_language_trace`); the `ContinuousRunner` adds periodic structural
+summaries, persists `meaning_trace.jsonl` / `causal_trace.json` /
+`last_explanations.json` on checkpoints and a JSON+Markdown session report on
+shutdown (`enable_language`, `report_interval_steps`); the sensorimotor runner
+explains each step (sensor reading, suggestion, safety validation, action
+result, feedback); and the Inner MAP records language status (atom counts,
+dominant categories, unknown statements, queryability) as part of the
+self-model.

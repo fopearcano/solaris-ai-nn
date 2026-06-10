@@ -633,3 +633,62 @@ already implemented and unit-tested).
 and the substrate learns state, but zero actions execute (`actions_executed ==
 0`, empty action counts) — the embodied analogue of the sidecar's observe-only
 mode. Tested.
+
+---
+
+# Phase-9 language experiments
+
+These exercise the internal language layer (`language/`). All deterministic;
+no LLM anywhere.
+
+## 37. Language Trace Demo ✅ (implemented)
+
+**File:** `src/solaris_ai_nn/experiments/language_trace_demo.py`
+**Run:** `python examples/run_language_trace_demo.py --steps 200`
+(add `--embodied` for the sensorimotor variant)
+
+**Setup.** A bounded language-enabled session: stimuli, substrate updates,
+suggestions, reactions, habit/synthesis (and plasticity with
+`--enable-plasticity`), with meaning atoms recorded throughout.
+
+**Output / pass criteria (tested).** grounded explanations for last event,
+action suggestion, strongest habit, Inner MAP, and continuity; meaning atoms
+> 0; `session_report.json` + `session_report.md` written; Markdown preview
+shown; explanations contain concrete fields (intensity, confidence, weight).
+
+## 38. Query Demo ✅ (implemented)
+
+**Run:** `python examples/run_language_query_demo.py --steps 100`
+
+**Setup.** A short bounded session, then seven fixed deterministic queries
+(what happened last / why suggested / substrate change / strongest habit /
+silence / restart / pruned).
+
+**Pass criteria (tested).** every supported query returns a `QueryResult`;
+answers render recorded numbers; unknown queries return the safe fallback;
+a static test verifies no LLM/network import exists in the language package.
+
+## 39. Causal Trace Experiment ✅ (implemented as tests)
+
+**Module:** `language/causal_trace.py`. Builds chains from the bridge's trace
+memory; heuristic links carry confidence < 1.0 and hedged relations only
+(`preceded` / `was_associated_with` / `influenced`); the two directly-coded
+paths (Reaction → readout update, Reaction → habit reinforcement) carry
+`caused` at 1.0 with the mechanism named. The rendered explanation always
+includes "not proven causation".
+
+## 40. Session Report Experiment ✅ (implemented)
+
+**Module:** `language/reporting.py`, wired into `ContinuousRunner`. Every
+language-enabled run ends with a JSON + Markdown report (runtime, signals,
+substrate, habits, synthesis, plasticity, memory, continuity, meaning-trace
+summary) whose Limitations and Unknowns section is mandatory and tested.
+
+## 41. Embodied Explanation Experiment ✅ (implemented)
+
+**Run:** `python examples/run_language_trace_demo.py --embodied`
+
+The sensorimotor runner with language enabled explains every step five ways:
+sensor readings, the suggested action, the safety validation verdict, the
+action result, and the reaction feedback — each rendered from the actual
+`ActionResult` / `SafetyReport` / `Reaction` objects of that step (tested).

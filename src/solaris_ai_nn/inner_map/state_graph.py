@@ -188,4 +188,25 @@ def build_default_state_graph() -> StateGraph:
     g.add_edge("sensorimotor_runner", "simulated_body", "drives")
     g.add_edge("inner_map", "simulated_body", "observes body/world state")
     g.add_edge("inner_map", "grid_world", "observes body/world state")
+
+    # Internal language / explainability layer (Prompt 9).
+    for name, role in [
+        ("language_layer", "cross-module meaning"),
+        ("meaning_trace_builder", "events -> atoms"),
+        ("causal_trace_builder", "heuristic chains"),
+        ("explanation_engine", "grounded explanations"),
+        ("structural_summarizer", "counts, not prose"),
+        ("query_interface", "deterministic queries"),
+        ("report_builder", "JSON/Markdown reports"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("bridge", "meaning_trace_builder", "signals feed")
+    g.add_edge("telemetry", "structural_summarizer", "feeds")
+    g.add_edge("inner_map", "explanation_engine", "feeds")
+    g.add_edge("simulated_body", "explanation_engine", "embodiment feeds")
+    g.add_edge("meaning_trace_builder", "causal_trace_builder", "feeds")
+    g.add_edge("explanation_engine", "language_layer", "produces SystemUtterance")
+    g.add_edge("query_interface", "explanation_engine", "routes queries")
+    g.add_edge("structural_summarizer", "report_builder", "feeds")
+    g.add_edge("report_builder", "continuity", "persists session reports")
     return g

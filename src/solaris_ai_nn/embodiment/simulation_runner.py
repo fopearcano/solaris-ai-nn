@@ -51,6 +51,7 @@ class SensorimotorSimulationRunner:
     height: int = 7
     plasticity_interval_steps: int = 50
     inner_map_interval_steps: int = 25
+    enable_language: bool = False
     world: Optional[GridWorld] = None
     body: Optional[SimulatedBody] = None
     bridge: Optional[SolarisNeuralBridge] = None
@@ -82,7 +83,9 @@ class SensorimotorSimulationRunner:
                 encoder=EventEncoder(vocabulary=list(SENSOR_VOCABULARY)),
                 substrate_name=self.substrate,
                 seed=self.seed,
+                enable_language_trace=self.enable_language,
             )
+        self.last_explanations: Dict[str, Any] = {}
         self.observer = None
         self.plasticity_engine = None
         if self.enable_plasticity:
@@ -175,6 +178,39 @@ class SensorimotorSimulationRunner:
             if "consumed_reward" in reasons:
                 self.rewards_consumed += 1
 
+        # 4. Optional language layer: atoms + grounded per-step explanations.
+        if self.enable_language and self.bridge.meaning_trace_builder is not None:
+            self._explain_step(readings, result, reaction)
+
+    def _explain_step(self, readings, result, reaction) -> None:
+        """Record embodiment atoms and render the per-step explanations."""
+        from ..language import templates as T
+
+        builder = self.bridge.meaning_trace_builder
+        builder.append_atoms(builder.from_embodiment_result(result.to_dict()))
+        engine = self.bridge.explanation_engine
+        ctx = self.bridge.explanation_context(
+            embodiment=self.embodiment_summary(),
+            last_result=result.to_dict(),
+        )
+        safety_report = self.body.safety.validate_action(result.action)
+        self.last_explanations = {
+            "sensor_reading": (
+                f"Sensors emitted {len(readings)} reading(s): "
+                + ", ".join(r.payload for r in readings) + "."
+                if readings else "No sensor readings this step."),
+            "suggested_action": engine.explain_action_suggestion(ctx).text,
+            "safety_validation": (
+                f"Safety validated {result.action!r}: "
+                + ("safe simulated action" if safety_report.safe
+                   else "; ".join(safety_report.violations)) + "."),
+            "action_result": engine.explain_action_result(ctx).text,
+            "reaction_feedback": (
+                T.render("reaction_feedback", valence=round(reaction.valence, 3))
+                if reaction is not None else
+                "No feedback was generated for this step (neutral outcome)."),
+        }
+
     # -- plasticity context (section 15) ------------------------------------------
 
     def plasticity_context(self) -> Dict[str, Any]:
@@ -259,6 +295,12 @@ class SensorimotorSimulationRunner:
             "embodiment": self.embodiment_summary(),
             "plasticity": (self.plasticity_engine.snapshot()
                            if self.plasticity_engine else None),
+            "language": ({
+                "enabled": True,
+                "meaning_atoms": len(self.bridge.meaning_trace_builder),
+                "last_explanations": dict(self.last_explanations),
+            } if self.enable_language
+              and self.bridge.meaning_trace_builder is not None else None),
             "world_ascii": self.world.to_ascii(),
         }
 

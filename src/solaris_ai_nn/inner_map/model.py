@@ -182,6 +182,11 @@ class InnerMapModel:
     # last_action_result, last_reaction_valence, environment_boundaries,
     # nearby_objects, action_authority ("simulation-only"), safety_status.
     embodiment: Optional[Dict[str, Any]] = None
+    # Internal language layer status (Prompt 9); None when language is off.
+    # Keys: enabled, meaning_atom_count, causal_trace_count,
+    # last_explanation_summary, dominant_categories, unknown_statements,
+    # queryable, last_session_report_path.
+    language: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

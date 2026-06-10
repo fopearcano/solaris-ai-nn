@@ -20,6 +20,10 @@ from .plasticity_adaptation import (  # noqa: F401
     run_plasticity_adaptation,
 )
 from .embodied_absence import EmbodiedAbsenceResult, run_embodied_absence  # noqa: F401
+from .language_trace_demo import (  # noqa: F401
+    LanguageTraceResult,
+    run_language_trace_demo,
+)
 from .reward_danger_adaptation import (  # noqa: F401
     RewardDangerResult,
     run_reward_danger_adaptation,
@@ -65,4 +69,6 @@ __all__ = [
     "EmbodiedAbsenceResult",
     "run_reward_danger_adaptation",
     "RewardDangerResult",
+    "run_language_trace_demo",
+    "LanguageTraceResult",
 ]

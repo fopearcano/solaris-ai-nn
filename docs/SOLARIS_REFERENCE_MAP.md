@@ -264,3 +264,19 @@ mechanisms; the reference repo untouched; no real-world actuation.
 | Memory–Sensory Interaction | bounded sensor/action histories + feedback valence record (`embodiment/state.py` summaries persisted as `embodiment_state.json`) |
 | Action/Reaction concept | `embodiment/effectors.py` (simulated actions only) + `embodiment/feedback.py` (`EmbodimentFeedback` → canonical Reaction with explicit reasons) |
 | AION absence Stimulus | `AbsenceSensor` — an empty sensory neighbourhood emits "I sense nothing" (`is_absence=True`); the embodied absence experiment measures the result |
+
+---
+
+## Language-layer mapping (Phase 9)
+
+The internal language layer (`language/`) realises Solaris_Ai's "language as
+cross-functional meaning" principle as deterministic, grounded machinery.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| `modules/language.py` (cross-functional meaning) | the whole `language/` package — controlled vocabulary, meaning atoms, explanations, reports; internal structure before any external conversation |
+| `runtime/signals.py` | `language/meaning_trace.py` — MeaningAtoms are generated from canonical signals (received / encoded_as / updated / suggested...) |
+| `conscience.py` topology (who talks to whom) | `language/causal_trace.py` — `CausalTraceBuilder` reconstructs hedged chains across the module topology; only coded paths carry `caused` |
+| `modules/inner_map.py` | `ExplanationContext` — the Inner MAP snapshot is a primary grounding source for explanations, and the Inner MAP records language status back |
+| Habit / Synthesis / Backpropagation family | explanation of adaptation — `explain_strongest_habit`, `explain_pruning`, `explain_plasticity` render exactly what those mechanisms recorded |
+| Embodiment principle | explanation of sensorimotor feedback — per-step sensor/suggestion/safety/result/reaction explanations in the simulation runner |

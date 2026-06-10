@@ -193,3 +193,40 @@ noise, and irreversibility while answering the same questions worse. The
 embodiment safety layer (closed action space, forbidden real-world patterns,
 simulation-only authority) is also the template any future physical interface
 would have to satisfy *before* existing.
+
+## Phase-9 language and explainability notes
+
+**Explainable AI (XAI).** The field's hard lesson is that post-hoc rationales
+often describe a plausible model rather than the actual one. Our answer is
+architectural: explanations are *renderings of records*, not interpretations.
+If a number is not in the trace, telemetry, or Inner MAP, it cannot appear in
+an explanation.
+
+**Trace-based explanation.** Everything the system says about itself is
+reconstructed from append-only traces it already keeps (signal trace, plasticity
+audit, continuity log, meaning trace). That makes explanations reproducible:
+re-render the same trace, get the same words.
+
+**Symbolic event languages.** The meaning-atom format (controlled categories ×
+controlled predicates × grounded values) is a tiny symbolic event language in
+the lineage of structured logging and event calculi — chosen because closed
+vocabularies are checkable. An uncontrolled label cannot enter a trace; it is
+demoted to `unknown`/`influenced` on the way in.
+
+**Why deterministic explanations come before LLM-based dialogue.** An LLM
+narrator put in front of this system today would be a fluent confabulator: it
+would smooth over missing data, invent motivations, and erase the distinction
+between coded causation and temporal association — precisely the failure modes
+this project exists to avoid. Deterministic templates are less articulate and
+strictly more honest. If LLM dialogue ever arrives, it will sit *on top of*
+this layer and be constrained to verbalising grounded atoms, never replacing
+them.
+
+**Risks of confabulation in self-explanation systems.** Systems that explain
+themselves tend to drift toward narrative: "I did X because I wanted Y." Three
+structural defenses here: (1) motivational vocabulary is excluded by rule and
+test — the readout "produced a tendency", nothing "wanted"; (2) causal claims
+are confidence-tagged and hard verbs are reserved for directly-coded paths;
+(3) the system must say "does not know" when context is missing, and every
+report carries a mandatory limitations section. Honesty is enforced by the
+type system and the test suite, not by good intentions.
