@@ -177,7 +177,21 @@ python examples/run_reward_danger_adaptation.py --steps 300
 # Internal language layer: grounded explanations + deterministic queries (no LLM)
 python examples/run_language_trace_demo.py --steps 200
 python examples/run_language_query_demo.py --steps 100
+
+# Evaluation layer: bounded benchmarks, cautious scorecards, reproducibility
+python examples/run_single_benchmark.py --experiment absence_stimulus --steps 150
+python examples/run_benchmark_suite.py --quick --steps 150
+python examples/generate_benchmark_report.py --output-dir .solaris_ai_nn_benchmarks
 ```
+
+The **evaluation layer** (`evaluation/`) is the measurement harness: nine
+registered protocols (absence, feedback inversion, reward/danger, restart
+recovery, replay determinism, substrate comparison, plasticity dry-run,
+synthesis pruning, language grounding), objective metrics across ten domains,
+a 0–1 scorecard with mandatory explanations (and deliberately **no
+consciousness score**), ablation baselines, reproducibility hashing/replay
+checks, and failure analysis with suggested next debug steps. Outputs land in
+`.solaris_ai_nn_benchmarks/` (git-ignored) as JSON + Markdown.
 
 The **language layer** (`language/`) lets the system describe what happened
 inside itself: meaning atoms from a controlled vocabulary, hedged causal traces
@@ -242,6 +256,7 @@ src/solaris_ai_nn/
   integration/  optional Solaris_Ai sidecar: probe, bus connector, mirror, suggestions
   embodiment/   simulated body + GridWorld: sensors, effectors, energy, safety, runner
   language/     internal meaning trace, causal trace, explanations, queries, reports
+  evaluation/   benchmarks, metrics, scorecards, baselines, reproducibility, failures
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

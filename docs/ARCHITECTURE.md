@@ -604,3 +604,59 @@ explains each step (sensor reading, suggestion, safety validation, action
 result, feedback); and the Inner MAP records language status (atom counts,
 dominant categories, unknown statements, queryability) as part of the
 self-model.
+
+## 20. Evaluation and reproducibility layer
+
+The evaluation layer (`evaluation/`, Prompt 10) is the measurement harness.
+After nine phases of mechanisms, the project needed a way to ask — with
+numbers — *is any of this actually improving anything?* before adding more
+complexity. Every run now has a manifest; every claim has a metric.
+
+**Why metrics before more complexity.** Adaptive systems invite
+self-deception: behaviour drifts, and the builder narrates the drift as
+progress. The harness replaces narration with manifests (what exactly was run:
+seed, substrate, config, features, bounds), domain metrics, and reproducibility
+hashes. Nothing gets called an improvement unless a metric moved.
+
+**Metric domains** (`evaluation/metrics.py`, all deterministic and
+zero-safe): continuity (heartbeats, checkpoints, restarts, brain-death gaps),
+reactivity (stimuli, suggestions, reactions, latency, response diversity),
+adaptation (prediction-error trend, feedback alignment, inversion recovery),
+habit (pathways, entropy, stability), synthesis (pruning counts, subtraction
+ratio), plasticity (proposed/applied/rejected/rollbacks), substrate (norm,
+drift, activity, spike/silence/saturation, energy proxy), embodiment (rewards,
+collisions, blocked actions, exhaustion, useful-action ratio), Inner MAP, and
+language (atom counts, grounded-explanation ratio, honest unknowns).
+
+**Why there is no consciousness score.** Scores (`evaluation/scoring.py`) are
+0–1 *mechanistic proxies* with mandatory explanations — "continuity
+performance", "adaptation proxy", "sensorimotor stability" — and `None` with a
+reason when data is insufficient. A consciousness score would be a category
+error: these numbers measure mechanisms (error trends, ratios, counts), and no
+arithmetic over mechanism metrics yields a fact about experience. The scorecard
+says so in its own `note` field, permanently.
+
+**Benchmarks compare substrates/features.** Nine registered protocols
+(`evaluation/protocols.py`) wrap the existing experiments — absence stimulus,
+feedback inversion, reward/danger, restart recovery, replay determinism,
+substrate comparison, plasticity dry-run, synthesis pruning, language
+grounding — each returning an `ExperimentResult` with metrics, scorecard,
+artifacts, and failure findings. `evaluation/comparison.py` groups results by
+substrate or feature flags into Markdown tables, and `evaluation/baselines.py`
+provides the bar to beat (random ≈0.44, fixed/no-feedback ≈0.31 vs the learning
+loop ≈0.81 late accuracy on the toy world — habit ablation collapses to the
+floor, which is the ablation telling us habit matters here).
+
+**Replay and reproducibility.** `compute_reproducibility_hash` pins the
+configuration; the replay protocol records a trace and replays it into two
+identically-seeded fresh bridges (bit-equal state required);
+`check_seed_stability` re-runs whole experiments and `compare_runs` diff their
+metrics within tolerance, flagging nondeterminism explicitly.
+
+**Failure analysis guides the next step.** `FailureAnalyzer` pattern-checks
+results for the known bad endings — frozen substrate, runaway activity, total
+silence, blocked-action dominance, missing feedback, plasticity lockout, empty
+traces, missing checkpoints, replay mismatch — and emits findings with
+severity, probable cause, and a *suggested next debug step*. Diagnosis only;
+nothing auto-fixes. The findings are exactly the queue future development
+should work through.

@@ -692,3 +692,61 @@ The sensorimotor runner with language enabled explains every step five ways:
 sensor readings, the suggested action, the safety validation verdict, the
 action result, and the reaction feedback — each rendered from the actual
 `ActionResult` / `SafetyReport` / `Reaction` objects of that step (tested).
+
+---
+
+# Phase-10 evaluation benchmarks
+
+The measurement layer (`evaluation/`): nine registered protocols, baselines,
+reproducibility checks, comparisons, and failure analysis. All bounded.
+
+## 42. Benchmark Suite ✅ (implemented)
+
+**Run:** `python examples/run_benchmark_suite.py --quick --steps 150`
+The quick suite runs absence_stimulus, feedback_inversion, restart_recovery,
+and language_trace; prints the experiment table + scorecards + warnings; writes
+`suite_summary.{json,md}` and per-run `runs/<experiment_id>/` directories.
+Tested end to end via subprocess.
+
+## 43. Single Benchmark Runner ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment absence_stimulus --steps 150`
+Runs one protocol, prints the full scorecard with per-domain explanations and
+failure findings.
+
+## 44. Reproducibility Check ✅ (implemented)
+
+`replay_determinism` protocol (trace recorded, replayed twice, bit-equal state
+required) + `check_seed_stability` (same experiment, same seed, repeated runs,
+metric deltas within tolerance). Nondeterminism produces an explicit warning
+and a `replay_mismatch` failure finding.
+
+## 45. Baseline Comparison ✅ (implemented)
+
+`evaluation/baselines.py`: random / fixed / no-plasticity / no-habit /
+no-synthesis / observe-only. Reference numbers on the toy world: learning loop
+≈0.81 late accuracy vs random ≈0.44 and no-feedback ≈0.31; the no-habit
+ablation drops to the floor on short runs.
+
+## 46. Failure Analysis Report ✅ (implemented)
+
+`FailureAnalyzer` findings (severity + probable cause + next debug step) are
+attached to every benchmark result and rendered in `result.md` /
+`combined_report.md`. Twelve failure modes covered, diagnosis-only.
+
+## 47. Substrate Comparison Benchmark ✅ (implemented)
+
+`substrate_comparison` protocol + `compare_substrates` table: the same
+deterministic trace across esn / liquid_state / spiking_recurrent, grouped
+scorecards per substrate.
+
+## 48. Feedback Inversion Benchmark ✅ (implemented)
+
+`feedback_inversion` protocol wraps the rule-flip experiment: early vs
+after-flip accuracy feeds the adaptation score; optionally with plasticity on.
+
+## 49. Embodied Reward/Danger Benchmark ✅ (implemented)
+
+`reward_danger` protocol wraps the embodied GridWorld experiment: embodiment
+metrics (collisions, blocked actions, useful-action ratio, exhaustion) plus the
+early/late valence shift feed the scorecard.

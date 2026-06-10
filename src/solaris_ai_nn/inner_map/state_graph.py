@@ -209,4 +209,21 @@ def build_default_state_graph() -> StateGraph:
     g.add_edge("query_interface", "explanation_engine", "routes queries")
     g.add_edge("structural_summarizer", "report_builder", "feeds")
     g.add_edge("report_builder", "continuity", "persists session reports")
+
+    # Evaluation / benchmark layer (Prompt 10).
+    for name, role in [
+        ("benchmark_runner", "bounded benchmark execution"),
+        ("experiment_registry", "protocol catalogue"),
+        ("metric_collector", "objective domain metrics"),
+        ("evaluation_score", "cautious scorecard"),
+        ("failure_analyzer", "diagnosis, no auto-fix"),
+        ("artifact_collector", "file evidence"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("experiment_registry", "benchmark_runner", "provides protocols")
+    g.add_edge("benchmark_runner", "artifact_collector", "experiments produce artifacts")
+    g.add_edge("artifact_collector", "metric_collector", "artifacts feed metrics")
+    g.add_edge("metric_collector", "evaluation_score", "metrics feed scorecard")
+    g.add_edge("evaluation_score", "inner_map", "scorecard feeds Inner MAP")
+    g.add_edge("failure_analyzer", "report_builder", "failure analysis feeds debugging")
     return g

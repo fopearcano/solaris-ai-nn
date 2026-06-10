@@ -230,3 +230,38 @@ are confidence-tagged and hard verbs are reserved for directly-coded paths;
 (3) the system must say "does not know" when context is missing, and every
 report carries a mandatory limitations section. Honesty is enforced by the
 type system and the test suite, not by good intentions.
+
+## Phase-10 evaluation notes
+
+**Evaluation of cognitive architectures.** Architectures are notoriously hard
+to evaluate because they are frameworks, not models: there is no single test
+set. The workable approach is the one adopted here — fixed, bounded protocols
+that each isolate one claimed capability (continuity, adaptation, recovery,
+grounding), plus ablation baselines that ask whether each mechanism earns its
+keep.
+
+**Reproducibility in adaptive systems.** A system that changes itself is easy
+to mistake for a system that improved. Reproducibility is the antidote: pin the
+seed, hash the configuration, replay the trace, and demand bit-equal substrate
+state. Anything that cannot survive a same-seed re-run is an anecdote.
+
+**Dangers of overinterpreting emergent behaviour.** Small adaptive loops
+produce behaviour that *looks* purposeful (our agent "learns to rest when
+tired"). The honest reading is mechanical: a feedback rule rewarded rest under
+low energy and an online learner followed the gradient. The benchmark layer
+enforces this reading — claims like "adapted faster after inversion" are only
+emitted when the inversion-recovery metric supports them, and "no evidence of
+adaptation was measured" is a first-class result.
+
+**Why proxy metrics are not consciousness metrics.** Every number here measures
+a mechanism: an error trend, a ratio of counts, a norm. Aggregating mechanism
+metrics yields a mechanism summary, never a fact about experience. That is why
+the scorecard structurally lacks a consciousness score and carries a permanent
+note saying one will not be derived.
+
+**Long-running experiment design.** The protocols are short by default
+(bounded steps, seconds of wall clock) because the harness must run in CI on
+every change. The same manifests scale to soak durations: the design rule is
+that a 24-hour run differs from a 150-step run only in its bound, never in its
+instrumentation — telemetry, artifacts, hashes, and failure analysis are
+identical at every scale.

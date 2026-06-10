@@ -26,3 +26,6 @@ artifacts/
 .idea/
 .vscode/
 .DS_Store
+
+# Benchmark runtime output (manifests, results, artifacts). Reproducible from code.
+.solaris_ai_nn_benchmarks/

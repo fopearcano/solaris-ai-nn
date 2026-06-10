@@ -187,6 +187,10 @@ class InnerMapModel:
     # last_explanation_summary, dominant_categories, unknown_statements,
     # queryable, last_session_report_path.
     language: Optional[Dict[str, Any]] = None
+    # Evaluation/benchmark status (Prompt 10); None until a benchmark ran.
+    # Keys: last_run_id, last_scores, last_failure_findings,
+    # reproducibility_status, comparison_summary, artifact_paths.
+    evaluation: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""
