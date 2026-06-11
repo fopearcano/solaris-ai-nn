@@ -85,6 +85,11 @@ class SolarisNeuralBridge:
     enable_language_trace: bool = False
     meaning_trace_builder: Any = None  # language.MeaningTraceBuilder when enabled
     explanation_engine: Any = None  # language.ExplanationEngine when enabled
+    # Homeostasis (Prompt 16): an optional HomeostaticRegulator whose drive
+    # pressures *bias* suggestions. It never commits actions and never
+    # overrides safety -- the bias lands beside the habit bias, pre-argmax.
+    enable_homeostasis: bool = False
+    homeostatic_regulator: Any = None
 
     _logos: Optional[C.LogosTension] = field(default=None, init=False, repr=False)
     _steps: int = field(default=0, init=False)
@@ -202,6 +207,12 @@ class SolarisNeuralBridge:
         # Form a tendency: readout score + light habit bias, epsilon-greedy.
         pattern_key = self.encoder.pattern_key(signal)
         bias = self.habit.bias_vector(pattern_key, self.action_labels)
+        if self.enable_homeostasis and self.homeostatic_regulator is not None:
+            # Drive-pressure bias for matching action labels (suggestion
+            # bias only; suppressed proposals already carry zero bias).
+            desire_bias = self.homeostatic_regulator.to_desire_bias()
+            for index, label in enumerate(self.action_labels):
+                bias[index] += 0.5 * desire_bias.get(label, 0.0)
         scores = self.readout.predict(features)
         greedy = self.readout.argmax(features, bias=bias)
         if len(self.action_labels) > 1 and self._rng.random() < self.exploration:
@@ -424,6 +435,8 @@ class SolarisNeuralBridge:
             "exploration": self.exploration,
             "telemetry": self.telemetry.report(),
         }
+        if self.enable_homeostasis and self.homeostatic_regulator is not None:
+            snap["homeostasis"] = self.homeostatic_regulator.summary()
         if include_language and self.enable_language_trace \
                 and self.meaning_trace_builder is not None:
             snap["language"] = {

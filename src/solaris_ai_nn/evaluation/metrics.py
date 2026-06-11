@@ -341,3 +341,55 @@ def world_model_metrics(world_model: Optional[Dict[str, Any]]) -> Dict[str, Any]
                                 or (world_model.get("context") or {}).get(
                                     "active", [])),
     }
+
+
+# -- N. homeostasis (Prompt 16) --------------------------------------------------------
+
+def homeostasis_metrics(homeostasis: Optional[Dict[str, Any]],
+                        traces: Optional[List[Dict[str, Any]]] = None,
+                        ) -> Dict[str, Any]:
+    """Objective homeostasis metrics: stability, conflict, suppression."""
+    if not homeostasis:
+        return {"present": False}
+    traces = traces or []
+    dominant_needs = [t.get("dominant_need") for t in traces
+                      if t.get("dominant_need")]
+    stability = None
+    if dominant_needs:
+        from collections import Counter
+
+        top_count = Counter(dominant_needs).most_common(1)[0][1]
+        stability = round(top_count / len(dominant_needs), 4)
+    volatility = None
+    if len(dominant_needs) >= 2:
+        switches = sum(1 for a, b in zip(dominant_needs, dominant_needs[1:])
+                       if a != b)
+        volatility = round(switches / (len(dominant_needs) - 1), 4)
+    tensions = [float(t.get("tension", 0.0) or 0.0) for t in traces]
+    tension_trend = None
+    if len(tensions) >= 4:
+        half = len(tensions) // 2
+        tension_trend = round(sum(tensions[half:]) / (len(tensions) - half)
+                              - sum(tensions[:half]) / half, 4)
+    updates = int(_get(homeostasis, "updates", 0))
+    suppressed = int(_get(homeostasis, "suppressed_desire_count", 0))
+    return {
+        "present": True,
+        "dominant_need_stability": stability,
+        "need_volatility": volatility,
+        "conflict_rate": (round(_get(homeostasis, "conflict_count", 0)
+                                / updates, 4) if updates else None),
+        "desire_suppression_rate": (round(suppressed / max(1, updates), 4)
+                                    if updates else None),
+        "homeostasis_update_count": updates,
+        "auto_determination_tension_trend": tension_trend,
+        "valence_trend": homeostasis.get("valence_trend"),
+        "current_valence": homeostasis.get("current_valence"),
+        "being_pressure": homeostasis.get("being_pressure"),
+        "not_being_pressure": homeostasis.get("not_being_pressure"),
+        "safe_shutdown_recommendation_count": int(_get(
+            homeostasis, "shutdown_recommendations", 0)),
+        "dominant_need": homeostasis.get("dominant_need"),
+        "dominant_drive": homeostasis.get("dominant_drive"),
+        "best_desire": homeostasis.get("best_desire"),
+    }

@@ -298,3 +298,20 @@ graph that grows from experience.
 | `modules/mysterium.py` (pull of the unknown) | `unknown` nodes with `mysterium` markers + high-Mysterium graph areas; prediction misses raise unknown pressure through the shared `MysteriumTracker` |
 | `modules/synthesis.py` (synthesis through subtraction) | `world_model/pruning.py` (`GraphSynthesisPruner`) — weak/redundant graph structure is proposed for subtraction, dry-run by default, evidence preserved, reversible |
 | `modules/language.py` (meaning expressed) | `world_model/query.py` + report builder — six fixed queries answered with cautious vocabulary ("observed association", "candidate causal relation"), ClaimGuard-scanned |
+
+---
+
+## Homeostasis mapping (Phase 16)
+
+The homeostasis layer (`homeostasis/`) realises Solaris_Ai's "Will = Need"
+as bounded, observable drive regulation.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| "Will = Need" | `homeostasis/needs.py` (`NeedEstimator`) — fourteen need types as pressure estimates with intensity, urgency, sources, and evidence; never commands |
+| `Stimulus → Push → Desire → Action` | `homeostasis/desire_synthesis.py` (`DesireSynthesisEngine`) — need/drive pressure becomes ranked candidates that map to the canonical `Desire` signal and bias (never commit) bridge suggestions |
+| `modules/auto_determination.py` (Being/Not-Being) | `homeostasis/auto_determination.py` (`AutoDeterminationEngine`) — two bounded pressures from operational facts; implication is a recommendation the ops watchdog may act on |
+| `modules/ego.py` / Inner MAP (self-continuity) | the continuity variable group (heartbeat/checkpoint freshness, restart stability, operational health) + `InnerMapModel.homeostasis` |
+| `modules/mysterium.py` (pull of the unknown) | novelty/unknown variable group — Mysterium pressure and prediction misses become `reduce_uncertainty` need pressure |
+| `modules/complexity.py` | complexity pressure feeds `increase_exploration` / `increase_stabilization` needs and the exploration/stabilization drives |
+| `modules/io_module.py` (actions committed) | formal `DesireCandidate` objects with `committed=False` semantics — the bridge suggests, Solaris_Ai (or the simulation) decides |

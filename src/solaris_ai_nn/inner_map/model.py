@@ -221,6 +221,13 @@ class InnerMapModel:
     # high_mysterium_areas, context_state, prediction_accuracy,
     # last_pruning_proposal, evidence_ratio, world_model_report_path.
     world_model: Optional[Dict[str, Any]] = None
+    # Homeostasis status (Prompt 16); None when homeostasis is disabled.
+    # Keys: enabled, dominant_need, dominant_drive, current_valence,
+    # valence_trend, being_pressure, not_being_pressure,
+    # auto_determination_tension, action_implication, conflict_count,
+    # suppressed_desire_count, last_desire_candidates,
+    # homeostasis_report_path.
+    homeostasis: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

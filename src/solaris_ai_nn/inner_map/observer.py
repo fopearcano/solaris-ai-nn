@@ -56,6 +56,7 @@ class InnerMapObserver:
     pilot: Any = None  # optional dict or object with pilot_summary()
     latent: Any = None  # optional dict or LatentCognition (summary())
     world_model: Any = None  # optional dict or WorldModelBuilder
+    homeostasis: Any = None  # optional dict or HomeostaticRegulator
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -353,6 +354,15 @@ class InnerMapObserver:
                 model.world_model = world_model.world_model_summary()
             elif isinstance(world_model, dict):
                 model.world_model = dict(world_model)
+        homeostasis = self.homeostasis
+        if homeostasis is None and self.runner is not None:
+            homeostasis = getattr(self.runner, "homeostasis", None)
+        if homeostasis is not None:
+            # Homeostasis status (read-only; pressure estimates).
+            if hasattr(homeostasis, "summary"):
+                model.homeostasis = homeostasis.summary()
+            elif isinstance(homeostasis, dict):
+                model.homeostasis = dict(homeostasis)
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

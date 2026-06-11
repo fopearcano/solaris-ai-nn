@@ -61,6 +61,10 @@ class SensorimotorSimulationRunner:
     # pathfinding, no planning. Off by default.
     enable_world_model: bool = False
     world_model_update_interval_steps: int = 25
+    # Homeostasis (Prompt 16): energy/danger/reward pressure biases the
+    # body's suggestions. Simulation-only, suggestions-only, off by default.
+    enable_homeostasis: bool = False
+    homeostasis_update_interval_steps: int = 10
     world: Optional[GridWorld] = None
     body: Optional[SimulatedBody] = None
     bridge: Optional[SolarisNeuralBridge] = None
@@ -125,11 +129,20 @@ class SensorimotorSimulationRunner:
                               if self.latent is not None else None),
                 mysterium=(self.latent.mysterium
                            if self.latent is not None else None))
+        self.homeostasis = None
+        if self.enable_homeostasis:
+            from ..homeostasis.regulation import HomeostaticRegulator
+
+            self.homeostasis = HomeostaticRegulator(
+                state_dir=self.state_dir, world_model=self.world_model)
+            self.bridge.enable_homeostasis = True
+            self.bridge.homeostatic_regulator = self.homeostasis
         from ..inner_map.observer import InnerMapObserver
 
         self.observer = InnerMapObserver(bridge=self.bridge, embodiment=self,
                                          latent=self.latent,
-                                         world_model=self.world_model)
+                                         world_model=self.world_model,
+                                         homeostasis=self.homeostasis)
 
     # -- the loop ---------------------------------------------------------------
 
@@ -153,7 +166,12 @@ class SensorimotorSimulationRunner:
             if (self.world_model is not None
                     and step % self.world_model_update_interval_steps == 0):
                 self.world_model.update_from_embodiment(self)
+            if (self.homeostasis is not None
+                    and step % self.homeostasis_update_interval_steps == 0):
+                self._homeostasis_tick(step)
         self.steps_run = step
+        if self.homeostasis is not None and self.state_dir is not None:
+            self.homeostasis.save_state()
         if self.world_model is not None:
             self.world_model.update_from_embodiment(self)
             if self.state_dir is not None:
@@ -185,6 +203,29 @@ class SensorimotorSimulationRunner:
             "latent cycle must not execute simulated actions"
         if summary is not None:
             self.latent_cycles += 1
+
+    def _homeostasis_tick(self, step: int) -> None:
+        """Regulation from body/world facts; suggestions stay simulated."""
+        world = self._world_summary()
+        recent = self.action_history[-20:]
+        blocked = sum(1 for r in recent if r.blocked_reason)
+        valences = self.reaction_valences[-10:]
+        quiet = not valences or max(abs(v) for v in valences) < 0.2
+        self.homeostasis.update({
+            "step": step,
+            "embodiment": {
+                "energy": self.body.energy.energy,
+                "max_energy": self.body.energy.max_energy,
+                "exhausted": self.body.energy.exhausted,
+                "dist_danger": world.get("dist_danger"),
+                "dist_reward": world.get("dist_reward"),
+                "blocked_ratio": (blocked / len(recent)) if recent else 0.0,
+            },
+            "blocked_actions": blocked,
+            "silence_duration": 10 if quiet else 0,
+            "valence_events": [{"kind": "reaction", "value": v}
+                               for v in valences[-3:]],
+        })
 
     def _should_stop(self, step: int, start: float) -> bool:
         if self.max_steps is not None and step >= self.max_steps:

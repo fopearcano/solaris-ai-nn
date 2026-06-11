@@ -76,6 +76,8 @@ def default_runner_factory(manifest: OperationalRunManifest,
         allow_latent_plasticity=manifest.enabled_features.get(
             "latent_plasticity", False),
         enable_world_model=manifest.enabled_features.get("world_model",
+                                                         False),
+        enable_homeostasis=manifest.enabled_features.get("homeostasis",
                                                          False))
 
 
@@ -297,6 +299,48 @@ class OperationalSupervisor:
                     related_metric="mysterium_pressure",
                     suggested_debug_step="inspect the mysterium reasons in "
                                          "the latent report")
+
+        # Homeostasis monitoring (Prompt 16): pressure readings only; the
+        # watchdog keeps all stop authority.
+        homeostasis = snapshot.get("homeostasis") or {}
+        if homeostasis:
+            stale_after = max(120.0, m.watchdog_interval_s * 30)
+            last_update = float(homeostasis.get("last_update_at", 0.0) or 0.0)
+            if last_update and time.time() - last_update > stale_after:
+                self.incidents.record(
+                    I.HOMEOSTASIS_STUCK, "warning",
+                    f"no homeostasis update for "
+                    f"{time.time() - last_update:.0f}s",
+                    related_metric="homeostasis_update",
+                    suggested_debug_step="check the regulation interval")
+            if float(homeostasis.get("dominant_need_intensity", 0.0)
+                     or 0.0) >= 0.98:
+                self.incidents.record(
+                    I.RUNAWAY_NEED_PRESSURE, "warning",
+                    f"need {homeostasis.get('dominant_need')!r} is pinned "
+                    "at maximum intensity",
+                    related_metric="need_pressure",
+                    suggested_debug_step="read the homeostasis report's "
+                                         "variable section")
+            if int(homeostasis.get("suppressed_desire_count", 0) or 0) >= 25:
+                self.incidents.record(
+                    I.REPEATED_SUPPRESSED_DESIRES, "warning",
+                    f"{homeostasis['suppressed_desire_count']} desire "
+                    "candidates suppressed this run",
+                    related_metric="suppressed_desires",
+                    suggested_debug_step="inspect the conflict ledger; the "
+                                         "configuration may be fighting "
+                                         "itself")
+            if homeostasis.get("action_implication") \
+                    == "safe_shutdown_recommended":
+                self.incidents.record(
+                    I.AUTO_DETERMINATION_SHUTDOWN_RECOMMENDED, "warning",
+                    "auto-determination recommends a safe shutdown "
+                    "(recommendation only; the watchdog decides)",
+                    related_metric="not_being_pressure",
+                    suggested_debug_step="review the Being/Not-Being "
+                                         "reasons in the homeostasis "
+                                         "report")
 
         budget_report = self.budget.check_budget(
             {"telemetry": snapshot.get("telemetry"),
@@ -592,6 +636,9 @@ class OperationalSupervisor:
         latent = getattr(runner, "latent", None)
         if latent is not None:
             snapshot["latent"] = latent.summary()
+        homeostasis = getattr(runner, "homeostasis", None)
+        if homeostasis is not None:
+            snapshot["homeostasis"] = homeostasis.summary()
         return snapshot
 
     def _build_status(self) -> OperationalStatus:

@@ -63,8 +63,17 @@ def test_grant_and_revoke():
 def test_all_scopes_in_default_set():
     ps = PermissionSet.default()
     assert set(ps.known_scopes()) == set(PermissionScope.ALL)
-    # 13 governance (P12) + 5 latent (P14) + 3 world model (P15).
-    assert len(PermissionScope.ALL) == 21
+    # 13 governance (P12) + 5 latent (P14) + 3 world model (P15)
+    # + 4 homeostasis (P16).
+    assert len(PermissionScope.ALL) == 25
+
+
+def test_homeostasis_scope_defaults():
+    ps = PermissionSet.default()
+    assert ps.allows(PermissionScope.ENABLE_HOMEOSTASIS)
+    assert ps.allows(PermissionScope.ENABLE_NEED_DRIVEN_SUGGESTIONS)
+    assert ps.allows(PermissionScope.ENABLE_AUTO_DETERMINATION)
+    assert ps.allows(PermissionScope.ALLOW_SAFE_SHUTDOWN_RECOMMENDATION)
 
 
 def test_world_model_scope_defaults():

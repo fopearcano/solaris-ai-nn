@@ -187,6 +187,22 @@ DEFAULT_RULES: List[PolicyRule] = [
     PolicyRule("offline_graph_evidence_labelled", "world_model",
                "counterfactual graph evidence must be labelled offline",
                forbidden=True),
+    # I. Homeostasis (Prompt 16)
+    PolicyRule("homeostasis_allowed_bounded", "homeostasis",
+               "homeostatic regulation is allowed in bounded/simulated "
+               "runs"),
+    PolicyRule("needs_never_override_governance", "homeostasis",
+               "no need or drive may override governance or safety",
+               forbidden=True),
+    PolicyRule("needs_never_actuate", "homeostasis",
+               "need-driven suggestions cannot create real-world actuation",
+               forbidden=True),
+    PolicyRule("shutdown_recommendation_via_ops", "homeostasis",
+               "safe_shutdown_recommended passes through the ops "
+               "supervisor/watchdog; homeostasis has no stop authority"),
+    PolicyRule("no_anthropomorphic_claims", "homeostasis",
+               "reports must avoid anthropomorphic claims (no wanting, no "
+               "feeling)", forbidden=True),
 ]
 
 
@@ -338,6 +354,18 @@ class GovernancePolicy:
                 need_approval(PermissionScope.ENABLE_WORLD_MODEL_PRUNING,
                               "production graph pruning requires explicit "
                               "approval")
+
+        # I. Homeostasis: allowed when the scope is granted; needs cannot
+        # override anything (structural, but a hostile manifest is named).
+        if features.get("homeostasis"):
+            if not self._approved(PermissionScope.ENABLE_HOMEOSTASIS, ctx):
+                need_approval(PermissionScope.ENABLE_HOMEOSTASIS,
+                              "homeostatic regulation is not permitted")
+            if ctx.get("needs_override_governance"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "needs_never_override_governance", "homeostasis",
+                    "no need or drive may override governance or safety"))
 
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):

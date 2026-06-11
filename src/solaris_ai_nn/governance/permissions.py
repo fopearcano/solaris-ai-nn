@@ -42,6 +42,11 @@ class PermissionScope:
     ENABLE_WORLD_MODEL = "enable_world_model"
     ENABLE_WORLD_MODEL_PRUNING = "enable_world_model_pruning"
     ENABLE_WORLD_MODEL_PREDICTION = "enable_world_model_prediction"
+    # Homeostasis (Prompt 16).
+    ENABLE_HOMEOSTASIS = "enable_homeostasis"
+    ENABLE_NEED_DRIVEN_SUGGESTIONS = "enable_need_driven_suggestions"
+    ENABLE_AUTO_DETERMINATION = "enable_auto_determination"
+    ALLOW_SAFE_SHUTDOWN_RECOMMENDATION = "allow_safe_shutdown_recommendation"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -54,6 +59,8 @@ class PermissionScope:
         RUN_DREAM_CYCLE, RUN_COUNTERFACTUAL_REPLAY,
         ENABLE_WORLD_MODEL, ENABLE_WORLD_MODEL_PRUNING,
         ENABLE_WORLD_MODEL_PREDICTION,
+        ENABLE_HOMEOSTASIS, ENABLE_NEED_DRIVEN_SUGGESTIONS,
+        ENABLE_AUTO_DETERMINATION, ALLOW_SAFE_SHUTDOWN_RECOMMENDATION,
     )
 
 
@@ -137,6 +144,17 @@ class PermissionSet:
             Permission(S.ENABLE_WORLD_MODEL_PREDICTION, granted=True,
                        note="predictions from graph counts; data only, "
                             "never executed"),
+            Permission(S.ENABLE_HOMEOSTASIS, granted=True,
+                       note="need-pressure regulation; biases, never "
+                            "commands"),
+            Permission(S.ENABLE_NEED_DRIVEN_SUGGESTIONS, granted=True,
+                       note="Desire candidates are clearly suggestions"),
+            Permission(S.ENABLE_AUTO_DETERMINATION, granted=True,
+                       note="an operational continuity metric, not "
+                            "authority"),
+            Permission(S.ALLOW_SAFE_SHUTDOWN_RECOMMENDATION, granted=True,
+                       note="a recommendation only; ops "
+                            "supervisor/watchdog decides"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

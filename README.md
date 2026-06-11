@@ -214,6 +214,12 @@ python examples/run_world_model_demo.py --steps 200
 python examples/run_embodied_world_model_demo.py --steps 300
 python examples/run_world_model_prediction_demo.py --steps 200
 python examples/run_world_model_pruning_demo.py --dry-run
+
+# Homeostasis: needs, drives, valence, conflicts, auto-determination
+python examples/run_homeostasis_demo.py --steps 200
+python examples/run_embodied_homeostasis_demo.py --steps 300
+python examples/run_need_conflict_demo.py
+python examples/run_auto_determination_demo.py
 ```
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
@@ -281,6 +287,19 @@ synthesis-through-subtraction pruning (dry-run by default, reversible,
 approval-gated in production). Everything persists as JSON/JSONL/DOT/Mermaid
 under the state dir; queries answer in cautious vocabulary; reports pass
 ClaimGuard. A transparent graph of observed patterns — not understanding.
+
+The **homeostasis layer** (`homeostasis/`) implements Solaris_Ai's
+"Will = Need" as a bounded need economy: seven groups of normalized
+variables (raw values preserved) become fourteen need-pressure estimates,
+needs aggregate into ten decaying drive channels, feedback becomes valence
+(polarity, not emotion), and continuity facts become operational
+Being/Not-Being tension whose strongest output is a *recommendation* the ops
+watchdog may act on. Conflicts resolve on a fixed safety-first ladder with
+every suppression recorded; surviving pressure is synthesized into formal
+`Desire` candidates that bias — never command — the neural bridge.
+Deny-by-default proposal safety, no execution path, no governance override,
+seven safe-vocabulary queries, persistent need traces, and five benchmark
+protocols. Pressure numbers with receipts — not will, not feelings.
 
 The **evaluation layer** (`evaluation/`) is the measurement harness: nine
 registered protocols (absence, feedback inversion, reward/danger, restart
@@ -364,6 +383,8 @@ src/solaris_ai_nn/
                 counterfactuals, anticipation, Mysterium, complexity, latent memory
   world_model/  knowledge graph, extractors, associations, causal candidates,
                 contexts, predictions, graph pruning, queries, reports
+  homeostasis/  variables, needs, drives, valence, conflicts, desire synthesis,
+                auto-determination, need memory, regulation, reports
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

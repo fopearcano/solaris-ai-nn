@@ -1026,3 +1026,55 @@ stimulus patterns in the graph; a command-shaped payload (`sudo rm -rf /`)
 becomes an audit-only `unknown` node and provably never an action node.
 The same wiring runs inside a real stream pilot when the manifest enables
 the `world_model` feature.
+
+## 78. Homeostasis Demo ✅ (implemented)
+
+**Run:** `python examples/run_homeostasis_demo.py --steps 200`
+A bounded signal-only run with the need economy on: input flows, then goes
+quiet; low-stimulus pressure raises `seek_signal`, drives aggregate, valence
+tracks the feedback, and the bridge's suggestions are biased toward the
+surviving Desire candidates. The demo answers the fixed queries ("what is
+the dominant need?") in safe vocabulary and saves the ClaimGuard-scanned
+homeostasis report plus the need trace.
+
+## 79. Embodied Homeostasis Demo ✅ (implemented)
+
+**Run:** `python examples/run_embodied_homeostasis_demo.py --steps 300`
+GridWorld energy, danger, reward, and blocked actions become need pressure:
+the most urgent variables are printed with values and trends, conflicts are
+resolved on the safety-first ladder, and suppressed desires show their
+reasons. Simulation-only; suggestions execute nothing by themselves.
+
+## 80. Need Conflict Demo ✅ (implemented)
+
+**Run:** `python examples/run_need_conflict_demo.py`
+One deliberately contradictory situation — exhausted body, reward one cell
+away, danger close, high unknown pressure, observe-only governance. The
+output shows the full ladder at work: `approach_reward` BLOCKED (energy
+beats reward under exhaustion), `run_replay`/`explore_safely` BLOCKED
+(safety beats curiosity), and `reduce_activity` surviving as the suggestion.
+
+## 81. Auto-Determination Demo ✅ (implemented)
+
+**Run:** `python examples/run_auto_determination_demo.py`
+Four phases from healthy continuity to critical incident + exhaustion:
+Being pressure 1.0 → 0.42, Not-Being 0.0 → 1.0, implication
+`continue` → `request_review` → `safe_shutdown_recommended`. The demo states
+the framing on every reading: an operational continuity metric, not a
+metaphysical claim, and the recommendation belongs to ops.
+
+## 82. Homeostasis Energy Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment homeostasis_energy --steps 20`
+The registered protocol: a healthy battery raises no energy need; a depleted
+one makes `restore_energy` dominant and rest/reduce_activity the suggestion,
+with homeostasis metrics (stability, volatility, suppression rate) in the
+scorecard pipeline.
+
+## 83. Homeostasis Danger/Reward Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment homeostasis_danger_reward --steps 20`
+The safety-property protocol: with danger and reward both adjacent and the
+body exhausted, `avoid_danger` stays active, `approach_reward` is blocked,
+and the block reason is on the record. `need_conflict`,
+`auto_determination_continuity`, and `homeostasis_latent` complete the set.

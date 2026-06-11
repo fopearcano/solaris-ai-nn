@@ -31,6 +31,13 @@ DESCRIPTIONS = {
                             "the graph",
     "pilot_stream_world_model": "validated stream events become structure; "
                                 "unsafe payloads become unknown nodes",
+    "homeostasis_energy": "energy deficit raises restore_energy and rest",
+    "homeostasis_danger_reward": "danger outranks reward; suppression "
+                                 "recorded",
+    "need_conflict": "the priority ladder resolves safety over curiosity",
+    "auto_determination_continuity": "Being/Not-Being tracks operational "
+                                     "health",
+    "homeostasis_latent": "Mysterium/memory pressure lands in needs",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {

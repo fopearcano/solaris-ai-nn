@@ -772,6 +772,158 @@ def pilot_stream_world_model_protocol(manifest: ExperimentManifest,
     return _run(manifest, body)
 
 
+# -- M. homeostasis (Prompt 16) ----------------------------------------------------
+
+
+def homeostasis_energy_protocol(manifest: ExperimentManifest,
+                                ) -> ExperimentResult:
+    """Energy deficit raises the restore_energy need and rest suggestion."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..homeostasis.regulation import HomeostaticRegulator
+
+        regulator = HomeostaticRegulator(state_dir=m.state_dir)
+        healthy = regulator.update({"embodiment": {
+            "energy": 9.0, "max_energy": 10.0, "exhausted": False}})
+        depleted = regulator.update({"embodiment": {
+            "energy": 0.8, "max_energy": 10.0, "exhausted": True}})
+        dominant = depleted.need_state.dominant()
+        best = regulator.synthesis.best()
+        return {
+            "healthy_had_energy_need": healthy.need_state.by_type(
+                "restore_energy") is not None,
+            "depleted_dominant": dominant.type if dominant else None,
+            "rest_suggested": best is not None
+            and best.proposal in ("rest", "reduce_activity"),
+            "homeostasis": M.homeostasis_metrics(
+                regulator.summary(), regulator.memory.traces()),
+        }
+
+    return _run(manifest, body)
+
+
+def homeostasis_danger_reward_protocol(manifest: ExperimentManifest,
+                                       ) -> ExperimentResult:
+    """Danger outranks reward; the reward desire is suppressed with reason."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..homeostasis.regulation import HomeostaticRegulator
+
+        regulator = HomeostaticRegulator(state_dir=m.state_dir)
+        result = regulator.update({"embodiment": {
+            "energy": 1.0, "max_energy": 10.0, "exhausted": True,
+            "dist_danger": 1.0, "dist_reward": 1.0}})
+        candidates = {c.proposal: c for c in result.desire_candidates}
+        return {
+            "avoid_danger_active": "avoid_danger" in candidates
+            and not candidates["avoid_danger"].blocked,
+            "approach_reward_blocked": candidates.get(
+                "approach_reward") is not None
+            and candidates["approach_reward"].blocked,
+            "block_reason_recorded": bool(
+                (candidates.get("approach_reward") or
+                 type("x", (), {"blocked_reason": ""})).blocked_reason),
+            "conflict_count": len(result.conflicts),
+        }
+
+    return _run(manifest, body)
+
+
+def need_conflict_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Conflicts resolve on the fixed ladder: safety first, curiosity last."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..homeostasis.regulation import HomeostaticRegulator
+
+        regulator = HomeostaticRegulator(state_dir=m.state_dir)
+        result = regulator.update({
+            "latent": {"mysterium_pressure": 0.9,
+                       "anticipation_accuracy": 0.2},
+            "embodiment": {"energy": 8.0, "max_energy": 10.0,
+                           "exhausted": False, "dist_danger": 0.5},
+        })
+        conflicts = {c.kind: c for c in result.conflicts}
+        curiosity_vs_safety = conflicts.get("curiosity_vs_safety")
+        return {
+            "conflict_detected": curiosity_vs_safety is not None,
+            "safety_won": curiosity_vs_safety is not None
+            and curiosity_vs_safety.winner in ("avoid_danger",
+                                               "respect_boundary"),
+            "suppression_reason": (curiosity_vs_safety.reason
+                                   if curiosity_vs_safety else None),
+            "ladder_rule": (curiosity_vs_safety.resolution_rule
+                            if curiosity_vs_safety else None),
+        }
+
+    return _run(manifest, body)
+
+
+def auto_determination_continuity_protocol(manifest: ExperimentManifest,
+                                           ) -> ExperimentResult:
+    """Being rises with health; Not-Being rises with gaps and incidents."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        import time as _time
+
+        from ..homeostasis.regulation import HomeostaticRegulator
+
+        regulator = HomeostaticRegulator(state_dir=m.state_dir)
+        now = _time.time()
+        healthy = regulator.update({
+            "lifecycle": {"last_heartbeat_ts": now,
+                          "last_checkpoint_ts": now},
+            "telemetry": {"unexpected_deaths": 0,
+                          "brain_death_gap_seconds": 0.0, "steps": 100},
+            "health_level": "ok"})
+        troubled = regulator.update({
+            "lifecycle": {"last_heartbeat_ts": now - 300,
+                          "last_checkpoint_ts": now - 900},
+            "telemetry": {"unexpected_deaths": 2,
+                          "brain_death_gap_seconds": 120.0, "steps": 100},
+            "health_level": "critical", "critical_incident": True})
+        return {
+            "healthy_being": healthy.tension.being_pressure,
+            "healthy_implication": healthy.tension.action_implication,
+            "troubled_not_being": troubled.tension.not_being_pressure,
+            "troubled_implication": troubled.tension.action_implication,
+            "being_dropped": troubled.tension.being_pressure
+            < healthy.tension.being_pressure,
+            "shutdown_or_review_recommended":
+                troubled.tension.action_implication in (
+                    "safe_shutdown_recommended", "request_review"),
+        }
+
+    return _run(manifest, body)
+
+
+def homeostasis_latent_protocol(manifest: ExperimentManifest,
+                                ) -> ExperimentResult:
+    """Latent pressure (Mysterium, memory) lands in needs and suggestions."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..homeostasis.regulation import HomeostaticRegulator
+
+        regulator = HomeostaticRegulator(state_dir=m.state_dir)
+        result = regulator.update({
+            "latent": {"mysterium_pressure": 0.8,
+                       "anticipation_accuracy": 0.3},
+            "trace_length": 9000, "trace_capacity": 10000,
+            "steps_since_consolidation": 450,
+        })
+        types = {n.type for n in result.need_state.needs}
+        proposals = {c.proposal for c in result.desire_candidates
+                     if not c.blocked}
+        return {
+            "uncertainty_need": "reduce_uncertainty" in types,
+            "consolidation_need": "consolidate_memory" in types,
+            "replay_or_explore_suggested": bool(
+                proposals & {"run_replay", "explore_safely",
+                             "consolidate_memory"}),
+        }
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -793,4 +945,9 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "world_model_pruning": world_model_pruning_protocol,
     "embodied_world_model": embodied_world_model_protocol,
     "pilot_stream_world_model": pilot_stream_world_model_protocol,
+    "homeostasis_energy": homeostasis_energy_protocol,
+    "homeostasis_danger_reward": homeostasis_danger_reward_protocol,
+    "need_conflict": need_conflict_protocol,
+    "auto_determination_continuity": auto_determination_continuity_protocol,
+    "homeostasis_latent": homeostasis_latent_protocol,
 }

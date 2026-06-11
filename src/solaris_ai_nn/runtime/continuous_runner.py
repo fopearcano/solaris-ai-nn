@@ -104,6 +104,11 @@ class ContinuousRunner:
     world_model_update_interval_steps: int = 25
     world_model_pruning_interval_steps: int = 250
     world_model_pruning_dry_run: bool = True
+    # Homeostasis (Prompt 16): the need economy. Off by default; when on,
+    # drive pressures bias bridge suggestions, never command anything.
+    enable_homeostasis: bool = False
+    homeostasis_update_interval_steps: int = 10
+    homeostasis_report_interval_steps: int = 100
 
     def __post_init__(self) -> None:
         if not self.continuous and self.max_steps is None and self.max_duration_s is None:
@@ -159,6 +164,17 @@ class ContinuousRunner:
                 allow_plasticity=self.allow_latent_plasticity,
                 plasticity_engine=self.plasticity_engine)
 
+        # Optional homeostasis (off by default; bias only, never authority).
+        self.homeostasis = None
+        if self.enable_homeostasis:
+            from ..homeostasis.regulation import HomeostaticRegulator
+
+            self.homeostasis = HomeostaticRegulator(
+                state_dir=self.pm.state_dir)
+            self.bridge.enable_homeostasis = True
+            self.bridge.homeostatic_regulator = self.homeostasis
+            self._pending_valence_events: List[Dict[str, Any]] = []
+
         # Optional world model (off by default; restored from disk if saved).
         self.world_model = None
         if self.enable_world_model:
@@ -173,6 +189,9 @@ class ContinuousRunner:
             saved = Path(self.pm.state_dir) / "world_model.json"
             if saved.exists():
                 self.world_model.graph = load_graph(saved)
+            if self.homeostasis is not None:
+                # Need/drive/conflict structure flows into the graph.
+                self.homeostasis.world_model = self.world_model
 
     # -- startup / restore --------------------------------------------------
 
@@ -316,6 +335,18 @@ class ContinuousRunner:
                 ):
                     self.world_model.update_from_trace(self.bridge.trace)
                 if (
+                    self.homeostasis is not None
+                    and self.homeostasis_update_interval_steps > 0
+                    and step % self.homeostasis_update_interval_steps == 0
+                ):
+                    self._homeostasis_tick(step)
+                if (
+                    self.homeostasis is not None
+                    and self.homeostasis_report_interval_steps > 0
+                    and step % self.homeostasis_report_interval_steps == 0
+                ):
+                    self._save_homeostasis(report=True)
+                if (
                     self.world_model is not None
                     and self.world_model_pruning_interval_steps > 0
                     and step % self.world_model_pruning_interval_steps == 0
@@ -359,6 +390,9 @@ class ContinuousRunner:
                 if self.world_model is not None:
                     self.world_model.update_from_reaction(
                         result["suggested_action"], valence)
+                if self.homeostasis is not None:
+                    self._pending_valence_events.append(
+                        {"kind": "reaction", "value": valence})
 
         self._trace.record_signal(step, signal_to_dict(stim), lifetime, valence)
 
@@ -435,7 +469,57 @@ class ContinuousRunner:
             self.pm.save_inner_map(self.observer.update().to_dict())
         if self.world_model is not None:
             self._save_world_model()
+        if self.homeostasis is not None:
+            self._save_homeostasis()
         self._save_manifest(lifetime, graceful=False)
+
+    # -- homeostasis (optional) ------------------------------------------------
+
+    def _homeostasis_tick(self, step: int) -> None:
+        """One regulation update from the runner's live context."""
+        events = self._pending_valence_events
+        self._pending_valence_events = []
+        context: Dict[str, Any] = {
+            "step": step,
+            "lifecycle": {
+                "last_heartbeat_ts": self.lifecycle.last_heartbeat_ts,
+                "last_checkpoint_ts": self._last_checkpoint_ts,
+            },
+            "telemetry": self.telemetry.to_dict(),
+            "silence_duration": self._silence,
+            "trace_length": len(self.bridge.trace),
+            "trace_capacity": self.bridge.trace.capacity,
+            "valence_events": events,
+        }
+        if self.latent is not None:
+            context["latent"] = self.latent.summary()
+        if self.world_model is not None:
+            context["world_model"] = \
+                self.world_model.world_model_summary()
+        self.homeostasis.update(context)
+        # Optional language trace: the dominant need as a grounded atom.
+        if self.enable_language \
+                and self.bridge.meaning_trace_builder is not None:
+            summary = self.homeostasis.summary()
+            if summary["dominant_need"]:
+                from ..language.meaning_trace import atom
+
+                self.bridge.meaning_trace_builder.append_atoms([atom(
+                    "inner_map", "need pressure", "influenced",
+                    f"dominant need {summary['dominant_need']} "
+                    f"(intensity {summary['dominant_need_intensity']})",
+                    source_module="homeostasis")])
+
+    def _save_homeostasis(self, report: bool = False) -> None:
+        if self.homeostasis is None:
+            return
+        self.homeostasis.save_state()
+        if report:
+            from ..homeostasis.reports import HomeostasisReportBuilder
+
+            HomeostasisReportBuilder(self.homeostasis).save(
+                Path(self.pm.state_dir) / "homeostasis_report.json",
+                Path(self.pm.state_dir) / "homeostasis_report.md")
 
     def _save_world_model(self) -> None:
         from ..world_model.serialization import save_graph_exports
@@ -520,6 +604,8 @@ class ContinuousRunner:
             self._save_session_report()
         if self.latent is not None:
             self._save_latent_state()
+        if self.homeostasis is not None:
+            self._save_homeostasis(report=True)
         self.continuity.close()
 
     # -- language layer (optional) ------------------------------------------
@@ -676,6 +762,8 @@ class ContinuousRunner:
             snap["latent"] = self.latent.summary()
         if self.world_model is not None:
             snap["world_model"] = self.world_model.world_model_summary()
+        if self.homeostasis is not None:
+            snap["homeostasis"] = self.homeostasis.summary()
         if self.enable_language and self.bridge.meaning_trace_builder is not None:
             ctx = self._language_context()
             engine = self.bridge.explanation_engine

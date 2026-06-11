@@ -375,4 +375,32 @@ def build_default_state_graph() -> StateGraph:
                "world model feeds Inner MAP")
     g.add_edge("graph_synthesis_pruner", "knowledge_graph",
                "synthesis feeds pruning report")
+
+    # Homeostasis / need economy (Prompt 16). Pressure, never authority.
+    for name, role in [
+        ("homeostatic_regulator", "the need-economy loop"),
+        ("homeostatic_state", "normalized internal variables"),
+        ("need_estimator", "variables -> need pressures"),
+        ("drive_resolver", "needs -> drive channels"),
+        ("valence_estimator", "feedback polarity, not emotion"),
+        ("auto_determination_engine", "Being/Not-Being tension"),
+        ("conflict_resolver", "safety-first priority ladder"),
+        ("desire_synthesis_engine", "drives -> Desire suggestions"),
+        ("need_memory", "the pressure trail on disk"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("telemetry", "homeostatic_state", "telemetry feeds variables")
+    g.add_edge("homeostatic_state", "need_estimator",
+               "variables feed needs")
+    g.add_edge("need_estimator", "drive_resolver", "needs feed drives")
+    g.add_edge("drive_resolver", "desire_synthesis_engine",
+               "drives feed desire synthesis")
+    g.add_edge("conflict_resolver", "desire_synthesis_engine",
+               "conflicts suppress unsafe desires")
+    g.add_edge("desire_synthesis_engine", "bridge",
+               "desire candidates bias suggestions")
+    g.add_edge("valence_estimator", "auto_determination_engine", "feeds")
+    g.add_edge("homeostatic_regulator", "need_memory", "records")
+    g.add_edge("homeostatic_regulator", "inner_map",
+               "homeostasis feeds Inner MAP")
     return g

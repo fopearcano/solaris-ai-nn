@@ -458,3 +458,37 @@ anticipation tracker (fast loop borrows slow structure), and prediction
 misses flow back as unknown pressure (slow structure learns where it is
 wrong). Neither layer claims understanding — together they make the
 system's behaviour explainable at two timescales.
+
+**Homeostasis in cognitive architectures.** Regulation-first designs put a
+layer between sensing and acting that asks "what is out of range?" before
+"what should be done?". The payoff is coherence under conflicting signals: a
+single normalized variable space means energy, safety, novelty, and memory
+pressure are comparable numbers, and a fixed resolution ladder means the
+same contradiction always resolves the same, inspectable way.
+
+**Drive-based behaviour.** Drives are the classic middle layer between needs
+and actions: slow-moving pressure channels that bias many decisions rather
+than commanding one. Implementing them as a ten-element decaying vector
+keeps them honest — a drive here is literally a float you can print, feed to
+the substrate as modulation, and watch decay when its needs go quiet.
+
+**Active inference parallels.** Squint and the loop resembles active
+inference: deviations from target ranges (prediction errors about preferred
+states) drive policy biases that should reduce those deviations. We
+deliberately implement the cheap half only — explicit variables, counted
+needs, fixed ladders — and not the full free-energy machinery; the parallels
+are a map for future work, not a claim of equivalence.
+
+**Valence as feedback polarity.** Calling the running sign of feedback
+"valence" rather than "mood" is not pedantry; it is what keeps the metric
+useful. A polarity with attributed evidence ("blocked_action: -0.3") can be
+debugged; an emotion label cannot. The same discipline applies everywhere in
+this layer: pressure, not desire; recommendation, not decision.
+
+**Why needs are not free will.** Every number in this layer is a deterministic
+function of recorded conditions; every suggestion passes a deny-by-default
+safety list and a fixed conflict ladder; every override attempt is refused by
+construction; and the one dramatic-sounding output — safe_shutdown_recommended
+— is an incident row that a watchdog may ignore. A system whose "wants" are
+auditable pressures with no execution path is precisely a system without
+will, and the documentation says so wherever the words could mislead.

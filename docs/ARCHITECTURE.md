@@ -983,3 +983,65 @@ approval-gated `enable_world_model_pruning` scope for production
 subtraction. Five benchmark protocols (`world_model_build`,
 `world_model_prediction`, `world_model_pruning`, `embodied_world_model`,
 `pilot_stream_world_model`) keep the behaviour measured.
+
+## Homeostasis, Need, and Auto-Determination
+
+**Will = Need is implemented as a need-pressure model.** Solaris_Ai models
+behaviour as Stimulus → Push → Desire → Action and treats Will as Need; the
+`homeostasis/` package supplies the missing calculus between stimulus and
+desire. Seven groups of normalized variables (continuity, energy, safety,
+novelty/Mysterium, memory, social/sidecar, embodiment — raw source values
+always preserved in metadata) feed a `NeedEstimator` whose fourteen need
+types are *pressure estimates with receipts*: intensity, urgency, source
+variables, supporting evidence, possible Desire proposals, and recorded
+inhibitions. **Needs are not commands** — structurally, the entire layer is
+data with no execution path.
+
+**Drives bias Desire/Action suggestions.** Needs aggregate into ten numeric
+drive channels (continuity, energy, safety, curiosity, consolidation,
+exploration, stabilization, embodiment, social-observation, governance) with
+structural priority bumps so ties never resolve toward curiosity. The
+resolver exposes a deterministic 10-channel modulation vector and a
+Desire-proposal bias dict; the `DesireSynthesisEngine` turns the surviving
+pressure into ranked `DesireCandidate`s that map onto the canonical Solaris
+``Desire`` signal and *bias* the neural bridge's suggestions (a small
+pre-argmax nudge beside the habit bias). Suppressed candidates stay in the
+list with their reasons. Valence is computed alongside as **feedback
+polarity, not emotion** — the running sign of reactions, outcomes,
+checkpoints, and operator decisions, with attributed evidence.
+
+**Conflicts resolve on a fixed safety-first ladder.** When needs oppose
+(curiosity vs safety, reward vs exhaustion, consolidation vs sensing,
+publishing vs observe-only, continuity vs a requested stop), the
+`ConflictResolver` works the ladder — governance/safety > emergency stop >
+continuity > embodiment safety > energy > intensity > exploration — and
+records each suppression with its rule and reason. **Governance always
+overrides needs**: the safety validator refuses override attempts outright,
+desire candidates are deny-by-default against an allowed-proposal list,
+real-world shapes are rejected, and the policy layer carries explicit
+homeostasis rules (`needs_never_override_governance`,
+`needs_never_actuate`, `no_anthropomorphic_claims`).
+
+**Auto-determination is operational Being/Not-Being tension.** Solaris_Ai's
+existential opposition becomes two bounded pressures computed from concrete
+facts: Being rises with fresh heartbeats, clean checkpoints, restored state,
+coherent self-model, and non-negative valence; Not-Being rises with
+brain-death gaps, critical incidents, unresolved Mysterium, runaway/inert
+substrates, and exhaustion. The implication ladder (continue / rest /
+consolidate / request_review / safe_shutdown_recommended / no_action) is
+explicitly a *recommendation*: the ops supervisor records it as an incident
+and the watchdog keeps all stop authority — the homeostasis monitoring block
+in the supervisor contains no `request_shutdown` call, by test.
+
+**Everything is integrated and accounted for.** The `HomeostaticRegulator`
+runs deterministically inside the ContinuousRunner and the sensorimotor
+runner (off by default), consumes latent summaries (Mysterium, anticipation)
+and world-model summaries (unknown ratio, predicted danger, redundancy),
+feeds need/drive/desire/conflict structure back into the knowledge graph,
+lands in `InnerMapModel.homeostasis` and the state graph (nine nodes),
+persists `need_trace.jsonl` / `homeostasis_state.json` /
+`auto_determination.json`, answers seven fixed queries in safe vocabulary
+("the need estimator assigned high pressure to…", never "the system
+wanted…"), and is measured by five benchmark protocols. **No free will or
+consciousness claim is made** — the reports say so in their mandatory
+limitations, and ClaimGuard plus an anthropomorphism check scan every save.
