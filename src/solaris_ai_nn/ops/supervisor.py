@@ -79,7 +79,8 @@ def default_runner_factory(manifest: OperationalRunManifest,
                                                          False),
         enable_homeostasis=manifest.enabled_features.get("homeostasis",
                                                          False),
-        enable_executive=manifest.enabled_features.get("executive", False))
+        enable_executive=manifest.enabled_features.get("executive", False),
+        enable_ego=manifest.enabled_features.get("ego", False))
 
 
 @dataclass
@@ -381,6 +382,37 @@ class OperationalSupervisor:
                                          "condition; the executive cannot "
                                          "clear it")
 
+        # Ego/self-model monitoring (Prompt 18): evidence only; the
+        # watchdog keeps all stop authority.
+        ego = snapshot.get("ego") or {}
+        if ego:
+            if int(ego.get("boundary_violation_count", 0) or 0) >= 1:
+                self.incidents.record(
+                    I.EGO_BOUNDARY_VIOLATION, "warning",
+                    f"{ego['boundary_violation_count']} ego boundary "
+                    "violation(s) recorded",
+                    related_metric="boundary_violations",
+                    suggested_debug_step="read the boundary registry in "
+                                         "the self-report")
+            if ego.get("identity_warnings"):
+                self.incidents.record(
+                    I.IDENTITY_ANCHOR_MISMATCH, "warning",
+                    "identity anchors mismatch: "
+                    + str(ego["identity_warnings"][-1])[:120],
+                    related_metric="identity_continuity",
+                    suggested_debug_step="compare current and previous "
+                                         "anchors in self_model.json")
+            if float(ego.get("attribution_unknown_rate", 0.0) or 0.0) \
+                    > 0.5:
+                self.incidents.record(
+                    I.ATTRIBUTION_CONFLICT, "warning",
+                    f"attribution unknown rate is "
+                    f"{ego['attribution_unknown_rate']}",
+                    related_metric="attribution_unknown_rate",
+                    suggested_debug_step="check event sources; too much "
+                                         "input has no attributable "
+                                         "producer")
+
         budget_report = self.budget.check_budget(
             {"telemetry": snapshot.get("telemetry"),
              "substrate": snapshot.get("substrate"),
@@ -681,6 +713,9 @@ class OperationalSupervisor:
         executive = getattr(runner, "executive", None)
         if executive is not None:
             snapshot["executive"] = executive.summary()
+        ego = getattr(runner, "ego", None)
+        if ego is not None:
+            snapshot["ego"] = ego.summary()
         return snapshot
 
     def _build_status(self) -> OperationalStatus:

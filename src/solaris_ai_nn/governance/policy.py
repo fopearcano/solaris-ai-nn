@@ -219,6 +219,20 @@ DEFAULT_RULES: List[PolicyRule] = [
     PolicyRule("emergency_mode_unstoppable", "executive",
                "the executive cannot disable its own emergency mode",
                forbidden=True),
+    # K. Ego / self-model (Prompt 18)
+    PolicyRule("ego_model_allowed_bounded", "ego",
+               "the ego/self-model layer is allowed in bounded runs"),
+    PolicyRule("self_report_claim_guard", "ego",
+               "self-reports must pass ClaimGuard and the identity-claim "
+               "scan before saving"),
+    PolicyRule("self_model_cannot_grant_permissions", "ego",
+               "the self-model can grant no permission and override no "
+               "policy", forbidden=True),
+    PolicyRule("boundary_violations_audited", "ego",
+               "ego boundary violations become governance audit events"),
+    PolicyRule("identity_claims_scanned", "ego",
+               "identity claims are scanned; consciousness/personhood "
+               "wording is blocked", forbidden=True),
 ]
 
 
@@ -393,6 +407,19 @@ class GovernancePolicy:
                 decision.violations.append(PolicyViolation(
                     "plans_bounded", "executive",
                     "plans longer than 5 steps are prohibited by default"))
+
+        # K. Ego/self-model: observation only; it can never grant itself
+        # anything (structural, but a hostile manifest is named).
+        if features.get("ego"):
+            if not self._approved(PermissionScope.ENABLE_EGO_MODEL, ctx):
+                need_approval(PermissionScope.ENABLE_EGO_MODEL,
+                              "the ego/self-model layer is not permitted")
+            if ctx.get("self_model_grants_permissions"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "self_model_cannot_grant_permissions", "ego",
+                    "the self-model can grant no permission and override "
+                    "no policy"))
 
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):

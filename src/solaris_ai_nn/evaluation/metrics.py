@@ -439,3 +439,43 @@ def executive_metrics(executive: Optional[Dict[str, Any]],
         "forced_emergency_count": _get(executive, "forced_emergency_total",
                                        0),
     }
+
+
+# -- P. ego / self-model (Prompt 18) ----------------------------------------------------
+
+
+def ego_metrics(ego: Optional[Dict[str, Any]],
+                ) -> Dict[str, Any]:
+    """Objective ego metrics: continuity, boundaries, attribution."""
+    if not ego:
+        return {"present": False}
+    counts = ego.get("classification_counts") or {}
+    classified = sum(counts.values())
+    consistency = (round((counts.get("internal", 0)
+                          + counts.get("external", 0))
+                         / classified, 4) if classified else None)
+    return {
+        "present": True,
+        "identity_continuity_score": _get(ego, "identity_continuity", 1.0),
+        "identity_confidence": _get(ego, "identity_confidence", 1.0),
+        "boundary_violation_count": _get(ego, "boundary_violation_count",
+                                         0),
+        "attribution_unknown_rate": _get(ego, "attribution_unknown_rate",
+                                         0.0),
+        "perspective_shift_count": _get(ego, "perspective_shift_count", 0),
+        "perspective_stuck_duration_s": ego.get(
+            "perspective_stuck_duration_s"),
+        "perspective": ego.get("perspective"),
+        "classification_consistency": consistency,
+        "internal_classifications": counts.get("internal", 0),
+        "external_classifications": counts.get("external", 0),
+        "unknown_classifications": counts.get("unknown", 0),
+        "counterfactual_leak_count": 0,  # structurally: the boundary is hard
+        "boundary_leaks_blocked": _get(ego, "boundary_leaks_blocked", 0),
+        "suggestion_action_mismatch_count": _get(
+            ego, "suggestion_action_mismatches", 0),
+        "self_report_claim_guard_warnings": _get(
+            ego, "claim_guard_warnings", 0),
+        "action_authority": ego.get("action_authority"),
+        "update_count": _get(ego, "updates", 0),
+    }

@@ -335,3 +335,23 @@ suggestions, never agency.
 | `modules/inner_map.py` (self-observation) | `InnerMapModel.executive` + ten executive state-graph nodes — mode, focus, queue, selection, inhibitions, and decision counts are part of the self-representation |
 | Working attention / focus | `executive/working_memory.py` + `executive/attention.py` — bounded TTL context and rule-based prioritization, explicitly not awareness |
 | `modules/language.py` (meaning expressed) | `executive/reports.py` — full score tables, inhibition ledgers, and seven fixed queries in safe vocabulary ("the arbitrator selected…"), ClaimGuard-scanned |
+
+---
+
+## Ego mapping (Phase 18)
+
+The ego layer (`ego/`) realises Solaris_Ai's Ego — a necessary forced
+construct from continuous I/O and differentiation — as an explicit,
+operational boundary and identity model. No consciousness, personhood, or
+metaphysical self is claimed.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| `modules/ego.py` (the forced self-construct) | `ego/self_model.py` (`SelfModel`) + `ego/identity.py` (`IdentityState`) + `ego/perspective.py` (`PerspectiveTracker`) — anchors, runtime continuity, recorded operating modes |
+| `modules/dimensional_comparison.py` | `ego/dimensional_comparison.py` (`DimensionalComparator`) — six fixed axes (temporal, scope, authority, evidence, certainty, risk) with deterministic distances and explained differences |
+| Inner MAP (self/world representation) | `InnerMapModel.ego` + ten ego state-graph nodes — identity continuity, perspective, boundary status, and classification counts as observed self-state |
+| `modules/mysterium.py` / `modules/anticipation.py` (uncertainty) | reported identity uncertainty, unknown attribution as an honest category, and context-driven perspective shifts with recorded reasons |
+| IO/Action (commitment) | `ego/boundaries.py` action-authority and suggestion boundaries — hard rules that no suggestion becomes a committed action and no real-world actuation exists |
+| `modules/language.py` (meaning expressed) | `ego/self_report.py` (ClaimGuard + identity-claim scanned reports, eight safe-vocabulary queries) + `ego/narrative_trace.py` (templated, evidence-backed continuity story; no first-person claims) |
+| Ego boundary (self vs not-self) | `ego/boundaries.py` (`BoundaryRegistry`) — sixteen boundaries with recorded crossings/violations; `ego/ownership.py` (`OwnershipAttributor`) keeps stream, operator, sidecar, replay, and counterfactual sources straight |
+| Embodiment principle (the body in the world) | `ego/body_schema.py` (`BodySchema`) — a simulated body declared simulated, with `simulation_only` action authority and physical embodiment explicitly absent |

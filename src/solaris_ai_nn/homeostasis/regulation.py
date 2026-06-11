@@ -234,6 +234,27 @@ class HomeostaticRegulator:
             up("operator_pressure", clamp01(ctx["operator_pressure"]),
                "governance", raw=ctx["operator_pressure"])
 
+        ego = ctx.get("ego") or {}
+        if ego:
+            # Ego/self-model state (Prompt 18): continuity and boundary
+            # facts become pressure, never commands.
+            continuity = ego.get("identity_continuity")
+            if continuity is not None:
+                up("identity_uncertainty_pressure",
+                   clamp01(1.0 - float(continuity)), "ego", raw=continuity)
+            violations = ego.get("boundary_violation_count")
+            if violations is not None:
+                up("boundary_violation_pressure",
+                   normalize(violations, 0.0, 3.0), "ego", raw=violations)
+            confidence = ego.get("self_model_confidence")
+            if confidence is not None:
+                up("self_model_uncertainty_pressure",
+                   clamp01(1.0 - float(confidence)), "ego", raw=confidence)
+            if ego.get("identity_warnings"):
+                up("operator_pressure",
+                   max(self.state.value("operator_pressure", 0.0), 0.7),
+                   "ego", raw=ego["identity_warnings"][-1])
+
     def _auto_context(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
         valence = self.valence.rolling()
         return {
@@ -267,6 +288,14 @@ class HomeostaticRegulator:
                 "policy_violation_pressure") > 0.3,
             "exhausted": self.state.value("exhaustion_pressure") > 0.5,
             "fatigue_high": self.state.value("fatigue") > 0.7,
+            # Ego/self-model (Prompt 18): identity continuity and boundary
+            # status feed the Being/Not-Being reading.
+            "identity_continuity_ok": self.state.value(
+                "identity_uncertainty_pressure", 0.0) < 0.3,
+            "identity_anchor_mismatch": self.state.value(
+                "identity_uncertainty_pressure", 0.0) > 0.4,
+            "ego_boundary_violation": self.state.value(
+                "boundary_violation_pressure", 0.0) > 0.2,
         }
 
     def _map_update(self, need_state: NeedState,

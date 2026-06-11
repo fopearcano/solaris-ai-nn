@@ -114,6 +114,10 @@ class ContinuousRunner:
     enable_executive: bool = False
     executive_mode: str = "arbitrated"
     executive_report_interval_steps: int = 100
+    # Ego / self-model (Prompt 18): operational continuity and boundaries.
+    # Off by default; observes and classifies, never acts.
+    enable_ego: bool = False
+    ego_update_interval_steps: int = 50
 
     def __post_init__(self) -> None:
         if not self.continuous and self.max_steps is None and self.max_duration_s is None:
@@ -189,6 +193,17 @@ class ContinuousRunner:
                                             mode=self.executive_mode)
             self.bridge.enable_executive = True
             self.bridge.executive_layer = self.executive
+
+        # Optional ego/self-model (off by default; observation only).
+        self.ego = None
+        if self.enable_ego:
+            from ..ego.self_model import SelfModel
+
+            self.ego = SelfModel(state_dir=self.pm.state_dir)
+            if self.executive is not None:
+                self.executive.ego = self.ego
+            if self.observer is not None:
+                self.observer.ego = self.ego
 
         # Optional world model (off by default; restored from disk if saved).
         self.world_model = None
@@ -368,6 +383,12 @@ class ContinuousRunner:
                 ):
                     self._executive_tick(step)
                 if (
+                    self.ego is not None
+                    and self.ego_update_interval_steps > 0
+                    and step % self.ego_update_interval_steps == 0
+                ):
+                    self._ego_tick(step)
+                if (
                     self.world_model is not None
                     and self.world_model_pruning_interval_steps > 0
                     and step % self.world_model_pruning_interval_steps == 0
@@ -494,6 +515,8 @@ class ContinuousRunner:
             self._save_homeostasis()
         if self.executive is not None:
             self.executive.save_state()
+        if self.ego is not None:
+            self.ego.save_state()
         self._save_manifest(lifetime, graceful=False)
 
     # -- homeostasis (optional) ------------------------------------------------
@@ -504,6 +527,7 @@ class ContinuousRunner:
         self._pending_valence_events = []
         context: Dict[str, Any] = {
             "step": step,
+            "ego": getattr(self, "_pending_ego_summary", None),
             "lifecycle": {
                 "last_heartbeat_ts": self.lifecycle.last_heartbeat_ts,
                 "last_checkpoint_ts": self._last_checkpoint_ts,
@@ -568,6 +592,47 @@ class ContinuousRunner:
         self.executive.decide(desires, context=context, step=step,
                               record=True)
         self.executive.save_state()
+
+    # -- ego / self-model (optional) ------------------------------------------
+
+    def _ego_tick(self, step: int) -> None:
+        """One self-model update with the runner's identity anchors."""
+        context: Dict[str, Any] = {
+            "step": step,
+            "run_id": self.run_id,
+            "session_id": self.session_id,
+            "substrate_identity": getattr(self.bridge, "substrate_type",
+                                          type(self.bridge).__name__),
+            "state_path": str(self.pm.state_dir),
+            "continuity_log": str(self.pm.continuity_log_path),
+            "restored_from_checkpoint": self.restart_count > 0,
+            "restart_gap_detected":
+                self.telemetry.brain_death_gap_seconds > 5.0,
+            "brain_death_gap_seconds":
+                self.telemetry.brain_death_gap_seconds,
+            "unexpected_deaths": self.telemetry.unexpected_deaths,
+            "latent_mode": (self.latent.controller.mode
+                            if self.latent is not None else "awake"),
+        }
+        if self.observer is not None:
+            context["inner_map_signature"] = "inner_map_observer"
+        if self.world_model is not None:
+            summary = self.world_model.world_model_summary()
+            context["world_model"] = summary
+            # A stable identity for the graph, not its (growing) contents.
+            context["world_model_signature"] = (
+                "knowledge_graph:" + str(self.pm.state_dir))
+        if self.homeostasis is not None \
+                and self.homeostasis.last_result is not None:
+            context["homeostasis"] = self.homeostasis.summary()
+        if self.executive is not None:
+            context["executive"] = self.executive.summary()
+        self.ego.update(context)
+        if self.world_model is not None:
+            self.ego.update_world_model(self.world_model.graph)
+        if self.homeostasis is not None:
+            # Ego pressure feeds homeostasis on its next update.
+            self._pending_ego_summary = self.ego.summary()
 
     def _save_world_model(self) -> None:
         from ..world_model.serialization import save_graph_exports
@@ -814,6 +879,8 @@ class ContinuousRunner:
             snap["homeostasis"] = self.homeostasis.summary()
         if self.executive is not None:
             snap["executive"] = self.executive.summary()
+        if self.ego is not None:
+            snap["ego"] = self.ego.summary()
         if self.enable_language and self.bridge.meaning_trace_builder is not None:
             ctx = self._language_context()
             engine = self.bridge.explanation_engine

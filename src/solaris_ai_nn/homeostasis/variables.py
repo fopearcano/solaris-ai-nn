@@ -64,6 +64,7 @@ VARIABLE_GROUPS: Dict[str, Dict[str, Tuple[Any, float]]] = {
         "checkpoint_freshness": (1.0, 1.0),
         "restart_stability": (1.0, 1.0),
         "operational_health": (1.0, 1.2),
+        "identity_uncertainty_pressure": (0.0, 1.0),  # ego (Prompt 18)
     },
     "energy": {
         "body_energy": (1.0, 1.2),
@@ -75,6 +76,8 @@ VARIABLE_GROUPS: Dict[str, Dict[str, Tuple[Any, float]]] = {
         "blocked_action_pressure": (0.0, 1.0),
         "policy_violation_pressure": (0.0, 1.5),
         "unsafe_proposal_pressure": (0.0, 1.0),
+        "boundary_violation_pressure": (0.0, 1.3),  # ego (Prompt 18)
+        "self_model_uncertainty_pressure": (0.0, 0.6),  # ego (Prompt 18)
     },
     "novelty": {
         "unknown_pressure": (0.0, 0.8),

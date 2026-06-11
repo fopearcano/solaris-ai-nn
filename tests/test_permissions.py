@@ -64,8 +64,8 @@ def test_all_scopes_in_default_set():
     ps = PermissionSet.default()
     assert set(ps.known_scopes()) == set(PermissionScope.ALL)
     # 13 governance (P12) + 5 latent (P14) + 3 world model (P15)
-    # + 4 homeostasis (P16) + 4 executive (P17).
-    assert len(PermissionScope.ALL) == 29
+    # + 4 homeostasis (P16) + 4 executive (P17) + 3 ego (P18).
+    assert len(PermissionScope.ALL) == 32
 
 
 def test_executive_scope_defaults():
@@ -75,6 +75,13 @@ def test_executive_scope_defaults():
     assert ps.allows(PermissionScope.ENABLE_PROSPECTION)
     assert ps.requires_approval(
         PermissionScope.ENABLE_EXECUTIVE_SIDECAR_SUGGESTIONS)
+
+
+def test_ego_scope_defaults():
+    ps = PermissionSet.default()
+    assert ps.allows(PermissionScope.ENABLE_EGO_MODEL)
+    assert ps.allows(PermissionScope.ENABLE_DIMENSIONAL_COMPARISON)
+    assert ps.allows(PermissionScope.ENABLE_SELF_REPORT)
 
 
 def test_homeostasis_scope_defaults():

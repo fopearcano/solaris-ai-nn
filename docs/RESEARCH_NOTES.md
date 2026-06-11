@@ -541,3 +541,54 @@ construction; and the strongest thing the layer can do when everything is
 blocked is ask a human to look. A chooser whose choices are auditable
 arithmetic with no execution authority is precisely a system without will —
 and the reports are required to say so.
+
+**Ego as an operational boundary model.** Solaris_Ai calls Ego a
+necessary forced illusion; the implementable core of that idea is a
+ledger of differences — what belongs to the running system, what belongs
+to the environment, what is only simulated, only suggested, only
+remembered, unknown, or forbidden. Implemented as sixteen named
+boundaries with recorded crossings, that ledger does real safety work:
+the questions that most often break agentic systems ("was that an
+instruction?", "did that actually happen?", "did we do that?") all become
+table lookups.
+
+**Self-models in cognitive architectures.** A self-model earns its place
+not by being rich but by being *load-bearing*: other layers must consult
+it. Here the executive asks it for action authority, homeostasis converts
+its uncertainty into pressure, pilot safety fails on its violations, and
+the Inner MAP publishes it. Crucially the dependency is one-way — the
+self-model can add inhibitions and raise pressure, but it can grant
+nothing, which is what keeps a self-model from quietly becoming a second
+decision-maker.
+
+**Body schema in simulation.** The body schema answers "what can act,
+and where?" with data: a simulated grid body with declared actions,
+sensors, effectors, and `simulation_only` authority. Declaring the body
+simulated everywhere it appears is not modesty; it is the mechanism that
+makes "no real-world actuation" checkable — any action shaped like
+hardware fails the schema before it reaches an arbiter.
+
+**Ownership attribution.** Most prompt-injection-style failures are
+attribution failures: text from a stream treated as an instruction, an
+observed action treated as one's own, a simulation treated as the world.
+Eleven fixed attribution categories with negative guarantees (stream is
+never executable; operator input needs the operator interface;
+counterfactuals stay counterfactual; suggestions are never committed)
+turn that whole failure family into explicit, testable rules.
+
+**Dimensional comparison.** Two events can differ in when, where, with
+what authority, on what evidence, with what certainty, and at what risk —
+six axes, each a short ordered list. Deterministic index distance is
+laughably simple next to embeddings, and that is the argument for it: the
+comparison is auditable, stable across runs, and its explanation is the
+computation itself, not a story about one.
+
+**Why self-report does not imply consciousness.** A system that prints
+"identity continuity 0.84, perspective latent_offline_replay, 1 boundary
+violation" is reporting measurements of its own machinery, exactly as a
+thermostat reports temperature. The report pipeline enforces the
+distinction mechanically: deterministic templates, no first-person
+statements, mandatory limitations, and two scanners (ClaimGuard plus the
+identity-claim scan) that refuse to write "I am conscious", "I want", or
+"same self" at all. Self-description is cheap; the discipline is in what
+the system is structurally unable to say.

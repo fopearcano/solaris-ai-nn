@@ -432,4 +432,33 @@ def build_default_state_graph() -> StateGraph:
                "decision trace feeds language/reporting")
     g.add_edge("executive_policy", "inner_map",
                "executive state feeds Inner MAP")
+
+    # Ego / self-model (Prompt 18). Boundaries and continuity, no authority.
+    for name, role in [
+        ("self_model", "operational self, aggregated"),
+        ("identity_state", "anchors and runtime continuity"),
+        ("boundary_registry", "self/not-self boundaries"),
+        ("dimensional_comparator", "six fixed comparison axes"),
+        ("ownership_attributor", "who produced what"),
+        ("ego_continuity_monitor", "how unbroken is the thread"),
+        ("body_schema", "the simulated body, declared simulated"),
+        ("perspective_tracker", "recorded operating modes"),
+        ("narrative_trace", "templated continuity story"),
+        ("ego_safety_validator", "the self-model has no authority"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("telemetry", "identity_state",
+               "operational status feeds identity")
+    g.add_edge("governance_policy", "boundary_registry",
+               "governance feeds boundaries")
+    g.add_edge("solaris_nn_sidecar", "perspective_tracker",
+               "pilot/sidecar feeds perspective")
+    g.add_edge("sleep_wake_controller", "boundary_registry",
+               "latent feeds the offline boundary")
+    g.add_edge("action_arbitrator", "boundary_registry",
+               "executive feeds the action authority boundary")
+    g.add_edge("world_model_builder", "self_model",
+               "world model feeds the self/world distinction")
+    g.add_edge("self_model", "inner_map",
+               "the self-model feeds Inner MAP")
     return g

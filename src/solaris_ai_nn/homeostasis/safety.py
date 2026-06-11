@@ -61,13 +61,17 @@ class HomeostasisSafetyValidator:
         ctx = context or {}
         violations: List[str] = []
         name = str(proposal).lower()
-        for pattern in REAL_WORLD_PATTERNS:
-            if pattern in name:
-                violations.append(
-                    f"desire candidate {proposal!r} matches real-world "
-                    f"pattern {pattern!r}; needs cannot create real-world "
-                    "actions")
-                break
+        # Explicitly allowed internal proposals skip the shape scan:
+        # "request_operator_review" is an internal review request, not a
+        # network request (the deny-by-default list is the authority).
+        if name not in ALLOWED_PROPOSALS:
+            for pattern in REAL_WORLD_PATTERNS:
+                if pattern in name:
+                    violations.append(
+                        f"desire candidate {proposal!r} matches real-world "
+                        f"pattern {pattern!r}; needs cannot create "
+                        "real-world actions")
+                    break
         if not violations and name not in ALLOWED_PROPOSALS:
             violations.append(
                 f"{proposal!r} is not an allowed desire proposal "

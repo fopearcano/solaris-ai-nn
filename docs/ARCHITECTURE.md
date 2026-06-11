@@ -1111,3 +1111,71 @@ vocabulary ("the arbitrator selected…", never "the system decided
 freely"), and is measured by six benchmark protocols. **No claim of
 will, intention, agency, or consciousness is made** — the reports carry
 mandatory limitations and ClaimGuard scans every save.
+
+## Ego Boundary, Self-Model, and Dimensional Comparison
+
+**Ego is operational, not metaphysical.** Solaris_Ai treats Ego as a
+necessary forced construct created by continuous I/O and differentiation;
+the `ego/` package implements exactly the implementable part: an explicit
+boundary and identity model. *Identity* means runtime continuity over
+eleven recorded anchors (run id, session id, substrate identity, state
+path, Inner MAP / world model / governance signatures, operator session,
+continuity log, body schema, sidecar identity). Anchors that mismatch
+produce reported uncertainty with warnings — the system never asserts an
+unqualified continuous self, and the words for one ("I am conscious",
+"same self", "I have a soul") are scanned and blocked in every output.
+
+**The self-model distinguishes, it never decides.** `SelfModel.classify_
+event` answers the operational questions with explicit confidence:
+internal or external (ownership attribution across eleven categories),
+simulated or real (the GridWorld, sandboxes, and prospection are inside
+the simulation boundary), offline or live (replay and counterfactual
+output is generated evidence, never observation), suggestion or action
+(`committed=False` is structural), authorized or forbidden (real-world
+shapes are never authorized anywhere). Unknown sources are an honest
+category with low confidence, not a guess.
+
+**Sixteen boundaries, eight hard rules.** The `BoundaryRegistry` tracks
+process, state/artifact directories, simulation, embodiment, sidecar,
+pilot input, operator, governance, emergency, latent-offline,
+counterfactual, suggestion, action-authority, source-code, and network
+boundaries. Every crossing and violation is recorded with evidence; six
+boundaries are *hard* — no source-code rewriting, no real-world
+actuation, no committed sidecar Actions, no network action, no
+counterfactual-as-observation, no suggestion-as-action, no emergency-stop
+suppression — and the `EgoSafetyValidator` refuses their crossings under
+every configuration.
+
+**Dimensional comparison is index arithmetic, not embeddings.** Six fixed
+axes (temporal, scope, authority, evidence, certainty, risk) with ordered
+value lists; events and contexts are placed deterministically, distances
+are mean normalized index differences, and differences are explained in
+plain sentences ("evidence: 'real_observed' vs 'counterfactual'"). The
+frames persist as JSONL and are explicitly "recorded operational
+placements, not experiential comparisons."
+
+**Attribution prevents the dangerous confusions.** Stream text is never
+an executable instruction; operator input counts as an instruction only
+through the operator interface; sidecar-observed Solaris_Ai Actions are
+external observed actions, never this system's actions; counterfactuals
+stay counterfactual; a candidate claiming `committed=True` is recorded as
+a conflict and still refused. Perspective tracking (eight modes) makes
+the same point structurally: each mode fixes whether actions are allowed
+and what its evidence counts as, and latent modes force the offline
+perspectives.
+
+**Everything feeds the layers above; nothing commands them.** The
+executive consults the ego for action authority and boundary gating (it
+can add inhibitions, never remove one); homeostasis converts identity
+uncertainty, boundary violations, and self-model uncertainty into
+pressure; auto-determination consumes the continuity score; pilot safety
+fails when boundaries are violated; the sidecar records attach/detach as
+boundary crossings; ops raises evidence-only incidents (six types);
+governance carries three permission scopes and five ego rules; the Inner
+MAP gains an `ego` section and ten state-graph nodes; the world model
+gains operational self-reference/boundary/perspective structure; and the
+language layer answers eight fixed queries plus a templated,
+evidence-backed narrative trace and a ClaimGuard-scanned self-report.
+**No consciousness or personhood claim is made anywhere** — the
+self-report's mandatory limitations say so, and two scanners enforce it
+before a byte is written.

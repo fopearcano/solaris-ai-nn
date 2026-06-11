@@ -236,6 +236,13 @@ class InnerMapModel:
     # last_prospection_confidence, decision_trace_path,
     # executive_report_path.
     executive: Optional[Dict[str, Any]] = None
+    # Ego/self-model status (Prompt 18); None when the ego layer is
+    # disabled. Keys: enabled, identity_continuity, identity_confidence,
+    # identity_warnings, perspective, boundary_violation_count,
+    # active_boundaries, violated_boundaries, classification_counts,
+    # attribution_unknown_rate, action_authority, self_model_confidence,
+    # perspective_shift_count, narrative_trace_path, self_report_path.
+    ego: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

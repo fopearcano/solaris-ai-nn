@@ -42,6 +42,9 @@ class ExecutiveLayer:
     state_dir: Optional[Union[str, Path]] = None
     mode: str = ExecutiveMode.DEFAULT
     max_plan_length: int = 3
+    # Optional ego/self-model (Prompt 18): consulted for action authority,
+    # perspective, and boundary status. It can only inhibit, never permit.
+    ego: Optional[Any] = None
 
     def __post_init__(self) -> None:
         self.policy = ExecutivePolicy(requested_mode=self.mode)
@@ -115,6 +118,26 @@ class ExecutiveLayer:
                 candidate.inhibited = True
                 candidate.inhibition_reason = report.violations[0]
         self.inhibition.apply_to_candidates(candidate_set.candidates, ctx)
+
+        # 3b. Ego/self-model boundary gate (Prompt 18): the self-model can
+        # add inhibitions (forbidden boundary crossings) but never remove
+        # one or grant authority the policy/safety layers withheld.
+        if self.ego is not None:
+            ctx.setdefault("ego_perspective",
+                           self.ego.perspective.state.mode)
+            ctx.setdefault("ego_action_authority",
+                           self.ego.action_authority())
+            ctx.setdefault("ego_boundary_violations",
+                           self.ego.boundaries.violations_total)
+            for candidate in candidate_set.candidates:
+                if candidate.inhibited:
+                    continue
+                ok, why = self.ego.check_action_boundary(
+                    candidate.label, candidate.action_type,
+                    bool(candidate.committed))
+                if not ok:
+                    candidate.inhibited = True
+                    candidate.inhibition_reason = f"ego_boundary: {why}"
 
         # 4. Prospection over the survivors feeds the arbitration context.
         prospection = self.prospection.compare_candidates(

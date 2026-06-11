@@ -29,10 +29,15 @@ class NodeType:
     UNKNOWN = "unknown"
     SELF_REFERENCE = "self_reference"
     LATENT_SCHEMA = "latent_schema"
+    # Ego / self-model (Prompt 18). Operational structure, not personhood.
+    PERSPECTIVE_CONTEXT = "perspective_context"
+    ACTION_AUTHORITY = "action_authority"
+    ATTRIBUTION_SOURCE = "attribution_source"
 
     ALL = (STIMULUS_PATTERN, SIGNAL_TYPE, ENTITY, OBJECT, PLACE, ACTION,
            REACTION, HABIT, BOUNDARY, CONTEXT, STATE, UNKNOWN,
-           SELF_REFERENCE, LATENT_SCHEMA)
+           SELF_REFERENCE, LATENT_SCHEMA, PERSPECTIVE_CONTEXT,
+           ACTION_AUTHORITY, ATTRIBUTION_SOURCE)
 
 
 def slug(label: str) -> str:

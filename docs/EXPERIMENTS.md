@@ -1136,3 +1136,65 @@ Bounded planning under measurement: plans stay ≤3 steps with prospection
 attached and every step suggestion-only, while a 7-step plan is refused by
 the safety validator. `executive_emergency_mode` verifies the forced-mode
 property end to end.
+
+## 91. Ego Boundary Demo ✅ (implemented)
+
+**Run:** `python examples/run_ego_boundary_demo.py --steps 150`
+A bounded run with the ego layer enabled: identity anchors captured,
+sixteen boundaries registered and checked, events classified
+internal/external/simulated, and a ClaimGuard-scanned self-report saved
+alongside the boundary registry table. Operational, not metaphysical.
+
+## 92. Dimensional Comparison Demo ✅ (implemented)
+
+**Run:** `python examples/run_dimensional_comparison_demo.py`
+Five event kinds — observed stream event, simulated GridWorld action,
+offline replay trace, sidecar suggestion, operator approval — placed on
+the six axes and compared pairwise with deterministic distances and
+plain-sentence difference explanations. No embeddings; index arithmetic.
+
+## 93. Identity Continuity Demo ✅ (implemented)
+
+**Run:** `python examples/run_identity_continuity_demo.py`
+Four phases: clean start, checkpoint restore (continuity is
+checkpoint-mediated), restart gap (score drops, warning recorded), and a
+mismatched run-id anchor — uncertainty is reported, never papered over.
+
+## 94. Counterfactual Boundary Demo ✅ (implemented)
+
+**Run:** `python examples/run_counterfactual_boundary_demo.py`
+A real trace event and a counterfactual replay classified side by side,
+then an attempt to relabel the counterfactual as real observation — which
+the ego safety validator blocks. The boundary is hard; no configuration
+relaxes it.
+
+## 95. Self-Report Demo ✅ (implemented)
+
+**Run:** `python examples/run_self_report_demo.py`
+The eight ego queries answered in safe vocabulary, then the Markdown
+self-report saved — after passing both ClaimGuard and the identity-claim
+scan ("operational identity", "runtime continuity"; never consciousness,
+soul, or wanting).
+
+## 96. Ego Boundary Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment ego_boundary`
+The structural-property protocol: all sixteen boundaries register,
+crossings and violations are recorded with evidence, the hard boundaries
+refuse crossings, and violations stay visible. `identity_continuity`,
+`dimensional_comparison`, and `counterfactual_boundary` complete the
+continuity/evidence set.
+
+## 97. Sidecar Attribution Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment sidecar_attribution`
+Solaris_Ai Actions observed through the sidecar are attributed as
+external observed actions — never this system's own — and sidecar
+suggestions remain suggestions with `committed=False`.
+
+## 98. Pilot Stream Attribution Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment pilot_stream_attribution`
+Stream text is attributed `observed_from_stream`, is never an executable
+instruction, and is never an authorized action — even when the line is
+shaped like a command.

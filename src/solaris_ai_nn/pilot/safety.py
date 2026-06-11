@@ -199,3 +199,17 @@ class PilotSafetyValidator:
         else:
             result = DC.validate_jsonl_event(event)
         return SafetyReport(safe=result.valid, violations=list(result.reasons))
+
+    def validate_boundary_registry(self, registry: Any) -> SafetyReport:
+        """Pilot safety fails if any ego boundary was violated (Prompt 18).
+
+        Stream input is observation only; a violated pilot-input, network,
+        or action-authority boundary means the run must not continue as if
+        nothing happened.
+        """
+        violations: List[str] = []
+        for boundary in getattr(registry, "violated", lambda: [])():
+            violations.append(
+                f"ego boundary {boundary.boundary_id!r} is violated: "
+                + "; ".join(boundary.evidence_refs[-2:]))
+        return SafetyReport(safe=not violations, violations=violations)

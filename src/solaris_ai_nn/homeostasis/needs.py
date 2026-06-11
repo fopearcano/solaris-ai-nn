@@ -151,10 +151,13 @@ _NEED_RULES = [
      [("blocked_action_pressure", 0.4, False),
       ("policy_violation_pressure", 0.3, False),
       ("unsafe_proposal_pressure", 0.4, False),
-      ("obstacle_pressure", 0.6, False)]),
+      ("obstacle_pressure", 0.6, False),
+      ("boundary_violation_pressure", 0.3, False),
+      ("self_model_uncertainty_pressure", 0.4, False)]),
     (NeedType.REQUEST_OPERATOR_REVIEW,
      [("incident_pressure", 0.7, False), ("operator_pressure", 0.6,
-                                          False)]),
+                                          False),
+      ("identity_uncertainty_pressure", 0.4, False)]),
 ]
 
 

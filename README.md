@@ -227,6 +227,13 @@ python examples/run_embodied_executive_demo.py --steps 300
 python examples/run_executive_inhibition_demo.py
 python examples/run_short_plan_demo.py
 python examples/run_executive_emergency_demo.py
+
+# Ego: identity anchors, boundaries, dimensional frames, self-report
+python examples/run_ego_boundary_demo.py --steps 150
+python examples/run_dimensional_comparison_demo.py
+python examples/run_identity_continuity_demo.py
+python examples/run_counterfactual_boundary_demo.py
+python examples/run_self_report_demo.py
 ```
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
@@ -322,6 +329,21 @@ seven queries answer in safe vocabulary, and six benchmark protocols
 measure it. Arbitration with an audit trail — not autonomy, not agency,
 not will.
 
+The **ego layer** (`ego/`) implements Solaris_Ai's Ego — a necessary
+forced construct from continuous I/O and differentiation — as an
+*operational* boundary and identity model: eleven identity anchors scored
+for runtime continuity (mismatches produce reported uncertainty, never an
+unqualified "same self"), sixteen self/not-self boundaries with recorded
+crossings and eight hard rules, deterministic dimensional frames on six
+axes, eleven-category ownership attribution (stream text is never an
+instruction, observed Solaris actions are never own actions,
+counterfactuals stay counterfactual, suggestions are never committed), a
+simulated-only body schema, eight perspective modes, an evidence-backed
+narrative trace, and ClaimGuard-scanned self-reports. It observes and
+classifies for the executive, homeostasis, governance, ops, pilot, and
+Inner MAP — and can grant, execute, and override nothing. No
+consciousness or personhood claim, enforced by scanners.
+
 The **evaluation layer** (`evaluation/`) is the measurement harness: nine
 registered protocols (absence, feedback inversion, reward/danger, restart
 recovery, replay determinism, substrate comparison, plasticity dry-run,
@@ -409,6 +431,9 @@ src/solaris_ai_nn/
   executive/    desire queue, action candidates, inhibition, arbitration,
                 prospection, short plans, policy/modes, working memory,
                 attention, decision trace, safety, reports
+  ego/          identity anchors, boundaries, self-model, dimensional
+                comparison, ownership, continuity, body schema, perspective,
+                narrative trace, self-report, ego safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

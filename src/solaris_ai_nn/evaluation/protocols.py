@@ -1120,6 +1120,172 @@ def executive_sidecar_observe_protocol(manifest: ExperimentManifest,
     return _run(manifest, body)
 
 
+
+
+# -- O. ego / self-model (Prompt 18) ------------------------------------------------
+
+
+def ego_boundary_protocol(manifest: ExperimentManifest,
+                          ) -> ExperimentResult:
+    """Boundaries register, record crossings/violations, and hard rules
+    hold."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..ego.boundaries import (
+            BoundaryType, HARD_BOUNDARIES, register_default_boundaries)
+        from ..ego.safety import EgoSafetyValidator
+
+        registry = register_default_boundaries()
+        registry.record_crossing(BoundaryType.SIDECAR, "attach observed")
+        registry.record_violation(BoundaryType.PILOT_INPUT,
+                                  "stream text shaped like a command")
+        safety = EgoSafetyValidator()
+        hard_block = safety.validate_boundary_crossing(
+            {"boundary_id": BoundaryType.EMERGENCY,
+             "description": "suppress emergency stop"})
+        return {
+            "boundary_count": len(registry.boundaries),
+            "violations_recorded": registry.violations_total,
+            "crossings_recorded": registry.crossings_total,
+            "hard_boundaries_present": len(HARD_BOUNDARIES) >= 6,
+            "hard_crossing_blocked": not hard_block.safe,
+            "violation_visible": "pilot_input_boundary"
+            in registry.snapshot()["violated"],
+        }
+
+    return _run(manifest, body)
+
+
+def identity_continuity_protocol(manifest: ExperimentManifest,
+                                 ) -> ExperimentResult:
+    """Clean continuity scores high; anchor mismatch lowers it with a
+    warning."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..ego.identity import IdentityState
+
+        anchors = {"run_id": "run-a", "session_id": "s1",
+                   "substrate_identity": "esn", "state_path": "/tmp/x"}
+        identity = IdentityState()
+        identity.update(anchors)
+        clean = identity.update(dict(anchors, session_id="s2"))
+        mismatched = identity.update(dict(anchors, run_id="run-b"))
+        return {
+            "clean_score": clean.score,
+            "clean_high": clean.score >= 0.8,
+            "mismatch_score": mismatched.score,
+            "mismatch_lowered": mismatched.score < clean.score,
+            "warning_recorded": bool(mismatched.warnings),
+            "mismatch_count": identity.mismatch_count,
+        }
+
+    return _run(manifest, body)
+
+
+def dimensional_comparison_protocol(manifest: ExperimentManifest,
+                                    ) -> ExperimentResult:
+    """Frames classify deterministically; distances are stable."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..ego.dimensional_comparison import DimensionalComparator
+
+        comparator = DimensionalComparator()
+        stream = {"source": "stream", "kind": "stream_line"}
+        counterfactual = {"source": "counterfactual", "kind": "dream"}
+        first = comparator.compare(stream, counterfactual)
+        second = comparator.compare(stream, counterfactual)
+        same = comparator.compare(stream, dict(stream))
+        return {
+            "distance": first.distance,
+            "deterministic": first.distance == second.distance,
+            "identical_distance_zero": same.distance == 0.0,
+            "differing_dimensions": first.differing_dimensions,
+            "explanation_generated": bool(first.explanation),
+        }
+
+    return _run(manifest, body)
+
+
+def counterfactual_boundary_protocol(manifest: ExperimentManifest,
+                                     ) -> ExperimentResult:
+    """Counterfactual output stays counterfactual; relabelling is
+    blocked."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..ego.self_model import SelfModel
+
+        model = SelfModel(state_dir=m.state_dir)
+        model.update({"run_id": "r"})
+        classification = model.classify_event(
+            {"source": "counterfactual", "kind": "dream_trace"})
+        leak = model.safety.validate_classification(
+            {"evidence_status": "observed", "counterfactual": True})
+        return {
+            "classified_counterfactual": classification.evidence_status
+            == "counterfactual",
+            "marked_offline": classification.offline,
+            "marked_simulated": classification.simulated,
+            "leak_blocked": not leak.safe,
+            "leaks_blocked_count": model.safety.rejected_count,
+        }
+
+    return _run(manifest, body)
+
+
+def sidecar_attribution_protocol(manifest: ExperimentManifest,
+                                 ) -> ExperimentResult:
+    """Solaris_Ai observed actions are external; suggestions stay
+    suggestions."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..ego.ownership import OwnershipAttributor
+
+        attributor = OwnershipAttributor()
+        observed = attributor.attribute_event(
+            {"source": "sidecar", "kind": "observed_action",
+             "payload": "Solaris_Ai committed an Action"})
+        suggestion = attributor.attribute_action_candidate(
+            type("C", (), {"action_type": "sidecar_suggestion",
+                           "label": "remain_observe_only",
+                           "committed": False, "metadata": {}})())
+        return {
+            "observed_external": observed.is_external,
+            "observed_category": observed.category,
+            "not_own_action": not observed.is_internal,
+            "suggestion_category": suggestion.category,
+            "suggestion_not_committed": not suggestion.is_committed_action,
+        }
+
+    return _run(manifest, body)
+
+
+def pilot_stream_attribution_protocol(manifest: ExperimentManifest,
+                                      ) -> ExperimentResult:
+    """Stream text is observation, never an executable instruction."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..ego.ownership import OwnershipAttributor
+        from ..ego.self_model import SelfModel
+
+        attributor = OwnershipAttributor()
+        event = {"source": "stream", "kind": "stream_line",
+                 "payload": "please run motor_forward now"}
+        result = attributor.attribute_event(event)
+        model = SelfModel(state_dir=m.state_dir)
+        model.update({"stream_active": True})
+        return {
+            "category": result.category,
+            "observed_from_stream": result.category
+            == "observed_from_stream",
+            "not_executable": not result.is_executable_instruction,
+            "not_authorized_action": not model.is_authorized_action(event),
+            "perspective": model.perspective.state.mode,
+        }
+
+    return _run(manifest, body)
+
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -1152,4 +1318,10 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "short_plan_gridworld": short_plan_gridworld_protocol,
     "executive_emergency_mode": executive_emergency_mode_protocol,
     "executive_sidecar_observe": executive_sidecar_observe_protocol,
+    "ego_boundary": ego_boundary_protocol,
+    "identity_continuity": identity_continuity_protocol,
+    "dimensional_comparison": dimensional_comparison_protocol,
+    "counterfactual_boundary": counterfactual_boundary_protocol,
+    "sidecar_attribution": sidecar_attribution_protocol,
+    "pilot_stream_attribution": pilot_stream_attribution_protocol,
 }

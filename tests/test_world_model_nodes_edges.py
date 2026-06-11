@@ -19,7 +19,10 @@ def test_required_node_types_exist():
     required = {"stimulus_pattern", "signal_type", "entity", "object",
                 "place", "action", "reaction", "habit", "boundary",
                 "context", "state", "unknown", "self_reference",
-                "latent_schema"}
+                "latent_schema",
+                # ego (Prompt 18)
+                "perspective_context", "action_authority",
+                "attribution_source"}
     assert required == set(NodeType.ALL)
 
 
@@ -27,7 +30,10 @@ def test_required_edge_types_exist():
     required = {"co_occurs_with", "precedes", "causes_candidate",
                 "reinforces", "inhibits", "belongs_to_context", "near",
                 "inside", "blocked_by", "produces", "predicts",
-                "contradicts", "unknown_relation", "self_boundary"}
+                "contradicts", "unknown_relation", "self_boundary",
+                # ego (Prompt 18)
+                "operates_under", "holds_authority", "bounded_by",
+                "separates_evidence", "attributed_to"}
     assert required == set(EdgeType.ALL)
 
 

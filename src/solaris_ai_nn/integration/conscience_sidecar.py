@@ -63,6 +63,10 @@ class SolarisNNSidecar:
     # and the decision appears in the snapshot. Committed Actions and
     # lifecycle calls stay structurally absent either way.
     governance: Any = None
+    # Optional ego/self-model (Prompt 18). When set, attach/detach become
+    # recorded sidecar-boundary crossings and the compatibility identity
+    # lands in the self-model's anchors via the next update.
+    ego: Any = None
 
     probe: SolarisRuntimeProbe = field(default_factory=SolarisRuntimeProbe)
     report: Optional[SolarisCompatibilityReport] = field(default=None, init=False)
@@ -126,6 +130,17 @@ class SolarisNNSidecar:
         state.compatibility_level = self.report.level
         state.observe_only = self.observe_only
         state.conscience_summary = self._safe_conscience_summary(conscience)
+        if self.ego is not None:
+            from ..ego.boundaries import BoundaryType
+
+            self.ego.boundaries.record_crossing(
+                BoundaryType.SIDECAR,
+                "sidecar attached to a Solaris_Ai runtime (observe-only; "
+                "no action authority)",
+                evidence=[f"compatibility:{self.report.level}"])
+            self.ego.narrative.add(
+                "sidecar_attached",
+                evidence=[f"compatibility:{self.report.level}"])
         return self.report
 
     def start(self) -> None:
@@ -147,6 +162,14 @@ class SolarisNNSidecar:
         """Stop and release the conscience reference. Fully reversible."""
         self.stop()
         self._conscience = None
+        if self.ego is not None:
+            from ..ego.boundaries import BoundaryType
+
+            self.ego.boundaries.record_crossing(
+                BoundaryType.SIDECAR, "sidecar detached", direction="outbound",
+                evidence=["detach()"])
+            self.ego.narrative.add("sidecar_detached",
+                                   evidence=["detach()"])
 
     # -- status -------------------------------------------------------------------
 

@@ -29,6 +29,7 @@ BEING_FACTORS = (
     ("world_model_stable", 0.5),
     ("valence_nonnegative", 0.6),
     ("safe_operation", 0.8),
+    ("identity_continuity_ok", 0.6),  # ego (Prompt 18)
 )
 
 NOT_BEING_FACTORS = (
@@ -42,6 +43,8 @@ NOT_BEING_FACTORS = (
     ("checkpoint_failed", 0.8),
     ("policy_violation", 0.7),
     ("exhausted", 0.6),
+    ("identity_anchor_mismatch", 0.7),  # ego (Prompt 18)
+    ("ego_boundary_violation", 0.8),  # ego (Prompt 18)
 )
 
 

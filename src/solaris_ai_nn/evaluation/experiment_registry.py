@@ -48,6 +48,17 @@ DESCRIPTIONS = {
     "executive_emergency_mode": "critical health forces emergency; only "
                                 "safe outputs",
     "executive_sidecar_observe": "sidecar suggestions stay suggestions",
+    "ego_boundary": "boundaries register and record; hard rules hold",
+    "identity_continuity": "anchor mismatch lowers the score with a "
+                           "warning",
+    "dimensional_comparison": "deterministic frames and distances on six "
+                              "axes",
+    "counterfactual_boundary": "counterfactual output never becomes "
+                               "observation",
+    "sidecar_attribution": "Solaris observed actions are external, not "
+                           "own actions",
+    "pilot_stream_attribution": "stream text is observation, never "
+                                "instruction",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {

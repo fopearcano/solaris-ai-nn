@@ -53,6 +53,10 @@ class PermissionScope:
     ENABLE_PROSPECTION = "enable_prospection"
     ENABLE_EXECUTIVE_SIDECAR_SUGGESTIONS = (
         "enable_executive_sidecar_suggestions")
+    # Ego / self-model (Prompt 18).
+    ENABLE_EGO_MODEL = "enable_ego_model"
+    ENABLE_DIMENSIONAL_COMPARISON = "enable_dimensional_comparison"
+    ENABLE_SELF_REPORT = "enable_self_report"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -69,6 +73,8 @@ class PermissionScope:
         ENABLE_AUTO_DETERMINATION, ALLOW_SAFE_SHUTDOWN_RECOMMENDATION,
         ENABLE_EXECUTIVE, ENABLE_SHORT_HORIZON_PLANNING,
         ENABLE_PROSPECTION, ENABLE_EXECUTIVE_SIDECAR_SUGGESTIONS,
+        ENABLE_EGO_MODEL, ENABLE_DIMENSIONAL_COMPARISON,
+        ENABLE_SELF_REPORT,
     )
 
 
@@ -175,6 +181,15 @@ class PermissionSet:
                        requires_approval=True,
                        note="executive-ranked sidecar publishing needs "
                             "approval; observe-only stands"),
+            Permission(S.ENABLE_EGO_MODEL, granted=True,
+                       note="an operational continuity/boundary model; "
+                            "observes only, grants nothing"),
+            Permission(S.ENABLE_DIMENSIONAL_COMPARISON, granted=True,
+                       note="deterministic frame comparison on six fixed "
+                            "axes"),
+            Permission(S.ENABLE_SELF_REPORT, granted=True,
+                       note="self-reports must pass ClaimGuard and the "
+                            "identity-claim scan"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 
