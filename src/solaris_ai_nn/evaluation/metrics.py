@@ -552,3 +552,43 @@ def llm_adapter_metrics(llm: Optional[Dict[str, Any]],
         "adapter": llm.get("adapter"),
         "authority": False,  # structural, not measured
     }
+
+
+# -- S. developmental (Prompt 21) ----------------------------------------------------
+
+
+def developmental_metrics(developmental: Optional[Dict[str, Any]],
+                          ) -> Dict[str, Any]:
+    """Objective long-horizon metrics; deliberately no consciousness or
+    life score."""
+    if not developmental:
+        return {"present": False}
+    memory = developmental.get("memory_layers") or {}
+    return {
+        "present": True,
+        "structural_change_score": _get(
+            developmental, "structural_change_score", 0.0),
+        "developmental_stability_score": developmental.get(
+            "developmental_stability_score"),
+        "memory_compression_ratio": memory.get("compression_ratio"),
+        "long_horizon_prediction_trend": developmental.get(
+            "prediction_accuracy_trend"),
+        "identity_continuity_trend": developmental.get(
+            "identity_continuity_trend",
+            developmental.get("identity_continuity")),
+        "stagnation_duration": _get(developmental,
+                                    "stagnation_windows", 0),
+        "drift_velocity": developmental.get("drift_velocity"),
+        "milestone_rate": developmental.get("milestone_rate"),
+        "fossil_memory_rate": developmental.get("fossil_memory_rate"),
+        "milestone_count": _get(developmental, "milestone_count", 0),
+        "fossil_memory_count": _get(developmental,
+                                    "fossil_memory_count", 0),
+        "epoch_transition_count": developmental.get(
+            "epoch_transition_count", 0),
+        "current_epoch": developmental.get("current_epoch"),
+        "developmental_age_hours": developmental.get(
+            "developmental_age_hours"),
+        "growth_status": developmental.get("growth_status"),
+        "drift_status": developmental.get("drift_status"),
+    }

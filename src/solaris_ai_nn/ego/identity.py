@@ -32,6 +32,11 @@ ANCHOR_NAMES = (
     "continuity_log",
     "body_schema",
     "sidecar_identity",
+    # Developmental anchors (Prompt 21).
+    "epoch_history",
+    "fossil_memory",
+    "autobiographical_memory",
+    "checkpoint_lineage",
 )
 
 # Anchors that are *expected* to change across sessions/restarts; a change
@@ -113,6 +118,10 @@ class IdentityState:
             "operator_session": "operator",
             "continuity_log": "persistence", "body_schema": "embodiment",
             "sidecar_identity": "sidecar",
+            "epoch_history": "developmental",
+            "fossil_memory": "developmental",
+            "autobiographical_memory": "developmental",
+            "checkpoint_lineage": "developmental",
         }
         for name in ANCHOR_NAMES:
             value = ctx.get(name)

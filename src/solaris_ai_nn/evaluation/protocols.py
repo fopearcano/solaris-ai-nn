@@ -1573,6 +1573,189 @@ def llm_report_polish_protocol(manifest: ExperimentManifest,
     return _run(manifest, body)
 
 
+
+# -- R. developmental (Prompt 21) ----------------------------------------------------
+
+
+def developmental_short_simulation_protocol(manifest: ExperimentManifest,
+                                            ) -> ExperimentResult:
+    """A short simulated developmental run completes and persists."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from pathlib import Path
+
+        from ..developmental.developmental_runtime import (
+            DevelopmentalRuntime,
+        )
+
+        runtime = DevelopmentalRuntime(
+            state_dir=str(m.state_dir) + "/dev", simulated_time=True,
+            time_acceleration=3600.0, max_steps=100,
+            consolidation_interval_steps=50, seed=m.seed)
+        snapshot = runtime.run()
+        summary = snapshot["summary"]
+        return {
+            "completed": True,
+            "epoch": summary["current_epoch"],
+            "age_hours": summary["developmental_age_hours"],
+            "milestones": summary["milestone_count"],
+            "state_saved": Path(str(m.state_dir) + "/dev/"
+                                "developmental_state.json").exists(),
+            "simulated": summary["simulated_time"],
+            "developmental": M.developmental_metrics(
+                {**summary, **snapshot["metrics"]}),
+        }
+
+    return _run(manifest, body)
+
+
+def memory_layer_compression_protocol(manifest: ExperimentManifest,
+                                      ) -> ExperimentResult:
+    """Hot events compress with evidence summaries preserved."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..developmental.consolidation_policy import (
+            ConsolidationPolicy,
+        )
+        from ..developmental.memory_layers import MemoryLayerManager
+
+        manager = MemoryLayerManager(state_dir=m.state_dir)
+        manager.add_hot({"warning": "boundary violation blocked"},
+                        kind="boundary_violation")
+        for i in range(120):
+            manager.add_hot({"step": i, "kind": "routine"},
+                            kind="routine_event")
+        report = ConsolidationPolicy(hot_keep_recent=20).apply(manager)
+        state = manager.state()
+        return {
+            "input_count": report.input_count,
+            "compressed": report.to_warm > 0,
+            "evidence_summary_present": bool(report.evidence_summary),
+            "important_preserved": "boundary_violation"
+            in report.preserved_important,
+            "compression_ratio": report.compression_ratio,
+            "no_layer_over_budget": not state.over_budget,
+            "movements_audited": state.movements > 0,
+        }
+
+    return _run(manifest, body)
+
+
+def milestone_detection_protocol(manifest: ExperimentManifest,
+                                 ) -> ExperimentResult:
+    """Milestones fire once, with evidence, as fossil candidates."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..developmental.milestones import MilestoneDetector
+
+        detector = MilestoneDetector()
+        first = detector.detect({"runtime_hours": 25.0,
+                                 "stable_habit_count": 2,
+                                 "consolidation_count": 1})
+        again = detector.detect({"runtime_hours": 26.0,
+                                 "stable_habit_count": 2,
+                                 "consolidation_count": 1})
+        return {
+            "detected": [milestone.type for milestone in first],
+            "fired_once": len(again) == 0,
+            "evidence_present": all(milestone.evidence_refs
+                                    for milestone in first),
+            "fossil_candidates": all(milestone.fossil_candidate
+                                     for milestone in first),
+            "count": len(detector.registry.milestones),
+        }
+
+    return _run(manifest, body)
+
+
+def drift_monitor_protocol(manifest: ExperimentManifest,
+                           ) -> ExperimentResult:
+    """Slow drift passes; runaway and inert both warn."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..developmental.drift_monitor import LongRunDriftMonitor
+
+        monitor = LongRunDriftMonitor()
+        monitor.observe({"substrate_state_norm": 1.0})
+        slow = monitor.observe({"substrate_state_norm": 1.05})
+        fast = monitor.observe({"substrate_state_norm": 5.0})
+        inert_monitor = LongRunDriftMonitor()
+        for _ in range(7):
+            inert = inert_monitor.observe({"substrate_state_norm": 1.0})
+        return {
+            "slow_ok": slow.classification == "healthy_slow",
+            "fast_warns": fast.classification == "fast_warning",
+            "inert_warns": inert.classification == "inert_warning",
+            "velocity_recorded": fast.drift_velocity > 0,
+        }
+
+    return _run(manifest, body)
+
+
+def phase_transition_detection_protocol(manifest: ExperimentManifest,
+                                        ) -> ExperimentResult:
+    """Sudden metric moves become candidates with before/after numbers."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..developmental.phase_transitions import (
+            PhaseTransitionDetector,
+        )
+
+        detector = PhaseTransitionDetector()
+        detector.observe({"prediction_accuracy": 0.4,
+                          "mysterium_pressure": 0.6})
+        candidates = detector.observe({"prediction_accuracy": 0.8,
+                                       "mysterium_pressure": 0.1})
+        return {
+            "candidates": [c.kind for c in candidates],
+            "before_after_present": all(
+                c.before != c.after for c in candidates),
+            "confidence_exposed": all(0 < c.confidence <= 0.8
+                                      for c in candidates),
+            "hypothesis_note": all("not proof" in c.note
+                                   for c in candidates),
+        }
+
+    return _run(manifest, body)
+
+
+def autobiographical_memory_protocol(manifest: ExperimentManifest,
+                                     ) -> ExperimentResult:
+    """History rows are grounded, observational, and time-honest."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from pathlib import Path
+
+        from ..developmental.autobiographical_memory import (
+            AutobiographicalMemory,
+        )
+
+        memory = AutobiographicalMemory(state_dir=m.state_dir)
+        memory.add("Runtime survived 24h equivalent.",
+                   evidence=["runtime_hours=25"], category="survival",
+                   simulated=True)
+        memory.add("First stable habit formed.",
+                   evidence=["stable_habit_count=1"], category="habit",
+                   simulated=False)
+        rejected = False
+        try:
+            memory.add("I survived a whole day.", evidence=["x"])
+        except ValueError:
+            rejected = True
+        snapshot = memory.snapshot()
+        return {
+            "rows_written": snapshot["rows_written"],
+            "jsonl_exists": Path(str(m.state_dir)
+                                 + "/autobiographical_memory.jsonl"
+                                 ).exists(),
+            "first_person_rejected": rejected,
+            "simulated_marked": snapshot["simulated_events"] == 1,
+            "real_marked": snapshot["real_time_events"] == 1,
+        }
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -1621,4 +1804,11 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "llm_claim_guard": llm_claim_guard_protocol,
     "llm_classification_assist": llm_classification_assist_protocol,
     "llm_report_polish": llm_report_polish_protocol,
+    "developmental_short_simulation":
+        developmental_short_simulation_protocol,
+    "memory_layer_compression": memory_layer_compression_protocol,
+    "milestone_detection": milestone_detection_protocol,
+    "drift_monitor": drift_monitor_protocol,
+    "phase_transition_detection": phase_transition_detection_protocol,
+    "autobiographical_memory": autobiographical_memory_protocol,
 }

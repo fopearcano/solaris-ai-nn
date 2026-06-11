@@ -76,6 +76,16 @@ DESCRIPTIONS = {
                                  "untouchable",
     "llm_report_polish": "polish keeps structure and facts or is "
                          "rejected",
+    "developmental_short_simulation": "a short simulated developmental "
+                                      "run completes and persists",
+    "memory_layer_compression": "hot events compress; evidence "
+                                "summaries preserved",
+    "milestone_detection": "milestones fire once with evidence",
+    "drift_monitor": "slow drift passes; runaway and inert both warn",
+    "phase_transition_detection": "sudden moves become hypotheses with "
+                                  "before/after numbers",
+    "autobiographical_memory": "grounded observational history; "
+                               "simulated time marked",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {

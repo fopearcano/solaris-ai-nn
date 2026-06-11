@@ -1288,3 +1288,61 @@ benchmark protocols verify the properties end to end. **No consciousness
 claim is made, and the adapter cannot be talked into making one** — the
 forbidden-claims list rides inside every request and is enforced twice on
 the way out.
+
+## Developmental Long-Horizon Learning Runtime
+
+**Solaris-AI-NN learns through persistence, not teacher correction.** The
+`developmental/` package makes the project's central bet operational: the
+first fundamental learning mode is low-compute autonomous adaptation over
+very long runtime — no RLHF, no reward button, no correction notes, no
+batch training, no external model. The system learns from continuity,
+absence, repeated exposure, prediction failure, Mysterium pressure, habit
+reinforcement, synthesis/pruning, latent replay, consolidation,
+world-model stabilization, homeostatic pressure, executive outcome
+history, identity continuity across restarts, and slow structural drift.
+The first serious testing window is **months**; the later target is
+years. The central research question: after months of runtime, is the
+system structurally different for reasons traceable to its own lived
+history?
+
+**Learning happens across seven time scales.** The `DevelopmentalClock`
+tracks lifetime from seconds to years — cumulative runtime, active
+ratio, restart gaps (lived time too), checkpoint age, and the maintenance
+timestamps — in real wall-clock mode for actual long runs and simulated
+mode for tests, so months of development never cost months of CPU.
+`EpochManager` lays nine reversible labels over the metrics
+(bootstrapping through mature_soak, plus the honest
+`uncertain_regression`); transitions depend on measured signals, are
+logged with their evidence, and prove nothing.
+
+**Raw memory cannot grow forever; layered memory preserves evidence of
+transformation.** Hot memory holds full-detail recent events (bounded);
+warm memory holds compressed trace summaries (days/weeks); cold memory
+holds consolidated schemas (months/years); fossil memory holds rare
+transformation milestones, append-only and indefinite. The deterministic
+`ConsolidationPolicy` assigns fates on a ten-rung preservation ladder
+(identity > safety > prediction failures > Mysterium spikes > habits >
+world-model phases > pruning > restarts > stable patterns > rare events);
+nothing leaves a layer without an evidence summary, every movement is
+audited, and pruning without a summary is a safety violation.
+
+**Structural change is measured, not assumed.** The `GrowthMonitor`
+classifies each window as accumulation, consolidation, stabilization,
+pruning, regression, drift, phase transition, or stagnation — separating
+"data piled up" from "structure changed." The `LongRunDriftMonitor`
+treats slow drift as expected adaptation, fast drift as a warning, and
+total flatness as a warning too (a system that never moves may be inert).
+The `PhaseTransitionDetector` emits *candidates* with before/after
+numbers and capped confidence. Sixteen milestones (first 24h survival,
+first stable habit, first Mysterium spike, first restart recovery...)
+fire once each, with evidence, into fossil memory and the
+autobiographical history — grounded observational rows that mark
+simulated vs real time and structurally refuse first-person voice. The
+headline numbers are deliberately modest: `structural_change_score`,
+`developmental_stability_score`, `long_horizon_adaptation_proxy` — and
+**no consciousness score, no life score, no personhood claim exists or
+can be computed.** The `DevelopmentalRuntime` wraps everything in
+governed segments (restarts included, deliberately), feeds developmental
+pressure into homeostasis and anchors into ego identity, reports through
+ClaimGuard, and refuses month/year scale without explicit human
+approval.

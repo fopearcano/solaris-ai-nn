@@ -78,12 +78,14 @@ VARIABLE_GROUPS: Dict[str, Dict[str, Tuple[Any, float]]] = {
         "unsafe_proposal_pressure": (0.0, 1.0),
         "boundary_violation_pressure": (0.0, 1.3),  # ego (Prompt 18)
         "self_model_uncertainty_pressure": (0.0, 0.6),  # ego (Prompt 18)
+        "drift_pressure": (0.0, 0.8),  # developmental (Prompt 21)
     },
     "novelty": {
         "unknown_pressure": (0.0, 0.8),
         "prediction_miss_pressure": (0.0, 0.8),
         "novelty_pressure": ((0.1, 0.5), 0.5),  # some novelty is healthy
         "replay_mismatch_pressure": (0.0, 1.0),
+        "stagnation_pressure": (0.0, 0.6),  # developmental (Prompt 21)
     },
     "memory": {
         "trace_pressure": (0.0, 0.6),

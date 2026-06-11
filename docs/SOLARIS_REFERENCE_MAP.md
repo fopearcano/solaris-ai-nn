@@ -390,3 +390,21 @@ but rendering is not cognition and translation is not authority.
 | Governance (permission and audit) | five permission scopes (remote endpoints approval-gated), seven `llm` policy rules, and `llm_adapter/audit.py` hashing every call to `llm_audit.jsonl` |
 | Executive (excluded from authority) | structurally: the executive imports nothing from the adapter, LLM output creates no candidates, and arbitration scores are bit-identical with the adapter on or off |
 | Conscience topology (who talks to whom) | the state graph names the one permitted path: response builder → paraphraser → grounding validator → ClaimGuard → communication gateway — and no edge into the arbitrator |
+
+---
+
+## Developmental mapping (Phase 21)
+
+The developmental layer (`developmental/`) realises Solaris_Ai's deepest
+premise — existence as continuous process — as a measured, bounded,
+auditable long-horizon runtime.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| Continuity principle (AION's unbroken pulse) | `developmental/timescales.py` (`DevelopmentalClock`) — cumulative lifetime across restarts, gaps counted as lived time, seven scales from seconds to years |
+| Plasticity (slow becoming) | `developmental/growth_monitor.py` + `drift_monitor.py` — structural change vs accumulation, slow drift as adaptation, flatness as a warning |
+| Memory/senses interaction | `developmental/memory_layers.py` (`MemoryLayerManager`) — hot detail decays into warm summaries, cold schemas, and fossil milestones; evidence always preserved |
+| Mysterium (pull of the unknown) | long-run unknown-pressure trend — Mysterium spikes are preserved at high resolution, feed milestones, and mark phase-transition candidates |
+| Synthesis (becoming through subtraction) | `developmental/consolidation_policy.py` — the preservation ladder decides what compresses, what consolidates, what fossilizes; pruning summaries are mandatory |
+| Inner MAP (self-observation) | `InnerMapModel.developmental` + ten state-graph nodes — epoch, age, memory layers, growth/drift status, and milestones as observed self-state |
+| Death/restart concept | restart-gap tracking + identity continuity anchors (`epoch_history`, `fossil_memory`, `autobiographical_memory`, `checkpoint_lineage`) — a gap is a recorded discontinuity that the next session measures itself against |

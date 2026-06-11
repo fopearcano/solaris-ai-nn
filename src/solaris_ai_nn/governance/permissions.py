@@ -71,6 +71,13 @@ class PermissionScope:
     ALLOW_REMOTE_LLM_ENDPOINT = "allow_remote_llm_endpoint"
     ALLOW_LLM_CLASSIFICATION_ASSIST = "allow_llm_classification_assist"
     ALLOW_LLM_REPORT_POLISH = "allow_llm_report_polish"
+    # Developmental runtime (Prompt 21).
+    ENABLE_DEVELOPMENTAL_RUNTIME = "enable_developmental_runtime"
+    ENABLE_MONTH_SCALE_TESTING = "enable_month_scale_testing"
+    ENABLE_YEAR_SCALE_TESTING = "enable_year_scale_testing"
+    ENABLE_MEMORY_COMPRESSION = "enable_memory_compression"
+    ENABLE_FOSSIL_MEMORY = "enable_fossil_memory"
+    ENABLE_DEVELOPMENTAL_PRUNING = "enable_developmental_pruning"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -96,6 +103,9 @@ class PermissionScope:
         ENABLE_LOCAL_LLM_ADAPTER, ALLOW_LOCALHOST_LLM_ENDPOINT,
         ALLOW_REMOTE_LLM_ENDPOINT, ALLOW_LLM_CLASSIFICATION_ASSIST,
         ALLOW_LLM_REPORT_POLISH,
+        ENABLE_DEVELOPMENTAL_RUNTIME, ENABLE_MONTH_SCALE_TESTING,
+        ENABLE_YEAR_SCALE_TESTING, ENABLE_MEMORY_COMPRESSION,
+        ENABLE_FOSSIL_MEMORY, ENABLE_DEVELOPMENTAL_PRUNING,
     )
 
 
@@ -248,6 +258,27 @@ class PermissionSet:
             Permission(S.ALLOW_LLM_REPORT_POLISH, granted=True,
                        note="wording only; structure, numbers, warnings, "
                             "and limitations are preserved or refused"),
+            Permission(S.ENABLE_DEVELOPMENTAL_RUNTIME, granted=True,
+                       note="bounded simulated developmental runs; "
+                            "month/year scale gated separately"),
+            Permission(S.ENABLE_MONTH_SCALE_TESTING,
+                       requires_approval=True,
+                       note="real month-scale runs need explicit human "
+                            "approval"),
+            Permission(S.ENABLE_YEAR_SCALE_TESTING,
+                       requires_approval=True,
+                       note="real year-scale runs need explicit human "
+                            "approval"),
+            Permission(S.ENABLE_MEMORY_COMPRESSION, granted=True,
+                       note="allowed because evidence summaries are "
+                            "structurally preserved"),
+            Permission(S.ENABLE_FOSSIL_MEMORY, granted=True,
+                       note="append-only milestone archive; deletion is "
+                            "operator maintenance only"),
+            Permission(S.ENABLE_DEVELOPMENTAL_PRUNING,
+                       requires_approval=True,
+                       note="pruning production memory needs approval "
+                            "unless dry-run"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

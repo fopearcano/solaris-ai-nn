@@ -60,6 +60,7 @@ class InnerMapObserver:
     executive: Any = None  # optional dict or ExecutiveLayer (summary())
     ego: Any = None  # optional dict or SelfModel (summary())
     communication: Any = None  # optional dict or CommunicationGateway
+    developmental: Any = None  # optional dict or DevelopmentalRuntime
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -393,6 +394,15 @@ class InnerMapObserver:
                 model.communication = communication.summary()
             elif isinstance(communication, dict):
                 model.communication = dict(communication)
+        developmental = self.developmental
+        if developmental is None and self.runner is not None:
+            developmental = getattr(self.runner, "developmental", None)
+        if developmental is not None:
+            # Developmental status (read-only; long-horizon labels).
+            if hasattr(developmental, "summary"):
+                model.developmental = developmental.summary()
+            elif isinstance(developmental, dict):
+                model.developmental = dict(developmental)
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

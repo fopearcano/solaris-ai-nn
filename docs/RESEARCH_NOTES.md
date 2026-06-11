@@ -671,3 +671,51 @@ The nineteen prior layers fixed what the system knows, decides, refuses,
 and reports — so the twentieth could be allowed near the text without
 being allowed near the truth. That ordering is the experiment's actual
 finding: language models are safe to add last, and only last.
+
+**Developmental learning.** A training job has a dataset, a loss, and an
+end; a developmental process has a history. Framing Solaris-AI-NN's first
+learning mode as months of autonomous runtime — rather than any form of
+teaching — commits the project to its own thesis: long-running weak
+adaptation over lived experience, with the system's structure as the
+record of what its history did to it.
+
+**Long-horizon adaptation.** The interesting failure modes of adaptive
+systems are slow: drift that compounds, memory that silently saturates,
+habits that ossify, accuracy that degrades over weeks. None of them are
+visible in a 150-step benchmark. The developmental runtime exists to make
+slow phenomena observable cheaply — simulated time for rehearsal, real
+time for the actual experiment, identical instrumentation for both.
+
+**Memory consolidation over months/years.** Biological memory does not
+keep raw experience; it keeps progressively compressed, progressively
+schematic derivatives, plus a few vivid landmarks. The hot/warm/cold/
+fossil ladder is the engineering version: detail decays on a schedule,
+schemas persist, and the landmarks (firsts, violations, recoveries) are
+kept verbatim forever. The non-negotiable constraint is auditability —
+every compression leaves an evidence summary, so forgetting is always a
+recorded act.
+
+**Autobiographical memory in cognitive architectures.** A system that
+runs for months needs an answer to "what happened to you?" that is
+shorter than its trace and truer than its current state. Grounded,
+templated, observational history rows — with simulated time explicitly
+marked — give exactly that, without the trap: autobiographical *records*
+imply storage and retrieval, not remembering in any experiential sense,
+and the writing voice is structurally prevented from claiming otherwise.
+
+**Structural change vs data accumulation.** The cheapest way for a
+long-running system to look like it is developing is to grow its
+database. The growth monitor's whole purpose is to refuse that
+equivocation: node counts rising while schemas, habits, and pruning stay
+flat is *accumulation*; consolidation, stabilization, and subtraction are
+where structure actually changes. A stagnation label is as valid a
+finding as a growth label — the measurement is the point.
+
+**Why human feedback is postponed.** Teaching signals are powerful and
+contaminating: once an operator's corrections shape behaviour, every
+structural change is confounded — did the system adapt to its world or to
+its teacher? Running the first months teacher-free keeps the central
+question clean (is it different because of what it lived through?), and
+it forces the architecture to be honest about what persistence alone can
+do. Human feedback can be layered on later; un-confounding it later is
+impossible.

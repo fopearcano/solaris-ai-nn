@@ -255,6 +255,37 @@ class HomeostaticRegulator:
                    max(self.state.value("operator_pressure", 0.0), 0.7),
                    "ego", raw=ego["identity_warnings"][-1])
 
+        developmental = ctx.get("developmental") or {}
+        if developmental:
+            # Developmental pressure (Prompt 21): long-run facts become
+            # pressure, never commands. Stagnation biases safe
+            # exploration; drift biases stabilization.
+            if developmental.get("stagnation_pressure") is not None:
+                up("stagnation_pressure",
+                   clamp01(developmental["stagnation_pressure"]),
+                   "developmental",
+                   raw=developmental["stagnation_pressure"])
+            if developmental.get("drift_pressure") is not None:
+                up("drift_pressure",
+                   clamp01(developmental["drift_pressure"]),
+                   "developmental", raw=developmental["drift_pressure"])
+            if developmental.get("memory_pressure") is not None:
+                up("consolidation_pressure",
+                   max(self.state.value("consolidation_pressure", 0.0),
+                       clamp01(developmental["memory_pressure"])),
+                   "developmental")
+            if developmental.get("identity_continuity") is not None:
+                up("identity_uncertainty_pressure",
+                   clamp01(1.0 - float(
+                       developmental["identity_continuity"])),
+                   "developmental",
+                   raw=developmental["identity_continuity"])
+            if developmental.get("long_run_fatigue_proxy") is not None:
+                up("fatigue",
+                   max(self.state.value("fatigue", 0.0),
+                       clamp01(developmental["long_run_fatigue_proxy"])),
+                   "developmental")
+
     def _auto_context(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
         valence = self.valence.rolling()
         return {

@@ -65,8 +65,9 @@ def test_all_scopes_in_default_set():
     assert set(ps.known_scopes()) == set(PermissionScope.ALL)
     # 13 governance (P12) + 5 latent (P14) + 3 world model (P15)
     # + 4 homeostasis (P16) + 4 executive (P17) + 3 ego (P18)
-    # + 7 communication (P19) + 5 LLM adapter (P20).
-    assert len(PermissionScope.ALL) == 44
+    # + 7 communication (P19) + 5 LLM adapter (P20)
+    # + 6 developmental (P21).
+    assert len(PermissionScope.ALL) == 50
 
 
 def test_executive_scope_defaults():
@@ -103,6 +104,17 @@ def test_llm_scope_defaults():
     assert ps.requires_approval(PermissionScope.ALLOW_REMOTE_LLM_ENDPOINT)
     assert ps.allows(PermissionScope.ALLOW_LLM_CLASSIFICATION_ASSIST)
     assert ps.allows(PermissionScope.ALLOW_LLM_REPORT_POLISH)
+
+
+def test_developmental_scope_defaults():
+    ps = PermissionSet.default()
+    assert ps.allows(PermissionScope.ENABLE_DEVELOPMENTAL_RUNTIME)
+    assert ps.requires_approval(PermissionScope.ENABLE_MONTH_SCALE_TESTING)
+    assert ps.requires_approval(PermissionScope.ENABLE_YEAR_SCALE_TESTING)
+    assert ps.allows(PermissionScope.ENABLE_MEMORY_COMPRESSION)
+    assert ps.allows(PermissionScope.ENABLE_FOSSIL_MEMORY)
+    assert ps.requires_approval(
+        PermissionScope.ENABLE_DEVELOPMENTAL_PRUNING)
 
 
 def test_homeostasis_scope_defaults():

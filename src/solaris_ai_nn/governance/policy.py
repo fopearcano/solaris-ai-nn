@@ -280,6 +280,27 @@ DEFAULT_RULES: List[PolicyRule] = [
                "ClaimGuard or falls back to deterministic text"),
     PolicyRule("llm_usage_audited", "llm",
                "every adapter call lands in the LLM audit log"),
+    # N. Developmental runtime (Prompt 21)
+    PolicyRule("developmental_simulated_allowed", "developmental",
+               "short simulated developmental runs are allowed by "
+               "default"),
+    PolicyRule("month_year_scale_approval", "developmental",
+               "month/year-scale testing requires explicit approval",
+               requires_approval_scope=
+               PermissionScope.ENABLE_MONTH_SCALE_TESTING),
+    PolicyRule("compression_preserves_evidence", "developmental",
+               "memory compression is allowed only with evidence "
+               "summaries preserved"),
+    PolicyRule("developmental_pruning_approval", "developmental",
+               "pruning production memory requires approval unless "
+               "dry-run",
+               requires_approval_scope=
+               PermissionScope.ENABLE_DEVELOPMENTAL_PRUNING),
+    PolicyRule("autobiography_claim_guard", "developmental",
+               "autobiographical reports must pass ClaimGuard"),
+    PolicyRule("no_teacher_loop_required", "developmental",
+               "no human feedback or teacher loop is required for "
+               "learning; persistence is the mechanism"),
 ]
 
 
@@ -494,6 +515,22 @@ class GovernancePolicy:
                 decision.violations.append(PolicyViolation(
                     "llm_remote_prohibited", "llm",
                     "remote LLM endpoints are prohibited by default"))
+
+        # N. Developmental: persistence learning; long scales are gated.
+        if features.get("developmental"):
+            if not self._approved(
+                    PermissionScope.ENABLE_DEVELOPMENTAL_RUNTIME, ctx):
+                need_approval(
+                    PermissionScope.ENABLE_DEVELOPMENTAL_RUNTIME,
+                    "the developmental runtime is not permitted")
+            if ctx.get("month_scale") and not self._approved(
+                    PermissionScope.ENABLE_MONTH_SCALE_TESTING, ctx):
+                need_approval(PermissionScope.ENABLE_MONTH_SCALE_TESTING,
+                              "month-scale testing requires approval")
+            if ctx.get("year_scale") and not self._approved(
+                    PermissionScope.ENABLE_YEAR_SCALE_TESTING, ctx):
+                need_approval(PermissionScope.ENABLE_YEAR_SCALE_TESTING,
+                              "year-scale testing requires approval")
 
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):

@@ -516,4 +516,34 @@ def build_default_state_graph() -> StateGraph:
     g.add_edge("llm_adapter", "llm_audit_log",
                "every call is audited; the LLM never feeds executive "
                "authority")
+
+    # Developmental runtime (Prompt 21). Learning by persistence.
+    for name, role in [
+        ("developmental_runtime", "persistent process, not training job"),
+        ("developmental_clock", "lifetime across restarts"),
+        ("epoch_manager", "labels over metrics, reversible"),
+        ("memory_layer_manager", "hot/warm/cold/fossil"),
+        ("consolidation_policy", "what survives, at what resolution"),
+        ("growth_monitor", "structure change vs accumulation"),
+        ("long_run_drift_monitor", "slow drift is life"),
+        ("milestone_registry", "the firsts, with evidence"),
+        ("autobiographical_memory", "grounded developmental history"),
+        ("phase_transition_detector", "hypotheses, never emergence "
+                                      "claims"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("telemetry", "developmental_clock",
+               "telemetry feeds the developmental clock")
+    g.add_edge("memory", "memory_layer_manager",
+               "trace memory feeds the memory layers")
+    g.add_edge("latent_scheduler", "consolidation_policy",
+               "latent replay feeds consolidation")
+    g.add_edge("world_model_builder", "growth_monitor",
+               "the world model feeds the growth monitor")
+    g.add_edge("long_run_drift_monitor", "operational_supervisor",
+               "drift warnings feed ops/health")
+    g.add_edge("milestone_registry", "memory_layer_manager",
+               "milestones feed fossil memory")
+    g.add_edge("developmental_runtime", "inner_map",
+               "developmental state feeds Inner MAP")
     return g

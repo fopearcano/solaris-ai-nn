@@ -382,6 +382,35 @@ class OperationalSupervisor:
                                          "condition; the executive cannot "
                                          "clear it")
 
+        # Developmental monitoring (Prompt 21): evidence only.
+        developmental = snapshot.get("developmental") or {}
+        if developmental:
+            memory_layers = developmental.get("memory_layers") or {}
+            if memory_layers.get("over_budget"):
+                self.incidents.record(
+                    I.HEALTH_WARNING, "warning",
+                    f"developmental memory layers over budget: "
+                    f"{memory_layers['over_budget']}",
+                    related_metric="memory_layer_budget",
+                    suggested_debug_step="run consolidation; raw events "
+                                         "must not grow forever")
+            if int(developmental.get("stagnation_windows", 0) or 0) >= 5:
+                self.incidents.record(
+                    I.HEALTH_WARNING, "warning",
+                    "no structural change measured over a long period",
+                    related_metric="stagnation_windows",
+                    suggested_debug_step="review the growth monitor; "
+                                         "stagnation is a finding, not "
+                                         "an error")
+            if developmental.get("drift_status") == "fast_warning":
+                self.incidents.record(
+                    I.HEALTH_WARNING, "warning",
+                    "uncontrolled drift detected by the developmental "
+                    "drift monitor",
+                    related_metric="drift_velocity",
+                    suggested_debug_step="compare drift reports; fast "
+                                         "drift may need stabilization")
+
         # LLM adapter monitoring (Prompt 20): evidence only.
         communication = snapshot.get("communication") or {}
         if communication.get("llm_adapter_enabled"):
@@ -742,6 +771,9 @@ class OperationalSupervisor:
         communication = getattr(runner, "communication", None)
         if communication is not None:
             snapshot["communication"] = communication.summary()
+        developmental = getattr(runner, "developmental", None)
+        if developmental is not None:
+            snapshot["developmental"] = developmental.summary()
         return snapshot
 
     def _build_status(self) -> OperationalStatus:

@@ -249,6 +249,13 @@ class InnerMapModel:
     # pending_approval_count, transcript_path, last_response_summary,
     # safety_status, plus the gateway counters.
     communication: Optional[Dict[str, Any]] = None
+    # Developmental status (Prompt 21); None when the runtime is absent.
+    # Keys: enabled, current_epoch, developmental_age_hours,
+    # memory_layers, fossil_memory_count, milestone_count,
+    # last_milestone, growth_status, drift_status,
+    # structural_change_score, phase_transition_candidates,
+    # developmental_report_path.
+    developmental: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

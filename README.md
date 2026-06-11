@@ -246,6 +246,13 @@ python examples/run_llm_mock_paraphrase_demo.py
 python examples/run_llm_classification_assist_demo.py
 python examples/run_llm_report_polish_demo.py
 python examples/run_local_llm_endpoint_check.py --endpoint-url http://127.0.0.1:11434
+
+# Developmental runtime: learning by persistence across months (simulated here)
+python examples/run_developmental_short_demo.py --steps 500
+python examples/run_memory_layer_demo.py
+python examples/run_milestone_demo.py
+python examples/run_drift_growth_demo.py
+python examples/run_month_scale_plan.py
 ```
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
@@ -386,6 +393,22 @@ falls back to the deterministic original; every call is hash-audited to
 paraphrase, never primary evidence. No cloud APIs, no required model —
 all tests run on the deterministic mock.
 
+The **developmental layer** (`developmental/`) is the project's thesis
+made operational: Solaris-AI-NN learns by remaining active across time —
+continuity, repetition, prediction failure, Mysterium pressure,
+consolidation, pruning, and slow structural drift — with no teacher, no
+RLHF, no reward button, and no batch training. A lifetime clock spans
+seven time scales (simulated for tests, real for actual long runs); nine
+reversible epoch labels sit over measured signals; memory moves through
+hot/warm/cold/fossil layers under an audited preservation ladder (nothing
+leaves without an evidence summary); growth is classified against
+stagnation, drift against inertia; sixteen milestones fossilize the
+firsts; and the autobiographical history is grounded, observational, and
+honest about simulated time. The first serious testing window is months;
+month/year scale requires explicit governance approval; and the headline
+metric is a cautious `structural_change_score` — there is no
+consciousness score, deliberately and permanently.
+
 The **evaluation layer** (`evaluation/`) is the measurement harness: nine
 registered protocols (absence, feedback inversion, reward/danger, restart
 recovery, replay determinism, substrate comparison, plasticity dry-run,
@@ -482,6 +505,9 @@ src/solaris_ai_nn/
   llm_adapter/  optional local LLM: base/mock/local-HTTP clients, prompt
                 contracts, grounding validator, paraphrase, classification
                 assist, summary, report polish, claim filter, audit, safety
+  developmental/ timescales, epochs, memory layers, consolidation policy,
+                developmental runtime, growth/drift monitors, milestones,
+                autobiographical memory, phase transitions, reports, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

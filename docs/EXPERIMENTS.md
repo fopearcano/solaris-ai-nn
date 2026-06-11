@@ -1282,3 +1282,61 @@ paths.
 **Run:** `python examples/run_single_benchmark.py --experiment llm_claim_guard`
 Forbidden claims never leave the filter: safe text passes, unsafe text is
 rewritten or refused, and nothing unsafe escapes either way.
+
+## 110. Developmental Short Demo ✅ (implemented)
+
+**Run:** `python examples/run_developmental_short_demo.py --steps 500`
+A bounded simulated-time developmental run: segments of the full
+cognitive stack with maintenance ticks between them — consolidation,
+epoch evaluation, milestones, growth/drift snapshots, autobiographical
+history, and a ClaimGuard-scanned developmental report. ~500 simulated
+hours in seconds of CPU.
+
+## 111. Memory Layer Demo ✅ (implemented)
+
+**Run:** `python examples/run_memory_layer_demo.py`
+Hot → warm → cold → fossil movement under the consolidation policy:
+routine events compress into summaries, important events keep their
+resolution, identity/safety events fossilize, and the movement audit
+shows nothing was silently destroyed.
+
+## 112. Milestone Demo ✅ (implemented)
+
+**Run:** `python examples/run_milestone_demo.py`
+First stable habit, first Mysterium spike, first consolidation — each
+firing once, with evidence, into the registry and the autobiographical
+history (observational voice, simulated time marked).
+
+## 113. Drift/Growth Demo ✅ (implemented)
+
+**Run:** `python examples/run_drift_growth_demo.py`
+Three scripted trajectories: structural growth vs stagnation, slow drift
+vs runaway drift, and a sudden jump that becomes a phase-transition
+*candidate* — a hypothesis with before/after numbers.
+
+## 114. Month-Scale Plan ✅ (implemented)
+
+**Run:** `python examples/run_month_scale_plan.py`
+Generates the month-scale testing plan, the state/artifact budget
+estimate, and the governance checklist — and proves the gate by showing
+a month-scale runtime refused without approval. No long run starts.
+
+## 115. Developmental Short Simulation Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment developmental_short_simulation`
+The end-to-end property: a short simulated developmental run completes,
+transitions epochs, records milestones, and persists its state.
+
+## 116. Memory Compression Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment memory_layer_compression`
+Compression under measurement: routine events compress with evidence
+summaries, important events are preserved, budgets hold, and every
+movement is audited. `milestone_detection`, `phase_transition_detection`,
+and `autobiographical_memory` complete the history set.
+
+## 117. Drift Monitor Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment drift_monitor`
+The three-way drift verdict: slow drift passes as adaptation, runaway
+drift warns, and total flatness warns too.
