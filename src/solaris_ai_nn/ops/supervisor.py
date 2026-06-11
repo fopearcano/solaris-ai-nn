@@ -78,7 +78,8 @@ def default_runner_factory(manifest: OperationalRunManifest,
         enable_world_model=manifest.enabled_features.get("world_model",
                                                          False),
         enable_homeostasis=manifest.enabled_features.get("homeostasis",
-                                                         False))
+                                                         False),
+        enable_executive=manifest.enabled_features.get("executive", False))
 
 
 @dataclass
@@ -341,6 +342,44 @@ class OperationalSupervisor:
                     suggested_debug_step="review the Being/Not-Being "
                                          "reasons in the homeostasis "
                                          "report")
+
+        # Executive monitoring (Prompt 17): evidence only; the watchdog
+        # keeps all stop authority.
+        executive = snapshot.get("executive") or {}
+        if executive:
+            if int(executive.get("no_safe_action_count", 0) or 0) >= 5:
+                self.incidents.record(
+                    I.EXECUTIVE_NO_SAFE_ACTION, "warning",
+                    f"{executive['no_safe_action_count']} arbitrations "
+                    "found no safe candidate",
+                    related_metric="no_safe_action",
+                    suggested_debug_step="read the inhibition ledger in "
+                                         "the executive report")
+            if int(executive.get("inhibited_candidate_count", 0)
+                   or 0) >= 50:
+                self.incidents.record(
+                    I.EXECUTIVE_REPEATED_INHIBITION, "warning",
+                    f"{executive['inhibited_candidate_count']} candidates "
+                    "inhibited this run",
+                    related_metric="inhibition_count",
+                    suggested_debug_step="the configuration may be "
+                                         "fighting its own constraints")
+            if int(executive.get("plans_rejected", 0) or 0) >= 5:
+                self.incidents.record(
+                    I.EXECUTIVE_PLAN_REJECTED, "warning",
+                    f"{executive['plans_rejected']} plans rejected",
+                    related_metric="plan_rejections",
+                    suggested_debug_step="check plan templates against "
+                                         "the active inhibitions")
+            if int(executive.get("forced_emergency_total", 0) or 0) >= 1 \
+                    and executive.get("mode") == "emergency":
+                self.incidents.record(
+                    I.EXECUTIVE_MODE_FORCED_EMERGENCY, "warning",
+                    "the executive was forced into emergency mode",
+                    related_metric="executive_mode",
+                    suggested_debug_step="resolve the underlying ops "
+                                         "condition; the executive cannot "
+                                         "clear it")
 
         budget_report = self.budget.check_budget(
             {"telemetry": snapshot.get("telemetry"),
@@ -639,6 +678,9 @@ class OperationalSupervisor:
         homeostasis = getattr(runner, "homeostasis", None)
         if homeostasis is not None:
             snapshot["homeostasis"] = homeostasis.summary()
+        executive = getattr(runner, "executive", None)
+        if executive is not None:
+            snapshot["executive"] = executive.summary()
         return snapshot
 
     def _build_status(self) -> OperationalStatus:

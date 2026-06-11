@@ -228,6 +228,14 @@ class InnerMapModel:
     # suppressed_desire_count, last_desire_candidates,
     # homeostasis_report_path.
     homeostasis: Optional[Dict[str, Any]] = None
+    # Executive status (Prompt 17); None when the executive is disabled.
+    # Keys: enabled, mode, active_focus, desire_queue_length,
+    # candidate_count, inhibited_candidate_count,
+    # selected_action_suggestion, selected_plan_length,
+    # no_safe_action_count, last_arbitration_score,
+    # last_prospection_confidence, decision_trace_path,
+    # executive_report_path.
+    executive: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

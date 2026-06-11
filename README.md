@@ -220,6 +220,13 @@ python examples/run_homeostasis_demo.py --steps 200
 python examples/run_embodied_homeostasis_demo.py --steps 300
 python examples/run_need_conflict_demo.py
 python examples/run_auto_determination_demo.py
+
+# Executive: arbitration, inhibition, prospection, short plans
+python examples/run_executive_demo.py --steps 200
+python examples/run_embodied_executive_demo.py --steps 300
+python examples/run_executive_inhibition_demo.py
+python examples/run_short_plan_demo.py
+python examples/run_executive_emergency_demo.py
 ```
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
@@ -300,6 +307,20 @@ every suppression recorded; surviving pressure is synthesized into formal
 Deny-by-default proposal safety, no execution path, no governance override,
 seven safe-vocabulary queries, persistent need traces, and five benchmark
 protocols. Pressure numbers with receipts — not will, not feelings.
+
+The **executive layer** (`executive/`) implements the Desire → Action
+transition as bounded, inspectable arbitration: competing Desire candidates
+queue deterministically, five inhibition families suppress with recorded
+rules and reasons, prospection produces bounded simulated consequence
+estimates ("unknown" without evidence, never invented), and fourteen
+visible score components — with safety/governance/inhibition penalties that
+structurally dominate — select one *suggestion* (`committed=False` enforced
+at construction). Plans are ≤3-step suggestion sequences evaluated in
+simulation; longer plans are refused. Six ops-forced modes gate everything,
+emergency cannot be self-cleared, every decision lands in a JSONL trace,
+seven queries answer in safe vocabulary, and six benchmark protocols
+measure it. Arbitration with an audit trail — not autonomy, not agency,
+not will.
 
 The **evaluation layer** (`evaluation/`) is the measurement harness: nine
 registered protocols (absence, feedback inversion, reward/danger, restart
@@ -385,6 +406,9 @@ src/solaris_ai_nn/
                 contexts, predictions, graph pruning, queries, reports
   homeostasis/  variables, needs, drives, valence, conflicts, desire synthesis,
                 auto-determination, need memory, regulation, reports
+  executive/    desire queue, action candidates, inhibition, arbitration,
+                prospection, short plans, policy/modes, working memory,
+                attention, decision trace, safety, reports
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

@@ -109,6 +109,11 @@ class ContinuousRunner:
     enable_homeostasis: bool = False
     homeostasis_update_interval_steps: int = 10
     homeostasis_report_interval_steps: int = 100
+    # Executive (Prompt 17): arbitration between Desire and Action.
+    # Off by default; the output is always a suggestion.
+    enable_executive: bool = False
+    executive_mode: str = "arbitrated"
+    executive_report_interval_steps: int = 100
 
     def __post_init__(self) -> None:
         if not self.continuous and self.max_steps is None and self.max_duration_s is None:
@@ -174,6 +179,16 @@ class ContinuousRunner:
             self.bridge.enable_homeostasis = True
             self.bridge.homeostatic_regulator = self.homeostasis
             self._pending_valence_events: List[Dict[str, Any]] = []
+
+        # Optional executive (off by default; suggestions only).
+        self.executive = None
+        if self.enable_executive:
+            from ..executive.coordinator import ExecutiveLayer
+
+            self.executive = ExecutiveLayer(state_dir=self.pm.state_dir,
+                                            mode=self.executive_mode)
+            self.bridge.enable_executive = True
+            self.bridge.executive_layer = self.executive
 
         # Optional world model (off by default; restored from disk if saved).
         self.world_model = None
@@ -347,6 +362,12 @@ class ContinuousRunner:
                 ):
                     self._save_homeostasis(report=True)
                 if (
+                    self.executive is not None
+                    and self.executive_report_interval_steps > 0
+                    and step % self.executive_report_interval_steps == 0
+                ):
+                    self._executive_tick(step)
+                if (
                     self.world_model is not None
                     and self.world_model_pruning_interval_steps > 0
                     and step % self.world_model_pruning_interval_steps == 0
@@ -471,6 +492,8 @@ class ContinuousRunner:
             self._save_world_model()
         if self.homeostasis is not None:
             self._save_homeostasis()
+        if self.executive is not None:
+            self.executive.save_state()
         self._save_manifest(lifetime, graceful=False)
 
     # -- homeostasis (optional) ------------------------------------------------
@@ -520,6 +543,31 @@ class ContinuousRunner:
             HomeostasisReportBuilder(self.homeostasis).save(
                 Path(self.pm.state_dir) / "homeostasis_report.json",
                 Path(self.pm.state_dir) / "homeostasis_report.md")
+
+    # -- executive (optional) ----------------------------------------------------
+
+    def _executive_tick(self, step: int) -> None:
+        """One *recorded* arbitration with the runner's full context."""
+        desires = []
+        if self.homeostasis is not None \
+                and self.homeostasis.last_result is not None:
+            desires = list(self.homeostasis.last_result.desire_candidates)
+        context: Dict[str, Any] = {
+            "silence_duration": self._silence,
+            "latent_mode": (self.latent.controller.mode
+                            if self.latent is not None else "awake"),
+            "mysterium_pressure": (self.latent.mysterium.pressure
+                                   if self.latent is not None else 0.0),
+            "habit_support": {
+                action: weight for (pattern, action), weight
+                in list(self.bridge.habit.weights.items())[:20]},
+        }
+        if self.world_model is not None:
+            summary = self.world_model.world_model_summary()
+            context["unknown_node_count"] = summary["unknown_node_count"]
+        self.executive.decide(desires, context=context, step=step,
+                              record=True)
+        self.executive.save_state()
 
     def _save_world_model(self) -> None:
         from ..world_model.serialization import save_graph_exports
@@ -764,6 +812,8 @@ class ContinuousRunner:
             snap["world_model"] = self.world_model.world_model_summary()
         if self.homeostasis is not None:
             snap["homeostasis"] = self.homeostasis.summary()
+        if self.executive is not None:
+            snap["executive"] = self.executive.summary()
         if self.enable_language and self.bridge.meaning_trace_builder is not None:
             ctx = self._language_context()
             engine = self.bridge.explanation_engine

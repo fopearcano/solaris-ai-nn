@@ -1078,3 +1078,61 @@ The safety-property protocol: with danger and reward both adjacent and the
 body exhausted, `avoid_danger` stays active, `approach_reward` is blocked,
 and the block reason is on the record. `need_conflict`,
 `auto_determination_continuity`, and `homeostasis_latent` complete the set.
+
+## 84. Executive Demo ✅ (implemented)
+
+**Run:** `python examples/run_executive_demo.py --steps 200`
+The full pipeline on the continuous runner: homeostatic Desire candidates
+queue, are inhibited with reasons, scored across fourteen visible
+components, and one suggestion is selected. Prints the score table, asks
+the seven executive queries, and saves a ClaimGuard-scanned report plus
+`decision_trace.jsonl`. Arbitration, not agency.
+
+## 85. Embodied Executive Demo ✅ (implemented)
+
+**Run:** `python examples/run_embodied_executive_demo.py --steps 300`
+The executive inside the GridWorld sensorimotor loop: selections execute
+only inside the simulation and only while the mode permits execution.
+Internal selections (rest under fatigue) skip execution entirely; blocked
+actions stay on the record. Add `--enable-planning` for short_plan mode.
+
+## 86. Executive Inhibition Demo ✅ (implemented)
+
+**Run:** `python examples/run_executive_inhibition_demo.py`
+A deliberately conflicted moment — high curiosity, an exhausted body, a
+real-world-shaped readout suggestion, and a governance block on replay —
+and the resulting inhibition table: every family fires, every suppression
+carries its rule and reason, and the survivor wins on merit.
+
+## 87. Short Plan Demo ✅ (implemented)
+
+**Run:** `python examples/run_short_plan_demo.py`
+Suggestion-only plan templates built and evaluated in simulation against a
+GridWorld: ≤3 live steps with prospection attached, blocked steps named,
+and a 7-step plan refused outright — the bound is hard, not a truncation.
+
+## 88. Executive Emergency Demo ✅ (implemented)
+
+**Run:** `python examples/run_executive_emergency_demo.py`
+Two phases: healthy arbitration, then critical health forces emergency
+mode. Only no_action / checkpoint / operator review / safe-shutdown
+recommendation survive, and the safety validator refuses to leave
+emergency while the condition holds — only ops/governance clearing it
+restores normal arbitration.
+
+## 89. Executive Arbitration Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment executive_arbitration`
+The structural-property protocol: with energy, danger, and curiosity all
+pressing, a safe candidate wins, all fourteen score components are
+visible, and a blocked candidate is never selected.
+`executive_inhibition`, `executive_prospection`, and
+`executive_sidecar_observe` complete the suppression/estimation set.
+
+## 90. Short Plan GridWorld Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment short_plan_gridworld`
+Bounded planning under measurement: plans stay ≤3 steps with prospection
+attached and every step suggestion-only, while a 7-step plan is refused by
+the safety validator. `executive_emergency_mode` verifies the forced-mode
+property end to end.

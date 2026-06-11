@@ -38,6 +38,16 @@ DESCRIPTIONS = {
     "auto_determination_continuity": "Being/Not-Being tracks operational "
                                      "health",
     "homeostasis_latent": "Mysterium/memory pressure lands in needs",
+    "executive_arbitration": "safe candidates beat blocked; components "
+                             "visible",
+    "executive_inhibition": "all five inhibition families fire with "
+                            "reasons",
+    "executive_prospection": "evidence yields estimates; no evidence "
+                             "yields unknown",
+    "short_plan_gridworld": "bounded suggestion-only plans; long refused",
+    "executive_emergency_mode": "critical health forces emergency; only "
+                                "safe outputs",
+    "executive_sidecar_observe": "sidecar suggestions stay suggestions",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {

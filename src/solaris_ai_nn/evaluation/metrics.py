@@ -393,3 +393,49 @@ def homeostasis_metrics(homeostasis: Optional[Dict[str, Any]],
         "dominant_drive": homeostasis.get("dominant_drive"),
         "best_desire": homeostasis.get("best_desire"),
     }
+
+
+# -- O. executive (Prompt 17) ----------------------------------------------------------
+
+def executive_metrics(executive: Optional[Dict[str, Any]],
+                      trace_rows: Optional[List[Dict[str, Any]]] = None,
+                      ) -> Dict[str, Any]:
+    """Objective executive metrics: arbitration, inhibition, plans."""
+    if not executive:
+        return {"present": False}
+    rows = trace_rows or []
+    decisions = int(_get(executive, "decisions", 0))
+    inhibitions = int(_get(executive, "inhibited_candidate_count", 0))
+    selected = [r.get("selected") for r in rows if r.get("selected")]
+    diversity = (round(len(set(selected)) / len(selected), 4)
+                 if selected else None)
+    totals = []
+    for row in rows:
+        scores = row.get("scores") or []
+        if scores:
+            totals.append(float(scores[0].get("total", 0.0) or 0.0))
+    stability = None
+    if len(totals) >= 2:
+        mean = sum(totals) / len(totals)
+        stability = round(sum(abs(t - mean) for t in totals)
+                          / len(totals), 4)
+    return {
+        "present": True,
+        "desire_queue_length": _get(executive, "desire_queue_length", 0),
+        "candidate_generation_count": _get(executive, "candidate_count", 0),
+        "inhibition_count": inhibitions,
+        "inhibition_rate": (round(inhibitions / max(1, decisions), 4)
+                            if decisions else None),
+        "no_safe_action_count": _get(executive, "no_safe_action_count", 0),
+        "arbitration_score_stability": stability,
+        "selected_action_diversity": diversity,
+        "plan_length_average": _get(executive, "selected_plan_length", 0),
+        "plan_rejection_count": _get(executive, "plans_rejected", 0),
+        "prospection_confidence_average": executive.get(
+            "last_prospection_confidence"),
+        "decision_count": decisions,
+        "fallback_count": _get(executive, "fallback_total", 0),
+        "safety_override_count": 0,  # structurally: no override path exists
+        "forced_emergency_count": _get(executive, "forced_emergency_total",
+                                       0),
+    }

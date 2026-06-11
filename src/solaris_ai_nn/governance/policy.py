@@ -203,6 +203,22 @@ DEFAULT_RULES: List[PolicyRule] = [
     PolicyRule("no_anthropomorphic_claims", "homeostasis",
                "reports must avoid anthropomorphic claims (no wanting, no "
                "feeling)", forbidden=True),
+    # J. Executive (Prompt 17)
+    PolicyRule("executive_arbitration_allowed", "executive",
+               "executive arbitration is allowed in bounded simulation"),
+    PolicyRule("plans_bounded", "executive",
+               "plans longer than 5 steps are prohibited by default",
+               forbidden=True),
+    PolicyRule("executive_never_real_world", "executive",
+               "real-world action candidates are prohibited",
+               forbidden=True),
+    PolicyRule("executive_sidecar_publish_approval", "executive",
+               "executive sidecar suggestion publishing requires approval",
+               requires_approval_scope=
+               PermissionScope.ENABLE_EXECUTIVE_SIDECAR_SUGGESTIONS),
+    PolicyRule("emergency_mode_unstoppable", "executive",
+               "the executive cannot disable its own emergency mode",
+               forbidden=True),
 ]
 
 
@@ -366,6 +382,17 @@ class GovernancePolicy:
                 decision.violations.append(PolicyViolation(
                     "needs_never_override_governance", "homeostasis",
                     "no need or drive may override governance or safety"))
+
+        # J. Executive: arbitration is cheap; the bounds are not optional.
+        if features.get("executive"):
+            if not self._approved(PermissionScope.ENABLE_EXECUTIVE, ctx):
+                need_approval(PermissionScope.ENABLE_EXECUTIVE,
+                              "executive arbitration is not permitted")
+            if int(ctx.get("max_plan_length", 0) or 0) > 5:
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "plans_bounded", "executive",
+                    "plans longer than 5 steps are prohibited by default"))
 
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):

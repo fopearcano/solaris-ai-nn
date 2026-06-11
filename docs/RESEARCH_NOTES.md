@@ -492,3 +492,52 @@ construction; and the one dramatic-sounding output — safe_shutdown_recommended
 — is an incident row that a watchdog may ignore. A system whose "wants" are
 auditable pressures with no execution path is precisely a system without
 will, and the documentation says so wherever the words could mislead.
+
+**Executive function as arbitration, not agency.** The cognitive-science
+term "executive function" names a family of control processes — selection,
+inhibition, working memory, set shifting — none of which requires agency to
+implement. Ours is a scoring function with a queue in front and a trace
+behind: fourteen visible components, penalties that structurally dominate
+utility, and a fallback that prefers doing nothing over forcing a choice.
+The selection is deterministic given its inputs, and that determinism is the
+research property — the same conflict resolves the same way, every time, and
+you can read off why.
+
+**Inhibition as a first-class output.** Most decision systems report what
+they chose; the interesting evidence is usually in what they suppressed.
+Treating inhibition as a recorded act — rule, family, reason, kept on the
+candidate — turns "why didn't it explore?" from a debugging session into a
+table lookup. The five-family structure (governance, safety, resource,
+context, conflict) also makes misconfiguration visible: a run whose
+inhibition ledger is dominated by one family is a run whose constraints are
+fighting its configuration.
+
+**Prospection without confabulation.** The failure mode of consequence
+estimation is inventing consequences. The engine here refuses to: estimates
+exist only where evidence exists (world-model valence, habit weights, a
+sandboxed world), every result carries its basis and a capped confidence,
+and "unknown" is a respectable answer that increments a counter rather than
+a gap to be papered over. Prospection runs against deep copies — the real
+world state is never touched by imagining.
+
+**Why short-horizon planning only.** Long-horizon autonomous planning is
+where suggestion systems quietly become agents: a 50-step plan is a policy,
+and a system executing its own policy is no longer arbitrating among
+suggestions. Capping plans at three steps (hard max five, refusal not
+truncation) keeps the planner inside the suggestion regime — long enough to
+test sequencing in simulation, too short to constitute autonomous conduct.
+
+**Emergency mode as a one-way door (from the inside).** The executive can
+enter emergency mode but not leave it; only ops or governance clearing the
+underlying condition restores arbitration. This asymmetry is the safety
+property: a control layer that could reason itself out of its own
+restrictions would make every restriction advisory. `can_override_emergency_
+stop()` returning a hard-coded `False` is the whole design, stated as code.
+
+**Why arbitration is not will.** Every selection is a deterministic function
+of recorded pressures, evidence, and penalties; every suppression carries
+its rule; every output is a suggestion with `committed=False` enforced at
+construction; and the strongest thing the layer can do when everything is
+blocked is ask a human to look. A chooser whose choices are auditable
+arithmetic with no execution authority is precisely a system without will —
+and the reports are required to say so.

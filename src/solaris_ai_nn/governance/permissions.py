@@ -47,6 +47,12 @@ class PermissionScope:
     ENABLE_NEED_DRIVEN_SUGGESTIONS = "enable_need_driven_suggestions"
     ENABLE_AUTO_DETERMINATION = "enable_auto_determination"
     ALLOW_SAFE_SHUTDOWN_RECOMMENDATION = "allow_safe_shutdown_recommendation"
+    # Executive (Prompt 17).
+    ENABLE_EXECUTIVE = "enable_executive"
+    ENABLE_SHORT_HORIZON_PLANNING = "enable_short_horizon_planning"
+    ENABLE_PROSPECTION = "enable_prospection"
+    ENABLE_EXECUTIVE_SIDECAR_SUGGESTIONS = (
+        "enable_executive_sidecar_suggestions")
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -61,6 +67,8 @@ class PermissionScope:
         ENABLE_WORLD_MODEL_PREDICTION,
         ENABLE_HOMEOSTASIS, ENABLE_NEED_DRIVEN_SUGGESTIONS,
         ENABLE_AUTO_DETERMINATION, ALLOW_SAFE_SHUTDOWN_RECOMMENDATION,
+        ENABLE_EXECUTIVE, ENABLE_SHORT_HORIZON_PLANNING,
+        ENABLE_PROSPECTION, ENABLE_EXECUTIVE_SIDECAR_SUGGESTIONS,
     )
 
 
@@ -155,6 +163,18 @@ class PermissionSet:
             Permission(S.ALLOW_SAFE_SHUTDOWN_RECOMMENDATION, granted=True,
                        note="a recommendation only; ops "
                             "supervisor/watchdog decides"),
+            Permission(S.ENABLE_EXECUTIVE, granted=True,
+                       note="arbitration in bounded simulation; "
+                            "suggestions only"),
+            Permission(S.ENABLE_SHORT_HORIZON_PLANNING, granted=True,
+                       note="plans capped at 3 steps (hard max 5); "
+                            "suggestion-only"),
+            Permission(S.ENABLE_PROSPECTION, granted=True,
+                       note="bounded simulated estimates, never facts"),
+            Permission(S.ENABLE_EXECUTIVE_SIDECAR_SUGGESTIONS,
+                       requires_approval=True,
+                       note="executive-ranked sidecar publishing needs "
+                            "approval; observe-only stands"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

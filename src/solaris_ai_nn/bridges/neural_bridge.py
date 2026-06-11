@@ -90,6 +90,12 @@ class SolarisNeuralBridge:
     # overrides safety -- the bias lands beside the habit bias, pre-argmax.
     enable_homeostasis: bool = False
     homeostatic_regulator: Any = None
+    # Executive (Prompt 17): an optional ExecutiveLayer that arbitrates
+    # among Desire candidates and the readout's tendency. Its output is the
+    # final *suggestion* -- still never a committed action.
+    enable_executive: bool = False
+    executive_mode: str = "arbitrated"
+    executive_layer: Any = None
 
     _logos: Optional[C.LogosTension] = field(default=None, init=False, repr=False)
     _steps: int = field(default=0, init=False)
@@ -145,6 +151,10 @@ class SolarisNeuralBridge:
                 self.meaning_trace_builder = MeaningTraceBuilder()
             if self.explanation_engine is None:
                 self.explanation_engine = ExplanationEngine()
+        if self.enable_executive and self.executive_layer is None:
+            from ..executive.coordinator import ExecutiveLayer  # local: optional
+
+            self.executive_layer = ExecutiveLayer(mode=self.executive_mode)
 
     # -- substrate access -----------------------------------------------------
 
@@ -265,6 +275,34 @@ class SolarisNeuralBridge:
             "reservoir_energy": self.substrate_state_norm(),
             "logos_fracture": self._logos.fracture if self._logos is not None else 0.0,
         }
+
+        # Executive arbitration (Prompt 17): Desire candidates + the
+        # readout's tendency become a final suggestion. Still a suggestion.
+        if self.enable_executive and self.executive_layer is not None:
+            desires = []
+            if self.enable_homeostasis \
+                    and self.homeostatic_regulator is not None \
+                    and self.homeostatic_regulator.last_result is not None:
+                desires = list(self.homeostatic_regulator
+                               .last_result.desire_candidates)
+            decision = self.executive_layer.decide(
+                desires, context={"logos_fracture":
+                                  result["logos_fracture"]},
+                readout_suggestion=label, step=self._steps, record=False)
+            if decision.selected is not None:
+                result["executive_selection"] = decision.selected.label
+                result["executive_fallback"] = decision.fallback_used
+                # The executive's pick becomes the suggestion when it names
+                # a known action label; suggestions stay uncommitted.
+                if decision.selected.label in self.action_labels:
+                    result["suggested_action"] = decision.selected.label
+                    result["suggested_desire"] = decision.selected.label
+                    self._last_action = self.adapter.from_nn_action(
+                        name=decision.selected.label, payload=pattern_key)
+                    self._last_desire = self.adapter.from_nn_desire(
+                        proposal=decision.selected.label,
+                        motivation=decision.selected.utility_estimate,
+                        confidence=decision.selected.confidence)
 
         # Optional language trace: atoms for received/encoded/updated/suggested.
         if self.enable_language_trace and self.meaning_trace_builder is not None:
@@ -437,6 +475,8 @@ class SolarisNeuralBridge:
         }
         if self.enable_homeostasis and self.homeostatic_regulator is not None:
             snap["homeostasis"] = self.homeostatic_regulator.summary()
+        if self.enable_executive and self.executive_layer is not None:
+            snap["executive"] = self.executive_layer.summary()
         if include_language and self.enable_language_trace \
                 and self.meaning_trace_builder is not None:
             snap["language"] = {

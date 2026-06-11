@@ -315,3 +315,23 @@ as bounded, observable drive regulation.
 | `modules/mysterium.py` (pull of the unknown) | novelty/unknown variable group — Mysterium pressure and prediction misses become `reduce_uncertainty` need pressure |
 | `modules/complexity.py` | complexity pressure feeds `increase_exploration` / `increase_stabilization` needs and the exploration/stabilization drives |
 | `modules/io_module.py` (actions committed) | formal `DesireCandidate` objects with `committed=False` semantics — the bridge suggests, Solaris_Ai (or the simulation) decides |
+
+---
+
+## Executive function mapping (Phase 17)
+
+The executive layer (`executive/`) realises Solaris_Ai's Desire → Action
+transition as bounded, inspectable arbitration — selection among
+suggestions, never agency.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| `Stimulus → Push → Desire → Action` (the Desire → Action step) | `executive/coordinator.py` (`ExecutiveLayer`) — Desire candidates queue, are inhibited with reasons, scored across fourteen visible components, and one *suggestion* is selected |
+| `modules/io_module.py` (actions committed) | `executive/action_candidates.py` — `ActionCandidate` with four executable scopes and `committed=False` enforced at construction; commitment stays with Solaris_Ai / the simulation |
+| Conflict between desires | `executive/desire_queue.py` + `executive/arbitration.py` — deterministic priority ordering and penalty-dominant scoring; `executive/inhibition.py` suppresses with rule, family, and reason across five families |
+| `modules/anticipation.py` (expectation before action) | `executive/prospection.py` (`ProspectionEngine`) — bounded simulated consequence estimates with confidence and evidence basis; "unknown" without evidence, never invented |
+| Planning as imagined sequence | `executive/planner.py` (`ShortHorizonPlanner`) — ≤3-step (hard max 5) suggestion-only plans evaluated in simulation; long-horizon autonomous planning is structurally refused |
+| `modules/conscience.py` (modes of operation) | `executive/policy.py` (`ExecutivePolicy`) — six modes forced by ops status; emergency cannot be self-cleared (`can_override_emergency_stop()` is `False`) |
+| `modules/inner_map.py` (self-observation) | `InnerMapModel.executive` + ten executive state-graph nodes — mode, focus, queue, selection, inhibitions, and decision counts are part of the self-representation |
+| Working attention / focus | `executive/working_memory.py` + `executive/attention.py` — bounded TTL context and rule-based prioritization, explicitly not awareness |
+| `modules/language.py` (meaning expressed) | `executive/reports.py` — full score tables, inhibition ledgers, and seven fixed queries in safe vocabulary ("the arbitrator selected…"), ClaimGuard-scanned |

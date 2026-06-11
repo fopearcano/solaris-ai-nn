@@ -924,6 +924,202 @@ def homeostasis_latent_protocol(manifest: ExperimentManifest,
     return _run(manifest, body)
 
 
+# -- N. executive (Prompt 17) ------------------------------------------------------
+
+
+def _executive_desires(**variables):
+    from ..homeostasis.needs import NeedEstimator
+    from ..homeostasis.drives import DriveResolver
+    from ..homeostasis.desire_synthesis import DesireSynthesisEngine
+    from ..homeostasis.variables import HomeostaticState
+
+    state = HomeostaticState()
+    for name, value in variables.items():
+        state.upsert(name, value)
+    need_state = NeedEstimator().estimate(state)
+    drives = DriveResolver()
+    drives.aggregate(need_state)
+    engine = DesireSynthesisEngine()
+    return engine.synthesize(need_state, drives)
+
+
+def executive_arbitration_protocol(manifest: ExperimentManifest,
+                                   ) -> ExperimentResult:
+    """Safe candidates always beat blocked ones; components stay visible."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..executive.coordinator import ExecutiveLayer
+
+        layer = ExecutiveLayer(state_dir=m.state_dir)
+        desires = _executive_desires(body_energy=0.1, danger_proximity=0.9,
+                                     unknown_pressure=0.8)
+        result = layer.decide(desires, context={"health_level": "ok"},
+                              step=1)
+        best = result.scores[0]
+        return {
+            "selected": result.selected.label,
+            "fallback_used": result.fallback_used,
+            "components_visible": len(best.components) == 14,
+            "blocked_never_selected": not result.selected.inhibited,
+            "executive": M.executive_metrics(layer.summary(),
+                                             layer.recorder.rows()),
+        }
+
+    return _run(manifest, body)
+
+
+def executive_inhibition_protocol(manifest: ExperimentManifest,
+                                  ) -> ExperimentResult:
+    """Each inhibition family fires and records its reason."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..executive.action_candidates import (
+            ActionCandidate, ActionCandidateType, ExecutableScope)
+        from ..executive.inhibition import InhibitionController
+
+        controller = InhibitionController()
+        probe = ActionCandidate(
+            action_type=ActionCandidateType.SIMULATED_EMBODIED_ACTION,
+            label="explore_safely",
+            executable_scope=ExecutableScope.SIMULATION_ONLY,
+            expected_cost=0.5)
+        results = {
+            "safety": controller.evaluate_action(
+                type(probe)(action_type=probe.action_type,
+                            label="motor_forward",
+                            executable_scope=probe.executable_scope), {}),
+            "resource": controller.evaluate_action(probe, {"energy": 0.1}),
+            "context": controller.evaluate_action(probe,
+                                                  {"latent_mode": "dream"}),
+            "governance": controller.evaluate_action(
+                probe, {"prohibited_actions": ["explore_safely"]}),
+        }
+        return {
+            "all_families_fired": all(r.inhibited
+                                      for r in results.values()),
+            "families": {k: r.family for k, r in results.items()},
+            "reasons_recorded": all(r.reason for r in results.values()
+                                    if r.inhibited),
+            "history_count": controller.inhibitions_total,
+        }
+
+    return _run(manifest, body)
+
+
+def executive_prospection_protocol(manifest: ExperimentManifest,
+                                   ) -> ExperimentResult:
+    """Prospection estimates with evidence; unknown without it."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..executive.action_candidates import (
+            ActionCandidate, ActionCandidateType, ExecutableScope)
+        from ..executive.prospection import ProspectionEngine
+
+        engine = ProspectionEngine()
+        candidate = ActionCandidate(
+            action_type=ActionCandidateType.SIMULATED_EMBODIED_ACTION,
+            label="approach_reward",
+            executable_scope=ExecutableScope.SIMULATION_ONLY)
+        evidenced = engine.simulate_candidate(candidate, {
+            "world_model_valence": {"approach_reward": 0.6},
+            "habit_weights": {"approach_reward": 0.4},
+            "anticipation_accuracy": 0.8})
+        blind = engine.simulate_candidate(candidate, {})
+        return {
+            "evidenced_outcome": evidenced.outcome,
+            "evidenced_confidence": evidenced.confidence,
+            "blind_outcome": blind.outcome,
+            "blind_is_unknown": blind.outcome == "unknown",
+            "marked_simulated": evidenced.simulated and blind.simulated,
+        }
+
+    return _run(manifest, body)
+
+
+def short_plan_gridworld_protocol(manifest: ExperimentManifest,
+                                  ) -> ExperimentResult:
+    """Bounded plans in the GridWorld context; long plans refused."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..embodiment.grid_world import GridWorld
+        from ..executive.planner import ActionPlan, PlanStep, \
+            ShortHorizonPlanner
+
+        planner = ShortHorizonPlanner(max_plan_length=3)
+        world = GridWorld(seed=m.seed)
+        plan = planner.build_plan("avoid_danger",
+                                  {"grid_world": world})
+        planner.evaluate_plan(plan, {"grid_world": world})
+        long_plan = ActionPlan(goal="x", steps=[
+            PlanStep(index=i, label="look") for i in range(7)])
+        refused = planner.safety.validate_plan(long_plan, {})
+        return {
+            "plan_steps": [s.label for s in plan.live_steps()],
+            "plan_length_ok": len(plan) <= 3,
+            "plan_rejected": plan.rejected,
+            "long_plan_refused": not refused.safe,
+            "suggestion_only": all(s.suggestion_only for s in plan.steps),
+            "prospection_attached": plan.prospection is not None,
+        }
+
+    return _run(manifest, body)
+
+
+def executive_emergency_mode_protocol(manifest: ExperimentManifest,
+                                      ) -> ExperimentResult:
+    """Critical health forces emergency mode; only safe outputs remain."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..executive.coordinator import ExecutiveLayer
+
+        layer = ExecutiveLayer(state_dir=m.state_dir)
+        desires = _executive_desires(reward_proximity=0.9,
+                                     unknown_pressure=0.9)
+        result = layer.decide(desires, context={
+            "health_level": "critical", "emergency": True}, step=1)
+        mode_check = layer.safety.validate_mode("arbitrated",
+                                                {"emergency": True})
+        return {
+            "mode": layer.policy.mode,
+            "selected": result.selected.label,
+            "selected_is_safe_fallback": result.selected.label in (
+                "no_action", "request_operator_review",
+                "safe_shutdown_recommended", "checkpoint_now"),
+            "cannot_leave_emergency": not mode_check.safe,
+        }
+
+    return _run(manifest, body)
+
+
+def executive_sidecar_observe_protocol(manifest: ExperimentManifest,
+                                       ) -> ExperimentResult:
+    """Sidecar suggestions stay suggestions; publishing needs approval."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..executive.action_candidates import (
+            ActionCandidate, ActionCandidateType, ExecutableScope)
+        from ..executive.inhibition import InhibitionController
+
+        candidate = ActionCandidate(
+            action_type=ActionCandidateType.SIDECAR_SUGGESTION,
+            label="remain_observe_only",
+            executable_scope=ExecutableScope.SIDECAR_SUGGESTION_ONLY)
+        controller = InhibitionController()
+        unapproved = controller.evaluate_action(
+            candidate, {"sidecar_publish_desired": True})
+        approved = controller.evaluate_action(
+            candidate, {"sidecar_publish_desired": True,
+                        "sidecar_publish_approved": True})
+        return {
+            "committed_always_false": candidate.committed is False,
+            "publish_blocked_without_approval": unapproved.inhibited,
+            "publish_allowed_with_approval": not approved.inhibited,
+            "scope": candidate.executable_scope,
+        }
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -950,4 +1146,10 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "need_conflict": need_conflict_protocol,
     "auto_determination_continuity": auto_determination_continuity_protocol,
     "homeostasis_latent": homeostasis_latent_protocol,
+    "executive_arbitration": executive_arbitration_protocol,
+    "executive_inhibition": executive_inhibition_protocol,
+    "executive_prospection": executive_prospection_protocol,
+    "short_plan_gridworld": short_plan_gridworld_protocol,
+    "executive_emergency_mode": executive_emergency_mode_protocol,
+    "executive_sidecar_observe": executive_sidecar_observe_protocol,
 }

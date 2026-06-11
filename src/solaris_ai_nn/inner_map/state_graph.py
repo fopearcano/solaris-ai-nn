@@ -403,4 +403,33 @@ def build_default_state_graph() -> StateGraph:
     g.add_edge("homeostatic_regulator", "need_memory", "records")
     g.add_edge("homeostatic_regulator", "inner_map",
                "homeostasis feeds Inner MAP")
+
+    # Executive function (Prompt 17). Arbitration, never authority.
+    for name, role in [
+        ("desire_queue", "competing Desire candidates"),
+        ("inhibition_controller", "explainable suppression"),
+        ("action_arbitrator", "scores with penalties dominating"),
+        ("prospection_engine", "bounded consequence estimates"),
+        ("short_horizon_planner", "<=3-step suggestion plans"),
+        ("executive_working_memory", "short-lived active context"),
+        ("attention_selector", "prioritization, not awareness"),
+        ("decision_trace_recorder", "every arbitration written down"),
+        ("executive_policy", "mode control, ops first"),
+        ("executive_safety_validator", "the walls around arbitration"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("desire_synthesis_engine", "desire_queue",
+               "homeostasis feeds desire queue")
+    g.add_edge("world_model_predictor", "prospection_engine",
+               "world model feeds prospection")
+    g.add_edge("inhibition_controller", "action_arbitrator",
+               "inhibition filters candidates")
+    g.add_edge("action_arbitrator", "bridge",
+               "arbitration selects the suggestion")
+    g.add_edge("short_horizon_planner", "action_arbitrator",
+               "planner sequences short plans")
+    g.add_edge("decision_trace_recorder", "report_builder",
+               "decision trace feeds language/reporting")
+    g.add_edge("executive_policy", "inner_map",
+               "executive state feeds Inner MAP")
     return g

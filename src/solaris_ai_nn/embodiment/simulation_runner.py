@@ -65,6 +65,11 @@ class SensorimotorSimulationRunner:
     # body's suggestions. Simulation-only, suggestions-only, off by default.
     enable_homeostasis: bool = False
     homeostasis_update_interval_steps: int = 10
+    # Executive (Prompt 17): arbitration over the body's suggestions.
+    # Off by default; selected actions execute only inside the simulation,
+    # and only when the executive's mode permits execution at all.
+    enable_executive: bool = False
+    executive_mode: str = "arbitrated"
     world: Optional[GridWorld] = None
     body: Optional[SimulatedBody] = None
     bridge: Optional[SolarisNeuralBridge] = None
@@ -137,12 +142,19 @@ class SensorimotorSimulationRunner:
                 state_dir=self.state_dir, world_model=self.world_model)
             self.bridge.enable_homeostasis = True
             self.bridge.homeostatic_regulator = self.homeostasis
+        self.executive = None
+        if self.enable_executive:
+            from ..executive.coordinator import ExecutiveLayer
+
+            self.executive = ExecutiveLayer(state_dir=self.state_dir,
+                                            mode=self.executive_mode)
         from ..inner_map.observer import InnerMapObserver
 
         self.observer = InnerMapObserver(bridge=self.bridge, embodiment=self,
                                          latent=self.latent,
                                          world_model=self.world_model,
-                                         homeostasis=self.homeostasis)
+                                         homeostasis=self.homeostasis,
+                                         executive=self.executive)
 
     # -- the loop ---------------------------------------------------------------
 
@@ -227,6 +239,40 @@ class SensorimotorSimulationRunner:
                                for v in valences[-3:]],
         })
 
+    def _executive_arbitrate(self, suggestion: str, step: int):
+        """Arbitrate the body's suggestion; returns the action to execute
+        in simulation, or None when the selection is non-embodied or the
+        executive's mode forbids execution."""
+        from .action_space import ACTION_SPACE
+
+        desires = []
+        if self.homeostasis is not None \
+                and self.homeostasis.last_result is not None:
+            desires = list(self.homeostasis.last_result.desire_candidates)
+        context = {
+            "energy": self.body.energy.energy / self.body.energy.max_energy,
+            "energy_normalized": self.body.energy.energy
+            / self.body.energy.max_energy,
+            "exhausted": self.body.energy.exhausted,
+            "grid_world": self.world,
+            "position": self.body.position,
+            "latent_mode": (self.latent.controller.mode
+                            if self.latent is not None else "awake"),
+            "habit_support": {action: weight for (pattern, action), weight
+                              in list(self.bridge.habit.weights.items())
+                              [:20]},
+        }
+        decision = self.executive.decide(desires, context=context,
+                                         readout_suggestion=suggestion,
+                                         step=step,
+                                         record=(step % 25 == 0))
+        if not self.executive.policy.execution_allowed():
+            return None  # observe-only/emergency/latent: nothing executes
+        selected = decision.selected
+        if selected is None or selected.label not in ACTION_SPACE:
+            return None  # internal/maintenance selections do not act
+        return selected.label
+
     def _should_stop(self, step: int, start: float) -> bool:
         if self.max_steps is not None and step >= self.max_steps:
             return True
@@ -261,6 +307,10 @@ class SensorimotorSimulationRunner:
 
         # 2. Act on the suggestion (safety-gated, simulation-only).
         action = result_dict["suggested_action"]
+        if self.executive is not None:
+            action = self._executive_arbitrate(action, step)
+            if action is None:
+                return  # the executive selected a non-embodied suggestion
         before = self._world_summary()
         result = self.body.act(self.body.consider(action))
         self.action_history.append(result)

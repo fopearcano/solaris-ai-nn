@@ -57,6 +57,7 @@ class InnerMapObserver:
     latent: Any = None  # optional dict or LatentCognition (summary())
     world_model: Any = None  # optional dict or WorldModelBuilder
     homeostasis: Any = None  # optional dict or HomeostaticRegulator
+    executive: Any = None  # optional dict or ExecutiveLayer (summary())
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -363,6 +364,15 @@ class InnerMapObserver:
                 model.homeostasis = homeostasis.summary()
             elif isinstance(homeostasis, dict):
                 model.homeostasis = dict(homeostasis)
+        executive = self.executive
+        if executive is None and self.runner is not None:
+            executive = getattr(self.runner, "executive", None)
+        if executive is not None:
+            # Executive status (read-only; arbitration evidence).
+            if hasattr(executive, "summary"):
+                model.executive = executive.summary()
+            elif isinstance(executive, dict):
+                model.executive = dict(executive)
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

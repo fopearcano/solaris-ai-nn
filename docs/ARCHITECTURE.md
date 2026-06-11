@@ -1045,3 +1045,69 @@ persists `need_trace.jsonl` / `homeostasis_state.json` /
 wanted…"), and is measured by five benchmark protocols. **No free will or
 consciousness claim is made** — the reports say so in their mandatory
 limitations, and ClaimGuard plus an anthropomorphism check scan every save.
+
+## Executive function, arbitration, and prospective planning
+
+**The Desire → Action transition is an inspectable arbitration, not
+agency.** The `executive/` package sits between the homeostatic Desire
+candidates and the bridge's Action suggestion. Competing desires enter a
+deterministic `DesireQueue` (one live entry per proposal, ordered by
+priority/urgency/confidence, expired entries retired but never silently
+dropped), become typed `ActionCandidate`s (eight types across four
+executable scopes — `none`, `simulation_only`, `internal_only`,
+`sidecar_suggestion_only` — with `committed=False` enforced at
+construction), and an `ActionArbitrator` scores every candidate with
+fourteen visible components: need pressure, drive priority, urgency,
+confidence, expected valence, expected risk, expected energy cost, world
+model support, habit support, novelty pressure, and four penalties. The
+safety, governance, inhibition, and operational-health penalties carry a
+-10.0 weight against utility components bounded in [0, 1], so **a
+forbidden candidate can never out-score a safe one** structurally. When
+nothing safe remains, the arbitrator falls back to `no_action` or
+`request_operator_review` — declining to act is a valid outcome.
+
+**Inhibition is explainable suppression across five rule families.**
+Governance (operator blocks, prohibited actions, sidecar publishing
+without approval, ClaimGuard-unsafe reports), safety (real-world shapes,
+unknown labels, unapproved mutations), resource (energy vs cost, watchdog
+stops, latent budgets), context (latent modes inhibit external actions,
+emergency inhibits exploration), and conflict. Every inhibition records
+its rule, family, and reason; inhibited entries stay visible in queues,
+candidate sets, decision traces, and reports.
+
+**Prospection estimates, never invents.** The `ProspectionEngine`
+produces bounded (default horizon 1, hard max 3) consequence estimates
+from whatever evidence exists — world-model action→valence support, habit
+weights, the anticipation tracker, and a *deep-copied* GridWorld sandbox
+for embodied candidates. Insufficient evidence returns `"unknown"` with
+low confidence; every result is marked `simulated=True`. The
+`ShortHorizonPlanner` sequences at most 3 (hard max 5) suggestion-only
+steps in simulation; longer plans are structurally refused, and
+**long-horizon autonomous planning does not exist** in this codebase.
+
+**Modes are forced by ops, never escaped by the executive.** Six modes
+(reactive_only, arbitrated, short_plan, observe_only, latent_only,
+emergency) gate which candidate types may even be scored. Critical health
+or a stop request forces `emergency` (only no_action / checkpoint /
+operator review / safe-shutdown recommendation survive); latent
+processing forces `latent_only`; the safety validator refuses any attempt
+to leave emergency while the condition holds, and
+`can_override_emergency_stop()` is hard-coded `False`.
+
+**Everything is recorded and accounted for.** The `ExecutiveLayer`
+coordinator wires queue → inhibition → mode gating → prospection →
+arbitration → optional plan → `DecisionTraceRecorder`
+(`decision_trace.jsonl`, `executive_state.json`, `current_plan.json`).
+Working memory and the attention selector are bounded prioritization
+mechanisms — explicitly not awareness. The layer is off by default, runs
+inside the bridge, the ContinuousRunner, and the sensorimotor runner
+(where selections execute only inside the GridWorld simulation and only
+when the mode permits), lands in `InnerMapModel.executive` and the state
+graph (ten nodes), is monitored by the ops supervisor (evidence-only
+incidents; the watchdog keeps all stop authority), is governed by five
+explicit policy rules and four permission scopes (sidecar suggestion
+publishing requires approval), answers seven fixed queries in safe
+vocabulary ("the arbitrator selected…", never "the system decided
+freely"), and is measured by six benchmark protocols. **No claim of
+will, intention, agency, or consciousness is made** — the reports carry
+mandatory limitations and ClaimGuard scans every save.
