@@ -55,6 +55,7 @@ class InnerMapObserver:
     governance: Any = None  # optional dict or object with governance_summary()
     pilot: Any = None  # optional dict or object with pilot_summary()
     latent: Any = None  # optional dict or LatentCognition (summary())
+    world_model: Any = None  # optional dict or WorldModelBuilder
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -343,6 +344,15 @@ class InnerMapObserver:
                 model.latent = latent.summary()
             elif isinstance(latent, dict):
                 model.latent = dict(latent)
+        world_model = self.world_model
+        if world_model is None and self.runner is not None:
+            world_model = getattr(self.runner, "world_model", None)
+        if world_model is not None:
+            # World model status (read-only; observed graph structure).
+            if hasattr(world_model, "world_model_summary"):
+                model.world_model = world_model.world_model_summary()
+            elif isinstance(world_model, dict):
+                model.world_model = dict(world_model)
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

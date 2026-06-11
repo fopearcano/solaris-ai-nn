@@ -215,6 +215,12 @@ class InnerMapModel:
     # complexity_pressure, consolidated_schema_count, latent_safety_status,
     # latent_report_path.
     latent: Optional[Dict[str, Any]] = None
+    # World model status (Prompt 15); None when the world model is disabled.
+    # Keys: enabled, graph_node_count, graph_edge_count,
+    # strongest_association, top_causal_candidate, unknown_node_count,
+    # high_mysterium_areas, context_state, prediction_accuracy,
+    # last_pruning_proposal, evidence_ratio, world_model_report_path.
+    world_model: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

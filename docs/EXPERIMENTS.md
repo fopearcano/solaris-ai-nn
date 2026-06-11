@@ -978,3 +978,51 @@ The safety-property protocol: dream cycles must leave production telemetry
 untouched, apply zero production mutations, and mark every trace offline.
 `latent_replay`, `anticipation`, and `mysterium_pressure` complete the
 latent protocol set (all five run inside `python -m pytest` too).
+
+## 73. World Model Demo ✅ (implemented)
+
+**Run:** `python examples/run_world_model_demo.py --steps 200`
+A bounded signal-only run with the world model enabled: a patterned
+stimulus stream (then silence) grows a graph of signal types, stimulus
+patterns (including `absence`), actions, reactions, contexts, counted
+associations, and `causes_candidate` edges. The demo answers the fixed
+queries ("what does the world model know?", "what is still unknown?") with
+grounded, hedged sentences, and persists the full artifact set
+(`world_model.json/.dot/.mmd/_report.md`) under the state dir.
+
+## 74. Embodied World Model Demo ✅ (implemented)
+
+**Run:** `python examples/run_embodied_world_model_demo.py --steps 300`
+GridWorld structure enters the graph: reward/danger markers, obstacles, and
+walls become object nodes; blocked actions become `blocked_by` edges with
+counts ("'move_south' blocked by 'wall' (9x)"); action->valence outcomes
+become `produces` edges. Observed structure only — no pathfinding, no
+planning — and the ClaimGuard-scanned report says so in its limitations.
+
+## 75. World Model Prediction Demo ✅ (implemented)
+
+**Run:** `python examples/run_world_model_prediction_demo.py --steps 200`
+Phase 1: a strictly repeating world — graph predictions hit 10/10 and
+unknown pressure stays at zero. Phase 2: the world changes — the same graph
+counts now miss (0/10) and Mysterium rises into "elevated" with attributed
+reasons. Predictions are based on graph counts, feed the anticipation
+tracker, and never execute anything.
+
+## 76. World Model Pruning Demo ✅ (implemented)
+
+**Run:** `python examples/run_world_model_pruning_demo.py --dry-run`
+Synthesis-through-subtraction over graph memory: strong (often-observed)
+structure survives, one-off weak edges/nodes and a redundant
+unknown-duplicate are proposed for removal, and the dry-run application
+proves the graph is unchanged while evidence summaries are preserved.
+Production pruning requires the approval-gated
+`enable_world_model_pruning` scope; this demo is structurally dry-run.
+
+## 77. Pilot Stream World Model Experiment ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment pilot_stream_world_model --steps 40`
+Validated read-only stream events become source entities, modalities, and
+stimulus patterns in the graph; a command-shaped payload (`sudo rm -rf /`)
+becomes an audit-only `unknown` node and provably never an action node.
+The same wiring runs inside a real stream pilot when the manifest enables
+the `world_model` feature.

@@ -208,6 +208,12 @@ python examples/run_latent_replay_demo.py --steps 200
 python examples/run_sleep_cycle_demo.py --steps 200
 python examples/run_counterfactual_dream_demo.py --steps 200
 python examples/run_mysterium_anticipation_demo.py --steps 200
+
+# World model: persistent knowledge graph of observed structure
+python examples/run_world_model_demo.py --steps 200
+python examples/run_embodied_world_model_demo.py --steps 300
+python examples/run_world_model_prediction_demo.py --steps 200
+python examples/run_world_model_pruning_demo.py --dry-run
 ```
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
@@ -262,6 +268,19 @@ step-bounded; latent modes structurally cannot execute external actions; and
 the ClaimGuard-scanned latent report says "offline simulated replay", never
 "dreaming". This is sleep-*inspired* maintenance, not a claim about
 experience.
+
+The **world model** (`world_model/`) is the first neuro-symbolic memory
+layer: a plain-dict `KnowledgeGraph` (no graph DB, no vector store) that
+distils recurring structure from signals, traces, GridWorld experience,
+meaning atoms, latent replay (offline-marked), pilot streams, and sidecar
+observation. Counted associations, `causes_candidate` edges (confidence
+capped, evidence exposed, never "causes"), 13 named contexts, graph-count
+predictions that feed anticipation and Mysterium (data only — no execution
+path), unknown nodes as first-class citizens, and
+synthesis-through-subtraction pruning (dry-run by default, reversible,
+approval-gated in production). Everything persists as JSON/JSONL/DOT/Mermaid
+under the state dir; queries answer in cautious vocabulary; reports pass
+ClaimGuard. A transparent graph of observed patterns — not understanding.
 
 The **evaluation layer** (`evaluation/`) is the measurement harness: nine
 registered protocols (absence, feedback inversion, reward/danger, restart
@@ -343,6 +362,8 @@ src/solaris_ai_nn/
                 ingestion, sensors, safety, readiness, deployment, reports
   latent/       sleep/wake modes, scheduler, sleep+dream cycles, offline replay,
                 counterfactuals, anticipation, Mysterium, complexity, latent memory
+  world_model/  knowledge graph, extractors, associations, causal candidates,
+                contexts, predictions, graph pruning, queries, reports
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

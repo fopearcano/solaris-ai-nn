@@ -38,6 +38,10 @@ class PermissionScope:
     ENABLE_LATENT_PLASTICITY = "enable_latent_plasticity"
     RUN_DREAM_CYCLE = "run_dream_cycle"
     RUN_COUNTERFACTUAL_REPLAY = "run_counterfactual_replay"
+    # World model (Prompt 15).
+    ENABLE_WORLD_MODEL = "enable_world_model"
+    ENABLE_WORLD_MODEL_PRUNING = "enable_world_model_pruning"
+    ENABLE_WORLD_MODEL_PREDICTION = "enable_world_model_prediction"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -48,6 +52,8 @@ class PermissionScope:
         PERFORM_ARTIFACT_ROTATION, PERFORM_ROLLBACK, PERFORM_EMERGENCY_STOP,
         ENABLE_LATENT, ENABLE_LATENT_DRY_RUN, ENABLE_LATENT_PLASTICITY,
         RUN_DREAM_CYCLE, RUN_COUNTERFACTUAL_REPLAY,
+        ENABLE_WORLD_MODEL, ENABLE_WORLD_MODEL_PRUNING,
+        ENABLE_WORLD_MODEL_PREDICTION,
     )
 
 
@@ -122,6 +128,15 @@ class PermissionSet:
             Permission(S.RUN_COUNTERFACTUAL_REPLAY, granted=True,
                        note="labelled simulations, never real "
                             "observations"),
+            Permission(S.ENABLE_WORLD_MODEL, granted=True,
+                       note="graph observation of recorded events; "
+                            "inspectable, no execution path"),
+            Permission(S.ENABLE_WORLD_MODEL_PRUNING, requires_approval=True,
+                       note="production graph subtraction needs approval; "
+                            "dry-run proposals are always allowed"),
+            Permission(S.ENABLE_WORLD_MODEL_PREDICTION, granted=True,
+                       note="predictions from graph counts; data only, "
+                            "never executed"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

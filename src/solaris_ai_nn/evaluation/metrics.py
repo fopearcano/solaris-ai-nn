@@ -305,3 +305,39 @@ def latent_metrics(latent: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "external_actions_during_latent": int(_get(
             latent, "external_actions_during_latent", 0)),
     }
+
+
+# -- M. world model (Prompt 15) --------------------------------------------------------
+
+def world_model_metrics(world_model: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective world-model metrics: structure, predictions, evidence."""
+    if not world_model:
+        return {"present": False}
+    nodes = int(_get(world_model, "graph_node_count", 0))
+    edges = int(_get(world_model, "graph_edge_count", 0))
+    unknowns = int(_get(world_model, "unknown_node_count", 0))
+    ratio = world_model.get("evidence_ratio") or {}
+    real = int(_get(ratio, "real", 0))
+    offline = int(_get(ratio, "offline", 0))
+    associations = world_model.get("associations") or {}
+    return {
+        "present": True,
+        "graph_node_count": nodes,
+        "graph_edge_count": edges,
+        "association_stability": associations.get("entropy_bits"),
+        "association_count": associations.get("association_count"),
+        "causal_candidate_count": (world_model.get("causal") or {}).get(
+            "candidate_count",
+            1 if world_model.get("top_causal_candidate") else 0),
+        "prediction_accuracy": world_model.get("prediction_accuracy"),
+        "unknown_node_ratio": round(unknowns / nodes, 4) if nodes else None,
+        "graph_pruning_count": (world_model.get("pruner") or {}).get(
+            "proposals_made", 0),
+        "graph_redundancy_estimate": (
+            round(edges / nodes, 4) if nodes else None),
+        "real_offline_evidence_ratio": (
+            round(real / (real + offline), 4) if (real + offline) else None),
+        "context_coverage": len(world_model.get("context_state")
+                                or (world_model.get("context") or {}).get(
+                                    "active", [])),
+    }

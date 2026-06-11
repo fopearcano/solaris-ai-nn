@@ -280,3 +280,21 @@ cross-functional meaning" principle as deterministic, grounded machinery.
 | `modules/inner_map.py` | `ExplanationContext` — the Inner MAP snapshot is a primary grounding source for explanations, and the Inner MAP records language status back |
 | Habit / Synthesis / Backpropagation family | explanation of adaptation — `explain_strongest_habit`, `explain_pruning`, `explain_plasticity` render exactly what those mechanisms recorded |
 | Embodiment principle | explanation of sensorimotor feedback — per-step sensor/suggestion/safety/result/reaction explanations in the simulation runner |
+
+---
+
+## World-model mapping (Phase 15)
+
+The world model (`world_model/`) realises Solaris_Ai's "cognition maps
+stimuli to meaning and an Inner MAP" as a minimal, inspectable symbolic
+graph that grows from experience.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| `modules/cognition.py` (stimuli -> meaning mapping) | `world_model/builder.py` (`WorldModelBuilder`) + the five extractors (`world_model/extractors.py`) — recorded events become typed nodes and hedged relations |
+| `modules/memory_senses.py` (memory-sense interaction) | graph evidence from trace memory — `update_from_trace` turns the chronological trace into precedence chains, associations, and `causes_candidate` edges with evidence refs |
+| `modules/inner_map.py` (self/world representation) | `InnerMapModel.world_model` — the graph summary (counts, strongest association, top causal candidate, unknowns, contexts) is part of the self-representation |
+| `modules/anticipation.py` | `world_model/prediction.py` (`WorldModelPredictor`) — graph-count predictions feed the existing `latent/anticipation.py` tracker as priors and are scored honestly |
+| `modules/mysterium.py` (pull of the unknown) | `unknown` nodes with `mysterium` markers + high-Mysterium graph areas; prediction misses raise unknown pressure through the shared `MysteriumTracker` |
+| `modules/synthesis.py` (synthesis through subtraction) | `world_model/pruning.py` (`GraphSynthesisPruner`) — weak/redundant graph structure is proposed for subtraction, dry-run by default, evidence preserved, reversible |
+| `modules/language.py` (meaning expressed) | `world_model/query.py` + report builder — six fixed queries answered with cautious vocabulary ("observed association", "candidate causal relation"), ClaimGuard-scanned |

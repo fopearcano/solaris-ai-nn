@@ -170,6 +170,23 @@ DEFAULT_RULES: List[PolicyRule] = [
                "observations", forbidden=True),
     PolicyRule("latent_loops_bounded", "latent",
                "every latent cycle carries an explicit step bound"),
+    # H. World model (Prompt 15)
+    PolicyRule("world_model_observation_allowed", "world_model",
+               "graph observation is allowed in bounded runs"),
+    PolicyRule("world_model_pruning_requires_approval", "world_model",
+               "production graph pruning requires approval (dry-run is "
+               "always allowed)",
+               requires_approval_scope=
+               PermissionScope.ENABLE_WORLD_MODEL_PRUNING),
+    PolicyRule("graph_predictions_never_execute", "world_model",
+               "graph predictions are data; they cannot execute actions",
+               forbidden=True),
+    PolicyRule("stream_payloads_never_commands", "world_model",
+               "stream payloads cannot become command/action authority",
+               forbidden=True),
+    PolicyRule("offline_graph_evidence_labelled", "world_model",
+               "counterfactual graph evidence must be labelled offline",
+               forbidden=True),
 ]
 
 
@@ -310,6 +327,17 @@ class GovernancePolicy:
                     "latent_forbidden_while_publishing", "latent",
                     "latent cycles are forbidden while sidecar publishing "
                     "is active"))
+
+        # H. World model: observation is cheap; production pruning is not.
+        if features.get("world_model"):
+            if not self._approved(PermissionScope.ENABLE_WORLD_MODEL, ctx):
+                need_approval(PermissionScope.ENABLE_WORLD_MODEL,
+                              "world model observation is not permitted")
+            if features.get("world_model_pruning") \
+                    or ctx.get("world_model_production_pruning"):
+                need_approval(PermissionScope.ENABLE_WORLD_MODEL_PRUNING,
+                              "production graph pruning requires explicit "
+                              "approval")
 
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):

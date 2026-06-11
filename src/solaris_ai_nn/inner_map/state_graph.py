@@ -338,4 +338,41 @@ def build_default_state_graph() -> StateGraph:
                "gates transitions")
     g.add_edge("sleep_cycle", "memory", "consolidates")
     g.add_edge("dream_cycle", "inner_map", "latent report feeds Inner MAP")
+
+    # World model / neuro-symbolic memory (Prompt 15).
+    for name, role in [
+        ("knowledge_graph", "observed symbols + relations"),
+        ("world_model_builder", "grows the graph from everything"),
+        ("signal_graph_extractor", "signals -> structure"),
+        ("embodiment_graph_extractor", "GridWorld -> structure"),
+        ("language_graph_extractor", "meaning atoms -> structure"),
+        ("latent_graph_extractor", "offline evidence -> structure"),
+        ("association_learner", "counted pairwise associations"),
+        ("causal_association_model", "candidates, never proven causes"),
+        ("context_tracker", "which situation it was"),
+        ("world_model_predictor", "predictions from graph counts"),
+        ("graph_synthesis_pruner", "subtraction over graph memory"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("memory", "world_model_builder", "trace memory feeds")
+    g.add_edge("language_layer", "world_model_builder",
+               "language trace feeds")
+    g.add_edge("simulated_body", "world_model_builder", "embodiment feeds")
+    g.add_edge("dream_cycle", "world_model_builder",
+               "latent replay feeds (offline)")
+    g.add_edge("signal_graph_extractor", "knowledge_graph", "upserts")
+    g.add_edge("embodiment_graph_extractor", "knowledge_graph", "upserts")
+    g.add_edge("language_graph_extractor", "knowledge_graph", "upserts")
+    g.add_edge("latent_graph_extractor", "knowledge_graph",
+               "upserts (offline-marked)")
+    g.add_edge("association_learner", "knowledge_graph", "writes weights")
+    g.add_edge("causal_association_model", "knowledge_graph",
+               "causes_candidate edges")
+    g.add_edge("context_tracker", "knowledge_graph", "context nodes")
+    g.add_edge("world_model_predictor", "anticipation_tracker",
+               "world model feeds anticipation")
+    g.add_edge("world_model_builder", "inner_map",
+               "world model feeds Inner MAP")
+    g.add_edge("graph_synthesis_pruner", "knowledge_graph",
+               "synthesis feeds pruning report")
     return g

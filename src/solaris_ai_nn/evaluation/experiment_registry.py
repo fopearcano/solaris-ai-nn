@@ -24,6 +24,13 @@ DESCRIPTIONS = {
     "anticipation": "predictable stream anticipated; surprise drops accuracy",
     "mysterium_pressure": "unknown pressure rises/falls with the rules",
     "counterfactual_dream": "sandboxed counterfactuals; production untouched",
+    "world_model_build": "the graph grows from a bounded run and persists",
+    "world_model_prediction": "graph-count predictions score above chance",
+    "world_model_pruning": "dry-run subtraction proposes, never mutates",
+    "embodied_world_model": "GridWorld objects and blocked actions reach "
+                            "the graph",
+    "pilot_stream_world_model": "validated stream events become structure; "
+                                "unsafe payloads become unknown nodes",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {

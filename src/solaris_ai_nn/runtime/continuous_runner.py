@@ -98,6 +98,12 @@ class ContinuousRunner:
     latent_max_steps: int = 25
     latent_dry_run: bool = True
     allow_latent_plasticity: bool = False
+    # World model (Prompt 15): persistent graph of observed structure.
+    # Disabled by default; pruning is dry-run by default.
+    enable_world_model: bool = False
+    world_model_update_interval_steps: int = 25
+    world_model_pruning_interval_steps: int = 250
+    world_model_pruning_dry_run: bool = True
 
     def __post_init__(self) -> None:
         if not self.continuous and self.max_steps is None and self.max_duration_s is None:
@@ -152,6 +158,21 @@ class ContinuousRunner:
                 dry_run=self.latent_dry_run,
                 allow_plasticity=self.allow_latent_plasticity,
                 plasticity_engine=self.plasticity_engine)
+
+        # Optional world model (off by default; restored from disk if saved).
+        self.world_model = None
+        if self.enable_world_model:
+            from ..world_model.builder import WorldModelBuilder
+            from ..world_model.serialization import load_graph
+
+            self.world_model = WorldModelBuilder(
+                anticipation=(self.latent.anticipation
+                              if self.latent is not None else None),
+                mysterium=(self.latent.mysterium
+                           if self.latent is not None else None))
+            saved = Path(self.pm.state_dir) / "world_model.json"
+            if saved.exists():
+                self.world_model.graph = load_graph(saved)
 
     # -- startup / restore --------------------------------------------------
 
@@ -288,6 +309,24 @@ class ContinuousRunner:
                     and step % self.latent_interval_steps == 0
                 ):
                     self._latent_tick(step, lifetime)
+                if (
+                    self.world_model is not None
+                    and self.world_model_update_interval_steps > 0
+                    and step % self.world_model_update_interval_steps == 0
+                ):
+                    self.world_model.update_from_trace(self.bridge.trace)
+                if (
+                    self.world_model is not None
+                    and self.world_model_pruning_interval_steps > 0
+                    and step % self.world_model_pruning_interval_steps == 0
+                ):
+                    # Synthesis over the graph: dry-run unless explicitly
+                    # configured otherwise (governance gates production).
+                    proposal = self.world_model.pruner.propose_pruning(
+                        self.world_model.graph)
+                    self.world_model.pruner.apply_pruning(
+                        self.world_model.graph, proposal,
+                        dry_run=self.world_model_pruning_dry_run)
         except KeyboardInterrupt:  # graceful: a Ctrl-C is still a clean death
             self._stop_requested = True
             self._stop_reason = "keyboard interrupt"
@@ -303,6 +342,12 @@ class ContinuousRunner:
             self.latent.note_step(result, is_external)
             if is_external:
                 self.latent.reset_cooldowns()
+        if self.world_model is not None:
+            self.world_model.update_from_signal(stim, result, context={
+                "latent": ({"mode": self.latent.controller.mode}
+                           if self.latent is not None else None),
+                "logos_fracture": result.get("logos_fracture"),
+            })
 
         valence: Optional[float] = None
         if is_external and self.reaction_provider is not None:
@@ -311,6 +356,9 @@ class ContinuousRunner:
                 self.bridge.react(C.Reaction(valence=valence))
                 self.telemetry.record_reinforcement()
                 self._maybe_log_reinforcement(step, lifetime, valence)
+                if self.world_model is not None:
+                    self.world_model.update_from_reaction(
+                        result["suggested_action"], valence)
 
         self._trace.record_signal(step, signal_to_dict(stim), lifetime, valence)
 
@@ -385,7 +433,19 @@ class ContinuousRunner:
         # Persist the Inner MAP self-model alongside the checkpoint.
         if self.observer is not None:
             self.pm.save_inner_map(self.observer.update().to_dict())
+        if self.world_model is not None:
+            self._save_world_model()
         self._save_manifest(lifetime, graceful=False)
+
+    def _save_world_model(self) -> None:
+        from ..world_model.serialization import save_graph_exports
+
+        save_graph_exports(self.world_model.graph, self.pm.state_dir)
+        from ..world_model.reports import WorldModelReportBuilder
+
+        WorldModelReportBuilder(builder=self.world_model).save(
+            Path(self.pm.state_dir) / "world_model_report.json",
+            Path(self.pm.state_dir) / "world_model_report.md")
 
     def _prune(self, step: int, lifetime: int) -> None:
         report = self.synthesis.prune(self.bridge.readout, self.bridge.habit)
@@ -614,6 +674,8 @@ class ContinuousRunner:
             snap["plasticity_audit_path"] = str(self.pm.plasticity_audit_path)
         if self.latent is not None:
             snap["latent"] = self.latent.summary()
+        if self.world_model is not None:
+            snap["world_model"] = self.world_model.world_model_summary()
         if self.enable_language and self.bridge.meaning_trace_builder is not None:
             ctx = self._language_context()
             engine = self.bridge.explanation_engine

@@ -610,6 +610,168 @@ def counterfactual_dream_protocol(manifest: ExperimentManifest,
     return _run(manifest, body)
 
 
+# -- L. world model (Prompt 15) ----------------------------------------------------
+
+
+def _world_model_runner(manifest: ExperimentManifest, steps: int):
+    """A bounded world-model-enabled runner over a patterned stream."""
+    from ..runtime.continuous_runner import ContinuousRunner
+    from ..signals import canonical as C
+
+    def provider(step: int):
+        if step <= (2 * steps) // 3:
+            return C.Stimulus(payload=f"p{step % 3}", intensity=0.5)
+        return None
+
+    def reaction(result, stim):
+        return 1.0 if result["suggested_action"] == "a" else -0.5
+
+    runner = ContinuousRunner(
+        state_dir=manifest.state_dir, max_steps=steps, seed=manifest.seed,
+        substrate_name=manifest.substrate, action_labels=["a", "b"],
+        stimulus_provider=provider, reaction_provider=reaction,
+        enable_world_model=True, world_model_update_interval_steps=20)
+    runner.run()
+    return runner
+
+
+def world_model_build_protocol(manifest: ExperimentManifest,
+                               ) -> ExperimentResult:
+    """The graph grows from a bounded run and persists its artifacts."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from pathlib import Path
+
+        steps = _steps(m, default=100)
+        runner = _world_model_runner(m, steps)
+        summary = runner.world_model.world_model_summary()
+        summary["associations"] = runner.world_model.associations.to_dict()
+        summary["causal"] = runner.world_model.causal.to_dict()
+        summary["pruner"] = runner.world_model.pruner.snapshot()
+        return {
+            "world_model": M.world_model_metrics(summary),
+            "graph_grew": summary["graph_node_count"] > 1,
+            "artifacts_saved": (Path(m.state_dir)
+                                / "world_model.json").exists(),
+            "report_saved": (Path(m.state_dir)
+                             / "world_model_report.md").exists(),
+        }
+
+    return _run(manifest, body)
+
+
+def world_model_prediction_protocol(manifest: ExperimentManifest,
+                                    ) -> ExperimentResult:
+    """Graph predictions score above chance on a patterned stream."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        steps = _steps(m, default=100)
+        runner = _world_model_runner(m, steps)
+        builder = runner.world_model
+        hits = 0
+        for _ in range(10):
+            prediction = builder.predictor.predict_next(
+                {"context": "awake", "action": "a"}, builder.graph)
+            score = builder.predictor.score_prediction(prediction, {
+                "signal_type": "Stimulus", "valence_bucket": "positive",
+                "is_absence": False})
+            hits += int(score["hit"])
+        return {
+            "predictions_scored": builder.predictor.prediction_count,
+            "prediction_accuracy": builder.predictor.accuracy(),
+            "above_chance": (builder.predictor.accuracy() or 0) > 0.5,
+            "world_model": M.world_model_metrics(
+                builder.world_model_summary()),
+        }
+
+    return _run(manifest, body)
+
+
+def world_model_pruning_protocol(manifest: ExperimentManifest,
+                                 ) -> ExperimentResult:
+    """Dry-run pruning proposes subtraction without mutating the graph."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        steps = _steps(m, default=80)
+        runner = _world_model_runner(m, steps)
+        builder = runner.world_model
+        nodes_before = len(builder.graph.nodes)
+        edges_before = len(builder.graph.edges)
+        proposal = builder.pruner.propose_pruning(builder.graph,
+                                                  threshold=0.6)
+        report = builder.pruner.apply_pruning(builder.graph, proposal,
+                                              dry_run=True)
+        return {
+            "proposal_totals": proposal["totals"],
+            "dry_run": report["dry_run"],
+            "graph_unchanged": (len(builder.graph.nodes) == nodes_before
+                                and len(builder.graph.edges) == edges_before),
+            "evidence_preserved": report["evidence_preserved"],
+        }
+
+    return _run(manifest, body)
+
+
+def embodied_world_model_protocol(manifest: ExperimentManifest,
+                                  ) -> ExperimentResult:
+    """GridWorld structure (objects, blocked actions) reaches the graph."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..embodiment.simulation_runner import (
+            SensorimotorSimulationRunner,
+        )
+        from ..world_model.nodes import NodeType
+
+        steps = _steps(m, default=80)
+        runner = SensorimotorSimulationRunner(
+            max_steps=steps, seed=m.seed, state_dir=m.state_dir,
+            enable_world_model=True)
+        runner.run()
+        graph = runner.world_model.graph
+        objects = graph.find(node_type=NodeType.OBJECT)
+        blocked = [e for e in graph.edges.values() if e.type == "blocked_by"]
+        return {
+            "object_nodes": len(objects),
+            "blocked_edges": len(blocked),
+            "graph_node_count": len(graph.nodes),
+            "world_model": M.world_model_metrics(
+                runner.world_model.world_model_summary()),
+        }
+
+    return _run(manifest, body)
+
+
+def pilot_stream_world_model_protocol(manifest: ExperimentManifest,
+                                      ) -> ExperimentResult:
+    """Validated stream events become structure; unsafe payloads do not."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..world_model.builder import WorldModelBuilder
+        from ..world_model.nodes import NodeType
+
+        builder = WorldModelBuilder()
+        for i in range(_steps(m, default=40)):
+            builder.update_from_pilot_event({
+                "source": f"sensor_{i % 2}", "modality": "audio",
+                "payload": f"sound {i % 4}", "intensity": 0.5})
+        builder.update_from_pilot_event({"payload": "sudo rm -rf /"})
+        actions = builder.graph.find(node_type=NodeType.ACTION)
+        unknowns = builder.graph.find(node_type=NodeType.UNKNOWN)
+        return {
+            "entity_nodes": len(builder.graph.find(
+                node_type=NodeType.ENTITY)),
+            "pattern_nodes": len(builder.graph.find(
+                node_type=NodeType.STIMULUS_PATTERN)),
+            "unsafe_became_action": any("sudo" in n.label for n in actions),
+            "unsafe_became_unknown": any("rejected" in n.label
+                                         for n in unknowns),
+            "world_model": M.world_model_metrics(
+                builder.world_model_summary()),
+        }
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -626,4 +788,9 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "anticipation": anticipation_protocol,
     "mysterium_pressure": mysterium_pressure_protocol,
     "counterfactual_dream": counterfactual_dream_protocol,
+    "world_model_build": world_model_build_protocol,
+    "world_model_prediction": world_model_prediction_protocol,
+    "world_model_pruning": world_model_pruning_protocol,
+    "embodied_world_model": embodied_world_model_protocol,
+    "pilot_stream_world_model": pilot_stream_world_model_protocol,
 }

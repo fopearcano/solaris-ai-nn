@@ -419,3 +419,42 @@ hard-coded to say "during offline replay, the system simulated…" rather
 than "the system dreamed…". The sleep/dream vocabulary is an engineering
 mnemonic for *when* and *how* the processing runs — not a description of
 what it is like, because it is not like anything.
+
+**Neuro-symbolic memory.** A reservoir is superb at reacting and hopeless at
+being asked "what do you know?". A symbolic graph is the opposite. Pairing
+them costs almost nothing here — the graph is dictionaries fed by events the
+system already records — and buys the property research needs most:
+inspectability. Every node is countable, every edge cites its evidence, and
+the whole memory diffs cleanly between runs.
+
+**Knowledge graphs in cognitive architectures.** The classic risk is
+ontological inflation: graphs that grow nodes faster than evidence. The
+discipline used here is deterministic identity (same type+label is the same
+node, observation accumulates), capped confidence, deny-by-default safety on
+what may become a node at all, and unknown nodes as first-class citizens —
+the graph records what it failed to extract with the same care as what it
+extracted.
+
+**Causal candidates vs proven causality.** Temporal precedence,
+co-occurrence, feedback, and even embodied intervention are evidence
+*streams*, not proofs. The model keeps them separate, weights intervention
+highest (it is the closest thing to an experiment the system has), marks
+counterfactual evidence as simulated, caps confidence below certainty, and
+labels every edge `causes_candidate`. The honest vocabulary is structural:
+there is no edge type that asserts proven causation.
+
+**Graph pruning as synthesis.** Solaris_Ai's synthesis-through-subtraction
+applies cleanly to symbolic memory: a graph that only grows becomes noise.
+Weak one-off structure is proposed for removal, redundant unknowns merge
+into their typed twins, and — the research-critical part — subtraction is
+dry-run by default, evidence-preserving, reversible, and governance-gated
+in production. Forgetting is a deliberate act with a paper trail.
+
+**Why symbolic memory complements reservoir substrates.** The reservoir's
+state is a point in a high-dimensional space that nobody can read; the
+graph is slow, low-dimensional, and legible. The substrate decides *now*;
+the graph remembers *usually*. Predictions flow from graph counts into the
+anticipation tracker (fast loop borrows slow structure), and prediction
+misses flow back as unknown pressure (slow structure learns where it is
+wrong). Neither layer claims understanding — together they make the
+system's behaviour explainable at two timescales.

@@ -925,3 +925,61 @@ the ten latent nodes; durable evidence lives under the state dir
 (`latent_memory.jsonl`, `dream_traces.jsonl`, `replay_traces.jsonl`,
 `consolidated_schemas.json`, `latent_report.{json,md}` — the report is
 ClaimGuard-scanned with mandatory limitations).
+
+## World Model and neuro-symbolic memory
+
+**The World Model stores stable symbolic structure extracted from events.**
+While the neural substrate reacts continuously, the `world_model/` package
+distils what *recurs*: repeated stimuli become `stimulus_pattern` nodes,
+GridWorld objects become `object` nodes, actions/reactions become
+`produces`/`reinforces`/`inhibits` edges, habits become weighted structure,
+contexts become `context` nodes, and the unexplained becomes `unknown`
+nodes. It complements the substrate rather than replacing it: the reservoir
+holds fast dynamics, the graph holds slow structure.
+
+**It is graph-based and inspectable.** The `KnowledgeGraph` is plain
+dictionaries with deterministic ids (same type+label -> same node, same
+triple -> same edge, so observation accumulates instead of duplicating) —
+no graph database, no vector store, no external library. Every node carries
+its observation count, capped confidence, source modules, and metadata;
+every edge carries weight, confidence, separate real/offline observation
+counts, and bounded evidence references. Exports to JSON, JSONL, DOT, and
+Mermaid are stdlib-only, and everything persists under the state dir
+(`world_model.json`, `world_model_{nodes,edges}.jsonl`, `world_model.dot`,
+`world_model.mmd`, `world_model_report.md`).
+
+**Associations, candidate causal links, contexts, predictions, and
+unknowns.** Five extractors feed the graph from existing layers (signals,
+embodiment, meaning atoms + causal traces, latent replay — always marked
+offline — and validated pilot stream events). The `AssociationLearner`
+counts and decays eight kinds of pairwise association; the
+`CausalAssociationModel` scores `causes_candidate` edges from temporal
+precedence, co-occurrence, feedback, embodied intervention, and (weighted
+down, always marked simulated) counterfactual divergence — confidence is
+capped and evidence counts are exposed, because nothing here is proven
+causation. The `ContextTracker` separates structure by situation (13 named
+contexts), and the `WorldModelPredictor` turns graph counts into scoreable
+predictions that feed the anticipation tracker and Mysterium — predictions
+are data with no execution path, enforced by `WorldModelSafety` (which also
+ensures command-shaped stream payloads can never become action nodes).
+
+**It feeds Inner MAP and anticipation.** The builder's
+`world_model_summary()` (node/edge counts, strongest association, top
+causal candidate, unknown count, high-Mysterium areas, context state,
+prediction accuracy, last pruning proposal, evidence ratio) lands in
+`InnerMapModel.world_model`; the state graph gains the eleven world-model
+nodes; six fixed language queries ("what does the world model know?",
+"what is still unknown?", ...) answer with cautious vocabulary — "observed
+association", "candidate causal relation", "prediction based on graph
+counts" — and every report passes ClaimGuard. **It does not claim
+understanding or consciousness**; the limitations say so in every report.
+
+**Pruning follows synthesis-through-subtraction.** The
+`GraphSynthesisPruner` proposes removal of weak edges, isolated weak nodes,
+and redundant unknown-duplicates; application is dry-run by default,
+archives everything it removes (restorable per proposal), preserves
+evidence summaries, refuses to touch raw trace evidence, and requires the
+approval-gated `enable_world_model_pruning` scope for production
+subtraction. Five benchmark protocols (`world_model_build`,
+`world_model_prediction`, `world_model_pruning`, `embodied_world_model`,
+`pilot_stream_world_model`) keep the behaviour measured.

@@ -63,8 +63,15 @@ def test_grant_and_revoke():
 def test_all_scopes_in_default_set():
     ps = PermissionSet.default()
     assert set(ps.known_scopes()) == set(PermissionScope.ALL)
-    # 13 governance scopes (Prompt 12) + 5 latent scopes (Prompt 14).
-    assert len(PermissionScope.ALL) == 18
+    # 13 governance (P12) + 5 latent (P14) + 3 world model (P15).
+    assert len(PermissionScope.ALL) == 21
+
+
+def test_world_model_scope_defaults():
+    ps = PermissionSet.default()
+    assert ps.allows(PermissionScope.ENABLE_WORLD_MODEL)
+    assert ps.allows(PermissionScope.ENABLE_WORLD_MODEL_PREDICTION)
+    assert ps.requires_approval(PermissionScope.ENABLE_WORLD_MODEL_PRUNING)
 
 
 def test_latent_scope_defaults():

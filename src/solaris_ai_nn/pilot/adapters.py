@@ -83,7 +83,9 @@ class ReadOnlyStreamPilotAdapter:
             enable_language=m.enabled_features.get("language", False),
             enable_plasticity=m.enabled_features.get("plasticity", False),
             plasticity_dry_run=m.enabled_features.get("plasticity_dry_run",
-                                                      False))
+                                                      False),
+            enable_latent=m.enabled_features.get("latent", False),
+            enable_world_model=m.enabled_features.get("world_model", False))
 
     def input_summary(self) -> Dict[str, Any]:
         return {

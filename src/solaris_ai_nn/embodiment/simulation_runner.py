@@ -57,6 +57,10 @@ class SensorimotorSimulationRunner:
     enable_latent: bool = False
     latent_interval_steps: int = 50
     latent_max_steps: int = 20
+    # World model (Prompt 15): observed GridWorld structure only -- no
+    # pathfinding, no planning. Off by default.
+    enable_world_model: bool = False
+    world_model_update_interval_steps: int = 25
     world: Optional[GridWorld] = None
     body: Optional[SimulatedBody] = None
     bridge: Optional[SolarisNeuralBridge] = None
@@ -112,10 +116,20 @@ class SensorimotorSimulationRunner:
                 or ".solaris_ai_nn_state/sensorimotor",
                 seed=self.seed, max_cycle_steps=self.latent_max_steps,
                 dry_run=True)  # embodied latent is always sandbox-only
+        self.world_model = None
+        if self.enable_world_model:
+            from ..world_model.builder import WorldModelBuilder
+
+            self.world_model = WorldModelBuilder(
+                anticipation=(self.latent.anticipation
+                              if self.latent is not None else None),
+                mysterium=(self.latent.mysterium
+                           if self.latent is not None else None))
         from ..inner_map.observer import InnerMapObserver
 
         self.observer = InnerMapObserver(bridge=self.bridge, embodiment=self,
-                                         latent=self.latent)
+                                         latent=self.latent,
+                                         world_model=self.world_model)
 
     # -- the loop ---------------------------------------------------------------
 
@@ -136,7 +150,16 @@ class SensorimotorSimulationRunner:
             if (self.latent is not None
                     and step % self.latent_interval_steps == 0):
                 self._latent_tick(step)
+            if (self.world_model is not None
+                    and step % self.world_model_update_interval_steps == 0):
+                self.world_model.update_from_embodiment(self)
         self.steps_run = step
+        if self.world_model is not None:
+            self.world_model.update_from_embodiment(self)
+            if self.state_dir is not None:
+                from ..world_model.serialization import save_graph_exports
+
+                save_graph_exports(self.world_model.graph, self.state_dir)
         self.bridge.telemetry.finish()
         if self.state_dir is not None:
             self.persist()

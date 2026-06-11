@@ -74,7 +74,9 @@ def default_runner_factory(manifest: OperationalRunManifest,
             "plasticity_dry_run", False),
         enable_latent=manifest.enabled_features.get("latent", False),
         allow_latent_plasticity=manifest.enabled_features.get(
-            "latent_plasticity", False))
+            "latent_plasticity", False),
+        enable_world_model=manifest.enabled_features.get("world_model",
+                                                         False))
 
 
 @dataclass
