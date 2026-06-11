@@ -77,6 +77,12 @@ class SelfReportBuilder:
                           if model.last_snapshot else [])
                          or ["no recorded unknowns this update"])
             .add_section("safety_status", snap["safety"])
+            .add_section("llm_adapter_status", {
+                **dict(getattr(model, "llm_status",
+                               {"enabled": False})),
+                "authority": False,
+                "note": "any LLM output is a validated paraphrase of "
+                        "grounded text, never primary evidence"})
         )
         for limitation in EGO_LIMITATIONS:
             report.add_limitation(limitation)

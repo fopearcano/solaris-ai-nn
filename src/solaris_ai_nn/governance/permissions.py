@@ -65,6 +65,12 @@ class PermissionScope:
     OPERATOR_RUN_BOUNDED_BENCHMARK = "operator_run_bounded_benchmark"
     OPERATOR_APPROVE_REQUESTS = "operator_approve_requests"
     OPERATOR_SEND_SENSORY_TEXT = "operator_send_sensory_text"
+    # Local LLM adapter (Prompt 20).
+    ENABLE_LOCAL_LLM_ADAPTER = "enable_local_llm_adapter"
+    ALLOW_LOCALHOST_LLM_ENDPOINT = "allow_localhost_llm_endpoint"
+    ALLOW_REMOTE_LLM_ENDPOINT = "allow_remote_llm_endpoint"
+    ALLOW_LLM_CLASSIFICATION_ASSIST = "allow_llm_classification_assist"
+    ALLOW_LLM_REPORT_POLISH = "allow_llm_report_polish"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -87,6 +93,9 @@ class PermissionScope:
         OPERATOR_REQUEST_CHECKPOINT, OPERATOR_REQUEST_SAFE_SHUTDOWN,
         OPERATOR_RUN_BOUNDED_BENCHMARK, OPERATOR_APPROVE_REQUESTS,
         OPERATOR_SEND_SENSORY_TEXT,
+        ENABLE_LOCAL_LLM_ADAPTER, ALLOW_LOCALHOST_LLM_ENDPOINT,
+        ALLOW_REMOTE_LLM_ENDPOINT, ALLOW_LLM_CLASSIFICATION_ASSIST,
+        ALLOW_LLM_REPORT_POLISH,
     )
 
 
@@ -223,6 +232,22 @@ class PermissionSet:
                        requires_approval=True,
                        note="injecting text as a sensory stimulus is "
                             "off by default and approval-gated"),
+            Permission(S.ENABLE_LOCAL_LLM_ADAPTER, granted=True,
+                       note="mock/local translator only; disabled in "
+                            "config by default and never authoritative"),
+            Permission(S.ALLOW_LOCALHOST_LLM_ENDPOINT, granted=True,
+                       note="localhost endpoints only, and only with "
+                            "explicit adapter config"),
+            Permission(S.ALLOW_REMOTE_LLM_ENDPOINT,
+                       requires_approval=True,
+                       note="remote/cloud endpoints are prohibited "
+                            "without explicit human approval"),
+            Permission(S.ALLOW_LLM_CLASSIFICATION_ASSIST, granted=True,
+                       note="suggestions only; the deterministic "
+                            "classifier remains authoritative"),
+            Permission(S.ALLOW_LLM_REPORT_POLISH, granted=True,
+                       note="wording only; structure, numbers, warnings, "
+                            "and limitations are preserved or refused"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

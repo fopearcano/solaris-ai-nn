@@ -37,6 +37,9 @@ class CommunicationResponse:
     executed: bool = False
     response_id: str = field(default_factory=lambda: uuid.uuid4().hex[:10])
     timestamp: float = field(default_factory=time.time)
+    # Optional LLM adapter markers (Prompt 20): a paraphrase changes
+    # wording only; the deterministic content stays authoritative.
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     @property
     def grounded(self) -> bool:

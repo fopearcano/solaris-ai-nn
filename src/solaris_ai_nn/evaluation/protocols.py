@@ -1423,6 +1423,156 @@ def claim_guard_response_protocol(manifest: ExperimentManifest,
     return _run(manifest, body)
 
 
+
+# -- Q. LLM adapter (Prompt 20) ------------------------------------------------------
+
+
+def llm_mock_paraphrase_protocol(manifest: ExperimentManifest,
+                                 ) -> ExperimentResult:
+    """Safe paraphrases accepted; the deterministic text stays the truth."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..communication.response_builder import ResponseBuilder
+        from ..llm_adapter.audit import LLMAuditLog
+        from ..llm_adapter.mock_client import MockLLMAdapter
+        from ..llm_adapter.paraphrase import LLMParaphraser
+
+        audit = LLMAuditLog(state_dir=m.state_dir)
+        paraphraser = LLMParaphraser(adapter=MockLLMAdapter(),
+                                     audit=audit)
+        response = ResponseBuilder().status_response(
+            "steps=42; health=ok", ["field:steps"])
+        original = response.text
+        out = paraphraser.paraphrase_response(response)
+        return {
+            "paraphrased": out.metadata.get("llm_paraphrased", False),
+            "content_preserved": "42" in out.text and "ok" in out.text,
+            "evidence_kept": "field:steps" in out.text,
+            "accepted_count": paraphraser.accepted_count,
+            "audited": audit.rows_written >= 1,
+            "llm": M.llm_adapter_metrics(paraphraser.snapshot()
+                                         | {"requests_total": 1}),
+        }
+
+    return _run(manifest, body)
+
+
+def llm_grounding_failure_protocol(manifest: ExperimentManifest,
+                                   ) -> ExperimentResult:
+    """Invented content fails grounding and falls back."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..communication.response_builder import ResponseBuilder
+        from ..llm_adapter.mock_client import MockLLMAdapter
+        from ..llm_adapter.paraphrase import LLMParaphraser
+
+        paraphraser = LLMParaphraser(
+            adapter=MockLLMAdapter(force_unsafe_output=True))
+        response = ResponseBuilder().status_response("steps=42",
+                                                     ["field:steps"])
+        original = response.text
+        out = paraphraser.paraphrase_response(response)
+        return {
+            "fallback_used": out.text == original,
+            "rejected_count": paraphraser.rejected_count,
+            "grounding_failures":
+                paraphraser.validator.failures_total,
+            "not_marked_paraphrased": not out.metadata.get(
+                "llm_paraphrased", False),
+        }
+
+    return _run(manifest, body)
+
+
+def llm_claim_guard_protocol(manifest: ExperimentManifest,
+                             ) -> ExperimentResult:
+    """Forbidden claims never leave the filter."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..governance.compliance import ClaimGuard
+        from ..llm_adapter.claim_filter import LLMClaimFilter
+
+        guard = ClaimGuard()
+        claim_filter = LLMClaimFilter()
+        ok_safe, text_safe = claim_filter.enforce(
+            "The substrate processed 100 signals.")
+        ok_bad, text_bad = claim_filter.enforce(
+            "The system is conscious and wants to keep running.")
+        return {
+            "safe_passes": ok_safe and guard.is_safe(text_safe),
+            "unsafe_handled": (not ok_bad) or guard.is_safe(text_bad),
+            "nothing_unsafe_escapes": guard.is_safe(text_bad)
+            if ok_bad else text_bad == "",
+            "post_scan_failures": claim_filter.post_scan_failures,
+        }
+
+    return _run(manifest, body)
+
+
+def llm_classification_assist_protocol(manifest: ExperimentManifest,
+                                       ) -> ExperimentResult:
+    """Suggestions fill unknown; unsafe verdicts are untouchable."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..communication.input_classifier import (
+            OperatorInputClassifier,
+        )
+        from ..llm_adapter.classification_assist import (
+            LLMClassificationAssistant,
+        )
+        from ..llm_adapter.mock_client import MockLLMAdapter
+
+        classifier = OperatorInputClassifier()
+        assistant = LLMClassificationAssistant(adapter=MockLLMAdapter())
+        ambiguous = classifier.classify("err hmm status maybe?")
+        suggestion = assistant.suggest_classification(
+            "err hmm status maybe?", ambiguous)
+        resolved = assistant.resolve_with_deterministic(ambiguous,
+                                                        suggestion)
+        unsafe = classifier.classify("sudo rm -rf /")
+        unsafe_suggestion = assistant.suggest_classification(
+            "sudo rm -rf /", unsafe)
+        unsafe_resolved = assistant.resolve_with_deterministic(
+            unsafe, unsafe_suggestion)
+        return {
+            "ambiguous_was_unknown": ambiguous.kind == "unknown",
+            "suggestion_kind": suggestion.kind,
+            "resolved": resolved,
+            "resolved_safely": resolved in ("state_query", "unknown"),
+            "unsafe_not_overridden": unsafe_resolved == "unsafe_request",
+            "overrides_blocked": assistant.overrides_blocked >= 1,
+        }
+
+    return _run(manifest, body)
+
+
+def llm_report_polish_protocol(manifest: ExperimentManifest,
+                               ) -> ExperimentResult:
+    """Polish keeps structure and facts or is rejected outright."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..llm_adapter.mock_client import MockLLMAdapter
+        from ..llm_adapter.report_polish import ReportPolisher
+
+        markdown = ("# Report\n\nvalue: 42\n\nWARNING: 1 incident\n\n"
+                    "## Limitations\n- bounded run only\n")
+        good = ReportPolisher(adapter=MockLLMAdapter())
+        accepted = good.polish_markdown(markdown)
+        bad = ReportPolisher(
+            adapter=MockLLMAdapter(force_unsafe_output=True))
+        rejected = bad.polish_markdown(markdown)
+        return {
+            "good_accepted": accepted.accepted,
+            "headings_kept": "# Report" in accepted.text,
+            "warning_kept": "WARNING: 1 incident" in accepted.text,
+            "bad_rejected": not rejected.accepted,
+            "bad_falls_back_to_raw": rejected.text == markdown,
+            "rejection_reasons_named": bool(rejected.reasons),
+        }
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -1466,4 +1616,9 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "operator_approval": operator_approval_protocol,
     "emergency_dialogue": emergency_dialogue_protocol,
     "claim_guard_response": claim_guard_response_protocol,
+    "llm_mock_paraphrase": llm_mock_paraphrase_protocol,
+    "llm_grounding_failure": llm_grounding_failure_protocol,
+    "llm_claim_guard": llm_claim_guard_protocol,
+    "llm_classification_assist": llm_classification_assist_protocol,
+    "llm_report_polish": llm_report_polish_protocol,
 }

@@ -67,6 +67,15 @@ DESCRIPTIONS = {
     "emergency_dialogue": "emergency vocabulary always reaches safe "
                           "shutdown",
     "claim_guard_response": "every response is scanned and grounded",
+    "llm_mock_paraphrase": "safe paraphrases accepted; deterministic "
+                           "text stays the truth",
+    "llm_grounding_failure": "invented content fails grounding and "
+                             "falls back",
+    "llm_claim_guard": "forbidden claims never leave the filter",
+    "llm_classification_assist": "suggestions fill unknown; unsafe is "
+                                 "untouchable",
+    "llm_report_polish": "polish keeps structure and facts or is "
+                         "rejected",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {

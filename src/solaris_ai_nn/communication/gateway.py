@@ -46,6 +46,11 @@ class CommunicationGateway:
     # world_model, latent, pilot, ops_status, health, incidents, audit,
     # operator_session, runner.
     components: Dict[str, Any] = field(default_factory=dict)
+    # Optional local LLM adapter (Prompt 20): translator only, never
+    # authority. Off by default; mock-backed unless an adapter is given.
+    enable_llm_adapter: bool = False
+    llm_adapter: Optional[Any] = None
+    llm_adapter_config: Optional[Any] = None
 
     def __post_init__(self) -> None:
         if self.session is None:
@@ -64,6 +69,46 @@ class CommunicationGateway:
             registry=self.components.get("approvals"),
             audit=self.components.get("audit"), builder=self.builder)
         self.components.setdefault("transcript", self.session.transcript)
+        # Optional LLM layer: paraphrase + classification assist, both
+        # validated and audited; deterministic decisions stay untouched.
+        self.llm_paraphraser = None
+        self.llm_classification_assistant = None
+        self.llm_audit = None
+        if self.enable_llm_adapter:
+            from ..llm_adapter.audit import LLMAuditLog
+            from ..llm_adapter.classification_assist import (
+                LLMClassificationAssistant,
+            )
+            from ..llm_adapter.config import LLMAdapterConfig
+            from ..llm_adapter.mock_client import MockLLMAdapter
+            from ..llm_adapter.paraphrase import LLMParaphraser
+            from ..llm_adapter.safety import LLMAdapterSafetyValidator
+
+            self.llm_adapter_config = (self.llm_adapter_config
+                                       or LLMAdapterConfig(enabled=True))
+            self.llm_safety = LLMAdapterSafetyValidator()
+            endpoint = self.llm_safety.validate_endpoint(
+                self.llm_adapter_config,
+                governance=self.components.get("governance"))
+            if self.llm_adapter is None:
+                self.llm_adapter = MockLLMAdapter()
+            if not endpoint.safe \
+                    and self.llm_adapter.name != "mock":
+                # Unsafe endpoint config: fall back to nothing, not mock
+                # magic -- the LLM layer simply stays inert.
+                self.llm_adapter = None
+            if self.llm_adapter is not None:
+                self.llm_audit = LLMAuditLog(state_dir=self.state_dir)
+                self.llm_paraphraser = LLMParaphraser(
+                    adapter=self.llm_adapter, audit=self.llm_audit)
+                governance = self.components.get("governance")
+                assist_allowed = (governance is None
+                                  or governance.permissions.allows(
+                                      "allow_llm_classification_assist"))
+                if assist_allowed:
+                    self.llm_classification_assistant = \
+                        LLMClassificationAssistant(
+                            adapter=self.llm_adapter)
         # Metrics.
         self.inputs_total = 0
         self.query_count = 0
@@ -159,6 +204,30 @@ class CommunicationGateway:
                 return self.builder.unknown_response()
             self.command_request_count += 1
             return self.command_router.route(command, ctx)
+        if kind == InputKind.UNKNOWN \
+                and self.llm_classification_assistant is not None:
+            suggestion = (self.llm_classification_assistant
+                          .suggest_classification(
+                              classification.raw_text, classification,
+                              ctx))
+            resolved = (self.llm_classification_assistant
+                        .resolve_with_deterministic(classification,
+                                                    suggestion))
+            if resolved in (InputKind.STATE_QUERY,
+                            InputKind.EXPLANATION_QUERY) \
+                    and resolved != classification.kind:
+                # Re-classify as the suggested *query* kind only; commands
+                # and governance kinds never come from a suggestion.
+                retry = self.classifier.classify(classification.raw_text)
+                retry.kind = resolved
+                retry.args.setdefault("topic", "status")
+                retry.reasons.append(
+                    f"LLM suggestion {suggestion.kind!r} "
+                    f"(confidence {suggestion.confidence}) accepted as a "
+                    "read-only query; deterministic classifier remains "
+                    "authoritative")
+                self.query_count += 1
+                return self.query_router.route_query(retry, ctx)
         self.unknown_count += 1
         return self.builder.unknown_response(
             examples=self.query_router.available_queries()[:5])
@@ -217,6 +286,16 @@ class CommunicationGateway:
                   response: CommunicationResponse, operator: str,
                   safety: str = "ok",
                   unsafe: bool = False) -> CommunicationResponse:
+        # Optional LLM paraphrase of already-safe, read-only responses.
+        # Refusals, confirmations, and emergency text stay verbatim.
+        if self.llm_paraphraser is not None and not unsafe \
+                and response.kind in ("status", "health", "explanation"):
+            response = self.llm_paraphraser.paraphrase_response(response)
+            if self.components.get("ego") is not None \
+                    and response.metadata.get("llm_paraphrased"):
+                self.components["ego"].attributor.attribute_event(
+                    {"source": "llm_adapter", "kind": "paraphrase",
+                     "payload": response.text[:60]})
         # Response-level safety scan (ClaimGuard ran in the builder; this
         # re-checks and downgrades rather than letting unsafe text out).
         scan = self.safety.validate_response(response)
@@ -274,6 +353,29 @@ class CommunicationGateway:
             "safety_status": ("ok" if not self.safety.rejected_count
                               else f"{self.safety.rejected_count} "
                                    "refusal(s) recorded"),
+            # Optional LLM adapter status (Prompt 20). Authority: never.
+            "llm_adapter_enabled": self.llm_paraphraser is not None,
+            "llm_provider": (self.llm_adapter_config.provider
+                             if self.llm_adapter_config else None),
+            "llm_last_task_type": (self.llm_adapter.status.last_task_type
+                                   if self.llm_adapter else ""),
+            "llm_fallback_count": (self.llm_paraphraser.fallback_count
+                                   if self.llm_paraphraser else 0),
+            "llm_grounding_failure_count": (
+                self.llm_paraphraser.validator.failures_total
+                if self.llm_paraphraser else 0),
+            "llm_claim_guard_warning_count": (
+                self.llm_paraphraser.claim_filter.post_scan_failures
+                if self.llm_paraphraser else 0),
+            "llm_last_grounding_status": (
+                "ok" if self.llm_paraphraser
+                and not self.llm_paraphraser.validator.failures_total
+                else "failures recorded" if self.llm_paraphraser
+                else None),
+            "llm_audit_path": (str(self.llm_audit.path)
+                               if self.llm_audit and self.llm_audit.path
+                               else None),
+            "llm_authority": False,
             "note": "communication is an interface, not authority; "
                     "nothing here bypasses governance or safety",
         }

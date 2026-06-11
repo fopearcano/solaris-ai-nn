@@ -373,3 +373,20 @@ system, not the ruler of it.
 | AutoDetermination / Governance (safe ends and human decisions) | `communication/approval_router.py` (decisions onto real pending `ApprovalRegistry` requests) + the always-available emergency path into `SafeShutdownManager`/`EmergencyStop` |
 | Conscience topology (who talks to whom) | status/explanation queries over the assembled component map — the query router names which module answered and with what evidence |
 | Language discipline (no anthropomorphic claims) | `communication/safety.py` + `templates.py` — forbidden first-person fragments are scanned out, and templates for "I want"/"I feel"/"I am conscious" structurally do not exist |
+
+---
+
+## LLM adapter mapping (Phase 20)
+
+The optional LLM adapter (`llm_adapter/`) realises Solaris_Ai's language
+principle at its outermost edge: language may be rendered more readable,
+but rendering is not cognition and translation is not authority.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| `modules/language.py` (meaning expressed) | `llm_adapter/paraphrase.py` + `summary.py` + `report_polish.py` — optional paraphrase of already-grounded deterministic text, validated and falling back to the original |
+| Inner MAP (grounded context source) | `LLMRequest.allowed_facts` / `grounded_context` — prompts are built from recorded state summaries only; `llm_adapter/grounding.py` rejects anything that strays |
+| Ego (attribution of output) | `generated_by_llm_adapter` attribution category — a paraphrase of grounded output, never primary evidence; the self-report carries `llm_authority: false` |
+| Governance (permission and audit) | five permission scopes (remote endpoints approval-gated), seven `llm` policy rules, and `llm_adapter/audit.py` hashing every call to `llm_audit.jsonl` |
+| Executive (excluded from authority) | structurally: the executive imports nothing from the adapter, LLM output creates no candidates, and arbitration scores are bit-identical with the adapter on or off |
+| Conscience topology (who talks to whom) | the state graph names the one permitted path: response builder → paraphraser → grounding validator → ClaimGuard → communication gateway — and no edge into the arbitrator |

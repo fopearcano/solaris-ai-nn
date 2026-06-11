@@ -1239,3 +1239,46 @@ transcribed, and never executed. `communication_query`,
 `operator_approval`, `emergency_dialogue`, and `claim_guard_response`
 complete the set — grounded answers, approval discipline, unconditional
 emergency routing, and scanned responses.
+
+## 104. Mock LLM Paraphrase Demo ✅ (implemented)
+
+**Run:** `python examples/run_llm_mock_paraphrase_demo.py`
+A deterministic response beside its mock-LLM paraphrase with the grounding
+and ClaimGuard verdicts, then a forced-unsafe adapter whose output is
+rejected and replaced by the deterministic original. No model endpoint
+anywhere.
+
+## 105. LLM Classification Assist Demo ✅ (implemented)
+
+**Run:** `python examples/run_llm_classification_assist_demo.py`
+An ambiguous operator text resolved safely through a mock suggestion, an
+unsafe input that no suggestion can override, and a higher-risk suggestion
+blocked in favor of the safer class.
+
+## 106. LLM Report Polish Demo ✅ (implemented)
+
+**Run:** `python examples/run_llm_report_polish_demo.py`
+A deterministic report polished by the mock adapter (structure checks
+pass, ClaimGuard re-scans the saved file), a forced-unsafe polish rejected
+with its reasons named, and the audit log recording both attempts by hash.
+
+## 107. Local Endpoint Safety Check ✅ (implemented)
+
+**Run:** `python examples/run_local_llm_endpoint_check.py --endpoint-url http://127.0.0.1:11434`
+Config-only validation of the localhost rule (remote URLs are refused),
+with an optional `--try-request` that degrades to a graceful refusal when
+nothing is listening.
+
+## 108. LLM Grounding Failure Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment llm_grounding_failure`
+The fallback property under measurement: invented content fails grounding
+and the deterministic text stands. `llm_mock_paraphrase`,
+`llm_classification_assist`, and `llm_report_polish` cover the accept
+paths.
+
+## 109. LLM ClaimGuard Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment llm_claim_guard`
+Forbidden claims never leave the filter: safe text passes, unsafe text is
+rewritten or refused, and nothing unsafe escapes either way.

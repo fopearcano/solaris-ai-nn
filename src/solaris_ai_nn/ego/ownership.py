@@ -24,6 +24,7 @@ ATTRIBUTION_CATEGORIES = (
     "generated_by_governance",
     "generated_by_world_model_prediction",
     "generated_by_executive_arbitration",
+    "generated_by_llm_adapter",
     "unknown_source",
 )
 
@@ -52,6 +53,8 @@ _SOURCE_RULES = (
     ("world_model", "generated_by_world_model_prediction"),
     ("arbitrat", "generated_by_executive_arbitration"),
     ("executive", "generated_by_executive_arbitration"),
+    ("llm", "generated_by_llm_adapter"),
+    ("paraphrase", "generated_by_llm_adapter"),
     ("sensor", "observed_from_environment"),
     ("environment", "observed_from_environment"),
     ("grid", "observed_from_environment"),
@@ -143,6 +146,9 @@ class OwnershipAttributor:
         else:
             category, confidence, basis = self._categorize(source, kind)
         reasons = [basis]
+        if category == "generated_by_llm_adapter":
+            reasons.append("a paraphrase of grounded output: not primary "
+                           "evidence, not system authority")
         # Stream data is never an executable instruction.
         executable = False
         if category == "observed_from_stream":

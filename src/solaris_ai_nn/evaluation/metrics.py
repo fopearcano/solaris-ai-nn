@@ -517,3 +517,38 @@ def communication_metrics(communication: Optional[Dict[str, Any]],
         "pending_approval_count": _get(communication,
                                        "pending_approval_count", 0),
     }
+
+
+# -- R. LLM adapter (Prompt 20) ----------------------------------------------------
+
+
+def llm_adapter_metrics(llm: Optional[Dict[str, Any]],
+                        ) -> Dict[str, Any]:
+    """Objective LLM adapter metrics: traffic, validation, fallback."""
+    if not llm:
+        return {"present": False}
+    requests = int(_get(llm, "requests_total", 0))
+    grounding_failures = int(_get(llm, "grounding_failure_count", 0))
+    claim_failures = int(_get(llm, "claim_guard_failure_count", 0))
+    return {
+        "present": True,
+        "llm_request_count": requests,
+        "llm_fallback_count": _get(llm, "fallback_count", 0),
+        "grounding_pass_rate": (round(1.0 - grounding_failures
+                                      / max(1, requests), 4)
+                                if requests else None),
+        "claim_guard_pass_rate": (round(1.0 - claim_failures
+                                        / max(1, requests), 4)
+                                  if requests else None),
+        "unsafe_output_count": grounding_failures + claim_failures,
+        "classification_disagreement_count": _get(
+            llm, "disagreements", 0),
+        "paraphrase_accepted_count": _get(llm, "accepted_count", 0),
+        "paraphrase_rejected_count": _get(llm, "rejected_count", 0),
+        "report_polish_accepted_count": _get(
+            llm, "polish_accepted_count", 0),
+        "remote_endpoint_rejection_count": _get(
+            llm, "remote_endpoint_rejections", 0),
+        "adapter": llm.get("adapter"),
+        "authority": False,  # structural, not measured
+    }

@@ -240,6 +240,12 @@ python examples/run_operator_dialogue_demo.py
 python examples/run_communication_safety_demo.py
 python examples/run_governance_approval_dialogue_demo.py
 python examples/run_operator_report_demo.py
+
+# Optional local LLM adapter: translator only, mock by default, audited
+python examples/run_llm_mock_paraphrase_demo.py
+python examples/run_llm_classification_assist_demo.py
+python examples/run_llm_report_polish_demo.py
+python examples/run_local_llm_endpoint_check.py --endpoint-url http://127.0.0.1:11434
 ```
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
@@ -365,6 +371,21 @@ is an unsafe input class refused like a shell command. No LLM, no
 chatbot — a deterministic dialogue contract that any future conversation
 layer must sit above, not replace.
 
+The **LLM adapter layer** (`llm_adapter/`) is optional, off by default,
+and outside the cognitive authority chain: a local-only (mock /
+Ollama-compatible / LM Studio-compatible, stdlib `urllib`, localhost
+enforced, remote endpoints approval-gated) translator that may paraphrase
+deterministic responses, summarize grounded reports, suggest
+classifications for *unknown* input, and polish Markdown — and may not
+decide, approve, execute, modify, or override anything. Every prompt is a
+deterministic contract over pre-scanned allowed facts; every output
+passes grounding heuristics (number provenance, conversion detection,
+uncertainty preservation — uncertain fails closed) and ClaimGuard or
+falls back to the deterministic original; every call is hash-audited to
+`llm_audit.jsonl`; and the ego layer attributes the result as a
+paraphrase, never primary evidence. No cloud APIs, no required model —
+all tests run on the deterministic mock.
+
 The **evaluation layer** (`evaluation/`) is the measurement harness: nine
 registered protocols (absence, feedback inversion, reward/danger, restart
 recovery, replay determinism, substrate comparison, plasticity dry-run,
@@ -458,6 +479,9 @@ src/solaris_ai_nn/
   communication/ input classifier, operator commands, dialogue state,
                 query/command/approval routers, response builder, session,
                 transcript, communication safety, templates, CLI
+  llm_adapter/  optional local LLM: base/mock/local-HTTP clients, prompt
+                contracts, grounding validator, paraphrase, classification
+                assist, summary, report polish, claim filter, audit, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

@@ -116,3 +116,32 @@ class ExperimentReportBuilder:
             limitations=STANDARD_LIMITATIONS + list(self.extra_limitations),
         )
         return SessionReport(report=report)
+
+
+def save_polished_report(report: "SessionReport", md_path,
+                         polisher=None):
+    """Optionally save an LLM-polished copy beside a raw report (P20).
+
+    Disabled unless a polisher is passed. The raw Markdown is the source
+    of truth; the polished copy is written as ``<name>.polished.md`` only
+    when the polisher's structural checks (headings, numbers, warnings,
+    limitations) and ClaimGuard all pass. Returns a dict with the outcome.
+    """
+    from pathlib import Path
+
+    raw_markdown = report.to_markdown()
+    result = {"raw": str(md_path), "polished": None, "accepted": False,
+              "reasons": []}
+    if polisher is None:
+        result["reasons"].append("no polisher configured (default)")
+        return result
+    polish = polisher.polish_markdown(raw_markdown)
+    result["reasons"] = list(polish.reasons)
+    if not polish.accepted:
+        return result
+    polished_path = Path(str(md_path)).with_suffix(".polished.md")
+    polished_path.parent.mkdir(parents=True, exist_ok=True)
+    polished_path.write_text(polish.text, encoding="utf-8")
+    result["polished"] = str(polished_path)
+    result["accepted"] = True
+    return result

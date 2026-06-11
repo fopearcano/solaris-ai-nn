@@ -633,3 +633,41 @@ layer first fixes the contract: classification before effect, closed
 command set, channel attribution, scanned output. If an LLM is ever added
 for parsing, it slots in *above* this layer and inherits its gates; it
 does not replace them.
+
+**LLMs as interface layers.** The useful framing for a deterministic
+cognitive system is the compiler one: the LLM is a pretty-printer, not a
+parser of authority. Everything upstream of it — classification, safety,
+governance, arbitration — runs identically whether the adapter is on,
+off, or hallucinating, which makes the adapter's worst case a wording
+regression rather than a behaviour change. That property is only true
+because it was built in structurally; it cannot be patched in later.
+
+**Grounding validation.** Without NLP machinery, grounding checks must be
+blunt: number provenance, forbidden-phrase scans, conversion detection,
+uncertainty preservation — and the crucial design rule that *uncertain
+means failed*. Blunt heuristics with a fail-closed default beat clever
+ones with a fail-open default in exactly the situations that matter,
+because the model's failure mode (fluent invention) is precisely the one
+heuristics flag as "this number came from nowhere."
+
+**Paraphrase vs authority.** A paraphrase changes wording under an
+invariance constraint: same facts, same numbers, same warnings, same
+limitations, same evidence references. Stating the constraint as code
+(structural checks after generation) rather than as a prompt instruction
+is the difference between asking a model to behave and not needing it to.
+
+**Confabulation risk.** LLMs produce confident text whether or not it is
+anchored to anything — for an operator interface, the dangerous output is
+not the wrong answer but the *plausible* one. The mitigations here are
+layered: facts pre-scanned in, contracts that demand refusal over
+invention, grounding heuristics that trace every number home, ClaimGuard
+on the way out, hashes in the audit log, and a deterministic original
+that is always one fallback away.
+
+**Why deterministic cognition/safety must precede LLM dialogue.** Adding
+an LLM to a system without a deterministic spine gives the model the
+spine's job; adding it to this system gives the model a typesetting job.
+The nineteen prior layers fixed what the system knows, decides, refuses,
+and reports — so the twentieth could be allowed near the text without
+being allowed near the truth. That ordering is the experiment's actual
+finding: language models are safe to add last, and only last.

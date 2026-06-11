@@ -65,8 +65,8 @@ def test_all_scopes_in_default_set():
     assert set(ps.known_scopes()) == set(PermissionScope.ALL)
     # 13 governance (P12) + 5 latent (P14) + 3 world model (P15)
     # + 4 homeostasis (P16) + 4 executive (P17) + 3 ego (P18)
-    # + 7 communication (P19).
-    assert len(PermissionScope.ALL) == 39
+    # + 7 communication (P19) + 5 LLM adapter (P20).
+    assert len(PermissionScope.ALL) == 44
 
 
 def test_executive_scope_defaults():
@@ -94,6 +94,15 @@ def test_communication_scope_defaults():
     assert ps.allows(PermissionScope.OPERATOR_RUN_BOUNDED_BENCHMARK)
     assert ps.allows(PermissionScope.OPERATOR_APPROVE_REQUESTS)
     assert ps.requires_approval(PermissionScope.OPERATOR_SEND_SENSORY_TEXT)
+
+
+def test_llm_scope_defaults():
+    ps = PermissionSet.default()
+    assert ps.allows(PermissionScope.ENABLE_LOCAL_LLM_ADAPTER)
+    assert ps.allows(PermissionScope.ALLOW_LOCALHOST_LLM_ENDPOINT)
+    assert ps.requires_approval(PermissionScope.ALLOW_REMOTE_LLM_ENDPOINT)
+    assert ps.allows(PermissionScope.ALLOW_LLM_CLASSIFICATION_ASSIST)
+    assert ps.allows(PermissionScope.ALLOW_LLM_REPORT_POLISH)
 
 
 def test_homeostasis_scope_defaults():

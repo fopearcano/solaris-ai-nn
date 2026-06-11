@@ -258,6 +258,28 @@ DEFAULT_RULES: List[PolicyRule] = [
                "commands are prohibited", forbidden=True),
     PolicyRule("approvals_need_pending_request", "communication",
                "approval commands act only on real pending requests"),
+    # M. Local LLM adapter (Prompt 20)
+    PolicyRule("llm_translator_only", "llm",
+               "the LLM adapter is a translator outside the authority "
+               "chain; it decides, approves, and executes nothing"),
+    PolicyRule("llm_localhost_only", "llm",
+               "non-mock adapters require an explicit localhost "
+               "endpoint config"),
+    PolicyRule("llm_remote_prohibited", "llm",
+               "remote LLM endpoints are prohibited by default",
+               requires_approval_scope=
+               PermissionScope.ALLOW_REMOTE_LLM_ENDPOINT),
+    PolicyRule("llm_cannot_approve", "llm",
+               "LLM output cannot approve or reject governance "
+               "requests", forbidden=True),
+    PolicyRule("llm_cannot_unsafe_to_safe", "llm",
+               "the LLM cannot reclassify unsafe input as safe",
+               forbidden=True),
+    PolicyRule("llm_output_validated", "llm",
+               "every LLM output passes grounding validation and "
+               "ClaimGuard or falls back to deterministic text"),
+    PolicyRule("llm_usage_audited", "llm",
+               "every adapter call lands in the LLM audit log"),
 ]
 
 
@@ -458,6 +480,20 @@ class GovernancePolicy:
                     "no_raw_command_execution", "communication",
                     "free-form text never executes; shell/network/OS "
                     "commands are prohibited"))
+
+        # M. LLM adapter: a translator; remote endpoints are gated.
+        if features.get("llm_adapter"):
+            if not self._approved(PermissionScope.ENABLE_LOCAL_LLM_ADAPTER,
+                                  ctx):
+                need_approval(PermissionScope.ENABLE_LOCAL_LLM_ADAPTER,
+                              "the local LLM adapter is not permitted")
+            if ctx.get("llm_endpoint_remote") \
+                    and not self._approved(
+                        PermissionScope.ALLOW_REMOTE_LLM_ENDPOINT, ctx):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "llm_remote_prohibited", "llm",
+                    "remote LLM endpoints are prohibited by default"))
 
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):

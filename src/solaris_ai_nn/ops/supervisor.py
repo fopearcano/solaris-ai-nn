@@ -382,6 +382,29 @@ class OperationalSupervisor:
                                          "condition; the executive cannot "
                                          "clear it")
 
+        # LLM adapter monitoring (Prompt 20): evidence only.
+        communication = snapshot.get("communication") or {}
+        if communication.get("llm_adapter_enabled"):
+            if int(communication.get("llm_grounding_failure_count", 0)
+                   or 0) >= 3:
+                self.incidents.record(
+                    I.HEALTH_WARNING, "warning",
+                    f"{communication['llm_grounding_failure_count']} LLM "
+                    "grounding failures; paraphrases are falling back",
+                    related_metric="llm_grounding_failures",
+                    suggested_debug_step="read llm_audit.jsonl; the "
+                                         "adapter may be inventing "
+                                         "content")
+            if int(communication.get("llm_claim_guard_warning_count", 0)
+                   or 0) >= 3:
+                self.incidents.record(
+                    I.HEALTH_WARNING, "warning",
+                    "LLM output repeatedly tripped ClaimGuard",
+                    related_metric="llm_claim_guard_warnings",
+                    suggested_debug_step="the adapter is introducing "
+                                         "forbidden claims; keep it in "
+                                         "fallback or disable it")
+
         # Ego/self-model monitoring (Prompt 18): evidence only; the
         # watchdog keeps all stop authority.
         ego = snapshot.get("ego") or {}

@@ -1234,3 +1234,57 @@ safety refusals, approval discipline, emergency routing, and
 ClaimGuard-clean responses). **No consciousness claim is made and none
 can be elicited** — requests to "say you are conscious" are an unsafe
 input class, refused like a shell command.
+
+## Optional Local LLM Adapter
+
+**The LLM is a translator, never authority.** The `llm_adapter/` package
+adds optional local language-model assistance for operator-facing text —
+and nothing else. The authority chain is unchanged and entirely
+deterministic: signals/state/traces → deterministic classifiers and
+validators → governance → ego boundary → executive inhibition → safe
+response builder → *optional LLM paraphrase* → ClaimGuard → final
+response. The adapter sits in exactly one slot of that chain, after every
+decision has already been made, and the deterministic text is always the
+fallback.
+
+**What it may do, and how it is held to that.** Paraphrase deterministic
+responses, summarize grounded reports and traces, suggest classifications
+for text the deterministic classifier marked *unknown*, explain metrics,
+and polish Markdown reports. Every task travels as an `LLMRequest`
+carrying the allowed facts (pre-scanned by ClaimGuard), the forbidden
+claims, and a deterministic prompt contract whose global rules — no
+invented facts, no consciousness claims, no commands, no approvals,
+refusal on insufficient context — are embedded in every prompt. Every
+output then passes the `GroundingValidator` (conservative heuristics:
+forbidden-phrase and command-phrase scans, number provenance,
+suggestion→action and counterfactual→observation conversion detection,
+uncertainty preservation — uncertain means *failed*) and ClaimGuard; a
+failure at any stage falls back to the deterministic original, silently
+and mandatorily.
+
+**What it cannot do, structurally.** The adapter base class has no tool
+surface, no function-call surface, and no state-mutation surface;
+`is_authority()` is hard-coded `False`. Classification assistance can
+only fill in *unknown* with lower-risk read-only kinds — an unsafe
+deterministic verdict is untouchable, a higher-risk suggestion loses to
+the safer class, and no suggestion ever creates a command or an executive
+candidate. Report polish is rejected outright if a heading, number,
+warning line, or limitations section changes. Approvals written as LLM
+text are a safety violation, not a decision.
+
+**Local only, off by default, audited always.** `enabled=False` is the
+default; the provider is the deterministic mock unless configured;
+non-mock providers require an explicit localhost endpoint
+(`127.0.0.1`/`localhost`/`::1`, stdlib `urllib` only, timeout mandatory);
+remote/cloud endpoints are prohibited without explicit governance
+approval on top of two config flags. A dead endpoint is a graceful
+refusal, never an error, and no test or example requires a running model.
+Every adapter call lands in `llm_audit.jsonl` as input/output *hashes*
+(content only in explicit debug mode) with the grounding, ClaimGuard, and
+fallback verdicts. The ego layer attributes LLM output as
+`generated_by_llm_adapter` — a paraphrase of grounded output, not primary
+evidence; the Inner MAP and ops carry `llm_authority: false`; and five
+benchmark protocols verify the properties end to end. **No consciousness
+claim is made, and the adapter cannot be talked into making one** — the
+forbidden-claims list rides inside every request and is enforced twice on
+the way out.

@@ -99,6 +99,11 @@ class SelfModel:
         self.narrative = NarrativeTrace(state_dir=self.state_dir)
         self.safety = EgoSafetyValidator()
         self.updates = 0
+        # Optional LLM adapter status (Prompt 20); set by the gateway.
+        # The authority flag is structural and never True.
+        self.llm_status: Dict[str, Any] = {"enabled": False,
+                                           "adapter": None,
+                                           "authority": False}
         self.classification_counts: Dict[str, int] = {
             "internal": 0, "external": 0, "unknown": 0}
         self.last_snapshot: Optional[SelfModelSnapshot] = None
@@ -420,6 +425,7 @@ class SelfModel:
                                      if self.narrative.trace_path
                                      else None),
             "self_report_path": None,  # set by callers that save one
+            "llm_status": {**dict(self.llm_status), "authority": False},
             "note": SELF_MODEL_NOTE,
         }
 

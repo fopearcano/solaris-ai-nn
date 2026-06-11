@@ -488,4 +488,32 @@ def build_default_state_graph() -> StateGraph:
                "grounded text returns through the gateway")
     g.add_edge("communication_transcript", "inner_map",
                "the transcript feeds audit and Inner MAP")
+
+    # Optional local LLM adapter (Prompt 20). Translator, never authority.
+    for name, role in [
+        ("llm_adapter", "optional translator, outside authority"),
+        ("local_http_llm_adapter", "localhost-only endpoint client"),
+        ("mock_llm_adapter", "deterministic fake for tests"),
+        ("grounding_validator", "no invented facts pass"),
+        ("llm_paraphraser", "readability or fallback"),
+        ("llm_classification_assistant", "suggestions under a ruler"),
+        ("llm_summarizer", "shorter text, identical truth"),
+        ("report_polisher", "wording changes, facts do not"),
+        ("llm_audit_log", "every adapter call hashed on record"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("response_builder", "llm_paraphraser",
+               "deterministic response feeds the paraphraser")
+    g.add_edge("llm_adapter", "grounding_validator",
+               "LLM output feeds grounding validation")
+    g.add_edge("grounding_validator", "claim_guard"
+               if "claim_guard" in g.nodes else "governance_policy",
+               "grounding validator feeds ClaimGuard")
+    g.add_edge("llm_paraphraser", "communication_gateway",
+               "safe paraphrase feeds the communication response")
+    g.add_edge("llm_audit_log", "inner_map",
+               "LLM audit feeds Inner MAP")
+    g.add_edge("llm_adapter", "llm_audit_log",
+               "every call is audited; the LLM never feeds executive "
+               "authority")
     return g
