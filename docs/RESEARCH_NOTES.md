@@ -592,3 +592,44 @@ statements, mandatory limitations, and two scanners (ClaimGuard plus the
 identity-claim scan) that refuse to write "I am conscious", "I want", or
 "same self" at all. Self-description is cheap; the discipline is in what
 the system is structurally unable to say.
+
+**Human-in-the-loop interfaces for adaptive systems.** An adaptive system
+needs an operator interface *more* than a static one — drift, incidents,
+and approvals all assume a human can see in and reach in. The design
+constraint is that the reaching-in must be narrower than the seeing-in:
+here every query is free, while every state change is typed, confirmed,
+scoped, and transcribed. The interface widens observation and narrows
+intervention.
+
+**Command/query separation.** The oldest interface discipline (CQS) does
+disproportionate safety work in this setting: queries cannot change
+state, so they need no gates; commands form a closed typed set, so they
+can all be enumerated, validated, confirmed, and refused by name. The
+moment "show status" and "shut down" travel the same code path with the
+same authority, every text becomes a potential command — separating them
+makes the dangerous class small and auditable.
+
+**Language as interface vs authority.** The failure mode of language-first
+systems is that whoever controls the text controls the system. The
+gateway inverts that: text is classified into intent, intent maps onto a
+closed command set, and the command set is gated by governance, ego
+boundaries, and safety validators that language cannot address at all.
+"Disable governance" is not a hard case — it is an unsafe *input class*,
+refused before routing.
+
+**Grounded responses.** A response is grounded when its content can be
+traced to recorded state — evidence references on every answer, "the
+system has no evidence for that answer" as a first-class reply, and an
+explicit distinction between *executed* and *recorded as a request*. The
+grounded-response ratio is a metric precisely because ungrounded fluency
+is the cheapest thing a text interface can produce and the most expensive
+to debug.
+
+**Why deterministic dialogue comes before LLM-based conversation.** An
+LLM front-end would add fluency and ambiguity in equal measure — and
+ambiguity at the operator boundary is attack surface (prompt injection is
+just attribution failure with better grammar). Building the deterministic
+layer first fixes the contract: classification before effect, closed
+command set, channel attribution, scanned output. If an LLM is ever added
+for parsing, it slots in *above* this layer and inherits its gates; it
+does not replace them.

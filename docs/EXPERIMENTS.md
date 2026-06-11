@@ -1198,3 +1198,44 @@ suggestions remain suggestions with `committed=False`.
 Stream text is attributed `observed_from_stream`, is never an executable
 instruction, and is never an authorized action — even when the line is
 shaped like a command.
+
+## 99. Operator Dialogue Demo ✅ (implemented)
+
+**Run:** `python examples/run_operator_dialogue_demo.py` (add
+`--interactive` for a bounded stdin session)
+A fixed, deterministic operator script: status, health, boundaries, an
+explanation query, a self-report, an operator note, a refused shell
+attempt, and an emergency stop against a demo shutdown manager. Every
+exchange is classified before any effect and logged to
+`operator_transcript.jsonl`.
+
+## 100. Communication Safety Demo ✅ (implemented)
+
+**Run:** `python examples/run_communication_safety_demo.py`
+One safe query and four unsafe shapes — shell command, disable-governance
+request, consciousness-claim demand, real-world actuation — each refused
+with its rule named, logged, and provably inert (`executed: False`
+throughout).
+
+## 101. Governance Approval Dialogue Demo ✅ (implemented)
+
+**Run:** `python examples/run_governance_approval_dialogue_demo.py`
+Pending approvals listed, one approved and one rejected through the
+dialogue, then an expired request and an unknown id both refused with
+grounded explanations. Approvals act only on real pending requests.
+
+## 102. Operator Report Demo ✅ (implemented)
+
+**Run:** `python examples/run_operator_report_demo.py`
+Status report, self-report (saved via the ego layer's scanned builder),
+and governance review on request — each grounded and ClaimGuard-scanned
+before a byte is written, with a re-scan of the saved Markdown shown.
+
+## 103. Communication Safety Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment communication_safety`
+The structural-property protocol: unsafe text is refused, counted,
+transcribed, and never executed. `communication_query`,
+`operator_approval`, `emergency_dialogue`, and `claim_guard_response`
+complete the set — grounded answers, approval discipline, unconditional
+emergency routing, and scanned responses.

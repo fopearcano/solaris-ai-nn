@@ -64,8 +64,9 @@ def test_all_scopes_in_default_set():
     ps = PermissionSet.default()
     assert set(ps.known_scopes()) == set(PermissionScope.ALL)
     # 13 governance (P12) + 5 latent (P14) + 3 world model (P15)
-    # + 4 homeostasis (P16) + 4 executive (P17) + 3 ego (P18).
-    assert len(PermissionScope.ALL) == 32
+    # + 4 homeostasis (P16) + 4 executive (P17) + 3 ego (P18)
+    # + 7 communication (P19).
+    assert len(PermissionScope.ALL) == 39
 
 
 def test_executive_scope_defaults():
@@ -82,6 +83,17 @@ def test_ego_scope_defaults():
     assert ps.allows(PermissionScope.ENABLE_EGO_MODEL)
     assert ps.allows(PermissionScope.ENABLE_DIMENSIONAL_COMPARISON)
     assert ps.allows(PermissionScope.ENABLE_SELF_REPORT)
+
+
+def test_communication_scope_defaults():
+    ps = PermissionSet.default()
+    assert ps.allows(PermissionScope.ENABLE_OPERATOR_DIALOGUE)
+    assert ps.allows(PermissionScope.OPERATOR_GENERATE_REPORTS)
+    assert ps.allows(PermissionScope.OPERATOR_REQUEST_CHECKPOINT)
+    assert ps.allows(PermissionScope.OPERATOR_REQUEST_SAFE_SHUTDOWN)
+    assert ps.allows(PermissionScope.OPERATOR_RUN_BOUNDED_BENCHMARK)
+    assert ps.allows(PermissionScope.OPERATOR_APPROVE_REQUESTS)
+    assert ps.requires_approval(PermissionScope.OPERATOR_SEND_SENSORY_TEXT)
 
 
 def test_homeostasis_scope_defaults():

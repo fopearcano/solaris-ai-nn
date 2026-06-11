@@ -243,6 +243,12 @@ class InnerMapModel:
     # attribution_unknown_rate, action_authority, self_model_confidence,
     # perspective_shift_count, narrative_trace_path, self_report_path.
     ego: Optional[Dict[str, Any]] = None
+    # Communication status (Prompt 19); None when the gateway is absent.
+    # Keys: enabled, operator_session_id, dialogue_mode, last_input_kind,
+    # unsafe_request_count, pending_confirmation_count,
+    # pending_approval_count, transcript_path, last_response_summary,
+    # safety_status, plus the gateway counters.
+    communication: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

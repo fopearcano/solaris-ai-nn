@@ -479,3 +479,41 @@ def ego_metrics(ego: Optional[Dict[str, Any]],
         "action_authority": ego.get("action_authority"),
         "update_count": _get(ego, "updates", 0),
     }
+
+
+# -- Q. communication (Prompt 19) ----------------------------------------------------
+
+
+def communication_metrics(communication: Optional[Dict[str, Any]],
+                          ) -> Dict[str, Any]:
+    """Objective communication metrics: traffic, refusals, grounding."""
+    if not communication:
+        return {"present": False}
+    return {
+        "present": True,
+        "operator_input_count": _get(communication, "inputs_total", 0),
+        "query_count": _get(communication, "query_count", 0),
+        "command_request_count": _get(communication,
+                                      "command_request_count", 0),
+        "unsafe_request_count": _get(communication,
+                                     "unsafe_request_count", 0),
+        "refused_command_count": _get(communication,
+                                      "refused_command_count", 0),
+        "confirmation_count": _get(communication, "confirmation_count",
+                                   0),
+        "approval_command_count": _get(communication,
+                                       "approval_command_count", 0),
+        "emergency_request_count": _get(communication,
+                                        "emergency_request_count", 0),
+        "response_claim_guard_warning_count": _get(
+            communication, "claim_guard_warning_count", 0),
+        "grounded_response_ratio": communication.get(
+            "grounded_response_ratio"),
+        "unknown_answer_count": _get(communication,
+                                     "unknown_answer_count", 0),
+        "dialogue_mode": communication.get("dialogue_mode"),
+        "pending_confirmation_count": _get(
+            communication, "pending_confirmation_count", 0),
+        "pending_approval_count": _get(communication,
+                                       "pending_approval_count", 0),
+    }

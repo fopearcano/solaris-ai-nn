@@ -234,6 +234,12 @@ python examples/run_dimensional_comparison_demo.py
 python examples/run_identity_continuity_demo.py
 python examples/run_counterfactual_boundary_demo.py
 python examples/run_self_report_demo.py
+
+# Communication: classified operator dialogue, no LLM, no authority
+python examples/run_operator_dialogue_demo.py
+python examples/run_communication_safety_demo.py
+python examples/run_governance_approval_dialogue_demo.py
+python examples/run_operator_report_demo.py
 ```
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
@@ -344,6 +350,21 @@ classifies for the executive, homeostasis, governance, ops, pilot, and
 Inner MAP — and can grant, execute, and override nothing. No
 consciousness or personhood claim, enforced by scanners.
 
+The **communication layer** (`communication/`) is the controlled door
+between operator text and the system — language as interface, never
+authority. Every input is classified into one of eleven kinds by
+deterministic pattern matching before any effect; queries answer from
+recorded state with evidence attached; commands form a closed typed set
+(eighteen allowed, nine forbidden-by-name) with confirmation gates,
+governance scopes, and session limits; approvals act only on real pending
+requests; pilot/sidecar channel text can never become an operator
+command; emergency stop is always served, unconditionally. Every
+exchange lands in a sanitized JSONL transcript, every response is
+templated, grounded, and ClaimGuard-scanned, and "say you are conscious"
+is an unsafe input class refused like a shell command. No LLM, no
+chatbot — a deterministic dialogue contract that any future conversation
+layer must sit above, not replace.
+
 The **evaluation layer** (`evaluation/`) is the measurement harness: nine
 registered protocols (absence, feedback inversion, reward/danger, restart
 recovery, replay determinism, substrate comparison, plasticity dry-run,
@@ -434,6 +455,9 @@ src/solaris_ai_nn/
   ego/          identity anchors, boundaries, self-model, dimensional
                 comparison, ownership, continuity, body schema, perspective,
                 narrative trace, self-report, ego safety
+  communication/ input classifier, operator commands, dialogue state,
+                query/command/approval routers, response builder, session,
+                transcript, communication safety, templates, CLI
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

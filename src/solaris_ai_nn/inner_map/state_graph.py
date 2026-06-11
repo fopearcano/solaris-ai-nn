@@ -461,4 +461,31 @@ def build_default_state_graph() -> StateGraph:
                "world model feeds the self/world distinction")
     g.add_edge("self_model", "inner_map",
                "the self-model feeds Inner MAP")
+
+    # Communication gateway (Prompt 19). An interface, never authority.
+    for name, role in [
+        ("communication_gateway", "the one door for operator text"),
+        ("operator_input_classifier", "classify before any effect"),
+        ("command_router", "bounded commands or refusals"),
+        ("communication_query_router", "questions answered from state"),
+        ("approval_router", "decisions onto real pending requests"),
+        ("response_builder", "grounded, templated, scanned text"),
+        ("communication_transcript", "every exchange on the record"),
+        ("communication_safety_validator", "language never outranks "
+                                           "policy"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("communication_gateway", "operator_input_classifier",
+               "operator input feeds the classifier")
+    g.add_edge("operator_input_classifier",
+               "communication_safety_validator",
+               "classification feeds safety/governance")
+    g.add_edge("communication_query_router", "inner_map",
+               "the query router reads system state")
+    g.add_edge("command_router", "action_arbitrator",
+               "bounded command requests become candidates")
+    g.add_edge("response_builder", "communication_gateway",
+               "grounded text returns through the gateway")
+    g.add_edge("communication_transcript", "inner_map",
+               "the transcript feeds audit and Inner MAP")
     return g

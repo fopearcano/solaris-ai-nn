@@ -57,6 +57,14 @@ class PermissionScope:
     ENABLE_EGO_MODEL = "enable_ego_model"
     ENABLE_DIMENSIONAL_COMPARISON = "enable_dimensional_comparison"
     ENABLE_SELF_REPORT = "enable_self_report"
+    # Communication / operator dialogue (Prompt 19).
+    ENABLE_OPERATOR_DIALOGUE = "enable_operator_dialogue"
+    OPERATOR_GENERATE_REPORTS = "operator_generate_reports"
+    OPERATOR_REQUEST_CHECKPOINT = "operator_request_checkpoint"
+    OPERATOR_REQUEST_SAFE_SHUTDOWN = "operator_request_safe_shutdown"
+    OPERATOR_RUN_BOUNDED_BENCHMARK = "operator_run_bounded_benchmark"
+    OPERATOR_APPROVE_REQUESTS = "operator_approve_requests"
+    OPERATOR_SEND_SENSORY_TEXT = "operator_send_sensory_text"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -75,6 +83,10 @@ class PermissionScope:
         ENABLE_PROSPECTION, ENABLE_EXECUTIVE_SIDECAR_SUGGESTIONS,
         ENABLE_EGO_MODEL, ENABLE_DIMENSIONAL_COMPARISON,
         ENABLE_SELF_REPORT,
+        ENABLE_OPERATOR_DIALOGUE, OPERATOR_GENERATE_REPORTS,
+        OPERATOR_REQUEST_CHECKPOINT, OPERATOR_REQUEST_SAFE_SHUTDOWN,
+        OPERATOR_RUN_BOUNDED_BENCHMARK, OPERATOR_APPROVE_REQUESTS,
+        OPERATOR_SEND_SENSORY_TEXT,
     )
 
 
@@ -190,6 +202,27 @@ class PermissionSet:
             Permission(S.ENABLE_SELF_REPORT, granted=True,
                        note="self-reports must pass ClaimGuard and the "
                             "identity-claim scan"),
+            Permission(S.ENABLE_OPERATOR_DIALOGUE, granted=True,
+                       note="classified, transcribed, ClaimGuard-scanned "
+                            "operator dialogue; no LLM, no authority"),
+            Permission(S.OPERATOR_GENERATE_REPORTS, granted=True,
+                       note="report generation runs through ClaimGuard"),
+            Permission(S.OPERATOR_REQUEST_CHECKPOINT, granted=True,
+                       note="a request to the runtime/ops layer, not a "
+                            "direct write"),
+            Permission(S.OPERATOR_REQUEST_SAFE_SHUTDOWN, granted=True,
+                       note="safe shutdown is always allowed; the ops "
+                            "layer performs it"),
+            Permission(S.OPERATOR_RUN_BOUNDED_BENCHMARK, granted=True,
+                       note="bounded protocol runs only; the step cap is "
+                            "structural"),
+            Permission(S.OPERATOR_APPROVE_REQUESTS, granted=True,
+                       note="approvals act only on real pending requests "
+                            "and bypass nothing prohibited"),
+            Permission(S.OPERATOR_SEND_SENSORY_TEXT,
+                       requires_approval=True,
+                       note="injecting text as a sensory stimulus is "
+                            "off by default and approval-gated"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

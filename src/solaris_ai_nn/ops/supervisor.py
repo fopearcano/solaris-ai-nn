@@ -716,6 +716,9 @@ class OperationalSupervisor:
         ego = getattr(runner, "ego", None)
         if ego is not None:
             snapshot["ego"] = ego.summary()
+        communication = getattr(runner, "communication", None)
+        if communication is not None:
+            snapshot["communication"] = communication.summary()
         return snapshot
 
     def _build_status(self) -> OperationalStatus:

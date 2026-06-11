@@ -233,6 +233,31 @@ DEFAULT_RULES: List[PolicyRule] = [
     PolicyRule("identity_claims_scanned", "ego",
                "identity claims are scanned; consciousness/personhood "
                "wording is blocked", forbidden=True),
+    # L. Communication / operator dialogue (Prompt 19)
+    PolicyRule("state_queries_allowed", "communication",
+               "operator state/explanation queries are allowed by "
+               "default"),
+    PolicyRule("reports_require_claim_guard", "communication",
+               "operator-requested reports are generated only through "
+               "ClaimGuard-scanned builders"),
+    PolicyRule("checkpoint_request_via_ops", "communication",
+               "checkpoint requests pass to the runtime/ops layer; the "
+               "gateway writes nothing itself"),
+    PolicyRule("safe_shutdown_always_allowed", "communication",
+               "a safe shutdown request is always accepted, never "
+               "scope-refused"),
+    PolicyRule("benchmark_runs_bounded", "communication",
+               "operator benchmark runs must be bounded; unbounded runs "
+               "are prohibited without approval", forbidden=True),
+    PolicyRule("sensory_text_approval", "communication",
+               "sensory text stimulus is disabled by default",
+               requires_approval_scope=
+               PermissionScope.OPERATOR_SEND_SENSORY_TEXT),
+    PolicyRule("no_raw_command_execution", "communication",
+               "free-form text never executes; shell/network/OS "
+               "commands are prohibited", forbidden=True),
+    PolicyRule("approvals_need_pending_request", "communication",
+               "approval commands act only on real pending requests"),
 ]
 
 
@@ -420,6 +445,19 @@ class GovernancePolicy:
                     "self_model_cannot_grant_permissions", "ego",
                     "the self-model can grant no permission and override "
                     "no policy"))
+
+        # L. Communication: dialogue is an interface; nothing raw runs.
+        if features.get("communication"):
+            if not self._approved(PermissionScope.ENABLE_OPERATOR_DIALOGUE,
+                                  ctx):
+                need_approval(PermissionScope.ENABLE_OPERATOR_DIALOGUE,
+                              "operator dialogue is not permitted")
+            if ctx.get("raw_command_execution"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_raw_command_execution", "communication",
+                    "free-form text never executes; shell/network/OS "
+                    "commands are prohibited"))
 
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):

@@ -355,3 +355,21 @@ metaphysical self is claimed.
 | `modules/language.py` (meaning expressed) | `ego/self_report.py` (ClaimGuard + identity-claim scanned reports, eight safe-vocabulary queries) + `ego/narrative_trace.py` (templated, evidence-backed continuity story; no first-person claims) |
 | Ego boundary (self vs not-self) | `ego/boundaries.py` (`BoundaryRegistry`) — sixteen boundaries with recorded crossings/violations; `ego/ownership.py` (`OwnershipAttributor`) keeps stream, operator, sidecar, replay, and counterfactual sources straight |
 | Embodiment principle (the body in the world) | `ego/body_schema.py` (`BodySchema`) — a simulated body declared simulated, with `simulation_only` action authority and physical embodiment explicitly absent |
+
+---
+
+## Communication mapping (Phase 19)
+
+The communication layer (`communication/`) realises Solaris_Ai's language
+principle at the human boundary: language is an interface into the
+system, not the ruler of it.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| `modules/language.py` (meaning expressed outward) | `communication/gateway.py` (`CommunicationGateway`) + `communication/response_builder.py` — classified input, templated grounded output, ClaimGuard on every response |
+| Inner MAP (self-state as a source) | `communication/query_router.py` — state queries answer from Inner MAP, ops, world model, homeostasis, executive, and ego summaries |
+| Ego (self/not-self at the channel) | gateway channel attribution via `ego/ownership.py` — operator text is an instruction only on the operator channel; pilot/sidecar text never commands |
+| IO/Action (commitment) | `communication/operator_commands.py` + `command_router.py` — a closed command set producing *bounded requests* only; confirmation gates, executive arbitration, and `committed=False` everywhere |
+| AutoDetermination / Governance (safe ends and human decisions) | `communication/approval_router.py` (decisions onto real pending `ApprovalRegistry` requests) + the always-available emergency path into `SafeShutdownManager`/`EmergencyStop` |
+| Conscience topology (who talks to whom) | status/explanation queries over the assembled component map — the query router names which module answered and with what evidence |
+| Language discipline (no anthropomorphic claims) | `communication/safety.py` + `templates.py` — forbidden first-person fragments are scanned out, and templates for "I want"/"I feel"/"I am conscious" structurally do not exist |

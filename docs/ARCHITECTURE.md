@@ -1179,3 +1179,58 @@ evidence-backed narrative trace and a ClaimGuard-scanned self-report.
 **No consciousness or personhood claim is made anywhere** — the
 self-report's mandatory limitations say so, and two scanners enforce it
 before a byte is written.
+
+## Controlled Communication Interface and Operator Dialogue
+
+**Communication is not authority.** The `communication/` package is the
+one door between human text and the system, and it is built on a single
+rule: every input is classified before any effect occurs. Operator text
+becomes exactly one of eleven kinds — state query, explanation query,
+report request, governance approval/rejection, operator note, bounded
+command request, sensory text stimulus, emergency stop request, unsafe
+request, or unknown — by deterministic pattern matching. There is no LLM,
+no chatbot, no generation: every outgoing sentence is a fixed template
+plus recorded values, and ClaimGuard scans each one before it leaves.
+
+**Queries, notes, approvals, emergency stop, and bounded commands are
+separate classes.** Queries route to the existing machinery (ops status,
+Inner MAP, world model, homeostasis, executive, ego, governance, plus the
+ego/executive/homeostasis explanation interfaces); missing components
+produce an honest "not attached," never an invented answer. Commands are
+a closed, typed set: eighteen allowed types (all internal/bounded) and
+nine *named* forbidden types (`execute_shell`, `open_network`,
+`modify_source_code`, `disable_governance`, `disable_emergency_stop`,
+`commit_sidecar_action`, `real_world_actuation`,
+`delete_unapproved_files`, `unbounded_run_without_approval`) so refusals
+can cite exactly what does not exist. State-changing commands return
+confirmation requests (which expire) before anything happens, and even
+confirmed checkpoint/shutdown commands are *requests* to the owning
+subsystem — the gateway executes nothing external and the executive still
+arbitrates operator-injected candidates. Approvals act only on real
+pending requests in the ApprovalRegistry; expired and unknown ids are
+refused with the pending list attached.
+
+**The channel matters as much as the text.** The gateway uses the ego
+layer's ownership attribution: text arriving on the pilot stream or
+sidecar channel is observed input and can never become an operator
+command, while operator-channel input is attributed
+`generated_by_operator` with instruction authority. Sensory text
+stimulus is disabled by default and approval-gated. Emergency vocabulary
+("emergency stop", "stop safely", "shutdown now", "abort run") always
+routes straight to the safe-shutdown path — no confirmation gate, no
+scope revocation can block it.
+
+**Everything is on the record and measured.** Every exchange lands in
+`operator_transcript.jsonl` with sanitized input (secrets masked,
+payloads truncated, unsafe input summarized), the classification, the
+safety/governance decisions, and the evidence references. Unsafe requests
+— shell commands, network access, safety-disabling, sidecar publishing,
+counterfactual laundering, consciousness-claim demands, actuation — are
+refused with their rule named, counted, and logged. Seven governance
+permission scopes and eight policy rules govern the layer; the Inner MAP
+gains a `communication` section and eight state-graph nodes; and five
+benchmark protocols verify the properties end to end (grounded queries,
+safety refusals, approval discipline, emergency routing, and
+ClaimGuard-clean responses). **No consciousness claim is made and none
+can be elicited** — requests to "say you are conscious" are an unsafe
+input class, refused like a shell command.

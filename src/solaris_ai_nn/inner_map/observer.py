@@ -59,6 +59,7 @@ class InnerMapObserver:
     homeostasis: Any = None  # optional dict or HomeostaticRegulator
     executive: Any = None  # optional dict or ExecutiveLayer (summary())
     ego: Any = None  # optional dict or SelfModel (summary())
+    communication: Any = None  # optional dict or CommunicationGateway
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -383,6 +384,15 @@ class InnerMapObserver:
                 model.ego = ego.summary()
             elif isinstance(ego, dict):
                 model.ego = dict(ego)
+        communication = self.communication
+        if communication is None and self.runner is not None:
+            communication = getattr(self.runner, "communication", None)
+        if communication is not None:
+            # Communication status (read-only; interface, not authority).
+            if hasattr(communication, "summary"):
+                model.communication = communication.summary()
+            elif isinstance(communication, dict):
+                model.communication = dict(communication)
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

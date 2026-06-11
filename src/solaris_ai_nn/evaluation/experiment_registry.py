@@ -59,6 +59,14 @@ DESCRIPTIONS = {
                            "own actions",
     "pilot_stream_attribution": "stream text is observation, never "
                                 "instruction",
+    "communication_query": "operator queries answer from state with "
+                           "evidence",
+    "communication_safety": "unsafe text refused, logged, never "
+                            "executed",
+    "operator_approval": "approvals act only on real pending requests",
+    "emergency_dialogue": "emergency vocabulary always reaches safe "
+                          "shutdown",
+    "claim_guard_response": "every response is scanned and grounded",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
