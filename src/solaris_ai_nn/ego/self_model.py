@@ -104,6 +104,11 @@ class SelfModel:
         self.llm_status: Dict[str, Any] = {"enabled": False,
                                            "adapter": None,
                                            "authority": False}
+        # Optional proto-language status (Prompt 22); set by callers.
+        self.proto_language_status: Dict[str, Any] = {
+            "enabled": False, "symbol_count": 0,
+            "stable_symbol_count": 0, "ambiguous_symbol_count": 0,
+            "authority": False}
         self.classification_counts: Dict[str, int] = {
             "internal": 0, "external": 0, "unknown": 0}
         self.last_snapshot: Optional[SelfModelSnapshot] = None
@@ -426,6 +431,8 @@ class SelfModel:
                                      else None),
             "self_report_path": None,  # set by callers that save one
             "llm_status": {**dict(self.llm_status), "authority": False},
+            "proto_language_status": {
+                **dict(self.proto_language_status), "authority": False},
             "note": SELF_MODEL_NOTE,
         }
 

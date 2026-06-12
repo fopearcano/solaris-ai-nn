@@ -546,4 +546,34 @@ def build_default_state_graph() -> StateGraph:
                "milestones feed fossil memory")
     g.add_edge("developmental_runtime", "inner_map",
                "developmental state feeds Inner MAP")
+
+    # Proto-language (Prompt 22). Signs under measurement, no authority.
+    for name, role in [
+        ("proto_symbol", "an internal sign from repetition"),
+        ("symbol_registry", "every sign on the books"),
+        ("symbol_emergence_engine", "repetition earns a name"),
+        ("internal_pattern_namer", "deterministic tokens"),
+        ("symbol_combinator", "which signs recur together"),
+        ("syntax_probe", "proto-syntactic regularities, tested"),
+        ("semantic_grounding_engine", "operational meaning"),
+        ("symbol_compression_evaluator", "does naming compress?"),
+        ("symbol_prediction_evaluator", "does naming predict?"),
+        ("proto_utterance_builder", "internal sequences, not speech"),
+        ("proto_language_translator", "debug renderings only"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("language_layer" if "language_layer" in g.nodes
+               else "memory", "symbol_emergence_engine",
+               "the meaning trace feeds symbol emergence")
+    g.add_edge("world_model_builder", "semantic_grounding_engine",
+               "the world model grounds symbols")
+    g.add_edge("symbol_registry", "symbol_compression_evaluator",
+               "the registry feeds compression")
+    g.add_edge("symbol_combinator", "syntax_probe",
+               "symbol sequences feed the syntax probe")
+    g.add_edge("symbol_prediction_evaluator", "evaluation_harness"
+               if "evaluation_harness" in g.nodes else "inner_map",
+               "prediction utility feeds evaluation")
+    g.add_edge("symbol_registry", "inner_map",
+               "proto-language state feeds Inner MAP")
     return g

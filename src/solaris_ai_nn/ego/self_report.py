@@ -83,6 +83,12 @@ class SelfReportBuilder:
                 "authority": False,
                 "note": "any LLM output is a validated paraphrase of "
                         "grounded text, never primary evidence"})
+            .add_section("proto_language_status", {
+                **dict(getattr(model, "proto_language_status",
+                               {"enabled": False})),
+                "authority": False,
+                "note": "proto-symbols are internal operational signs; "
+                        "not human speech, never authority"})
         )
         for limitation in EGO_LIMITATIONS:
             report.add_limitation(limitation)

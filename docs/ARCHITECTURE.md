@@ -1346,3 +1346,58 @@ governed segments (restarts included, deliberately), feeds developmental
 pressure into homeostasis and anchors into ego identity, reports through
 ClaimGuard, and refuses month/year scale without explicit human
 approval.
+
+## Emergent Proto-Language and Self-Generated Symbols
+
+**Language begins as internal differentiation.** The `protolanguage/`
+package lets repeated experience earn internal signs — and makes every
+sign pay rent. Recurring stimulus patterns, absence states, habit loops,
+Mysterium spikes, boundary events, executive inhibitions, needs,
+world-model entities, latent schemas, and developmental milestones cross
+a repetition threshold and receive deterministic generated tokens
+(``ABS_0001``, ``HAB_REST_0003``, ``UNK_SPIKE_0002``) from the
+`InternalPatternNamer` — typed prefixes, zero-padded counters, hash
+suffixes on collision, no human-language primaries, no anthropomorphic or
+mystical names, and no LLM anywhere near the naming. Human-readable
+labels exist only as clearly-secondary debug artifacts.
+
+**Symbols are grounded, and meaning is operational.** Every symbol ties
+to recorded structure across eleven grounding dimensions (signal
+patterns, contexts, needs, actions, reaction valence, world-model nodes,
+boundaries, schemas, milestones, Mysterium changes, executive decisions),
+with real/simulated/offline/counterfactual evidence kinds never mixed up
+— a counterfactual-grounded candidate is rejected outright unless marked
+offline, forever. Ambiguity (inconsistent grounding) is measured and kept
+visible; stability is repetition with consistency; and a fresh ungrounded
+symbol is ambiguous by default, not assumed clear.
+
+**Utility is the test, and failure is a finding.** A symbol is useful
+only if it demonstrably helps: the `SymbolCompressionEvaluator` measures
+whether symbolized traces shrink (safety/boundary incidents stay verbatim
+always — compression cannot hide them), and the
+`SymbolPredictionEvaluator` runs Markov-style next-symbol prediction
+against a frequency baseline, with negative improvement reported as
+honestly as positive. Repeated symbol streams fold into n-gram sequences
+(*proto-syntactic structures, not sentences*), and the `SyntaxProbe`
+infers type-level regularities (stimulus → need → action → reaction;
+unknown → replay → reduced unknown) that must survive held-out validation
+or be marked uncertain — the vocabulary is "proto-syntactic regularity,"
+never human grammar.
+
+**Proto-utterances are structure; translation is inspection.**
+``[ABS_0001] [NEED_SIGNAL_0002] [ACT_LOOK_0003]`` is an internal sequence
+built for a measured purpose (compression, prediction, explanation,
+memory, executive support, report support). The deterministic translator
+renders it as cautious debug text — "An absence pattern was followed by a
+need pressure and an action suggestion" — always suffixed as approximate
+translation, always ClaimGuard-gated, never first-person, and never a
+claim that the system speaks human language, because it does not.
+Symbols command nothing: they cannot execute, approve, override safety,
+or become operator language; validated action symbols may add at most a
+small capped bias to executive habit support, which governance and safety
+penalties always dominate. The developmental runtime scans for emergence
+each segment, fossilizes symbol births, tracks survival and extinction
+across simulated months, and seven new milestones (first proto-symbol
+through first proto-utterance) mark the firsts — with no human teaching,
+no LLM, and no consciousness or understanding claim anywhere in the
+chain.

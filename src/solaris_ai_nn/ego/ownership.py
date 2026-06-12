@@ -32,7 +32,8 @@ ATTRIBUTION_CATEGORIES = (
 _INTERNAL_SOURCES = frozenset({
     "substrate", "readout", "habit", "bridge", "memory", "plasticity",
     "homeostasis", "inner_map", "telemetry", "embodiment", "runtime",
-    "language", "evaluation", "ego", "self_model",
+    "language", "evaluation", "ego", "self_model", "protolanguage",
+    "proto_symbol",
 })
 
 # (keyword, category) checked in order against source/kind text.
@@ -146,6 +147,10 @@ class OwnershipAttributor:
         else:
             category, confidence, basis = self._categorize(source, kind)
         reasons = [basis]
+        if "proto_symbol" in f"{source} {kind}".lower() \
+                or "protolanguage" in source.lower():
+            reasons.append("an internally generated proto-symbol: not "
+                           "human speech, not an operator command")
         if category == "generated_by_llm_adapter":
             reasons.append("a paraphrase of grounded output: not primary "
                            "evidence, not system authority")

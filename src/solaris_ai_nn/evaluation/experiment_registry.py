@@ -86,6 +86,18 @@ DESCRIPTIONS = {
                                   "before/after numbers",
     "autobiographical_memory": "grounded observational history; "
                                "simulated time marked",
+    "proto_symbol_emergence": "repetition earns deterministic, "
+                              "grounded names",
+    "symbol_compression": "symbolized traces shrink; safety stays "
+                          "verbatim",
+    "symbol_prediction": "symbol prediction vs baseline, honest "
+                         "either way",
+    "proto_syntax": "regularities inferred and tested, never grammar "
+                    "claims",
+    "symbol_grounding": "operational meaning; ambiguity measured, not "
+                        "resolved",
+    "proto_language_safety": "symbols command nothing; counterfactuals "
+                             "stay offline",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {

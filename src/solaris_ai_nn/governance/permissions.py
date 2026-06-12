@@ -78,6 +78,12 @@ class PermissionScope:
     ENABLE_MEMORY_COMPRESSION = "enable_memory_compression"
     ENABLE_FOSSIL_MEMORY = "enable_fossil_memory"
     ENABLE_DEVELOPMENTAL_PRUNING = "enable_developmental_pruning"
+    # Proto-language (Prompt 22).
+    ENABLE_PROTO_LANGUAGE = "enable_proto_language"
+    ENABLE_SYMBOL_EMERGENCE = "enable_symbol_emergence"
+    ENABLE_SYMBOLIC_COMPRESSION = "enable_symbolic_compression"
+    ENABLE_PROTO_LANGUAGE_TRANSLATION = (
+        "enable_proto_language_translation")
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -106,6 +112,8 @@ class PermissionScope:
         ENABLE_DEVELOPMENTAL_RUNTIME, ENABLE_MONTH_SCALE_TESTING,
         ENABLE_YEAR_SCALE_TESTING, ENABLE_MEMORY_COMPRESSION,
         ENABLE_FOSSIL_MEMORY, ENABLE_DEVELOPMENTAL_PRUNING,
+        ENABLE_PROTO_LANGUAGE, ENABLE_SYMBOL_EMERGENCE,
+        ENABLE_SYMBOLIC_COMPRESSION, ENABLE_PROTO_LANGUAGE_TRANSLATION,
     )
 
 
@@ -279,6 +287,19 @@ class PermissionSet:
                        requires_approval=True,
                        note="pruning production memory needs approval "
                             "unless dry-run"),
+            Permission(S.ENABLE_PROTO_LANGUAGE, granted=True,
+                       note="internal symbols in bounded/developmental "
+                            "runs; never authority, never commands"),
+            Permission(S.ENABLE_SYMBOL_EMERGENCE, granted=True,
+                       note="repetition-based naming; deterministic, "
+                            "no LLM, no human feedback"),
+            Permission(S.ENABLE_SYMBOLIC_COMPRESSION, granted=True,
+                       note="allowed because safety incidents stay "
+                            "verbatim and evidence refs survive"),
+            Permission(S.ENABLE_PROTO_LANGUAGE_TRANSLATION,
+                       granted=True,
+                       note="debug translations only; ClaimGuard gates "
+                            "every rendering"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

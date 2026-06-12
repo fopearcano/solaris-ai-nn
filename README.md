@@ -253,6 +253,13 @@ python examples/run_memory_layer_demo.py
 python examples/run_milestone_demo.py
 python examples/run_drift_growth_demo.py
 python examples/run_month_scale_plan.py
+
+# Proto-language: internal symbols from repetition, utility-tested
+python examples/run_proto_language_demo.py --steps 500
+python examples/run_symbol_emergence_demo.py
+python examples/run_proto_utterance_demo.py
+python examples/run_symbol_prediction_demo.py
+python examples/run_proto_language_safety_demo.py
 ```
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
@@ -409,6 +416,22 @@ month/year scale requires explicit governance approval; and the headline
 metric is a cautious `structural_change_score` — there is no
 consciousness score, deliberately and permanently.
 
+The **proto-language layer** (`protolanguage/`) lets language begin the
+only honest way available to a system without a teacher: as internal
+differentiation. Repeated experience — stimulus patterns, absence
+states, habit loops, Mysterium spikes, boundaries, needs, decisions —
+crosses a repetition threshold and earns deterministic generated tokens
+(`ABS_0001`, `HAB_REST_0003`; no human words, no LLM naming). Every
+symbol is grounded in recorded structure across eleven dimensions with
+real/offline/counterfactual evidence never mixed; ambiguity is measured,
+not resolved; and utility is the rent — symbolized traces must compress
+(safety events stay verbatim) and Markov-style prediction must beat the
+baseline, with failure reported as honestly as success. Sequences become
+proto-syntactic structures (never grammar), proto-utterances are
+internal structure (never speech), translations are ClaimGuard-gated
+debug renderings, and the answer to "is this human language?" is a flat
+No. Symbols command nothing, approve nothing, and carry no authority.
+
 The **evaluation layer** (`evaluation/`) is the measurement harness: nine
 registered protocols (absence, feedback inversion, reward/danger, restart
 recovery, replay determinism, substrate comparison, plasticity dry-run,
@@ -508,6 +531,9 @@ src/solaris_ai_nn/
   developmental/ timescales, epochs, memory layers, consolidation policy,
                 developmental runtime, growth/drift monitors, milestones,
                 autobiographical memory, phase transitions, reports, safety
+  protolanguage/ symbols, registry, emergence, naming, combinatorics,
+                syntax probe, grounding, compression, prediction utility,
+                symbol memory, utterances, translation, reports, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

@@ -33,11 +33,13 @@ class NodeType:
     PERSPECTIVE_CONTEXT = "perspective_context"
     ACTION_AUTHORITY = "action_authority"
     ATTRIBUTION_SOURCE = "attribution_source"
+    # Proto-language (Prompt 22). Internal operational symbols.
+    PROTO_SYMBOL = "proto_symbol"
 
     ALL = (STIMULUS_PATTERN, SIGNAL_TYPE, ENTITY, OBJECT, PLACE, ACTION,
            REACTION, HABIT, BOUNDARY, CONTEXT, STATE, UNKNOWN,
            SELF_REFERENCE, LATENT_SCHEMA, PERSPECTIVE_CONTEXT,
-           ACTION_AUTHORITY, ATTRIBUTION_SOURCE)
+           ACTION_AUTHORITY, ATTRIBUTION_SOURCE, PROTO_SYMBOL)
 
 
 def slug(label: str) -> str:

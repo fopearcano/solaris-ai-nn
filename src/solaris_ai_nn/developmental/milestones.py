@@ -31,6 +31,15 @@ class MilestoneType:
     FIRST_LANGUAGE_LIKE_STRUCTURE = "first_language_like_structure"
     FIRST_LONG_STAGNATION = "first_long_stagnation"
     FIRST_PHASE_TRANSITION = "first_phase_transition"
+    # Proto-language (Prompt 22).
+    FIRST_PROTO_SYMBOL = "first_proto_symbol"
+    FIRST_STABLE_SYMBOL = "first_stable_symbol"
+    FIRST_SYMBOL_SEQUENCE = "first_symbol_sequence"
+    FIRST_PROTO_SYNTAX_RULE = "first_proto_syntax_rule"
+    FIRST_SYMBOL_PREDICTION_IMPROVEMENT = (
+        "first_symbol_prediction_improvement")
+    FIRST_SYMBOL_EXTINCTION = "first_symbol_extinction"
+    FIRST_PROTO_UTTERANCE = "first_proto_utterance"
 
     ALL = (FIRST_24H_SURVIVAL, FIRST_WEEK_SURVIVAL,
            FIRST_MONTH_SURVIVAL, FIRST_STABLE_HABIT,
@@ -39,7 +48,11 @@ class MilestoneType:
            FIRST_MAJOR_PRUNING, FIRST_WORLD_MODEL_SCHEMA,
            FIRST_IDENTITY_RESTART_RECOVERY, FIRST_BOUNDARY_VIOLATION,
            FIRST_SAFE_SHUTDOWN, FIRST_LANGUAGE_LIKE_STRUCTURE,
-           FIRST_LONG_STAGNATION, FIRST_PHASE_TRANSITION)
+           FIRST_LONG_STAGNATION, FIRST_PHASE_TRANSITION,
+           FIRST_PROTO_SYMBOL, FIRST_STABLE_SYMBOL,
+           FIRST_SYMBOL_SEQUENCE, FIRST_PROTO_SYNTAX_RULE,
+           FIRST_SYMBOL_PREDICTION_IMPROVEMENT,
+           FIRST_SYMBOL_EXTINCTION, FIRST_PROTO_UTTERANCE)
 
 
 @dataclass
@@ -118,6 +131,32 @@ _RULES = (
      "First phase-transition candidate recorded (a hypothesis, not "
      "proof of emergence).",
      lambda c: c.get("phase_transition_candidates", 0) >= 1),
+    (MilestoneType.FIRST_PROTO_SYMBOL,
+     "First internal proto-symbol generated from repeated experience "
+     "(an operational sign, not human language).",
+     lambda c: c.get("proto_symbol_count", 0) >= 1),
+    (MilestoneType.FIRST_STABLE_SYMBOL,
+     "First proto-symbol reached stability (repeated, consistently "
+     "grounded observation).",
+     lambda c: c.get("stable_symbol_count", 0) >= 1),
+    (MilestoneType.FIRST_SYMBOL_SEQUENCE,
+     "First repeated proto-symbol sequence recorded.",
+     lambda c: c.get("symbol_sequence_count", 0) >= 1),
+    (MilestoneType.FIRST_PROTO_SYNTAX_RULE,
+     "First proto-syntactic regularity inferred (a tested statistical "
+     "pattern, not human grammar).",
+     lambda c: c.get("proto_syntax_rule_count", 0) >= 1),
+    (MilestoneType.FIRST_SYMBOL_PREDICTION_IMPROVEMENT,
+     "Proto-symbols first improved prediction over the baseline.",
+     lambda c: (c.get("symbol_prediction_improvement") or 0) > 0),
+    (MilestoneType.FIRST_SYMBOL_EXTINCTION,
+     "First proto-symbol went extinct (named structure that stopped "
+     "recurring).",
+     lambda c: c.get("symbol_extinction_count", 0) >= 1),
+    (MilestoneType.FIRST_PROTO_UTTERANCE,
+     "First proto-utterance built (an internal symbolic sequence, not "
+     "speech).",
+     lambda c: c.get("proto_utterance_count", 0) >= 1),
 )
 
 

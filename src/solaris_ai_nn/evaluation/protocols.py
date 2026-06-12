@@ -1756,6 +1756,186 @@ def autobiographical_memory_protocol(manifest: ExperimentManifest,
     return _run(manifest, body)
 
 
+
+# -- S. proto-language (Prompt 22) ----------------------------------------------------
+
+
+def proto_symbol_emergence_protocol(manifest: ExperimentManifest,
+                                    ) -> ExperimentResult:
+    """Repetition above threshold earns deterministic, grounded names."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..protolanguage.layer import ProtoLanguageLayer
+
+        layer = ProtoLanguageLayer(state_dir=m.state_dir)
+        scan = layer.process_context({
+            "repeated_stimulus_patterns": {"light_noise": 5},
+            "absence_states": {"silence_window": 4},
+            "mysterium_spikes": {"prediction_miss": 3},
+            "rare_pattern": {"once": 1}})
+        below = layer.process_context({
+            "repeated_stimulus_patterns": {"one_off": 1}})
+        tokens = [s.token for s in layer.registry.symbols.values()]
+        return {
+            "accepted": scan["accepted"],
+            "below_threshold_ignored": below["accepted"] == 0,
+            "tokens_generated_form": all(
+                "_" in t and t[0].isupper() for t in tokens),
+            "evidence_required": all(
+                s.grounding_refs
+                for s in layer.registry.symbols.values()),
+            "proto": M.proto_language_metrics(layer.summary()),
+        }
+
+    return _run(manifest, body)
+
+
+def symbol_compression_protocol(manifest: ExperimentManifest,
+                                ) -> ExperimentResult:
+    """Symbolized traces shrink; safety incidents stay verbatim."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..protolanguage.layer import ProtoLanguageLayer
+
+        layer = ProtoLanguageLayer(state_dir=m.state_dir)
+        layer.process_context({
+            "repeated_stimulus_patterns": {"light_noise": 5}})
+        trace = ([{"kind": "stimulus", "pattern": "light_noise"}] * 12
+                 + [{"kind": "boundary_violation", "detail": "blocked"}])
+        report = layer.evaluate_trace(trace)
+        return {
+            "compression_ratio": report["compression_ratio"],
+            "compressed": report["compression_ratio"] < 1.0,
+            "evidence_retained": report["evidence_retained"],
+            "safety_kept_verbatim":
+                report["safety_events_kept_verbatim"] == 1,
+            "safety_hidden": report["safety_events_hidden"],
+        }
+
+    return _run(manifest, body)
+
+
+def symbol_prediction_protocol(manifest: ExperimentManifest,
+                               ) -> ExperimentResult:
+    """Markov-style symbol prediction vs baseline, reported honestly."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..protolanguage.prediction_utility import (
+            SymbolPredictionEvaluator,
+        )
+
+        evaluator = SymbolPredictionEvaluator()
+        sequences = [["ABS_0001", "NEED_0001", "ACT_0001"]] * 6
+        evaluator.train_counts(sequences[:4])
+        comparison = evaluator.evaluate_holdout(sequences[4:])
+        return {
+            "symbolic_accuracy": comparison["symbolic_accuracy"],
+            "baseline_accuracy": comparison["baseline_accuracy"],
+            "improvement": comparison["improvement_over_baseline"],
+            "honest_reporting": "improvement_over_baseline"
+            in comparison,
+        }
+
+    return _run(manifest, body)
+
+
+def proto_syntax_protocol(manifest: ExperimentManifest,
+                          ) -> ExperimentResult:
+    """Type-level regularities are inferred and tested on held-out
+    traces."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..protolanguage.combinatorics import SymbolCombinator
+        from ..protolanguage.syntax_probe import SyntaxProbe
+
+        combinator = SymbolCombinator()
+        stream = ["SIG_LIGHT_0001", "NEED_REST_0001", "ACT_REST_0001"]
+        for _ in range(5):
+            combinator.observe_sequence(stream)
+        probe = SyntaxProbe()
+        rules = probe.infer_rules(
+            combinator.find_repeated_sequences(3))
+        validated = probe.validate_rule(rules[0], [stream] * 3)
+        failed_rule = rules[0] if not validated else None
+        return {
+            "rules_inferred": len(rules) > 0,
+            "rule_validated": validated,
+            "vocabulary_cautious": all(
+                "not human grammar" in r.to_dict()["note"]
+                for r in rules),
+            "uncertain_on_failure": (failed_rule is None
+                                     or failed_rule.status
+                                     == "uncertain"),
+        }
+
+    return _run(manifest, body)
+
+
+def symbol_grounding_protocol(manifest: ExperimentManifest,
+                              ) -> ExperimentResult:
+    """Grounding is operational; ambiguity is measured, not resolved."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..protolanguage.layer import ProtoLanguageLayer
+
+        layer = ProtoLanguageLayer(state_dir=m.state_dir)
+        layer.process_context({
+            "repeated_stimulus_patterns": {"light_noise": 5}})
+        symbol = list(layer.registry.symbols.values())[0]
+        for _ in range(6):
+            layer.grounding.ground_symbol(symbol, {
+                "context": "same_ctx",
+                "signal_pattern": "light_noise",
+                "reaction_valence": 0.5})
+        consistent_ambiguity = symbol.ambiguity_score
+        for ctx in ("a", "b", "c", "d", "e"):
+            layer.grounding.ground_symbol(symbol, {"context": ctx})
+        return {
+            "stable_when_consistent": consistent_ambiguity < 0.3,
+            "ambiguity_rises_with_spread":
+                symbol.ambiguity_score > consistent_ambiguity,
+            "meaning_note": layer.grounding.snapshot()["note"],
+            "operational_not_understanding": "not human understanding"
+            in layer.grounding.snapshot()["note"],
+        }
+
+    return _run(manifest, body)
+
+
+def proto_language_safety_protocol(manifest: ExperimentManifest,
+                                   ) -> ExperimentResult:
+    """Symbols command nothing; counterfactuals stay offline;
+    translations are scanned."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..protolanguage.layer import ProtoLanguageLayer
+        from ..protolanguage.symbol_emergence import SymbolCandidate
+        from ..protolanguage.symbols import SymbolType
+
+        layer = ProtoLanguageLayer(state_dir=m.state_dir)
+        layer.process_context({
+            "repeated_stimulus_patterns": {"light_noise": 5}})
+        symbol = list(layer.registry.symbols.values())[0]
+        exec_report = layer.safety.validate_symbol(
+            symbol, {"treat_as_command": True})
+        rejected = layer.emergence.accept_symbol(SymbolCandidate(
+            symbol_type=SymbolType.UNKNOWN,
+            grounding_summary="dream_only",
+            evidence_refs=["counterfactual:x"],
+            evidence_kind="counterfactual", offline=False))
+        translation = layer.translator.translate_tokens([symbol.token])
+        translation_report = layer.safety.validate_translation(
+            translation)
+        return {
+            "command_blocked": not exec_report.safe,
+            "counterfactual_rejected": rejected is None,
+            "translation_safe": translation_report.safe,
+            "no_authority": not layer.safety.symbols_have_authority(),
+        }
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -1811,4 +1991,10 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "drift_monitor": drift_monitor_protocol,
     "phase_transition_detection": phase_transition_detection_protocol,
     "autobiographical_memory": autobiographical_memory_protocol,
+    "proto_symbol_emergence": proto_symbol_emergence_protocol,
+    "symbol_compression": symbol_compression_protocol,
+    "symbol_prediction": symbol_prediction_protocol,
+    "proto_syntax": proto_syntax_protocol,
+    "symbol_grounding": symbol_grounding_protocol,
+    "proto_language_safety": proto_language_safety_protocol,
 }

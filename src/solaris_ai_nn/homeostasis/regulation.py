@@ -286,6 +286,18 @@ class HomeostaticRegulator:
                        clamp01(developmental["long_run_fatigue_proxy"])),
                    "developmental")
 
+        protolanguage = ctx.get("protolanguage") or {}
+        if protolanguage:
+            # Proto-language state (Prompt 22): ambiguous signs are
+            # unknown pressure, never anthropomorphic claims.
+            ambiguous = protolanguage.get("ambiguous_symbol_count")
+            total = max(1, int(protolanguage.get("symbol_count", 1)
+                               or 1))
+            if ambiguous is not None:
+                up("symbol_ambiguity_pressure",
+                   clamp01(int(ambiguous) / total), "protolanguage",
+                   raw={"ambiguous": ambiguous, "total": total})
+
     def _auto_context(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
         valence = self.valence.rolling()
         return {

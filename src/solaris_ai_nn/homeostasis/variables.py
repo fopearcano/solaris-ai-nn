@@ -86,6 +86,7 @@ VARIABLE_GROUPS: Dict[str, Dict[str, Tuple[Any, float]]] = {
         "novelty_pressure": ((0.1, 0.5), 0.5),  # some novelty is healthy
         "replay_mismatch_pressure": (0.0, 1.0),
         "stagnation_pressure": (0.0, 0.6),  # developmental (Prompt 21)
+        "symbol_ambiguity_pressure": (0.0, 0.6),  # proto-lang (P22)
     },
     "memory": {
         "trace_pressure": (0.0, 0.6),

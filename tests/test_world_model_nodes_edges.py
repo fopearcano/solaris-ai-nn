@@ -22,7 +22,9 @@ def test_required_node_types_exist():
                 "latent_schema",
                 # ego (Prompt 18)
                 "perspective_context", "action_authority",
-                "attribution_source"}
+                "attribution_source",
+                # proto-language (Prompt 22)
+                "proto_symbol"}
     assert required == set(NodeType.ALL)
 
 
@@ -33,7 +35,9 @@ def test_required_edge_types_exist():
                 "contradicts", "unknown_relation", "self_boundary",
                 # ego (Prompt 18)
                 "operates_under", "holds_authority", "bounded_by",
-                "separates_evidence", "attributed_to"}
+                "separates_evidence", "attributed_to",
+                # proto-language (Prompt 22)
+                "grounded_in"}
     assert required == set(EdgeType.ALL)
 
 

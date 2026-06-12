@@ -58,6 +58,8 @@ class DevelopmentalRuntime:
     governance: Any = None
     stimulus_provider: Any = None
     reaction_provider: Any = None
+    # Proto-language (Prompt 22): internal symbols from repetition.
+    enable_proto_language: bool = False
 
     def __post_init__(self) -> None:
         self.state_dir = Path(self.state_dir)
@@ -72,6 +74,12 @@ class DevelopmentalRuntime:
         self.phases = PhaseTransitionDetector()
         self.autobiography = AutobiographicalMemory(
             state_dir=self.state_dir)
+        self.protolanguage = None
+        if self.enable_proto_language:
+            from ..protolanguage.layer import ProtoLanguageLayer
+
+            self.protolanguage = ProtoLanguageLayer(
+                state_dir=self.state_dir)
         self.segments_run = 0
         self.last_runner_snapshot: Dict[str, Any] = {}
         self.last_report_path: Optional[str] = None
@@ -196,6 +204,8 @@ class DevelopmentalRuntime:
         signals["stagnation_windows"] = self.growth.stagnation_windows
         signals["consolidation_count"] = \
             self.clock.total_memory_consolidations
+        if self.protolanguage is not None:
+            self._proto_language_tick(snapshot, signals, lifetime)
         transition = self.epochs.evaluate(signals, lifetime_s=lifetime)
         if transition is not None:
             self.clock.note_epoch_transition()
@@ -226,6 +236,71 @@ class DevelopmentalRuntime:
                 simulated=self.simulated_time)
         del report, growth_snapshot  # recorded in their own monitors
         self.save_state()
+
+    def _proto_language_tick(self, snapshot: Dict[str, Any],
+                             signals: Dict[str, Any],
+                             lifetime: float) -> None:
+        """Scan the segment for symbol emergence; fossilize the firsts."""
+        layer = self.protolanguage
+        habit_count = int(snapshot.get("habit_pathways", 0) or 0)
+        latent = snapshot.get("latent") or {}
+        ego = snapshot.get("ego") or {}
+        executive = snapshot.get("executive") or {}
+        proto_context = {
+            "label": f"segment_{self.segments_run}",
+            "repeated_stimulus_patterns": {
+                "session_stimuli": signals.get(
+                    "total_observed_stimuli", 0)},
+            "absence_states": {"silence_windows": 3}
+            if snapshot.get("session_steps") else {},
+            "action_reaction_loops": {
+                f"habit_pathways_{habit_count}": habit_count},
+            "mysterium_spikes": (
+                {"mysterium_high": 3}
+                if float(latent.get("mysterium_pressure", 0.0)
+                         or 0.0) > 0.6 else {}),
+            "boundary_events": (
+                {"boundary_violation":
+                 int(ego.get("boundary_violation_count", 0) or 0)}
+                if ego.get("boundary_violation_count") else {}),
+            "executive_inhibitions": (
+                {"inhibition": int(executive.get(
+                    "inhibited_candidate_count", 0) or 0)}
+                if executive.get("inhibited_candidate_count") else {}),
+            "need_pressures": {"regulation_updates": 3},
+            "world_model_entities": {
+                "graph_growth": signals.get("world_model_node_count",
+                                            0)},
+            "milestones": [m.type for m in
+                           self.milestones.registry.milestones[-3:]],
+        }
+        scan = layer.process_context(proto_context, lifetime_s=lifetime)
+        born = int(scan.get("born", 0) or 0)
+        if born:
+            for symbol in sorted(layer.registry.symbols.values(),
+                                 key=lambda s: -s.created_at)[:born]:
+                self.memory.record_fossil(
+                    {"description": f"proto-symbol born: "
+                                    f"{symbol.token}",
+                     "kind": "proto_symbol_birth",
+                     "token": symbol.token},
+                    kind="proto_symbol_birth", lifetime_s=lifetime)
+        layer.save_state()
+        summary = layer.summary()
+        signals["proto_symbol_count"] = summary["symbol_count"]
+        signals["stable_symbol_count"] = max(
+            signals.get("stable_symbol_count", 0),
+            summary["stable_symbol_count"])
+        signals["symbol_sequence_count"] = summary["sequence_count"]
+        signals["proto_syntax_rule_count"] = summary[
+            "proto_syntax_rule_count"]
+        signals["symbol_prediction_improvement"] = summary[
+            "prediction_utility"]
+        signals["proto_utterance_count"] = (
+            layer.utterances.built)
+        signals["symbol_extinction_count"] = sum(
+            1 for s in layer.registry.symbols.values()
+            if s.status == "extinct")
 
     def _signals(self, snapshot: Dict[str, Any]) -> Dict[str, Any]:
         habit_weights = ((snapshot.get("bridge") or {}).get("habit")
@@ -396,6 +471,9 @@ class DevelopmentalRuntime:
             "next_long_report_after_steps":
                 self.long_report_interval_steps,
             "developmental_report_path": self.last_report_path,
+            "proto_language": (self.protolanguage.summary()
+                               if self.protolanguage is not None
+                               else None),
             "note": "a persistent developmental process; labels are "
                     "measurements, not consciousness claims",
         }

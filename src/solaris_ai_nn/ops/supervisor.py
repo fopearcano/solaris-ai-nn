@@ -410,6 +410,39 @@ class OperationalSupervisor:
                     related_metric="drift_velocity",
                     suggested_debug_step="compare drift reports; fast "
                                          "drift may need stabilization")
+            proto = developmental.get("proto_language") or {}
+            if proto:
+                symbol_count = int(proto.get("symbol_count", 0) or 0)
+                ambiguous = int(proto.get("ambiguous_symbol_count", 0)
+                                or 0)
+                if symbol_count > 500:
+                    self.incidents.record(
+                        I.HEALTH_WARNING, "warning",
+                        f"symbol explosion: {symbol_count} proto-"
+                        "symbols registered",
+                        related_metric="proto_symbol_count",
+                        suggested_debug_step="raise the emergence "
+                                             "threshold; repetition "
+                                             "should be earning names")
+                if symbol_count >= 10 and ambiguous / max(
+                        1, symbol_count) > 0.8:
+                    self.incidents.record(
+                        I.HEALTH_WARNING, "warning",
+                        "proto-symbol ambiguity is dominating "
+                        f"({ambiguous}/{symbol_count})",
+                        related_metric="symbol_ambiguity",
+                        suggested_debug_step="review grounding "
+                                             "consistency; ambiguous "
+                                             "signs stay ambiguous")
+                if symbol_count >= 20 \
+                        and not proto.get("stable_symbol_count"):
+                    self.incidents.record(
+                        I.HEALTH_WARNING, "warning",
+                        "no stable proto-symbols over a long run",
+                        related_metric="stable_symbol_count",
+                        suggested_debug_step="symbols are being born "
+                                             "but none stabilize; check "
+                                             "grounding repetition")
 
         # LLM adapter monitoring (Prompt 20): evidence only.
         communication = snapshot.get("communication") or {}

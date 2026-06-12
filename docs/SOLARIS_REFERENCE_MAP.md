@@ -408,3 +408,21 @@ auditable long-horizon runtime.
 | Synthesis (becoming through subtraction) | `developmental/consolidation_policy.py` — the preservation ladder decides what compresses, what consolidates, what fossilizes; pruning summaries are mandatory |
 | Inner MAP (self-observation) | `InnerMapModel.developmental` + ten state-graph nodes — epoch, age, memory layers, growth/drift status, and milestones as observed self-state |
 | Death/restart concept | restart-gap tracking + identity continuity anchors (`epoch_history`, `fossil_memory`, `autobiographical_memory`, `checkpoint_lineage`) — a gap is a recorded discontinuity that the next session measures itself against |
+
+---
+
+## Proto-language mapping (Phase 22)
+
+The proto-language layer (`protolanguage/`) realises Solaris_Ai's deepest
+language premise: language begins as internal differentiation, not as
+human words.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| `modules/language.py` (language as meaning) | `protolanguage/symbols.py` + `utterance.py` + `translation.py` — internally generated signs, purposeful sequences, and inspection-only debug translation |
+| Logos (differentiation and recombination) | `pattern_naming.py` (signs differentiate by type and grounding) + `combinatorics.py` (signs recombine into measured sequences) |
+| Mysterium (pull of the unknown) | `unknown_symbol` types from repeated Mysterium spikes + ambiguity pressure feeding REDUCE_UNCERTAINTY through homeostasis |
+| Habit (reinforced pathways) | `habit_symbol` loops — stable signal/action/reaction circuits earn names, and stability is repetition with consistent grounding |
+| Synthesis (becoming through subtraction) | `compression.py` — symbolization as measured subtraction, with safety events kept verbatim and decay/extinction on the record |
+| Inner MAP (self-observation) | `InnerMapModel.proto_language` + eleven state-graph nodes — symbol counts, utility, and ambiguity as observed self-state |
+| Developmental runtime (long becoming) | symbol birth/survival/extinction tracked across simulated months; births fossilize; seven proto-language milestones mark the firsts |

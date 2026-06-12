@@ -301,6 +301,24 @@ DEFAULT_RULES: List[PolicyRule] = [
     PolicyRule("no_teacher_loop_required", "developmental",
                "no human feedback or teacher loop is required for "
                "learning; persistence is the mechanism"),
+    # O. Proto-language (Prompt 22)
+    PolicyRule("proto_language_allowed_bounded", "protolanguage",
+               "proto-language is allowed in bounded/developmental "
+               "runs"),
+    PolicyRule("translation_claim_guard", "protolanguage",
+               "translation reports must pass ClaimGuard"),
+    PolicyRule("symbols_never_execute", "protolanguage",
+               "proto-symbols cannot execute commands",
+               forbidden=True),
+    PolicyRule("symbols_not_operator_language", "protolanguage",
+               "proto-symbols cannot be treated as operator language",
+               forbidden=True),
+    PolicyRule("symbols_no_action_authority", "protolanguage",
+               "proto-symbols cannot become action authority",
+               forbidden=True),
+    PolicyRule("compression_cannot_hide_safety", "protolanguage",
+               "symbol compression cannot hide safety events",
+               forbidden=True),
 ]
 
 
@@ -531,6 +549,19 @@ class GovernancePolicy:
                     PermissionScope.ENABLE_YEAR_SCALE_TESTING, ctx):
                 need_approval(PermissionScope.ENABLE_YEAR_SCALE_TESTING,
                               "year-scale testing requires approval")
+
+        # O. Proto-language: internal signs; never commands, never
+        # authority (structural, but a hostile manifest is named).
+        if features.get("proto_language"):
+            if not self._approved(PermissionScope.ENABLE_PROTO_LANGUAGE,
+                                  ctx):
+                need_approval(PermissionScope.ENABLE_PROTO_LANGUAGE,
+                              "proto-language is not permitted")
+            if ctx.get("symbols_as_commands"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "symbols_never_execute", "protolanguage",
+                    "proto-symbols cannot execute commands"))
 
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):

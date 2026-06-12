@@ -1340,3 +1340,54 @@ and `autobiographical_memory` complete the history set.
 **Run:** `python examples/run_single_benchmark.py --experiment drift_monitor`
 The three-way drift verdict: slow drift passes as adaptation, runaway
 drift warns, and total flatness warns too.
+
+## 118. Proto-Language Demo ✅ (implemented)
+
+**Run:** `python examples/run_proto_language_demo.py --steps 500`
+A simulated developmental run with proto-language enabled: repetition
+earns deterministic tokens, births fossilize, milestones fire, and a
+ClaimGuard-scanned proto-language report closes the run. No teacher, no
+LLM, no human-language claim.
+
+## 119. Symbol Emergence Demo ✅ (implemented)
+
+**Run:** `python examples/run_symbol_emergence_demo.py`
+Repeated patterns cross the naming threshold; one-offs earn nothing; an
+unmarked counterfactual candidate is rejected; and consistent grounding
+turns a fresh sign into a stable one.
+
+## 120. Proto-Utterance Demo ✅ (implemented)
+
+**Run:** `python examples/run_proto_utterance_demo.py`
+Symbols fold into repeated sequences, sequences become purposeful
+proto-utterances, and the translator renders cautious debug text that is
+clearly marked as translation — structure, not speech.
+
+## 121. Symbol Prediction Demo ✅ (implemented)
+
+**Run:** `python examples/run_symbol_prediction_demo.py`
+The semantic test: Markov-style prediction beats the baseline on
+structured sequences and fails honestly on shuffled noise — both
+outcomes printed exactly as measured.
+
+## 122. Proto-Language Safety Demo ✅ (implemented)
+
+**Run:** `python examples/run_proto_language_safety_demo.py`
+Four properties live: a symbol cannot become a command, pilot-stream
+symbols cannot become operator commands, counterfactual symbols stay
+offline, and every translation passes ClaimGuard.
+
+## 123. Symbol Compression Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment symbol_compression`
+Symbolized traces shrink (run-length folding included) while evidence
+references survive and safety incidents stay verbatim.
+`proto_symbol_emergence`, `symbol_prediction`, `symbol_grounding`, and
+`proto_language_safety` complete the utility/safety set.
+
+## 124. Proto-Syntax Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment proto_syntax`
+Type-level regularities inferred from repeated sequences and validated
+against held-out traces — tested statistical patterns over internal
+symbols, never human grammar.

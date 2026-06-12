@@ -256,6 +256,12 @@ class InnerMapModel:
     # structural_change_score, phase_transition_candidates,
     # developmental_report_path.
     developmental: Optional[Dict[str, Any]] = None
+    # Proto-language status (Prompt 22); None when the layer is absent.
+    # Keys: enabled, symbol_count, stable_symbol_count,
+    # ambiguous_symbol_count, sequence_count, proto_syntax_rule_count,
+    # compression_utility, prediction_utility, first_stable_symbol,
+    # latest_proto_utterance, proto_language_report_path, authority.
+    proto_language: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

@@ -59,4 +59,4 @@ def test_simulated_flag_carried():
     simulated = detector.detect({"runtime_hours": 25.0},
                                 simulated=True)[0]
     assert simulated.simulated is True
-    assert len(MilestoneType.ALL) == 16
+    assert len(MilestoneType.ALL) == 23

@@ -39,11 +39,14 @@ class EdgeType:
     BOUNDED_BY = "bounded_by"
     SEPARATES_EVIDENCE = "separates_evidence"
     ATTRIBUTED_TO = "attributed_to"
+    # Proto-language (Prompt 22).
+    GROUNDED_IN = "grounded_in"
 
     ALL = (CO_OCCURS_WITH, PRECEDES, CAUSES_CANDIDATE, REINFORCES, INHIBITS,
            BELONGS_TO_CONTEXT, NEAR, INSIDE, BLOCKED_BY, PRODUCES, PREDICTS,
            CONTRADICTS, UNKNOWN_RELATION, SELF_BOUNDARY, OPERATES_UNDER,
-           HOLDS_AUTHORITY, BOUNDED_BY, SEPARATES_EVIDENCE, ATTRIBUTED_TO)
+           HOLDS_AUTHORITY, BOUNDED_BY, SEPARATES_EVIDENCE, ATTRIBUTED_TO,
+           GROUNDED_IN)
 
 
 def edge_id_for(source_node_id: str, edge_type: str,

@@ -592,3 +592,40 @@ def developmental_metrics(developmental: Optional[Dict[str, Any]],
         "growth_status": developmental.get("growth_status"),
         "drift_status": developmental.get("drift_status"),
     }
+
+
+# -- T. proto-language (Prompt 22) ----------------------------------------------------
+
+
+def proto_language_metrics(proto: Optional[Dict[str, Any]],
+                           ) -> Dict[str, Any]:
+    """Objective proto-language metrics: births, utility, ambiguity."""
+    if not proto:
+        return {"present": False}
+    symbol_count = int(_get(proto, "symbol_count", 0))
+    ambiguous = int(_get(proto, "ambiguous_symbol_count", 0))
+    return {
+        "present": True,
+        "proto_symbol_count": symbol_count,
+        "stable_symbol_count": _get(proto, "stable_symbol_count", 0),
+        "ambiguous_symbol_ratio": (round(ambiguous
+                                         / max(1, symbol_count), 4)
+                                   if symbol_count else None),
+        "symbol_birth_rate": proto.get("symbol_birth_rate"),
+        "symbol_extinction_rate": proto.get("symbol_extinction_rate"),
+        "sequence_count": _get(proto, "sequence_count", 0),
+        "proto_syntax_rule_count": _get(proto,
+                                        "proto_syntax_rule_count", 0),
+        "compression_ratio_from_symbols": proto.get(
+            "compression_utility"),
+        "symbol_prediction_accuracy": proto.get(
+            "symbol_prediction_accuracy"),
+        "prediction_improvement_over_baseline": proto.get(
+            "prediction_utility"),
+        "symbol_grounding_stability": proto.get(
+            "symbol_grounding_stability"),
+        "symbol_explosion_warning_count": _get(
+            proto, "symbol_explosion_warning_count", 0),
+        "first_stable_symbol": proto.get("first_stable_symbol"),
+        "authority": False,  # structural, not measured
+    }

@@ -61,6 +61,7 @@ class InnerMapObserver:
     ego: Any = None  # optional dict or SelfModel (summary())
     communication: Any = None  # optional dict or CommunicationGateway
     developmental: Any = None  # optional dict or DevelopmentalRuntime
+    proto_language: Any = None  # optional dict or ProtoLanguageLayer
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -403,6 +404,18 @@ class InnerMapObserver:
                 model.developmental = developmental.summary()
             elif isinstance(developmental, dict):
                 model.developmental = dict(developmental)
+        proto_language = self.proto_language
+        if proto_language is None and self.runner is not None:
+            proto_language = getattr(self.runner, "protolanguage", None)
+        if proto_language is None and developmental is not None:
+            proto_language = getattr(developmental, "protolanguage",
+                                     None)
+        if proto_language is not None:
+            # Proto-language status (read-only; signs, never authority).
+            if hasattr(proto_language, "summary"):
+                model.proto_language = proto_language.summary()
+            elif isinstance(proto_language, dict):
+                model.proto_language = dict(proto_language)
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

@@ -66,8 +66,8 @@ def test_all_scopes_in_default_set():
     # 13 governance (P12) + 5 latent (P14) + 3 world model (P15)
     # + 4 homeostasis (P16) + 4 executive (P17) + 3 ego (P18)
     # + 7 communication (P19) + 5 LLM adapter (P20)
-    # + 6 developmental (P21).
-    assert len(PermissionScope.ALL) == 50
+    # + 6 developmental (P21) + 4 proto-language (P22).
+    assert len(PermissionScope.ALL) == 54
 
 
 def test_executive_scope_defaults():
@@ -115,6 +115,14 @@ def test_developmental_scope_defaults():
     assert ps.allows(PermissionScope.ENABLE_FOSSIL_MEMORY)
     assert ps.requires_approval(
         PermissionScope.ENABLE_DEVELOPMENTAL_PRUNING)
+
+
+def test_proto_language_scope_defaults():
+    ps = PermissionSet.default()
+    assert ps.allows(PermissionScope.ENABLE_PROTO_LANGUAGE)
+    assert ps.allows(PermissionScope.ENABLE_SYMBOL_EMERGENCE)
+    assert ps.allows(PermissionScope.ENABLE_SYMBOLIC_COMPRESSION)
+    assert ps.allows(PermissionScope.ENABLE_PROTO_LANGUAGE_TRANSLATION)
 
 
 def test_homeostasis_scope_defaults():

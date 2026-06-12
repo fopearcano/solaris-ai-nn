@@ -719,3 +719,54 @@ question clean (is it different because of what it lived through?), and
 it forces the architecture to be honest about what persistence alone can
 do. Human feedback can be layered on later; un-confounding it later is
 impossible.
+
+**Language emergence.** Every account of language origins begins with
+differentiation: some recurring chunk of experience becomes worth
+marking apart from the rest. The proto-language layer implements exactly
+that minimal step — repetition above a threshold earns a deterministic
+internal token — and deliberately nothing more. Whatever else language
+is, it is downstream of having signs at all.
+
+**The symbol grounding problem.** Symbols that only point at other
+symbols mean nothing; Harnad's classic problem is escaping the
+dictionary loop. Here every symbol is born already grounded — in a
+recorded signal pattern, need, action, reaction, boundary, or unknown —
+and grounding is the *definition* of meaning in this system: a sign
+means what it reliably co-occurs with, operationally, with ambiguity
+measured rather than resolved by fiat.
+
+**Proto-language vs human language.** The distance is the point. No
+phonology, no recursion guarantee, no pragmatics, no speaker — just
+signs, sequences, and tested regularities. Calling the sequences
+"proto-syntactic structures" rather than grammar is not modesty; it is
+accuracy, and the one query the system answers with a flat "No" is
+"is this human language?"
+
+**Compression as naming pressure.** Why name anything? Because a name is
+cheaper than the thing it stands for. The compression evaluator makes
+that folk intuition a metric: a symbol that lets twelve repeated events
+fold into one token with a repeat count has earned its existence in
+bytes. The constraint that safety incidents stay verbatim is the
+counterweight — some things must never become cheap to store.
+
+**Prediction as semantic test.** A symbol system that carries structure
+should make the future cheaper to guess. Markov-style next-symbol
+prediction against a frequency baseline is the lowest-compute honest
+version of that test, and its honesty is structural: shuffled noise
+produces no improvement and the report says so. Meaning that does not
+help prediction anywhere is indistinguishable from decoration.
+
+**Enfant sauvage framing.** A child raised without language exposure
+still differentiates, names privately, and routinizes — what they lack
+is the social loop that standardizes signs into a shared code.
+Solaris-AI-NN is deliberately in that pre-social stage: its signs answer
+to its own experience and its own utility metrics, not to a community of
+speakers. That makes the symbols strange and private, and it makes them
+*evidence* — nothing about them can have been imitated.
+
+**Why human teaching is postponed.** The moment an operator labels
+things, the symbol system inherits human ontology and every emergent
+structure is confounded. Keeping the first symbols teacher-free keeps
+the research question clean: what sign system does repetition plus
+utility produce on its own? Human alignment of the vocabulary can be
+layered on later; un-teaching it later is impossible.
