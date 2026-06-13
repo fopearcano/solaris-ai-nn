@@ -61,6 +61,12 @@ SAMPLING_LOOP = "sampling_loop"
 EXCESSIVE_NOVELTY_SEEKING = "excessive_novelty_seeking"
 NO_USEFUL_SAMPLING = "no_useful_sampling"
 SAMPLING_FORBIDDEN_BOUNDARY = "sampling_forbidden_boundary"
+# Hypothesis engine / self-experimentation (Prompt 25).
+HYPOTHESIS_EXPLOSION = "hypothesis_explosion"
+TOO_MANY_INCONCLUSIVE_TESTS = "too_many_inconclusive_tests"
+REPEATED_UNSAFE_HYPOTHESES = "repeated_unsafe_hypotheses"
+EXCESSIVE_INTERVENTION_RATE = "excessive_intervention_rate"
+NO_HYPOTHESIS_PROGRESS = "no_hypothesis_progress"
 
 INCIDENT_TYPES = frozenset({
     HEALTH_WARNING, HEALTH_CRITICAL, WATCHDOG_SHUTDOWN, UNEXPECTED_DEATH,
@@ -82,6 +88,9 @@ INCIDENT_TYPES = frozenset({
     ECOLOGY_REPLAY_MISMATCH,
     CURIOSITY_RUNAWAY, SAMPLING_LOOP, EXCESSIVE_NOVELTY_SEEKING,
     NO_USEFUL_SAMPLING, SAMPLING_FORBIDDEN_BOUNDARY,
+    HYPOTHESIS_EXPLOSION, TOO_MANY_INCONCLUSIVE_TESTS,
+    REPEATED_UNSAFE_HYPOTHESES, EXCESSIVE_INTERVENTION_RATE,
+    NO_HYPOTHESIS_PROGRESS,
 })
 
 SEVERITIES = ("info", "warning", "critical")

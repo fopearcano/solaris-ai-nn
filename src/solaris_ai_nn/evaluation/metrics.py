@@ -758,3 +758,53 @@ def active_perception_metrics(active_perception: Optional[Dict[str, Any]],
         "sampling_policy_mode": policy.get("mode"),
         "authority": False,  # structural; sampling never has authority
     }
+
+
+# -- W. hypothesis engine / self-experimentation (Prompt 25) ---------------------------
+
+
+def hypothesis_metrics(hypothesis: Optional[Dict[str, Any]],
+                       ) -> Dict[str, Any]:
+    """Objective hypothesis metrics: how many candidates, how many tests,
+    how often supported/falsified/inconclusive, and whether testing reduced
+    uncertainty. These describe an internal experimental loop, never proof
+    of understanding."""
+    if not hypothesis:
+        return {"present": False}
+    snap = hypothesis
+    memory = snap.get("memory") or {}
+    runner = snap.get("test_runner") or {}
+    generator = snap.get("generator") or {}
+    evidence = runner.get("evidence") or {}
+    counts = memory.get("counts_by_status", {})
+    tests = int(_get(runner, "tests_run", 0))
+    supported = int(counts.get("supported", 0))
+    falsified = int(counts.get("falsified", 0))
+    inconclusive = int(counts.get("inconclusive", 0))
+    unsafe = int(_get(runner, "unsafe_count", 0))
+    generated = int(_get(generator, "generated_total", 0))
+    distinct = int(_get(generator, "distinct_keys", 0))
+    return {
+        "present": True,
+        "hypothesis_count": int(_get(memory, "hypothesis_count", 0)),
+        "hypothesis_generation_rate": generated,
+        "test_count": tests,
+        "support_rate": round(supported / tests, 4) if tests else None,
+        "falsification_rate": round(falsified / tests, 4) if tests else None,
+        "inconclusive_rate": (round(inconclusive / tests, 4) if tests
+                              else None),
+        "unsafe_test_rate": round(unsafe / max(1, tests + unsafe), 4),
+        "average_test_cost": _get(runner, "average_test_cost", 0.05),
+        "evidence_count": int(_get(evidence, "evidence_count", 0)),
+        "Mysterium_reduction_after_tests": snap.get(
+            "mysterium_reduction_after_tests"),
+        "world_model_confidence_delta": snap.get(
+            "world_model_confidence_delta"),
+        "proto_symbol_ambiguity_delta": snap.get(
+            "proto_symbol_ambiguity_delta"),
+        "hypothesis_reuse_rate": (round(1.0 - distinct / generated, 4)
+                                  if generated else None),
+        "long_lived_unknown_count": int(_get(
+            memory, "long_lived_unknown_count", 0)),
+        "authority": False,  # structural; hypotheses are never authority
+    }

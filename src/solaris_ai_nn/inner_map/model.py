@@ -276,6 +276,12 @@ class InnerMapModel:
     # blocked_sampling_count, stagnation_state,
     # active_perception_report_path, authority.
     active_perception: Optional[Dict[str, Any]] = None
+    # Hypothesis engine status (Prompt 25); None when the engine is off.
+    # Keys: enabled, hypothesis_count, highest_priority_hypothesis,
+    # current_test_scope, supported_count, falsified_count,
+    # inconclusive_count, unsafe_to_test_count, long_lived_unknown_count,
+    # last_evidence_result, hypothesis_report_path, authority.
+    hypothesis: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

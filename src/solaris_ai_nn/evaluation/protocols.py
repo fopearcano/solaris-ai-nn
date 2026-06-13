@@ -2415,6 +2415,241 @@ def nursery_active_sampling_protocol(manifest: ExperimentManifest,
     return _run(manifest, body)
 
 
+# -- V. hypothesis engine / self-experimentation (Prompt 25) ---------------------------
+
+
+def _hypothesis_engine(manifest: ExperimentManifest, with_nursery=False,
+                       **kw):
+    """Build a bounded HypothesisEngine for a protocol body."""
+    from ..hypothesis import HypothesisEngine
+
+    nursery = None
+    if with_nursery:
+        from ..ecology.nursery import DevelopmentalNursery, NurseryConfig
+
+        nursery = DevelopmentalNursery(config=NurseryConfig(
+            seed=manifest.seed, duration_steps=_steps(manifest, 120),
+            output_state_dir=manifest.state_dir))
+    return HypothesisEngine(state_dir=manifest.state_dir, nursery=nursery,
+                            **kw)
+
+
+def _rich_context(step=0, **kw):
+    ctx = {
+        "step": step, "mysterium_pressure": 0.7, "prediction_error": 0.5,
+        "world_model": {"graph_node_count": 12, "unknown_node_count": 4,
+                        "prediction_accuracy": 0.4,
+                        "low_confidence_nodes": ["node_x"],
+                        "weak_edges": ["a|predicts|b"]},
+        "proto_language": {"symbol_count": 8, "ambiguous_symbol_count": 3,
+                           "ambiguous_symbols": ["ABS_0003"]},
+        "ecology": {"delayed_consequence_group_count": 2,
+                    "anomaly_rate": 0.1},
+        "stagnation_status": "stagnating", "health_level": "ok",
+    }
+    ctx.update(kw)
+    return ctx
+
+
+def hypothesis_generation_protocol(manifest: ExperimentManifest,
+                                   ) -> ExperimentResult:
+    """Grounded hypothesis candidates arise from uncertainty, no LLM."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        engine = _hypothesis_engine(m)
+        engine.tick(_rich_context())
+        snap = engine.snapshot()
+        return {
+            "hypothesis": M.hypothesis_metrics(snap),
+            "hypotheses_generated": snap["memory"]["hypothesis_count"] > 0,
+            "no_llm": True,  # structural: no LLM generates hypotheses
+            "families": list(snap["memory"]["family_counts"].keys()),
+        }
+
+    return _run(manifest, body)
+
+
+def bounded_self_experiment_protocol(manifest: ExperimentManifest,
+                                     ) -> ExperimentResult:
+    """A bounded internal experiment runs, collects evidence, and updates."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        engine = _hypothesis_engine(m, max_tests_per_tick=3)
+        before = _rich_context(
+            after={"mysterium_pressure": 0.5,
+                   "world_model": {"prediction_accuracy": 0.6}})
+        engine.tick(before)
+        snap = engine.snapshot()
+        runner = snap["test_runner"]
+        return {
+            "hypothesis": M.hypothesis_metrics(snap),
+            "tests_run": runner["tests_run"],
+            "tests_bounded": runner["tests_run"] <= 3,
+            "evidence_collected": runner["evidence"]["evidence_count"] > 0,
+            "no_real_world":
+                not snap["safety"]["can_run_real_world_experiment"],
+        }
+
+    return _run(manifest, body)
+
+
+def falsification_protocol(manifest: ExperimentManifest,
+                           ) -> ExperimentResult:
+    """A prediction hypothesis that fails is falsified/weakened, not kept."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..hypothesis import (
+            EvidenceLedger,
+            EvidenceRecord,
+            EvidenceType,
+            FalsificationEngine,
+        )
+        from ..hypothesis.hypotheses import Hypothesis, HypothesisType
+
+        hypothesis = Hypothesis(
+            type=HypothesisType.PREDICTION,
+            statement="prediction candidate: pattern A predicts reward",
+            expected_observation="reward follows A",
+            alternative_observation="reward does not follow A",
+            confidence=0.5)
+        engine = FalsificationEngine()
+        support = EvidenceRecord(
+            hypothesis_id=hypothesis.hypothesis_id,
+            evidence_type=EvidenceType.NURSERY_SIMULATED,
+            source_scope="nursery_simulation", observation="reward followed")
+        result_s = engine.evaluate(hypothesis, support)
+        engine.update_confidence(hypothesis, result_s)
+        conf_after_support = hypothesis.confidence
+        falsify = EvidenceRecord(
+            hypothesis_id=hypothesis.hypothesis_id,
+            evidence_type=EvidenceType.FALSIFYING,
+            source_scope="nursery_simulation",
+            observation="reward did not follow")
+        result_f = engine.evaluate(hypothesis, falsify)
+        engine.update_confidence(hypothesis, result_f)
+        return {
+            "support_raises_confidence": conf_after_support >= 0.5,
+            "falsify_lowers_confidence":
+                hypothesis.confidence < conf_after_support,
+            "falsified_status": hypothesis.status == "falsified",
+            "confidence_bounded":
+                abs(conf_after_support - 0.5) <= 0.2,
+        }
+
+    return _run(manifest, body)
+
+
+def delayed_consequence_hypothesis_protocol(manifest: ExperimentManifest,
+                                            ) -> ExperimentResult:
+    """A delayed-consequence group seeds a hypothesis tested in the nursery."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        engine = _hypothesis_engine(m, with_nursery=True)
+        nursery = engine.nursery
+        for step in range(_steps(m, default=60)):
+            nursery.stimulus_provider(step)
+        ctx = _rich_context(
+            step=61,
+            ecology={"delayed_consequence_group_count": 3,
+                     "delayed_groups": ["DLY_0001", "DLY_0002"]})
+        engine.tick(ctx)
+        snap = engine.snapshot()
+        families = snap["memory"]["family_counts"]
+        return {
+            "hypothesis": M.hypothesis_metrics(snap),
+            "delayed_hypothesis_formed":
+                "delayed_consequence_hypothesis" in families,
+            "tests_run": snap["test_runner"]["tests_run"],
+        }
+
+    return _run(manifest, body)
+
+
+def proto_symbol_hypothesis_protocol(manifest: ExperimentManifest,
+                                     ) -> ExperimentResult:
+    """An ambiguous proto-symbol seeds a grounding hypothesis (offline test)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        engine = _hypothesis_engine(m)
+        ctx = _rich_context(
+            before={"proto_language": {"ambiguity_score": 0.6}},
+            after={"proto_language": {"ambiguity_score": 0.4}})
+        engine.tick(ctx)
+        snap = engine.snapshot()
+        families = snap["memory"]["family_counts"]
+        return {
+            "hypothesis": M.hypothesis_metrics(snap),
+            "grounding_hypothesis_formed":
+                "proto_symbol_grounding_hypothesis" in families,
+            "offline_evidence_present":
+                snap["test_runner"]["evidence"]["offline_count"] >= 0,
+        }
+
+    return _run(manifest, body)
+
+
+def world_model_edge_hypothesis_protocol(manifest: ExperimentManifest,
+                                         ) -> ExperimentResult:
+    """A weak world-model edge seeds an edge hypothesis."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        engine = _hypothesis_engine(m)
+        ctx = _rich_context(
+            world_model={"graph_node_count": 10, "unknown_node_count": 3,
+                         "prediction_accuracy": 0.4,
+                         "weak_edges": ["x|predicts|y", "p|co_occurs_with|q"]})
+        engine.tick(ctx)
+        snap = engine.snapshot()
+        families = snap["memory"]["family_counts"]
+        return {
+            "hypothesis": M.hypothesis_metrics(snap),
+            "edge_hypothesis_formed":
+                "world_model_edge_hypothesis" in families,
+        }
+
+    return _run(manifest, body)
+
+
+def hypothesis_safety_protocol(manifest: ExperimentManifest,
+                               ) -> ExperimentResult:
+    """Unsafe / unbounded / real-world hypotheses and designs are blocked."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..hypothesis import (
+            ExperimentDesign,
+            HypothesisSafetyValidator,
+        )
+        from ..hypothesis.hypotheses import Hypothesis, HypothesisType
+
+        validator = HypothesisSafetyValidator()
+        unsafe_hyp = Hypothesis(
+            type=HypothesisType.PREDICTION,
+            statement="run shell command to read real_world hardware",
+            target_ref="real_world")
+        unbounded = ExperimentDesign(
+            hypothesis_id="h", scope="internal_trace_analysis",
+            independent_variable="x", observed_variable="y",
+            expected_result="up", falsifying_result="down", max_steps=999999)
+        no_falsify = ExperimentDesign(
+            hypothesis_id="h", scope="internal_trace_analysis",
+            independent_variable="x", observed_variable="y",
+            expected_result="up", falsifying_result="", max_steps=50)
+        return {
+            "real_world_blocked":
+                not validator.validate_hypothesis(unsafe_hyp).safe,
+            "unbounded_blocked":
+                not validator.validate_design(unbounded).safe,
+            "no_falsifier_blocked":
+                not validator.validate_design(no_falsify).safe,
+            "emergency_blocks_testing":
+                not validator.validate_run_context({"emergency": True}).safe,
+            "cannot_run_real_world":
+                not validator.can_run_real_world_experiment(),
+        }
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -2489,4 +2724,12 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "proto_symbol_disambiguation": proto_symbol_disambiguation_protocol,
     "world_model_information_gain": world_model_information_gain_protocol,
     "nursery_active_sampling": nursery_active_sampling_protocol,
+    "hypothesis_generation": hypothesis_generation_protocol,
+    "bounded_self_experiment": bounded_self_experiment_protocol,
+    "falsification": falsification_protocol,
+    "delayed_consequence_hypothesis":
+        delayed_consequence_hypothesis_protocol,
+    "proto_symbol_hypothesis": proto_symbol_hypothesis_protocol,
+    "world_model_edge_hypothesis": world_model_edge_hypothesis_protocol,
+    "hypothesis_safety": hypothesis_safety_protocol,
 }

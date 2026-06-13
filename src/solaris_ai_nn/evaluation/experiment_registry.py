@@ -124,6 +124,20 @@ DESCRIPTIONS = {
                                     "yields a hedged gain estimate",
     "nursery_active_sampling": "active perception samples a bounded "
                                "nursery via its sampling hooks",
+    "hypothesis_generation": "grounded hypothesis candidates arise from "
+                             "uncertainty, no LLM",
+    "bounded_self_experiment": "a bounded internal experiment runs, "
+                               "collects evidence, and updates",
+    "falsification": "a failing prediction hypothesis is falsified, not "
+                     "kept; confidence moves in bounded steps",
+    "delayed_consequence_hypothesis": "a delayed-consequence group seeds a "
+                                      "hypothesis tested in the nursery",
+    "proto_symbol_hypothesis": "an ambiguous proto-symbol seeds a grounding "
+                               "hypothesis (offline test)",
+    "world_model_edge_hypothesis": "a weak world-model edge seeds an edge "
+                                   "hypothesis",
+    "hypothesis_safety": "unsafe/unbounded/real-world hypotheses and "
+                         "designs are blocked",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -191,6 +205,13 @@ class ExperimentRegistry:
                         "world_model_information_gain",
                         "nursery_active_sampling")
             or bool(merged.get("active_perception", False)))
+        features["hypothesis_engine"] = (
+            name.startswith("hypothesis")
+            or name in ("bounded_self_experiment", "falsification",
+                        "delayed_consequence_hypothesis",
+                        "proto_symbol_hypothesis",
+                        "world_model_edge_hypothesis")
+            or bool(merged.get("hypothesis_engine", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

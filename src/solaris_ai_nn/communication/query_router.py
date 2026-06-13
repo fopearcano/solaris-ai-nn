@@ -30,6 +30,9 @@ AVAILABLE_QUERIES = (
     "what is the system sampling?", "why did it look there?",
     "what is the current attention focus?", "what uncertainty is highest?",
     "is curiosity overriding safety?",
+    "what hypotheses exist?", "what is the top hypothesis?",
+    "what was tested?", "what was falsified?", "what remains unknown?",
+    "why was a test blocked?", "did testing reduce mysterium?",
 )
 
 
@@ -99,6 +102,7 @@ class QueryRouter:
             "incidents": "incidents", "run_registry": "run_registry",
             "last_event": "last_event",
             "active_perception": "active_perception",
+            "hypothesis": "hypothesis",
         }
         key = component_keys.get(topic)
         if key is None:
@@ -160,6 +164,12 @@ class QueryRouter:
             interfaces.append(("active_perception",
                                ActivePerceptionQueryInterface(
                                    active_perception)))
+        hypothesis = self.components.get("hypothesis")
+        if hypothesis is not None:
+            from ..hypothesis.reports import HypothesisQueryInterface
+
+            interfaces.append(("hypothesis",
+                               HypothesisQueryInterface(hypothesis)))
         return interfaces
 
     # -- meta queries -----------------------------------------------------------------

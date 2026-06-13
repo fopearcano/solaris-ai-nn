@@ -274,6 +274,13 @@ python examples/run_uncertainty_sampling_demo.py
 python examples/run_curiosity_safety_demo.py
 python examples/run_stagnation_recovery_demo.py
 python examples/run_proto_symbol_disambiguation_demo.py
+
+# Hypothesis engine: bounded internal self-experimentation
+python examples/run_hypothesis_engine_demo.py --steps 300
+python examples/run_hypothesis_falsification_demo.py
+python examples/run_delayed_consequence_hypothesis_demo.py
+python examples/run_proto_symbol_hypothesis_demo.py
+python examples/run_hypothesis_safety_demo.py
 ```
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
@@ -486,6 +493,25 @@ to `exploration_memory.jsonl` with expected vs observed gain. It is **not**
 real-world autonomy: no robotics, no browser/OS automation, no network, no
 LLM in any exploration decision, and curiosity can never override safety or
 the emergency stop.
+
+The **hypothesis engine** (`hypothesis/`) closes the loop from wondering to
+testing. It forms grounded *hypothesis candidates* from its own uncertainty
+(Mysterium, prediction misses, weak world-model edges, ambiguous
+proto-symbols, delayed consequences, anomalies, stagnation,
+executive/homeostatic conflicts) — thirteen types, deterministic and
+non-anthropomorphic ("pattern A *may predict* B"; never "believes" or
+"wants") — then designs **bounded, falsifiable** experiments and runs them in
+latent / nursery / simulation / read-only / sidecar-observe scope only. Every
+`EvidenceRecord` keeps its source scope; offline and counterfactual evidence
+is never treated as a real observation; the `FalsificationEngine` moves
+confidence in small bounded steps (one success rarely proves anything, one
+clear failure can falsify). Supported, real-backed, above-threshold
+hypotheses may strengthen a world-model edge (a hedged `causes_candidate`,
+never a proven cause) only behind an approval-gated scope; falsified ones add
+a `contradicts` edge. It is **not** human science, consciousness, or
+real-world autonomy: no LLM generates hypotheses, no human feedback is used,
+no experiment reaches the real world, and nothing can disable safety,
+governance, executive inhibition, ego boundaries, or the emergency stop.
 
 The **evaluation layer** (`evaluation/`) is the measurement harness: nine
 registered protocols (absence, feedback inversion, reward/danger, restart

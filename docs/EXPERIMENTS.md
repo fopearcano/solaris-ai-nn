@@ -1489,3 +1489,51 @@ count, useful/blocked rate, expected vs observed information gain, Mysterium
 reduction, prediction improvement, proto-symbol disambiguation, and that
 curiosity never overrides safety — each describing self-directed sampling,
 never a score of understanding or autonomy.
+
+## 137. Hypothesis Engine Demo ✅ (implemented)
+
+**Run:** `python examples/run_hypothesis_engine_demo.py --steps 300`
+A bounded simulated developmental run with the hypothesis engine enabled:
+uncertainty becomes grounded hypothesis candidates, bounded safe tests run,
+source-scoped evidence is collected, and the unknown is updated or preserved.
+No LLM, no human feedback, no real-world experiment.
+
+## 138. Hypothesis Falsification Demo ✅ (implemented)
+
+**Run:** `python examples/run_hypothesis_falsification_demo.py`
+A prediction hypothesis is supported by one bounded test (confidence rises a
+bounded step) then contradicted by another (confidence falls; it is
+falsified). One success does not prove it; one clear failure can falsify it.
+
+## 139. Delayed Consequence Hypothesis Demo ✅ (implemented)
+
+**Run:** `python examples/run_delayed_consequence_hypothesis_demo.py`
+A delayed-feedback nursery produces consequence groups; the engine forms a
+delayed-consequence hypothesis and tests it in the nursery, yielding a
+nursery-simulated update or an honest inconclusive verdict.
+
+## 140. Proto-Symbol Hypothesis Demo ✅ (implemented)
+
+**Run:** `python examples/run_proto_symbol_hypothesis_demo.py`
+An ambiguous proto-symbol seeds a grounding hypothesis tested via latent
+replay; ambiguity before/after is shown, and the offline evidence cannot
+fully promote the hypothesis.
+
+## 141. Hypothesis Safety Demo ✅ (implemented)
+
+**Run:** `python examples/run_hypothesis_safety_demo.py`
+The hard rules in force: a real-world hypothesis is refused, an unbounded
+test design is rejected, a design with no falsifier is rejected,
+counterfactual/latent evidence stays offline, and an emergency stop blocks
+all testing.
+
+## 142. Bounded Self-Experiment + Hypothesis Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment bounded_self_experiment`
+(also `hypothesis_generation`, `falsification`,
+`delayed_consequence_hypothesis`, `proto_symbol_hypothesis`,
+`world_model_edge_hypothesis`, `hypothesis_safety`). Seven registered
+protocols measure hypothesis counts, support/falsification/inconclusive
+rates, unsafe-test rate, evidence counts, and Mysterium reduction after
+tests -- describing an internal experimental loop, never proof of
+understanding.

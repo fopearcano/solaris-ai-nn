@@ -98,6 +98,15 @@ class PermissionScope:
     ENABLE_READ_ONLY_STREAM_SAMPLING = "enable_read_only_stream_sampling"
     ENABLE_SIDECAR_OBSERVATION_SAMPLING = (
         "enable_sidecar_observation_sampling")
+    # Hypothesis engine / self-experimentation (Prompt 25).
+    ENABLE_HYPOTHESIS_ENGINE = "enable_hypothesis_engine"
+    ENABLE_SELF_EXPERIMENTATION = "enable_self_experimentation"
+    ENABLE_NURSERY_INTERVENTIONS = "enable_nursery_interventions"
+    ENABLE_LATENT_HYPOTHESIS_TESTS = "enable_latent_hypothesis_tests"
+    ENABLE_COUNTERFACTUAL_HYPOTHESIS_TESTS = (
+        "enable_counterfactual_hypothesis_tests")
+    ENABLE_HYPOTHESIS_WORLD_MODEL_UPDATES = (
+        "enable_hypothesis_world_model_updates")
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -134,6 +143,10 @@ class PermissionScope:
         ENABLE_ACTIVE_PERCEPTION, ENABLE_CURIOSITY_DRIVEN_SAMPLING,
         ENABLE_NURSERY_SAMPLING_REQUESTS, ENABLE_READ_ONLY_STREAM_SAMPLING,
         ENABLE_SIDECAR_OBSERVATION_SAMPLING,
+        ENABLE_HYPOTHESIS_ENGINE, ENABLE_SELF_EXPERIMENTATION,
+        ENABLE_NURSERY_INTERVENTIONS, ENABLE_LATENT_HYPOTHESIS_TESTS,
+        ENABLE_COUNTERFACTUAL_HYPOTHESIS_TESTS,
+        ENABLE_HYPOTHESIS_WORLD_MODEL_UPDATES,
     )
 
 
@@ -358,6 +371,26 @@ class PermissionSet:
             Permission(S.ENABLE_SIDECAR_OBSERVATION_SAMPLING, granted=True,
                        note="sidecar sampling is observe-only; it can "
                             "neither publish nor commit"),
+            Permission(S.ENABLE_HYPOTHESIS_ENGINE, granted=True,
+                       note="grounded internal hypothesis candidates in "
+                            "bounded runs; never authority, never a belief"),
+            Permission(S.ENABLE_SELF_EXPERIMENTATION, granted=True,
+                       note="bounded simulation/internal/read-only "
+                            "experiments only; no real-world test"),
+            Permission(S.ENABLE_NURSERY_INTERVENTIONS, granted=True,
+                       note="hypothesis tests may request bounded ecology "
+                            "interventions; ecology safety validates them"),
+            Permission(S.ENABLE_LATENT_HYPOTHESIS_TESTS, granted=True,
+                       note="bounded latent-replay tests; evidence is "
+                            "offline and never treated as real"),
+            Permission(S.ENABLE_COUNTERFACTUAL_HYPOTHESIS_TESTS, granted=True,
+                       note="counterfactual tests are allowed but their "
+                            "evidence stays offline by construction"),
+            Permission(S.ENABLE_HYPOTHESIS_WORLD_MODEL_UPDATES,
+                       requires_approval=True,
+                       note="updating the world model from supported "
+                            "hypotheses needs approval and an evidence "
+                            "threshold; offline support never promotes"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

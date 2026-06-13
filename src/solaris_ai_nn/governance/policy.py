@@ -361,6 +361,34 @@ DEFAULT_RULES: List[PolicyRule] = [
     PolicyRule("emergency_disables_sampling", "active_perception",
                "emergency mode disables sampling except safe "
                "shutdown/report"),
+    # R. Hypothesis engine / self-experimentation (Prompt 25).
+    PolicyRule("hypothesis_engine_allowed_bounded", "hypothesis",
+               "internal trace analysis and hypothesis generation are "
+               "allowed in bounded runs"),
+    PolicyRule("self_experimentation_bounded", "hypothesis",
+               "self-experiments must be bounded; latent tests are allowed "
+               "if bounded",
+               requires_approval_scope=
+               PermissionScope.ENABLE_SELF_EXPERIMENTATION),
+    PolicyRule("nursery_interventions_via_ecology_safety", "hypothesis",
+               "nursery interventions require ecology safety validation"),
+    PolicyRule("counterfactual_evidence_stays_offline", "hypothesis",
+               "counterfactual/offline evidence must remain offline and "
+               "never be treated as real observation", forbidden=True),
+    PolicyRule("world_model_updates_need_evidence", "hypothesis",
+               "world-model updates from hypotheses require an evidence "
+               "threshold and approval",
+               requires_approval_scope=
+               PermissionScope.ENABLE_HYPOTHESIS_WORLD_MODEL_UPDATES),
+    PolicyRule("no_real_world_experiment", "hypothesis",
+               "no real-world, OS, browser, or network experiment is "
+               "permitted", forbidden=True),
+    PolicyRule("hypothesis_cannot_disable_safety", "hypothesis",
+               "no hypothesis or test may disable safety, governance, or "
+               "the emergency stop", forbidden=True),
+    PolicyRule("no_llm_generated_hypotheses", "hypothesis",
+               "LLM-generated hypotheses are not authoritative and are not "
+               "tested", forbidden=True),
 ]
 
 
@@ -657,6 +685,34 @@ class GovernancePolicy:
                 decision.violations.append(PolicyViolation(
                     "curiosity_never_overrides_safety", "active_perception",
                     "curiosity can never override safety or governance"))
+
+        # R. Hypothesis engine: bounded internal experiments; world-model
+        # updates and real-world tests are gated/forbidden.
+        if features.get("hypothesis_engine"):
+            if not self._approved(
+                    PermissionScope.ENABLE_HYPOTHESIS_ENGINE, ctx):
+                need_approval(PermissionScope.ENABLE_HYPOTHESIS_ENGINE,
+                              "the hypothesis engine is not permitted")
+            if (features.get("hypothesis_world_model_updates")
+                    or ctx.get("hypothesis_world_model_updates")) \
+                    and not self._approved(
+                        PermissionScope.ENABLE_HYPOTHESIS_WORLD_MODEL_UPDATES,
+                        ctx):
+                need_approval(
+                    PermissionScope.ENABLE_HYPOTHESIS_WORLD_MODEL_UPDATES,
+                    "world-model updates from hypotheses require approval")
+            if ctx.get("hypothesis_real_world") \
+                    or ctx.get("real_world_actuation"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_real_world_experiment", "hypothesis",
+                    "no real-world, OS, browser, or network experiment is "
+                    "permitted"))
+            if ctx.get("hypothesis_counterfactual_as_real"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "counterfactual_evidence_stays_offline", "hypothesis",
+                    "counterfactual evidence must remain offline"))
 
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):

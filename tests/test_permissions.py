@@ -67,8 +67,9 @@ def test_all_scopes_in_default_set():
     # + 4 homeostasis (P16) + 4 executive (P17) + 3 ego (P18)
     # + 7 communication (P19) + 5 LLM adapter (P20)
     # + 6 developmental (P21) + 4 proto-language (P22)
-    # + 6 ecology (P23) + 5 active perception (P24).
-    assert len(PermissionScope.ALL) == 65
+    # + 6 ecology (P23) + 5 active perception (P24)
+    # + 6 hypothesis engine (P25).
+    assert len(PermissionScope.ALL) == 71
 
 
 def test_executive_scope_defaults():
@@ -138,6 +139,20 @@ def test_active_perception_scope_defaults():
     assert ps.requires_approval(
         PermissionScope.ENABLE_CURIOSITY_DRIVEN_SAMPLING)
     assert not ps.allows(PermissionScope.ENABLE_CURIOSITY_DRIVEN_SAMPLING)
+
+
+def test_hypothesis_scope_defaults():
+    ps = PermissionSet.default()
+    assert ps.allows(PermissionScope.ENABLE_HYPOTHESIS_ENGINE)
+    assert ps.allows(PermissionScope.ENABLE_SELF_EXPERIMENTATION)
+    assert ps.allows(PermissionScope.ENABLE_NURSERY_INTERVENTIONS)
+    assert ps.allows(PermissionScope.ENABLE_LATENT_HYPOTHESIS_TESTS)
+    assert ps.allows(PermissionScope.ENABLE_COUNTERFACTUAL_HYPOTHESIS_TESTS)
+    # World-model updates from hypotheses need explicit approval.
+    assert ps.requires_approval(
+        PermissionScope.ENABLE_HYPOTHESIS_WORLD_MODEL_UPDATES)
+    assert not ps.allows(
+        PermissionScope.ENABLE_HYPOTHESIS_WORLD_MODEL_UPDATES)
 
 
 def test_proto_language_scope_defaults():

@@ -468,3 +468,24 @@ self-directed sensing — never real-world autonomy.
 | Synthesis (becoming through subtraction) | `seek_absence` / `rest` / `consolidate_before_sampling` — sampling can choose *less* exposure after overstimulation |
 | Inner MAP (self-observation) | `InnerMapModel.active_perception` + ten state-graph nodes — sampling policy, attention focus, salience/uncertainty/curiosity, exploration memory as observed self-state (never authority) |
 | Safety / boundaries (no real-world reach) | `active_perception/safety.py` — ten hard rules; the ego classifies sampling as simulated/internal/read-only/sidecar-observe/forbidden, and curiosity can never override safety, governance, or the emergency stop |
+
+---
+
+## Hypothesis engine / self-experimentation mapping (Phase 25)
+
+The hypothesis engine (`hypothesis/`) realises Solaris_Ai's move from
+perceiving and wondering to *testing*: uncertainty becomes a grounded
+candidate, a bounded safe experiment yields source-scoped evidence, and the
+world model / proto-language update only through that evidence -- never human
+science, never a proven cause, never real-world autonomy.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| Mysterium (pull of the unknown) | `hypothesis/sources.py` -- high unknown pressure seeds Mysterium-reduction and prediction hypotheses |
+| Anticipation (forward prediction) | prediction-miss seeds become `prediction_hypothesis` candidates tested in the nursery |
+| World Model / Cognition (structure) | `causal_candidate_hypothesis` / `world_model_edge_hypothesis` -- weak edges and causal candidates become testable, with supported evidence strengthening edges (hedged `causes_candidate`, never proven) |
+| Proto-Language (signs) | `proto_symbol_grounding_hypothesis` / `proto_syntax_hypothesis` -- ambiguous symbols and failed rules become grounding/validation tests |
+| Active Perception (sampling) | `HypothesisEngine.test_via_active_perception` -- a high-priority hypothesis defines the sampling target; the sampling result becomes source-scoped evidence |
+| Synthesis (becoming through subtraction) | `FalsificationEngine` -- weakening/falsifying verdicts subtract confidence in bounded steps; falsified edges add `contradicts` |
+| Inner MAP (self-observation) | `InnerMapModel.hypothesis` + ten state-graph nodes -- hypothesis counts, top candidate, supported/falsified/inconclusive, long-lived unknowns as observed self-state (never authority, never a belief) |
+| Safety / boundaries (no real-world reach) | `hypothesis/safety.py` -- ten hard rules: no real-world/OS/browser/network experiment, no source rewriting, no sidecar commit, no unbounded test, no counterfactual-as-real, no safety-disabling hypothesis, no LLM-generated hypothesis as authority |

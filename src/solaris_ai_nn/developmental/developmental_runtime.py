@@ -69,6 +69,9 @@ class DevelopmentalRuntime:
     enable_active_perception: bool = False
     active_perception_mode: str = "balanced"
     curiosity_driven_sampling: bool = False
+    # Hypothesis engine / self-experimentation (Prompt 25).
+    enable_hypothesis_engine: bool = False
+    enable_hypothesis_world_model_updates: bool = False
 
     def __post_init__(self) -> None:
         self.state_dir = Path(self.state_dir)
@@ -126,6 +129,17 @@ class DevelopmentalRuntime:
                 memory=ExplorationMemory(state_dir=self.state_dir),
                 nursery=self.nursery, protolanguage=self.protolanguage,
                 curiosity_enabled=self.curiosity_driven_sampling)
+        self.hypothesis_engine = None
+        if self.enable_hypothesis_engine:
+            from ..hypothesis import HypothesisEngine
+
+            self.hypothesis_engine = HypothesisEngine(
+                state_dir=self.state_dir, nursery=self.nursery,
+                protolanguage=self.protolanguage,
+                active_perception=self.active_perception,
+                governance=self.governance,
+                enable_world_model_updates=(
+                    self.enable_hypothesis_world_model_updates))
         self.segments_run = 0
         self.last_runner_snapshot: Dict[str, Any] = {}
         self.last_report_path: Optional[str] = None
@@ -256,6 +270,8 @@ class DevelopmentalRuntime:
             self._ecology_tick(signals, lifetime)
         if self.active_perception is not None:
             self._active_perception_tick(snapshot, signals, lifetime)
+        if self.hypothesis_engine is not None:
+            self._hypothesis_tick(snapshot, signals, lifetime)
         transition = self.epochs.evaluate(signals, lifetime_s=lifetime)
         if transition is not None:
             self.clock.note_epoch_transition()
@@ -430,6 +446,43 @@ class DevelopmentalRuntime:
             snap.get("blocked_count", 0) or 0)
         signals["curiosity_pressure"] = float(
             (snap.get("curiosity") or {}).get("pressure", 0.0) or 0.0)
+
+    def _hypothesis_tick(self, snapshot: Dict[str, Any],
+                         signals: Dict[str, Any], lifetime: float) -> None:
+        """Run one scan -> generate -> bounded-test hypothesis cycle."""
+        engine = self.hypothesis_engine
+        latent = snapshot.get("latent") or {}
+        world = snapshot.get("world_model") or {}
+        proto = (self.protolanguage.summary()
+                 if self.protolanguage is not None else {})
+        ctx = {
+            "step": self.segments_run,
+            "mysterium_pressure": float(latent.get("mysterium_pressure", 0.0)
+                                        or 0.0),
+            "prediction_error": float(
+                signals.get("recent_prediction_error", 0.0) or 0.0),
+            "structural_change_score": float(
+                signals.get("structural_change_score", 0.0) or 0.0),
+            "stagnation_status": ("stagnating"
+                                  if signals.get("stagnation_windows", 0)
+                                  else None),
+            "world_model": world,
+            "proto_language": {
+                "symbol_count": proto.get("symbol_count", 0),
+                "ambiguous_symbol_count": proto.get(
+                    "ambiguous_symbol_count", 0)},
+            "ecology": (self.nursery.summary()
+                        if self.nursery is not None else {}),
+            "health_level": "ok",
+        }
+        engine.tick(ctx)
+        summary = engine.summary()
+        signals["hypothesis_count"] = int(summary.get("hypothesis_count", 0))
+        signals["hypothesis_supported_count"] = int(
+            summary.get("supported_count", 0))
+        signals["hypothesis_falsified_count"] = int(
+            summary.get("falsified_count", 0))
+        signals["hypothesis_tests_run"] = int(summary.get("tests_run", 0))
 
     def _signals(self, snapshot: Dict[str, Any]) -> Dict[str, Any]:
         habit_weights = ((snapshot.get("bridge") or {}).get("habit")
@@ -608,6 +661,8 @@ class DevelopmentalRuntime:
             "active_perception": (self.active_perception.snapshot()
                                   if self.active_perception is not None
                                   else None),
+            "hypothesis": (self.hypothesis_engine.summary()
+                           if self.hypothesis_engine is not None else None),
             "note": "a persistent developmental process; labels are "
                     "measurements, not consciousness claims",
         }
@@ -654,5 +709,7 @@ class DevelopmentalRuntime:
             "active_perception": (self.active_perception.snapshot()
                                   if self.active_perception is not None
                                   else None),
+            "hypothesis": (self.hypothesis_engine.snapshot()
+                           if self.hypothesis_engine is not None else None),
             "metrics": self.metrics(),
         }

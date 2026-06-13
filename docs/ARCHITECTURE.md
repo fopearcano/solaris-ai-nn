@@ -1555,3 +1555,79 @@ governing principle throughout: **the system regulates its own exposure
 inside bounded simulation and internal runtime, and governance, safety,
 executive inhibition, ego boundaries, and the emergency stop always
 dominate.**
+
+## Hypothesis Engine and Self-Experimentation
+
+Active perception (Prompt 24) let the system *choose how to sample*. The
+hypothesis engine (`solaris_ai_nn.hypothesis`) closes the loop: the system
+can now form simple, grounded **hypothesis candidates** about its own world
+and test them through bounded, safe experiments. The shape is a low-compute
+internal scientific method, not human science and not consciousness:
+
+    uncertainty -> hypothesis -> bounded test -> evidence -> update / reject /
+    preserve unknown
+
+**Hypotheses arise from uncertainty, not invention.** The
+`HypothesisSourceScanner` reads a normalized context and emits seeds from
+high Mysterium, repeated prediction misses, weak world-model edges, causal
+candidates, ambiguous proto-symbols, failed proto-syntax rules,
+delayed-consequence groups, recurring anomalies, stagnation, active-perception
+uncertainty targets, executive inhibition, homeostasis conflicts, boundary
+events, and developmental phase-transition candidates. The
+`HypothesisGenerator` turns each seed into one of thirteen
+:class:`Hypothesis` types -- prediction, causal candidate, delayed
+consequence, proto-symbol grounding, proto-syntax, habit context, boundary,
+Mysterium reduction, stagnation recovery, homeostatic regulation, executive
+arbitration, world-model edge, anomaly pattern -- with a deterministic,
+non-anthropomorphic statement ("pattern A *may predict* B"; "association
+*candidate*"), the expected and alternative observations, a bounded test
+scope, a low initial confidence, and high uncertainty. **No LLM generates
+hypotheses**, and nothing here claims the system "believes", "wants", or
+"understands".
+
+**Tests are bounded, falsifiable, and safe.** Every `ExperimentDesign`
+declares its independent and observed variables, what would count as the
+expected result, what would falsify or weaken the hypothesis, and what is
+inconclusive; it is capped in steps and duration; and its scope is one of
+latent replay, nursery simulation, GridWorld simulation, read-only stream
+observation, sidecar observation, or internal trace analysis -- never the
+real world. `Intervention`s are *requests* to safe subsystems (sample/repeat/
+withhold a pattern, introduce bounded novelty/anomaly, trigger a delayed
+consequence, run latent/counterfactual replay, inspect a node/symbol, shift a
+nursery regime, observe only) and are validated by the
+`HypothesisSafetyValidator` and ecology safety before anything runs. The
+`HypothesisTestRunner` refuses to test during an emergency or critical ops
+state, validates the design and every intervention, runs the bounded
+experiment, and produces a source-scoped `EvidenceRecord`.
+
+**Evidence keeps its source scope; falsification is careful.** Evidence is
+typed (supporting / weakening / falsifying / inconclusive / unsafe) and
+scoped (offline-simulated / nursery-simulated / latent-replay /
+observed-real-stream); **offline and counterfactual evidence is never treated
+as a real observation** and is logged append-only. The `FalsificationEngine`
+turns evidence into a careful verdict and a *bounded* confidence change: one
+success rarely proves anything, offline-only support cannot promote a
+hypothesis past a ceiling, and one clear failure can weaken or falsify
+depending on the design. The `HypothesisPrioritizer` ranks low-risk,
+high-information tests first, never schedules an unsafe hypothesis, and is
+fully blocked by an emergency or critical state.
+
+**Hypotheses update the rest of the stack only through evidence.** A
+supported, real/nursery-backed, above-threshold hypothesis may strengthen a
+world-model edge (as a hedged `predicts`/`causes_candidate`, never a proven
+cause) or reduce a proto-symbol's ambiguity -- and only when the
+approval-gated `enable_hypothesis_world_model_updates` scope allows it; a
+falsified hypothesis adds a `contradicts` edge and raises unknown pressure.
+The `HypothesisMemory` persists proposed / tested / supported / falsified /
+inconclusive / unsafe-to-test hypotheses, repeated families, long-lived
+unknowns, and promotions to JSON + JSONL. Hypothesis tests enter executive
+arbitration as ordinary `ActionCandidate`s (inhibition applies); unresolved
+hypotheses and falsification surprise feed homeostatic unknown pressure; the
+ego classifies every test scope; the ops supervisor surfaces
+hypothesis-explosion / too-many-inconclusive / repeated-unsafe /
+no-progress warnings; the Inner MAP carries the engine's state (research
+artifacts, never authority); and the evaluation layer adds generation,
+self-experiment, falsification, delayed-consequence, proto-symbol,
+world-model-edge, and safety protocols with their metrics. Throughout: **no
+human feedback, no operator correction as the learning source, no LLM
+hypothesis generation, and no real-world autonomy.**

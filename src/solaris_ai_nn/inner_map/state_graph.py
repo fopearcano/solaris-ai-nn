@@ -699,4 +699,63 @@ def build_default_state_graph() -> StateGraph:
                "expected vs observed gain recorded")
     g.add_edge("active_sensing_controller", "inner_map",
                "active perception state feeds Inner MAP")
+
+    # Hypothesis engine / self-experimentation (Prompt 25). An internal
+    # scientific loop: uncertainty -> hypothesis -> bounded test -> evidence.
+    for name, role in [
+        ("hypothesis_source_scanner", "uncertainty becomes seeds"),
+        ("hypothesis_generator", "seeds become testable candidates"),
+        ("experiment_design", "bounded, falsifiable test plans"),
+        ("intervention_plan", "bounded requests to safe subsystems"),
+        ("hypothesis_test_runner", "runs bounded experiments"),
+        ("evidence_ledger", "source-scoped, append-only evidence"),
+        ("falsification_engine", "careful supported/weakened/falsified"),
+        ("hypothesis_memory", "what was wondered and learned"),
+        ("hypothesis_prioritizer", "low-risk, high-information first"),
+        ("hypothesis_safety", "experiments never a back door"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("mysterium_tracker" if "mysterium_tracker" in g.nodes
+               else "unknown", "hypothesis_source_scanner",
+               "Mysterium feeds hypothesis seeds")
+    g.add_edge("world_model_builder" if "world_model_builder" in g.nodes
+               else "knowledge_graph", "hypothesis_generator",
+               "the world model feeds hypothesis generation")
+    g.add_edge("hypothesis_source_scanner", "hypothesis_generator",
+               "seeds feed generation")
+    g.add_edge("hypothesis_generator", "hypothesis_prioritizer",
+               "candidates are prioritized")
+    g.add_edge("hypothesis_prioritizer", "experiment_design",
+               "scheduled hypotheses get bounded designs")
+    g.add_edge("hypothesis_safety", "hypothesis_test_runner",
+               "safety gates every experiment")
+    g.add_edge("experiment_design", "hypothesis_test_runner",
+               "designs are run within their bounded scope")
+    g.add_edge("intervention_plan", "hypothesis_test_runner",
+               "bounded interventions feed the test")
+    g.add_edge("active_sensing_controller", "hypothesis_test_runner",
+               "active perception tests hypotheses by sampling")
+    g.add_edge("developmental_nursery" if "developmental_nursery" in g.nodes
+               else "bridge", "hypothesis_test_runner",
+               "the nursery provides safe interventions")
+    g.add_edge("hypothesis_test_runner", "evidence_ledger",
+               "tests produce source-scoped evidence")
+    g.add_edge("evidence_ledger", "falsification_engine",
+               "evidence drives the verdict")
+    g.add_edge("falsification_engine", "hypothesis_memory",
+               "verdicts update hypothesis memory")
+    g.add_edge("evidence_ledger",
+               "world_model_builder" if "world_model_builder" in g.nodes
+               else "knowledge_graph",
+               "supported evidence updates the world model")
+    g.add_edge("evidence_ledger",
+               "symbol_registry" if "symbol_registry" in g.nodes
+               else "memory",
+               "supported evidence updates proto-language")
+    g.add_edge("hypothesis_memory",
+               "developmental_runtime" if "developmental_runtime" in g.nodes
+               else "runtime",
+               "hypothesis memory feeds developmental reports")
+    g.add_edge("hypothesis_memory", "inner_map",
+               "hypothesis state feeds Inner MAP")
     return g

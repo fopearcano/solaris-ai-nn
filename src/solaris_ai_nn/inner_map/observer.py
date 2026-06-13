@@ -64,6 +64,7 @@ class InnerMapObserver:
     proto_language: Any = None  # optional dict or ProtoLanguageLayer
     ecology: Any = None  # optional dict or DevelopmentalNursery
     active_perception: Any = None  # optional dict or ActiveSensingController
+    hypothesis: Any = None  # optional dict or HypothesisEngine
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -482,6 +483,18 @@ class InnerMapObserver:
             if snap:
                 model.active_perception = self._active_perception_summary(
                     snap)
+        hypothesis = self.hypothesis
+        if hypothesis is None and self.runner is not None:
+            hypothesis = getattr(self.runner, "hypothesis_engine", None)
+        if hypothesis is None and developmental is not None:
+            hypothesis = getattr(developmental, "hypothesis_engine", None)
+        if hypothesis is not None:
+            # Hypothesis engine status (read-only; research artifacts, never
+            # authority and never beliefs).
+            if hasattr(hypothesis, "summary"):
+                model.hypothesis = hypothesis.summary()
+            elif isinstance(hypothesis, dict):
+                model.hypothesis = dict(hypothesis)
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

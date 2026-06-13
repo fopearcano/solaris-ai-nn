@@ -539,6 +539,50 @@ class OperationalSupervisor:
                     suggested_debug_step="vary the policy mode; the same "
                                          "action is repeating")
 
+        # Hypothesis engine monitoring (Prompt 25): evidence only. The
+        # engine never has stop authority; these warnings surface
+        # experimentation that has slipped out of safe, productive bounds.
+        hypothesis = snapshot.get("hypothesis") or {}
+        if hypothesis:
+            summary = hypothesis.get("summary") or {}
+            memory = hypothesis.get("memory") or {}
+            runner_snap = hypothesis.get("test_runner") or {}
+            count = int(memory.get("hypothesis_count", 0) or 0)
+            if count > 500:
+                self.incidents.record(
+                    I.HYPOTHESIS_EXPLOSION, "warning",
+                    f"{count} hypothesis candidates on record",
+                    related_metric="hypothesis_count",
+                    suggested_debug_step="raise generation thresholds; "
+                                         "the engine should earn, not flood, "
+                                         "candidates")
+            tests = int(runner_snap.get("tests_run", 0) or 0)
+            inconclusive = int(runner_snap.get("inconclusive_count", 0) or 0)
+            if tests >= 20 and inconclusive / max(1, tests) > 0.8:
+                self.incidents.record(
+                    I.TOO_MANY_INCONCLUSIVE_TESTS, "warning",
+                    f"{inconclusive}/{tests} hypothesis tests were "
+                    "inconclusive",
+                    related_metric="inconclusive_rate",
+                    suggested_debug_step="review experiment designs; tests "
+                                         "are not discriminating")
+            if int(runner_snap.get("unsafe_count", 0) or 0) >= 10:
+                self.incidents.record(
+                    I.REPEATED_UNSAFE_HYPOTHESES, "warning",
+                    f"{runner_snap['unsafe_count']} hypotheses were "
+                    "unsafe to test",
+                    related_metric="unsafe_test_count",
+                    suggested_debug_step="the generator keeps proposing "
+                                         "unsafe tests; inspect the sources")
+            if int(summary.get("long_lived_unknown_count", 0) or 0) >= 25 \
+                    and int(summary.get("supported_count", 0) or 0) == 0:
+                self.incidents.record(
+                    I.NO_HYPOTHESIS_PROGRESS, "warning",
+                    "many long-lived unknowns and no supported hypotheses",
+                    related_metric="hypothesis_progress",
+                    suggested_debug_step="testing is not resolving "
+                                         "uncertainty; review priority/design")
+
         # LLM adapter monitoring (Prompt 20): evidence only.
         communication = snapshot.get("communication") or {}
         if communication.get("llm_adapter_enabled"):
@@ -918,6 +962,11 @@ class OperationalSupervisor:
         if active_perception is not None and hasattr(active_perception,
                                                      "snapshot"):
             snapshot["active_perception"] = active_perception.snapshot()
+        hypothesis = getattr(runner, "hypothesis_engine", None)
+        if hypothesis is None and developmental is not None:
+            hypothesis = getattr(developmental, "hypothesis_engine", None)
+        if hypothesis is not None and hasattr(hypothesis, "snapshot"):
+            snapshot["hypothesis"] = hypothesis.snapshot()
         return snapshot
 
     def _build_status(self) -> OperationalStatus:

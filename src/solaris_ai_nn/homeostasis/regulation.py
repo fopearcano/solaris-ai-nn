@@ -385,6 +385,30 @@ class HomeostaticRegulator:
                    "active_perception",
                    raw="sampling rarely reduced uncertainty")
 
+        hypothesis = ctx.get("hypothesis") or {}
+        if hypothesis:
+            # Hypothesis engine (Prompt 25): unresolved hypotheses and
+            # falsification surprise raise unknown pressure; testing cost is
+            # fatigue. Research artifacts make pressure, never commands.
+            unresolved = (float(hypothesis.get("inconclusive_count", 0) or 0)
+                          + float(hypothesis.get(
+                              "long_lived_unknown_count", 0) or 0))
+            if unresolved:
+                up("unknown_pressure",
+                   max(self.state.value("unknown_pressure", 0.0),
+                       clamp01(unresolved / 10.0)),
+                   "hypothesis", raw=unresolved)
+            if hypothesis.get("last_evidence_result") == "falsified":
+                up("unknown_pressure",
+                   max(self.state.value("unknown_pressure", 0.0), 0.5),
+                   "hypothesis", raw="falsification surprise")
+            cost = hypothesis.get("testing_cost")
+            if cost is not None and float(cost) > 0.5:
+                up("fatigue",
+                   max(self.state.value("fatigue", 0.0),
+                       clamp01(float(cost) * 0.5)),
+                   "hypothesis", raw=cost)
+
     def _auto_context(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
         valence = self.valence.rolling()
         return {

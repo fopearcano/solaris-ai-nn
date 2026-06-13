@@ -869,3 +869,58 @@ Action; no LLM makes any exploration decision; and the loop is bounded.
 Choosing where to look inside a bounded simulation and one's own memory is a
 developmental capability — it is emphatically not permission to act in the
 world, and the architecture keeps those two things apart on purpose.
+
+---
+
+## Phase 25 — Hypothesis engine and bounded self-experimentation
+
+**Self-experimentation in adaptive systems.** A system that only samples
+(Phase 24) still answers questions the environment happens to pose. Phase 25
+lets it pose its own: form a candidate ("pattern A may predict B"), design a
+bounded test, run it in simulation/internal/read-only scope, and read the
+evidence. This is the smallest honest version of an internal scientific
+method — generate, test, update — implemented at low compute and kept
+strictly bounded.
+
+**Falsification first.** The engine is built around weakening and
+falsification, not confirmation. It is easy to build a system that
+accumulates support for whatever it already leans toward; the discipline here
+is the opposite. Confidence moves in small bounded steps, one success rarely
+promotes a hypothesis, offline-only support is capped below a ceiling, and a
+clear contradiction can falsify outright. The most useful outcome of a test
+is often "falsified" — a candidate removed — and the report shows the
+falsified set as prominently as the supported one.
+
+**Curiosity and hypothesis generation.** Phase 24's curiosity (an intrinsic
+uncertainty-reduction pressure) is what makes hypotheses worth forming and
+testing: the source scanner is, in effect, curiosity made specific. Where
+curiosity says "this region is uncertain", the hypothesis engine says "here
+is a concrete, falsifiable guess about that region, and here is the bounded
+test that would settle it". The two layers are the same impulse at different
+resolutions.
+
+**Causal candidates vs proven causes.** The engine never claims a cause. The
+strongest label it can earn is `causes_candidate` in the world model, and
+only from real or nursery-simulated evidence above a threshold, behind an
+approval-gated permission. A supported hypothesis is a hedged, evidence-backed
+association, explicitly not a proof — the reports and the wording enforce
+this, because the gap between correlation a system can measure and causation
+it cannot is exactly where overclaiming begins.
+
+**Source-scoped evidence.** Every piece of evidence remembers where it came
+from. Latent-replay and counterfactual evidence is marked offline and can
+never be treated as a real observation of the running system; nursery and
+read-only-stream evidence can support; and the falsification engine respects
+the distinction. This keeps the cheap, abundant offline evidence from
+silently standing in for the scarce, expensive real evidence.
+
+**Why testing stays bounded and safe.** A system that experiments on its
+world is one step from a system that acts on it, so the boundary is stated in
+code: no real-world experiment, no OS/browser/network action, no source
+rewriting, no sidecar commit, no unbounded test, no test that disables safety
+or the emergency stop, and no LLM-generated hypothesis treated as authority.
+Hypothesis tests enter executive arbitration as ordinary suggestions and are
+inhibited like any other; an emergency blocks all testing. Forming and
+testing guesses about a bounded simulation and one's own memory is a
+developmental capability — it is not, and must not be confused with,
+permission to act in the world.
