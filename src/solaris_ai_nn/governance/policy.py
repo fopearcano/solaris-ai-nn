@@ -336,6 +336,31 @@ DEFAULT_RULES: List[PolicyRule] = [
                forbidden=True),
     PolicyRule("ecology_report_claim_guard", "ecology",
                "ecology reports must pass ClaimGuard"),
+    # Q. Active perception / intrinsic exploration (Prompt 24).
+    PolicyRule("active_perception_allowed_bounded", "active_perception",
+               "self-directed sampling is allowed in bounded "
+               "simulation/developmental runs"),
+    PolicyRule("curiosity_driven_requires_config", "active_perception",
+               "curiosity-driven sampling mode requires explicit config",
+               requires_approval_scope=
+               PermissionScope.ENABLE_CURIOSITY_DRIVEN_SAMPLING),
+    PolicyRule("read_only_stream_sampling_no_modify", "active_perception",
+               "read-only stream sampling cannot modify the input stream",
+               forbidden=True),
+    PolicyRule("sidecar_sampling_observe_only", "active_perception",
+               "sidecar sampling is observe-only; it cannot publish or "
+               "commit", forbidden=True),
+    PolicyRule("sampling_never_real_world", "active_perception",
+               "sampling actions are simulation/internal/read-only; "
+               "real-world actuation is forbidden", forbidden=True),
+    PolicyRule("curiosity_never_overrides_safety", "active_perception",
+               "curiosity can never override safety, governance, executive "
+               "inhibition, or the emergency stop", forbidden=True),
+    PolicyRule("no_unbounded_exploration", "active_perception",
+               "unbounded exploration loops are prohibited", forbidden=True),
+    PolicyRule("emergency_disables_sampling", "active_perception",
+               "emergency mode disables sampling except safe "
+               "shutdown/report"),
 ]
 
 
@@ -602,6 +627,36 @@ class GovernancePolicy:
                     "ecology_no_human_feedback", "ecology",
                     "no human feedback may be injected through the "
                     "ecology"))
+
+        # Q. Active perception: self-directed sampling, suggestion-only;
+        # curiosity-driven mode needs explicit config (structural, but a
+        # hostile manifest is named).
+        if features.get("active_perception"):
+            if not self._approved(
+                    PermissionScope.ENABLE_ACTIVE_PERCEPTION, ctx):
+                need_approval(
+                    PermissionScope.ENABLE_ACTIVE_PERCEPTION,
+                    "active perception is not permitted")
+            if (features.get("curiosity_driven_sampling")
+                    or ctx.get("curiosity_driven_sampling")) \
+                    and not self._approved(
+                        PermissionScope.ENABLE_CURIOSITY_DRIVEN_SAMPLING,
+                        ctx):
+                need_approval(
+                    PermissionScope.ENABLE_CURIOSITY_DRIVEN_SAMPLING,
+                    "curiosity-driven sampling requires explicit config")
+            if ctx.get("sampling_real_world") \
+                    or ctx.get("real_world_actuation"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "sampling_never_real_world", "active_perception",
+                    "sampling actions are simulation/internal/read-only; "
+                    "real-world actuation is forbidden"))
+            if ctx.get("curiosity_overrides_safety"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "curiosity_never_overrides_safety", "active_perception",
+                    "curiosity can never override safety or governance"))
 
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):

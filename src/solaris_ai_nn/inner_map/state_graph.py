@@ -636,4 +636,67 @@ def build_default_state_graph() -> StateGraph:
                "the nursery drives long developmental runs")
     g.add_edge("developmental_nursery", "inner_map",
                "ecology state feeds Inner MAP")
+
+    # Active perception / intrinsic exploration (Prompt 24). The system
+    # regulates its own exposure: it proposes safe sampling, never acts.
+    for name, role in [
+        ("active_sensing_controller", "proposes + safely runs sampling"),
+        ("sampling_policy", "which safe sampling to propose, by mode"),
+        ("salience_estimator", "what is worth attending to (ranked)"),
+        ("uncertainty_estimator", "where the model is weakest"),
+        ("curiosity_estimator", "intrinsic sampling pressure, not desire"),
+        ("information_gain_estimator", "heuristic value of sampling"),
+        ("active_attention_controller", "resource allocation, not awareness"),
+        ("exploration_memory", "what sampling actually helped"),
+        ("stagnation_detector", "stalling / racing / healthily quiet"),
+        ("active_perception_safety", "exploration never a back door"),
+    ]:
+        g.add_node(name, role)
+    # ecology feeds salience; world model feeds uncertainty; proto-language
+    # feeds ambiguity; curiosity feeds the policy; the policy feeds the
+    # executive; results feed exploration memory and evaluation.
+    g.add_edge("developmental_nursery", "salience_estimator",
+               "ecology events feed salience")
+    g.add_edge("world_model_builder" if "world_model_builder" in g.nodes
+               else "knowledge_graph", "uncertainty_estimator",
+               "world model feeds uncertainty")
+    g.add_edge("symbol_registry" if "symbol_registry" in g.nodes
+               else "memory", "uncertainty_estimator",
+               "proto-symbol ambiguity feeds uncertainty")
+    g.add_edge("mysterium_tracker" if "mysterium_tracker" in g.nodes
+               else "unknown", "curiosity_estimator",
+               "Mysterium feeds intrinsic pressure")
+    g.add_edge("salience_estimator", "active_attention_controller",
+               "salience drives attention focus")
+    g.add_edge("uncertainty_estimator", "sampling_policy",
+               "uncertain targets feed the policy")
+    g.add_edge("curiosity_estimator", "sampling_policy",
+               "curiosity feeds the policy")
+    g.add_edge("stagnation_detector", "sampling_policy",
+               "stagnation feeds the policy")
+    g.add_edge("sampling_policy", "active_sensing_controller",
+               "the policy decides; the controller proposes")
+    g.add_edge("active_perception_safety", "active_sensing_controller",
+               "safety gates every sampling action")
+    g.add_edge("active_sensing_controller",
+               "action_arbitrator" if "action_arbitrator" in g.nodes
+               else "desire_queue",
+               "sampling actions become ActionCandidates for the executive")
+    g.add_edge("active_sensing_controller",
+               "developmental_nursery",
+               "sampling requests (never commands) bounded ecology shifts")
+    g.add_edge("active_sensing_controller", "exploration_memory",
+               "sampling results feed exploration memory")
+    g.add_edge("active_sensing_controller",
+               "homeostatic_state" if "homeostatic_state" in g.nodes
+               else "telemetry",
+               "curiosity/stagnation/overload feed homeostatic pressure")
+    g.add_edge("exploration_memory",
+               "metric_collector" if "metric_collector" in g.nodes
+               else "inner_map",
+               "exploration memory feeds evaluation")
+    g.add_edge("information_gain_estimator", "exploration_memory",
+               "expected vs observed gain recorded")
+    g.add_edge("active_sensing_controller", "inner_map",
+               "active perception state feeds Inner MAP")
     return g

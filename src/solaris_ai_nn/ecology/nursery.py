@@ -195,6 +195,72 @@ class DevelopmentalNursery:
         event = max(salient, key=lambda e: e.stimulus.intensity)
         return self.stream.to_canonical_signal(event.stimulus)
 
+    # -- active-perception sampling hooks (Prompt 24) ---------------------------------
+
+    def sample(self, action_type: str,
+               target_ref: Optional[str] = None) -> Dict[str, Any]:
+        """A bounded, read-only/request sampling hook for active perception.
+
+        Active perception may *request* (never command) bounded ecology
+        shifts; the nursery stays controlled and ecology safety validates
+        every request. Nothing here actuates the real world.
+        """
+        eco = self.ecology
+        regime = eco.regimes.current
+        season = eco.seasonality.current_season
+        handlers = {
+            "look": lambda: {"signal_source": regime, "season": season,
+                             "last_pattern": eco._last_pattern},
+            "focus_signal_source": lambda: {
+                "focused_on": target_ref or eco._last_pattern,
+                "regime": regime},
+            "sample_boundary": lambda: {
+                "boundary_events": self.memory.event_counts.get(
+                    "boundary_event", 0)},
+            "sample_unknown_region": lambda: {
+                "novel_patterns": eco.novelty.snapshot()["novel_patterns"]},
+            "sample_known_pattern": lambda: {
+                "stable_patterns":
+                    eco.novelty.snapshot()["stable_patterns"],
+                "revisited": target_ref},
+            "seek_novelty": lambda: self.request_novelty_window(),
+            "seek_absence": lambda: self.request_quiet_window(),
+            "emit_simulated_ping": lambda: self.emit_simulated_ping(),
+            "focus_delayed_consequence": lambda: {
+                "pending_groups": eco.delayed.pending_count},
+        }
+        handler = handlers.get(action_type)
+        if handler is None:
+            return {"action_type": action_type, "noop": True}
+        result = handler()
+        return {"action_type": action_type, "scope": "simulation_only",
+                **result}
+
+    def request_quiet_window(self) -> Dict[str, Any]:
+        """Request (not force) a bounded quiet window after overstimulation."""
+        deprivation = self.ecology.deprivation
+        kind = deprivation.maybe_start(self.state.step, silence_probability=1.0)
+        return {"quiet_window_requested": True, "kind": kind,
+                "bounded_by": deprivation.max_window}
+
+    def request_novelty_window(self) -> Dict[str, Any]:
+        """Request a bounded novelty proposal (within the per-run cap)."""
+        proposal = self.ecology.novelty.propose(self.state.step)
+        return {"novelty_window_requested": True,
+                "pattern_id": (proposal or {}).get("pattern_id"),
+                "capped": proposal is None}
+
+    def emit_simulated_ping(self) -> Dict[str, Any]:
+        """Emit a simulated, local-only ping (reveals a limited signal)."""
+        return {"ping": "simulated", "reveals": "limited_local_signal",
+                "regime": self.ecology.regimes.current}
+
+    def revisit_known_pattern(self, pattern: Optional[str] = None,
+                              ) -> Dict[str, Any]:
+        stable = self.ecology.novelty.stable_patterns
+        return {"revisited": pattern or (stable[0] if stable else None),
+                "stable_patterns": list(stable)}
+
     def reaction_provider(self, result: Any, stim: Any) -> Optional[float]:
         """Valence from the ecology's last danger/reward analogue, if any."""
         # The ecology embeds valence hints in danger/reward analogues; the

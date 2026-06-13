@@ -818,3 +818,54 @@ symbols applies one layer down: the moment the world contains answers, the
 emergent structure is confounded by them. A clean question demands a world
 that pressures but never tells. Adaptation to that world can be measured;
 it cannot be taught here, and that is the point.
+
+---
+
+## Phase 24 — Active perception and intrinsic exploration
+
+**From being fed to sampling.** Phases 1–23 built a system that *reacts* to a
+world the ecology supplies. Phase 24 takes the next step a developing system
+must take: it begins to *choose how it looks*. The same stimulus world is now
+something the system can sample — look, focus, replay, consolidate, seek
+novelty, seek absence — rather than only receive. The principle is simple and
+load-bearing: a developmental system should not only react to stimuli, it
+should regulate its own exposure.
+
+**Curiosity as uncertainty reduction, not wanting.** The hardest discipline
+here is naming. It would be easy, and wrong, to call the drive that makes the
+system sample an unknown region "curiosity" in the human sense and let the
+word do unearned work. We keep curiosity strictly as an *intrinsic sampling
+pressure*: a scalar that rises with unresolved unknown pressure and falls with
+safety load, computed from existing metrics, and explicitly documented as not
+a desire, feeling, or personality. The intrinsic-motivation literature
+(novelty, prediction-error, information gain as reward) is the lineage; the
+anthropomorphism is deliberately left out.
+
+**Information gain in a low-compute system.** We cannot run a Bayesian
+value-of-information computation on every candidate. So information gain is a
+heuristic: per-action affinities for the pressures they tend to relieve,
+scaled by how present that pressure is and how much evidence supports the
+estimate — and every estimate carries a confidence and an uncertainty, with
+the expected gain capped when evidence is weak. The honest move is the
+*observed* gain: after an action runs, we measure the actual before/after
+change in Mysterium, prediction, and ambiguity, and record it next to the
+estimate. Over time the gap between expected and observed is itself a
+finding.
+
+**Exploration vs safety.** The whole layer is built so that exploration can
+never win against safety. Curiosity is damped to near zero by emergencies,
+critical health, exhaustion, and runaway novelty; the policy is forced into
+emergency or recovery mode by those same conditions; the safety validator
+refuses real-world targets, stream modification, sidecar commits, and
+unbounded loops; the ego classifies every sample by boundary; and sampling
+actions still pass through executive inhibition as ordinary suggestions. When
+no safe sampling exists, the answer is `no_sampling_action`.
+
+**Why this is not real-world autonomy.** Self-directed sampling sounds close
+to agency, so the boundary is stated plainly: every sampling action is
+simulation-only, internal-only, read-only, or sidecar-observe-only; nothing
+reaches the network, the OS, a browser, hardware, or a committed Solaris_Ai
+Action; no LLM makes any exploration decision; and the loop is bounded.
+Choosing where to look inside a bounded simulation and one's own memory is a
+developmental capability — it is emphatically not permission to act in the
+world, and the architecture keeps those two things apart on purpose.

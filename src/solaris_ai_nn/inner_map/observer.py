@@ -63,6 +63,7 @@ class InnerMapObserver:
     developmental: Any = None  # optional dict or DevelopmentalRuntime
     proto_language: Any = None  # optional dict or ProtoLanguageLayer
     ecology: Any = None  # optional dict or DevelopmentalNursery
+    active_perception: Any = None  # optional dict or ActiveSensingController
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -280,6 +281,40 @@ class InnerMapObserver:
             unknown_pressure=clamp(recent_err / 2.0, 0.0, 1.0),
         )
 
+    @staticmethod
+    def _active_perception_summary(snap: Dict[str, Any]) -> Dict[str, Any]:
+        """Flatten an ActiveSensingController snapshot for the Inner MAP."""
+        policy = snap.get("policy") or {}
+        attention = snap.get("attention") or {}
+        salience = snap.get("salience") or {}
+        uncertainty = snap.get("uncertainty") or {}
+        curiosity = snap.get("curiosity") or {}
+        memory = snap.get("exploration_memory") or {}
+        stagnation = snap.get("stagnation") or {}
+        last_decision = policy.get("last_decision") or {}
+        ranked = salience.get("ranked") or []
+        top_uncertain = uncertainty.get("top_targets") or []
+        current_focus = attention.get("current") or {}
+        return {
+            "enabled": snap.get("enabled", True),
+            "sampling_policy_mode": policy.get("mode"),
+            "current_attention_focus": current_focus.get("target_ref"),
+            "top_salience_target": (ranked[0].get("target_ref")
+                                    if ranked else None),
+            "top_uncertainty_target": (top_uncertain[0].get("target_ref")
+                                       if top_uncertain else None),
+            "curiosity_pressure": curiosity.get("pressure"),
+            "latest_sampling_action": (last_decision.get("action") or {}).get(
+                "action_type"),
+            "latest_sampling_result": (snap.get("last_result") or {}).get(
+                "outcome"),
+            "useful_sampling_rate": memory.get("useful_rate"),
+            "blocked_sampling_count": snap.get("blocked_count"),
+            "stagnation_state": stagnation.get("status"),
+            "active_perception_report_path": snap.get("report_path"),
+            "authority": False,
+        }
+
     # -- assemble / snapshot -----------------------------------------------
 
     def update(self) -> InnerMapModel:
@@ -428,6 +463,25 @@ class InnerMapObserver:
                 model.ecology = ecology.summary()
             elif isinstance(ecology, dict):
                 model.ecology = dict(ecology)
+        active_perception = self.active_perception
+        if active_perception is None and self.runner is not None:
+            active_perception = getattr(self.runner, "active_perception",
+                                        None)
+        if active_perception is None and developmental is not None:
+            active_perception = getattr(developmental, "active_perception",
+                                        None)
+        if active_perception is not None:
+            # Active perception status (read-only; sampling regulates
+            # exposure, never authority).
+            if hasattr(active_perception, "snapshot"):
+                snap = active_perception.snapshot()
+            elif isinstance(active_perception, dict):
+                snap = active_perception
+            else:
+                snap = {}
+            if snap:
+                model.active_perception = self._active_perception_summary(
+                    snap)
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

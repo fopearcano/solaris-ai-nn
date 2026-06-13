@@ -65,6 +65,10 @@ class DevelopmentalRuntime:
     nursery_config: Any = None
     ecology_report_interval_steps: int = 500
     ecology_event_log_path: Any = None
+    # Active perception / intrinsic exploration (Prompt 24).
+    enable_active_perception: bool = False
+    active_perception_mode: str = "balanced"
+    curiosity_driven_sampling: bool = False
 
     def __post_init__(self) -> None:
         self.state_dir = Path(self.state_dir)
@@ -101,6 +105,27 @@ class DevelopmentalRuntime:
             # The ecology becomes the runtime's stimulus source.
             self.stimulus_provider = self.nursery.stimulus_provider
             self._ecology_base_step = 0
+        self.active_perception = None
+        if self.enable_active_perception:
+            from ..active_perception.active_sensing import (
+                ActiveSensingController,
+            )
+            from ..active_perception.exploration_memory import (
+                ExplorationMemory,
+            )
+            from ..active_perception.sampling_policy import (
+                SamplingPolicy,
+                SamplingPolicyMode,
+            )
+
+            mode = (SamplingPolicyMode.CURIOSITY_DRIVEN
+                    if self.curiosity_driven_sampling
+                    else self.active_perception_mode)
+            self.active_perception = ActiveSensingController(
+                policy=SamplingPolicy(mode=mode, seed=self.seed),
+                memory=ExplorationMemory(state_dir=self.state_dir),
+                nursery=self.nursery, protolanguage=self.protolanguage,
+                curiosity_enabled=self.curiosity_driven_sampling)
         self.segments_run = 0
         self.last_runner_snapshot: Dict[str, Any] = {}
         self.last_report_path: Optional[str] = None
@@ -229,6 +254,8 @@ class DevelopmentalRuntime:
             self._proto_language_tick(snapshot, signals, lifetime)
         if self.nursery is not None:
             self._ecology_tick(signals, lifetime)
+        if self.active_perception is not None:
+            self._active_perception_tick(snapshot, signals, lifetime)
         transition = self.epochs.evaluate(signals, lifetime_s=lifetime)
         if transition is not None:
             self.clock.note_epoch_transition()
@@ -367,6 +394,42 @@ class DevelopmentalRuntime:
                               if self.growth.latest() else None),
             "structural_change_score": signals.get(
                 "structural_change_score", 0.0)})
+
+    def _active_perception_tick(self, snapshot: Dict[str, Any],
+                                signals: Dict[str, Any],
+                                lifetime: float) -> None:
+        """Run one self-directed sampling decision over the segment context."""
+        controller = self.active_perception
+        latent = snapshot.get("latent") or {}
+        # Build a normalized context from this segment's measured signals.
+        before = controller.build_context({
+            "step": self.segments_run,
+            "mysterium_pressure": float(latent.get("mysterium_pressure", 0.0)
+                                        or 0.0),
+            "prediction_error": float(
+                signals.get("recent_prediction_error", 0.0) or 0.0),
+            "structural_change_score": float(
+                signals.get("structural_change_score", 0.0) or 0.0),
+            "stagnation_status": ("stagnating"
+                                  if signals.get("stagnation_windows", 0)
+                                  else None),
+            "health_level": "ok",
+        })
+        decision = controller.select(before)
+        result = controller.execute_if_allowed(decision, before)
+        after = controller.build_context({"step": self.segments_run + 1})
+        controller.observe_result(result, before, after)
+        # Surface sampling signals for milestones/ops/inner map.
+        snap = controller.snapshot()
+        memory = snap.get("exploration_memory") or {}
+        signals["sampling_action_count"] = int(
+            memory.get("record_count", 0) or 0)
+        signals["useful_sampling_rate"] = float(
+            memory.get("useful_rate", 0.0) or 0.0)
+        signals["blocked_sampling_count"] = int(
+            snap.get("blocked_count", 0) or 0)
+        signals["curiosity_pressure"] = float(
+            (snap.get("curiosity") or {}).get("pressure", 0.0) or 0.0)
 
     def _signals(self, snapshot: Dict[str, Any]) -> Dict[str, Any]:
         habit_weights = ((snapshot.get("bridge") or {}).get("habit")
@@ -542,6 +605,9 @@ class DevelopmentalRuntime:
                                else None),
             "ecology": (self.nursery.summary()
                         if self.nursery is not None else None),
+            "active_perception": (self.active_perception.snapshot()
+                                  if self.active_perception is not None
+                                  else None),
             "note": "a persistent developmental process; labels are "
                     "measurements, not consciousness claims",
         }
@@ -585,5 +651,8 @@ class DevelopmentalRuntime:
             "safety": self.safety.snapshot(),
             "ecology": (self.nursery.snapshot()
                         if self.nursery is not None else None),
+            "active_perception": (self.active_perception.snapshot()
+                                  if self.active_perception is not None
+                                  else None),
             "metrics": self.metrics(),
         }

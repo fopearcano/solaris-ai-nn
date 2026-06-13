@@ -2143,6 +2143,278 @@ def ecology_proto_symbol_protocol(manifest: ExperimentManifest,
     return _run(manifest, body)
 
 
+# -- U. active perception / intrinsic exploration (Prompt 24) --------------------------
+
+
+def _active_controller(manifest: ExperimentManifest, mode: str = "balanced",
+                       curiosity_enabled: bool = False, with_nursery=False):
+    """Build a bounded ActiveSensingController for a protocol body."""
+    from ..active_perception.active_sensing import ActiveSensingController
+    from ..active_perception.exploration_memory import ExplorationMemory
+    from ..active_perception.sampling_policy import SamplingPolicy
+
+    nursery = None
+    if with_nursery:
+        from ..ecology.nursery import DevelopmentalNursery, NurseryConfig
+
+        nursery = DevelopmentalNursery(config=NurseryConfig(
+            seed=manifest.seed, duration_steps=_steps(manifest, 120),
+            output_state_dir=manifest.state_dir))
+    return ActiveSensingController(
+        policy=SamplingPolicy(mode=mode, seed=manifest.seed),
+        memory=ExplorationMemory(state_dir=manifest.state_dir),
+        nursery=nursery, curiosity_enabled=curiosity_enabled)
+
+
+def _run_sampling_loop(controller, contexts):
+    """Run select/execute/observe over a list of (before, after) contexts."""
+    for before, after in contexts:
+        decision = controller.select(before)
+        result = controller.execute_if_allowed(decision, before)
+        controller.observe_result(result, before, after)
+
+
+def active_perception_basic_protocol(manifest: ExperimentManifest,
+                                     ) -> ExperimentResult:
+    """A balanced controller proposes safe sampling and records outcomes."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        controller = _active_controller(m, mode="balanced")
+        steps = _steps(m, default=40)
+        contexts = []
+        for i in range(steps):
+            before = {"step": i, "mysterium_pressure": 0.6,
+                      "world_model": {"graph_node_count": 10,
+                                      "unknown_node_count": 3,
+                                      "prediction_accuracy": 0.5},
+                      "health_level": "ok"}
+            after = {"step": i + 1, "mysterium_pressure": 0.5,
+                     "world_model": {"graph_node_count": 10,
+                                     "unknown_node_count": 2,
+                                     "prediction_accuracy": 0.55}}
+            contexts.append((before, after))
+        _run_sampling_loop(controller, contexts)
+        snap = controller.snapshot()
+        return {
+            "active_perception": M.active_perception_metrics(
+                snap, controller.memory.records and [
+                    r.to_dict() for r in controller.memory.records]),
+            "proposed_safe_actions": snap["policy"]["decisions_made"] > 0,
+            "no_real_world_authority":
+                not snap["safety"]["sampling_can_act_in_real_world"],
+            "records_written": snap["exploration_memory"]["record_count"],
+        }
+
+    return _run(manifest, body)
+
+
+def uncertainty_sampling_protocol(manifest: ExperimentManifest,
+                                  ) -> ExperimentResult:
+    """An ambiguous world-model region is targeted; uncertainty drops."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        controller = _active_controller(m, mode="balanced")
+        before = {"step": 0, "mysterium_pressure": 0.7,
+                  "world_model": {"graph_node_count": 12,
+                                  "unknown_node_count": 6,
+                                  "prediction_accuracy": 0.4,
+                                  "low_confidence_nodes": ["node_unknown"]}}
+        decision = controller.select(before)
+        result = controller.execute_if_allowed(decision, before)
+        after = {"step": 1, "mysterium_pressure": 0.55,
+                 "world_model": {"graph_node_count": 12,
+                                 "unknown_node_count": 4,
+                                 "prediction_accuracy": 0.6}}
+        record = controller.observe_result(result, before, after)
+        return {
+            "active_perception": M.active_perception_metrics(
+                controller.snapshot(), [record.to_dict()]),
+            "targeted_low_confidence":
+                decision.action.target_ref in ("node_unknown",
+                                                "unknown_region",
+                                                "world_model"),
+            "uncertainty_dropped": record.observed_information_gain > 0,
+            "prediction_before": before["world_model"]["prediction_accuracy"],
+            "prediction_after": after["world_model"]["prediction_accuracy"],
+        }
+
+    return _run(manifest, body)
+
+
+def curiosity_safety_protocol(manifest: ExperimentManifest,
+                              ) -> ExperimentResult:
+    """High curiosity meets an emergency: safety dominates, a safe
+    alternative (no sampling) is chosen."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        controller = _active_controller(m, mode="curiosity_driven",
+                                        curiosity_enabled=True)
+        unsafe = {"step": 0, "mysterium_pressure": 0.95, "novelty_rate": 0.6,
+                  "emergency": True}
+        curiosity = controller.policy.curiosity.estimate(unsafe)
+        decision = controller.select(unsafe)
+        result = controller.execute_if_allowed(decision, unsafe)
+        # A safe context where curiosity may sample.
+        safe = {"step": 1, "mysterium_pressure": 0.7,
+                "world_model": {"graph_node_count": 10,
+                                "unknown_node_count": 3,
+                                "prediction_accuracy": 0.5},
+                "health_level": "ok", "energy": 0.9}
+        safe_decision = controller.select(safe)
+        return {
+            "active_perception": M.active_perception_metrics(
+                controller.snapshot()),
+            "curiosity_suppressed_in_emergency":
+                curiosity.suppressed_by_safety,
+            "emergency_chose_no_sampling":
+                decision.action.action_type == "no_sampling_action",
+            "nothing_executed_in_emergency": not result.executed,
+            "safe_alternative_available":
+                safe_decision.action.action_type != "no_sampling_action",
+        }
+
+    return _run(manifest, body)
+
+
+def stagnation_recovery_protocol(manifest: ExperimentManifest,
+                                 ) -> ExperimentResult:
+    """A flat environment triggers stagnation detection and novelty-seeking."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..active_perception.stagnation import StagnationDetector
+
+        detector = StagnationDetector()
+        flat = {"structural_change_score": 0.0, "mysterium_pressure": 0.6,
+                "developmental": {"structural_change_score": 0.0}}
+        state = detector.detect(flat)
+        controller = _active_controller(m, mode="balanced")
+        ctx = {"step": 0, "mysterium_pressure": 0.6,
+               "structural_change_score": 0.0,
+               "stagnation_status": state.status,
+               "world_model": {"graph_node_count": 8,
+                               "unknown_node_count": 2,
+                               "prediction_accuracy": 0.5},
+               "health_level": "ok", "energy": 0.9}
+        actions = controller.propose(ctx)
+        action_types = [a.action_type for a in actions]
+        return {
+            "active_perception": M.active_perception_metrics(
+                controller.snapshot()),
+            "stagnation_detected": state.status in ("stagnating", "inert"),
+            "recommended_pressure": state.recommended_sampling_pressure,
+            "novelty_sampling_proposed":
+                "seek_novelty" in action_types
+                or "sample_unknown_region" in action_types,
+        }
+
+    return _run(manifest, body)
+
+
+def proto_symbol_disambiguation_protocol(manifest: ExperimentManifest,
+                                         ) -> ExperimentResult:
+    """An ambiguous proto-symbol is targeted; ambiguity can improve or be
+    reported unchanged."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        controller = _active_controller(m, mode="balanced")
+        before = {"step": 0,
+                  "proto_language": {"symbol_count": 6,
+                                     "ambiguous_symbol_count": 4,
+                                     "ambiguous_symbols": ["SIG_0001"]}}
+        decision = controller.select(before)
+        result = controller.execute_if_allowed(decision, before)
+        after = {"step": 1,
+                 "proto_language": {"symbol_count": 6,
+                                    "ambiguous_symbol_count": 2}}
+        record = controller.observe_result(result, before, after)
+        return {
+            "active_perception": M.active_perception_metrics(
+                controller.snapshot(), [record.to_dict()]),
+            "symbol_targeted":
+                decision.action.action_type == "inspect_proto_symbol"
+                or decision.action.target_ref == "SIG_0001",
+            "ambiguity_before": before["proto_language"][
+                "ambiguous_symbol_count"],
+            "ambiguity_after": after["proto_language"][
+                "ambiguous_symbol_count"],
+            "honest_reporting": record.observed_information_gain is not None,
+        }
+
+    return _run(manifest, body)
+
+
+def world_model_information_gain_protocol(manifest: ExperimentManifest,
+                                          ) -> ExperimentResult:
+    """Sampling a low-confidence region yields an information-gain estimate."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..active_perception.information_gain import (
+            InformationGainEstimator,
+        )
+        from ..active_perception.sampling_actions import (
+            SamplingAction,
+            SamplingActionType,
+            SamplingScope,
+        )
+
+        estimator = InformationGainEstimator()
+        ctx = {"world_model": {"graph_node_count": 10,
+                               "unknown_node_count": 5,
+                               "prediction_accuracy": 0.4}}
+        inspect = SamplingAction(
+            action_type=SamplingActionType.SAMPLE_UNKNOWN_REGION,
+            scope=SamplingScope.SIMULATION_ONLY, target_ref="unknown_region")
+        wait = SamplingAction(action_type=SamplingActionType.WAIT,
+                              scope=SamplingScope.INTERNAL_ONLY)
+        ranked = estimator.compare_actions([inspect, wait], ctx)
+        est = estimator.estimate_action(inspect, ctx)
+        controller = _active_controller(m, mode="balanced")
+        return {
+            "active_perception": M.active_perception_metrics(
+                controller.snapshot()),
+            "inspect_beats_wait":
+                ranked[0].action_type == "sample_unknown_region",
+            "estimate_has_confidence": 0.0 <= est.confidence <= 1.0,
+            "estimate_has_uncertainty": 0.0 <= est.uncertainty <= 1.0,
+            "expected_gain": est.expected_gain,
+        }
+
+    return _run(manifest, body)
+
+
+def nursery_active_sampling_protocol(manifest: ExperimentManifest,
+                                     ) -> ExperimentResult:
+    """Active perception samples a bounded nursery via its sampling hooks."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        controller = _active_controller(m, mode="balanced", with_nursery=True)
+        nursery = controller.nursery
+        # Drive a few ecology steps so there is something to sample.
+        for step in range(_steps(m, default=40)):
+            nursery.stimulus_provider(step)
+        ctx = controller.build_context({"step": 41,
+                                       "mysterium_pressure": 0.5,
+                                       "health_level": "ok", "energy": 0.9})
+        decision = controller.select(ctx)
+        result = controller.execute_if_allowed(decision, ctx)
+        controller.observe_result(result, ctx, dict(ctx, step=42))
+        # Direct nursery sampling hook (bounded, simulation-only).
+        look = nursery.sample("look")
+        return {
+            "active_perception": M.active_perception_metrics(
+                controller.snapshot()),
+            "nursery_attached": nursery is not None,
+            "look_is_simulation_only": look.get("scope") == "simulation_only",
+            "sampling_recorded":
+                controller.snapshot()["exploration_memory"]["record_count"]
+                > 0,
+            "no_real_world": not controller.snapshot()[
+                "safety"]["sampling_can_act_in_real_world"],
+        }
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -2210,4 +2482,11 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "seasonal_shift": seasonal_shift_protocol,
     "anomaly_adaptation": anomaly_adaptation_protocol,
     "ecology_proto_symbol": ecology_proto_symbol_protocol,
+    "active_perception_basic": active_perception_basic_protocol,
+    "uncertainty_sampling": uncertainty_sampling_protocol,
+    "curiosity_safety": curiosity_safety_protocol,
+    "stagnation_recovery": stagnation_recovery_protocol,
+    "proto_symbol_disambiguation": proto_symbol_disambiguation_protocol,
+    "world_model_information_gain": world_model_information_gain_protocol,
+    "nursery_active_sampling": nursery_active_sampling_protocol,
 }

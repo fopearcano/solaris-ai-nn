@@ -339,6 +339,52 @@ class HomeostaticRegulator:
                    max(self.state.value("danger_proximity", 0.0), 0.7),
                    "ecology", raw="ecology danger analogue")
 
+        active_perception = ctx.get("active_perception") or {}
+        if active_perception:
+            # Active perception (Prompt 24): curiosity is an intrinsic
+            # uncertainty-reduction pressure; stagnation biases safe
+            # exploration; overload/cost bias rest. Sampling never commands.
+            curiosity = active_perception.get("curiosity_pressure")
+            if curiosity is not None:
+                up("unknown_pressure",
+                   max(self.state.value("unknown_pressure", 0.0),
+                       clamp01(float(curiosity))),
+                   "active_perception", raw=curiosity)
+            stagnation = active_perception.get("stagnation_pressure")
+            if stagnation is not None:
+                up("stagnation_pressure",
+                   max(self.state.value("stagnation_pressure", 0.0),
+                       clamp01(float(stagnation))),
+                   "active_perception", raw=stagnation)
+            overload = active_perception.get("overload_pressure")
+            if overload is not None:
+                up("fatigue",
+                   max(self.state.value("fatigue", 0.0),
+                       clamp01(float(overload))),
+                   "active_perception", raw=overload)
+            fatigue = active_perception.get("attention_fatigue")
+            if fatigue is not None:
+                up("fatigue",
+                   max(self.state.value("fatigue", 0.0),
+                       clamp01(float(fatigue))),
+                   "active_perception", raw=fatigue)
+            cost = active_perception.get("sampling_cost")
+            if cost is not None and float(cost) > 0.5:
+                up("fatigue",
+                   max(self.state.value("fatigue", 0.0),
+                       clamp01(float(cost) * 0.5)),
+                   "active_perception", raw=cost)
+            # Repeated useless sampling keeps unknown pressure up (no gain).
+            if active_perception.get("useful_sampling_rate") is not None \
+                    and float(active_perception.get(
+                        "sampling_action_count", 0) or 0) >= 5 \
+                    and float(active_perception["useful_sampling_rate"]) \
+                    < 0.2:
+                up("unknown_pressure",
+                   max(self.state.value("unknown_pressure", 0.0), 0.5),
+                   "active_perception",
+                   raw="sampling rarely reduced uncertainty")
+
     def _auto_context(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
         valence = self.valence.rolling()
         return {

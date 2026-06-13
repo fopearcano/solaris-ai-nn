@@ -269,6 +269,13 @@ class InnerMapModel:
     # delayed_consequence_group_count, seasonal_shift_count,
     # ecology_report_path, authority.
     ecology: Optional[Dict[str, Any]] = None
+    # Active perception status (Prompt 24); None when sampling is off.
+    # Keys: enabled, sampling_policy_mode, current_attention_focus,
+    # top_salience_target, top_uncertainty_target, curiosity_pressure,
+    # latest_sampling_action, latest_sampling_result, useful_sampling_rate,
+    # blocked_sampling_count, stagnation_state,
+    # active_perception_report_path, authority.
+    active_perception: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

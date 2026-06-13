@@ -267,6 +267,13 @@ python examples/run_deprivation_nursery_demo.py --steps 400
 python examples/run_delayed_consequence_demo.py --steps 500
 python examples/run_seasonal_shift_demo.py --steps 800
 python examples/run_anomaly_nursery_demo.py --steps 500
+
+# Active perception: the system regulates its own exposure (sampling)
+python examples/run_active_perception_demo.py --steps 300
+python examples/run_uncertainty_sampling_demo.py
+python examples/run_curiosity_safety_demo.py
+python examples/run_stagnation_recovery_demo.py
+python examples/run_proto_symbol_disambiguation_demo.py
 ```
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
@@ -459,6 +466,26 @@ feedback, never the real world). It feeds proto-language, the world model,
 homeostatic pressure, and seven new milestones — and there is **no teaching
 loop, no operator correction as learning source, no human-language symbols,
 and no LLM learning environment** anywhere in it.
+
+The **active perception layer** (`active_perception/`) lets the system stop
+only reacting and begin to **regulate its own exposure**. It estimates
+salience (what is worth attending to, with safety always outranking
+curiosity), uncertainty (grounded in world-model confidence, proto-symbol
+ambiguity, anticipation, Mysterium — *unknown* when evidence is thin),
+curiosity (an *intrinsic sampling pressure*, never a desire, damped to zero
+by emergencies and exhaustion), heuristic information gain (hedged with
+confidence/uncertainty, scored again after the fact), and stagnation (a
+cautious stable/stagnating/inert/overactive/unknown verdict). From these it
+proposes sixteen kinds of *safe* sampling action — look, wait, rest, focus,
+seek novelty/absence, emit a simulated ping, replay an uncertain trace,
+consolidate, inspect a node/symbol/boundary, observe a sidecar — each
+simulation-only, internal-only, read-only, or sidecar-observe-only and a
+**suggestion** until the safety validator (ten hard rules), governance, ego
+boundaries, and executive inhibition all clear it. Every episode is recorded
+to `exploration_memory.jsonl` with expected vs observed gain. It is **not**
+real-world autonomy: no robotics, no browser/OS automation, no network, no
+LLM in any exploration decision, and curiosity can never override safety or
+the emergency stop.
 
 The **evaluation layer** (`evaluation/`) is the measurement harness: nine
 registered protocols (absence, feedback inversion, reward/danger, restart

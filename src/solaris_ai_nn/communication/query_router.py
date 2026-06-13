@@ -27,6 +27,9 @@ AVAILABLE_QUERIES = (
     "what can I ask?", "what commands are allowed?",
     "what commands are forbidden?", "what approvals are pending?",
     "show transcript summary", "what evidence supports this answer?",
+    "what is the system sampling?", "why did it look there?",
+    "what is the current attention focus?", "what uncertainty is highest?",
+    "is curiosity overriding safety?",
 )
 
 
@@ -95,6 +98,7 @@ class QueryRouter:
             "pilot": "pilot", "latent": "latent", "sidecar": "sidecar",
             "incidents": "incidents", "run_registry": "run_registry",
             "last_event": "last_event",
+            "active_perception": "active_perception",
         }
         key = component_keys.get(topic)
         if key is None:
@@ -147,6 +151,15 @@ class QueryRouter:
 
             interfaces.append(("homeostasis",
                                HomeostasisQueryInterface(homeostasis)))
+        active_perception = self.components.get("active_perception")
+        if active_perception is not None:
+            from ..active_perception.reports import (
+                ActivePerceptionQueryInterface,
+            )
+
+            interfaces.append(("active_perception",
+                               ActivePerceptionQueryInterface(
+                                   active_perception)))
         return interfaces
 
     # -- meta queries -----------------------------------------------------------------

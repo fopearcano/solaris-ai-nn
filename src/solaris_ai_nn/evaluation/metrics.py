@@ -686,3 +686,75 @@ def ecology_metrics(ecology: Optional[Dict[str, Any]],
         "event_rate": _get(ecology, "event_rate", 0.0),
         "authority": False,  # structural, not measured -- a world, not a score
     }
+
+
+# -- V. active perception / intrinsic exploration (Prompt 24) --------------------------
+
+
+def active_perception_metrics(active_perception: Optional[Dict[str, Any]],
+                              records: Optional[List[Dict[str, Any]]] = None,
+                              ) -> Dict[str, Any]:
+    """Objective sampling metrics: how much sampling, how useful, how safe,
+    and whether it reduced uncertainty. These describe self-directed
+    sampling, never a score of understanding or autonomy."""
+    if not active_perception:
+        return {"present": False}
+    snap = active_perception
+    memory = snap.get("exploration_memory") or {}
+    info = snap.get("information_gain") or {}
+    attention = snap.get("attention") or {}
+    policy = snap.get("policy") or {}
+    rows = records if records is not None else (memory.get("recent") or [])
+
+    total = int(_get(memory, "record_count", len(rows)))
+    blocked = int(_get(memory, "blocked_count", 0))
+    # Before/after deltas from recorded rows.
+    myst_deltas, pred_deltas, amb_count, disamb = [], [], 0, 0
+    expected_gains, observed_gains = [], []
+    for r in rows:
+        mb, ma = r.get("mysterium_before"), r.get("mysterium_after")
+        if mb is not None and ma is not None:
+            myst_deltas.append(float(mb) - float(ma))
+        pb, pa = (r.get("prediction_accuracy_before"),
+                  r.get("prediction_accuracy_after"))
+        if pb is not None and pa is not None:
+            pred_deltas.append(float(pa) - float(pb))
+        ab, aa = (r.get("proto_symbol_ambiguity_before"),
+                  r.get("proto_symbol_ambiguity_after"))
+        if ab is not None and aa is not None:
+            amb_count += 1
+            if float(aa) < float(ab):
+                disamb += 1
+        expected_gains.append(float(r.get("expected_information_gain", 0.0)
+                                    or 0.0))
+        observed_gains.append(float(r.get("observed_information_gain", 0.0)
+                                    or 0.0))
+
+    def _mean(xs):
+        return round(sum(xs) / len(xs), 4) if xs else None
+
+    return {
+        "present": True,
+        "sampling_action_count": total,
+        "useful_sampling_rate": _get(memory, "useful_rate", 0.0),
+        "blocked_sampling_rate": (round(blocked / total, 4)
+                                  if total else 0.0),
+        "average_expected_information_gain": (
+            _mean(expected_gains)
+            if expected_gains else info.get("mean_observed_gain")),
+        "average_observed_information_gain": (
+            _mean(observed_gains)
+            if observed_gains else info.get("mean_observed_gain")),
+        "Mysterium_reduction_after_sampling": _mean(myst_deltas),
+        "prediction_improvement_after_sampling": _mean(pred_deltas),
+        "proto_symbol_disambiguation_rate": (
+            round(disamb / amb_count, 4) if amb_count else None),
+        "world_model_confidence_gain": _mean(pred_deltas),
+        "stagnation_recovery_count": int(_get(
+            snap, "stagnation_recovery_count", 0)),
+        "curiosity_runaway_count": int(_get(
+            snap, "curiosity_runaway_count", 0)),
+        "attention_shift_count": int(_get(attention, "shifts_total", 0)),
+        "sampling_policy_mode": policy.get("mode"),
+        "authority": False,  # structural; sampling never has authority
+    }

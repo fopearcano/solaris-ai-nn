@@ -91,6 +91,13 @@ class PermissionScope:
     ENABLE_YEAR_SCALE_ECOLOGY = "enable_year_scale_ecology"
     ENABLE_DEPRIVATION_WINDOWS = "enable_deprivation_windows"
     ENABLE_ANOMALY_GENERATION = "enable_anomaly_generation"
+    # Active perception / intrinsic exploration (Prompt 24).
+    ENABLE_ACTIVE_PERCEPTION = "enable_active_perception"
+    ENABLE_CURIOSITY_DRIVEN_SAMPLING = "enable_curiosity_driven_sampling"
+    ENABLE_NURSERY_SAMPLING_REQUESTS = "enable_nursery_sampling_requests"
+    ENABLE_READ_ONLY_STREAM_SAMPLING = "enable_read_only_stream_sampling"
+    ENABLE_SIDECAR_OBSERVATION_SAMPLING = (
+        "enable_sidecar_observation_sampling")
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -124,6 +131,9 @@ class PermissionScope:
         ENABLE_DEVELOPMENTAL_NURSERY, ENABLE_ECOLOGY_STREAM,
         ENABLE_MONTH_SCALE_ECOLOGY, ENABLE_YEAR_SCALE_ECOLOGY,
         ENABLE_DEPRIVATION_WINDOWS, ENABLE_ANOMALY_GENERATION,
+        ENABLE_ACTIVE_PERCEPTION, ENABLE_CURIOSITY_DRIVEN_SAMPLING,
+        ENABLE_NURSERY_SAMPLING_REQUESTS, ENABLE_READ_ONLY_STREAM_SAMPLING,
+        ENABLE_SIDECAR_OBSERVATION_SAMPLING,
     )
 
 
@@ -330,6 +340,24 @@ class PermissionSet:
             Permission(S.ENABLE_ANOMALY_GENERATION, granted=True,
                        note="bounded controlled perturbations, not "
                             "errors"),
+            Permission(S.ENABLE_ACTIVE_PERCEPTION, granted=True,
+                       note="self-directed sampling in bounded "
+                            "simulation/internal/read-only scope; "
+                            "suggestion-only, never real-world"),
+            Permission(S.ENABLE_CURIOSITY_DRIVEN_SAMPLING,
+                       requires_approval=True,
+                       note="curiosity-driven mode is off by default and "
+                            "needs explicit config/approval"),
+            Permission(S.ENABLE_NURSERY_SAMPLING_REQUESTS, granted=True,
+                       note="active perception may request (never command) "
+                            "bounded ecology shifts; ecology safety "
+                            "validates them"),
+            Permission(S.ENABLE_READ_ONLY_STREAM_SAMPLING, granted=True,
+                       note="read-only stream sampling cannot modify the "
+                            "stream"),
+            Permission(S.ENABLE_SIDECAR_OBSERVATION_SAMPLING, granted=True,
+                       note="sidecar sampling is observe-only; it can "
+                            "neither publish nor commit"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

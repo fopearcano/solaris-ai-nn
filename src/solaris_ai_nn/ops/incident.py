@@ -55,6 +55,12 @@ ECOLOGY_SILENCE_TOO_LONG = "ecology_silence_too_long"
 ECOLOGY_ANOMALY_RATE_HIGH = "ecology_anomaly_rate_high"
 ECOLOGY_MEMORY_GROWTH = "ecology_memory_growth"
 ECOLOGY_REPLAY_MISMATCH = "ecology_replay_mismatch"
+# Active perception / intrinsic exploration (Prompt 24).
+CURIOSITY_RUNAWAY = "curiosity_runaway"
+SAMPLING_LOOP = "sampling_loop"
+EXCESSIVE_NOVELTY_SEEKING = "excessive_novelty_seeking"
+NO_USEFUL_SAMPLING = "no_useful_sampling"
+SAMPLING_FORBIDDEN_BOUNDARY = "sampling_forbidden_boundary"
 
 INCIDENT_TYPES = frozenset({
     HEALTH_WARNING, HEALTH_CRITICAL, WATCHDOG_SHUTDOWN, UNEXPECTED_DEATH,
@@ -74,6 +80,8 @@ INCIDENT_TYPES = frozenset({
     ECOLOGY_STIMULUS_RATE_HIGH, ECOLOGY_SILENCE_TOO_LONG,
     ECOLOGY_ANOMALY_RATE_HIGH, ECOLOGY_MEMORY_GROWTH,
     ECOLOGY_REPLAY_MISMATCH,
+    CURIOSITY_RUNAWAY, SAMPLING_LOOP, EXCESSIVE_NOVELTY_SEEKING,
+    NO_USEFUL_SAMPLING, SAMPLING_FORBIDDEN_BOUNDARY,
 })
 
 SEVERITIES = ("info", "warning", "critical")

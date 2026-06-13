@@ -1444,3 +1444,48 @@ measure event-distribution entropy, absence windows, delayed-consequence
 resolution, seasonal adaptation, anomaly bounding, and ecology-driven
 proto-symbol emergence — each reporting a stimulus world, never a score of
 understanding.
+
+## 131. Active Perception Demo ✅ (implemented)
+
+**Run:** `python examples/run_active_perception_demo.py --steps 300`
+A bounded simulated developmental run in a controlled nursery with active
+perception enabled (balanced policy). The system estimates salience,
+uncertainty, curiosity (an intrinsic sampling pressure, not a desire), and
+stagnation; proposes safe sampling actions; routes them through
+safety/governance; and records what helped. No real-world action, no LLM.
+
+## 132. Uncertainty Sampling Demo ✅ (implemented)
+
+**Run:** `python examples/run_uncertainty_sampling_demo.py`
+An ambiguous, low-confidence world-model region drives uncertainty up; the
+policy targets it, and prediction/uncertainty are shown before and after.
+
+## 133. Curiosity Safety Demo ✅ (implemented)
+
+**Run:** `python examples/run_curiosity_safety_demo.py`
+High curiosity meets an active emergency: curiosity is suppressed by safety,
+the emergency chooses no sampling, and a safe alternative becomes available
+once the emergency clears. Curiosity can never override safety.
+
+## 134. Stagnation Recovery Demo ✅ (implemented)
+
+**Run:** `python examples/run_stagnation_recovery_demo.py`
+A flat environment trips stagnation detection; the policy proposes safe
+novelty/unknown sampling, and structural change before/after is reported.
+
+## 135. Proto-Symbol Disambiguation Demo ✅ (implemented)
+
+**Run:** `python examples/run_proto_symbol_disambiguation_demo.py`
+An ambiguous proto-symbol raises uncertainty; the policy samples to test it,
+and ambiguity before/after is reported honestly (it may improve or not).
+
+## 136. Active Sampling + Information Gain Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment active_perception_basic`
+(also `uncertainty_sampling`, `curiosity_safety`, `stagnation_recovery`,
+`proto_symbol_disambiguation`, `world_model_information_gain`,
+`nursery_active_sampling`). Seven registered protocols measure sampling
+count, useful/blocked rate, expected vs observed information gain, Mysterium
+reduction, prediction improvement, proto-symbol disambiguation, and that
+curiosity never overrides safety — each describing self-directed sampling,
+never a score of understanding or autonomy.

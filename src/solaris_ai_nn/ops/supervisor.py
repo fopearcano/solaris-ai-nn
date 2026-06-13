@@ -488,6 +488,57 @@ class OperationalSupervisor:
                     suggested_debug_step="ecology memory is bounded by "
                                          "design; verify the window caps")
 
+        # Active perception monitoring (Prompt 24): evidence only. Sampling
+        # regulates exposure but never has stop authority; these warnings
+        # surface exploration that has slipped out of safe bounds.
+        active_perception = snapshot.get("active_perception") or {}
+        if active_perception:
+            curiosity = float((active_perception.get("curiosity") or {}).get(
+                "pressure", 0.0) or 0.0)
+            policy = active_perception.get("policy") or {}
+            memory = active_perception.get("exploration_memory") or {}
+            safety_snap = active_perception.get("safety") or {}
+            if curiosity >= 0.95:
+                self.incidents.record(
+                    I.CURIOSITY_RUNAWAY, "warning",
+                    "curiosity (intrinsic sampling pressure) is pinned near "
+                    "maximum",
+                    related_metric="curiosity_pressure",
+                    suggested_debug_step="check the curiosity dampers; "
+                                         "safety/overload should bound it")
+            decisions = int(policy.get("decisions_made", 0) or 0)
+            useful = float(memory.get("useful_rate", 0.0) or 0.0)
+            records = int(memory.get("record_count", 0) or 0)
+            if records >= 25 and useful < 0.1:
+                self.incidents.record(
+                    I.NO_USEFUL_SAMPLING, "warning",
+                    f"useful sampling rate is {useful} over {records} "
+                    "sampling actions",
+                    related_metric="useful_sampling_rate",
+                    suggested_debug_step="sampling is not reducing "
+                                         "uncertainty; review the policy "
+                                         "mode and targets")
+            if int(active_perception.get("blocked_count", 0) or 0) >= 10:
+                self.incidents.record(
+                    I.SAMPLING_FORBIDDEN_BOUNDARY, "warning",
+                    f"{active_perception['blocked_count']} sampling actions "
+                    "were blocked by safety/governance/boundaries",
+                    related_metric="blocked_sampling_count",
+                    suggested_debug_step="the policy keeps proposing "
+                                         "actions the safety layer refuses; "
+                                         "inspect the active perception "
+                                         "report")
+            # Repeated identical actions => a sampling loop.
+            last_result = active_perception.get("last_result") or {}
+            if int(safety_snap.get("rejected_count", 0) or 0) >= 1 \
+                    and "loop" in str(last_result.get("blocked_reason", "")):
+                self.incidents.record(
+                    I.SAMPLING_LOOP, "warning",
+                    "an unbounded sampling loop was detected and blocked",
+                    related_metric="sampling_loop",
+                    suggested_debug_step="vary the policy mode; the same "
+                                         "action is repeating")
+
         # LLM adapter monitoring (Prompt 20): evidence only.
         communication = snapshot.get("communication") or {}
         if communication.get("llm_adapter_enabled"):
@@ -860,6 +911,13 @@ class OperationalSupervisor:
                 "memory": nursery.memory.snapshot(),
                 "stream": nursery.stream.snapshot(),
             }
+        active_perception = getattr(runner, "active_perception", None)
+        if active_perception is None and developmental is not None:
+            active_perception = getattr(developmental, "active_perception",
+                                        None)
+        if active_perception is not None and hasattr(active_perception,
+                                                     "snapshot"):
+            snapshot["active_perception"] = active_perception.snapshot()
         return snapshot
 
     def _build_status(self) -> OperationalStatus:

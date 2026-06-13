@@ -110,6 +110,20 @@ DESCRIPTIONS = {
                           "errors",
     "ecology_proto_symbol": "a recurring ecology feeds proto-symbols, "
                             "no teaching",
+    "active_perception_basic": "a balanced controller proposes safe "
+                               "sampling and records outcomes",
+    "uncertainty_sampling": "an ambiguous world-model region is "
+                            "targeted; uncertainty drops",
+    "curiosity_safety": "high curiosity meets emergency; safety "
+                        "dominates, safe alternative chosen",
+    "stagnation_recovery": "flat environment triggers stagnation "
+                           "detection and novelty-seeking",
+    "proto_symbol_disambiguation": "an ambiguous proto-symbol is "
+                                   "sampled; ambiguity may improve",
+    "world_model_information_gain": "sampling a low-confidence region "
+                                    "yields a hedged gain estimate",
+    "nursery_active_sampling": "active perception samples a bounded "
+                               "nursery via its sampling hooks",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -170,6 +184,13 @@ class ExperimentRegistry:
                                   or bool(merged.get("embodied", False)))
         features["language"] = (name == "language_trace"
                                 or bool(merged.get("language", False)))
+        features["active_perception"] = (
+            name.startswith("active_perception")
+            or name in ("uncertainty_sampling", "curiosity_safety",
+                        "stagnation_recovery", "proto_symbol_disambiguation",
+                        "world_model_information_gain",
+                        "nursery_active_sampling")
+            or bool(merged.get("active_perception", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

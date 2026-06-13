@@ -1475,3 +1475,83 @@ consequences, stream, and memory and their edges into the substrate.
 human language injected as the symbol system, no LLM-generated learning
 environment** — the system grows up by living in a world, not by being
 told the answers.
+
+## Active Perception and Intrinsic Exploration
+
+The developmental nursery (Prompt 23) gives the system a world that *feeds*
+it stimuli. The active perception layer (`solaris_ai_nn.active_perception`)
+lets the system begin to **regulate its own exposure** to that world: it does
+not only react, it chooses *how to sample*. This is not real-world autonomy
+— there is no robotics, no browser/OS automation, no network, and no LLM in
+any exploration decision. Every sampling action is simulation-only,
+internal-only, read-only, sidecar-observe-only, or suggestion-only.
+
+**Sampling is a vocabulary of safe actions.** A `SamplingAction` is one of
+sixteen types — look, wait, rest, focus a signal source, sample a boundary,
+sample an unknown region, sample a known pattern, seek novelty, seek absence,
+emit a simulated ping, replay an uncertain trace, consolidate before
+sampling, inspect a world-model node, inspect a proto-symbol, observe a
+sidecar, or no sampling — each carrying a `SamplingScope` that is the most
+reach it may ever request. `observe_sidecar_only` can never publish or
+commit; `read_only_stream` can never modify the stream; nothing is ever a
+committed real-world action.
+
+**Sampling is driven by measured pressure, not whim.** Five estimators read a
+normalized context assembled from existing metrics. The `SalienceEstimator`
+ranks what is worth attending to (Mysterium, prediction miss, novelty, rare
+ecology events, low-confidence world-model nodes, unstable proto-symbols,
+homeostatic pressure, milestone candidates, executive inhibition) and
+guarantees that **safety/emergency salience dominates curiosity salience**.
+The `UncertaintyEstimator` grounds uncertainty in world-model confidence,
+proto-symbol ambiguity, anticipation misses, Mysterium, counterfactual
+divergence, repeated anomalies, executive conflict, ego attribution, and
+memory-compression loss — and reports *unknown* rather than inventing a
+target when evidence is thin. The `CuriosityEstimator` produces an
+**intrinsic sampling pressure** — explicitly a drive to reduce uncertainty,
+*not* a desire, feeling, or personality — that rises with unresolved unknown
+pressure, non-safety-critical prediction error, stagnation, ambiguity, and
+unknown regions, and is damped to near zero by safety incidents, exhaustion,
+runaway novelty/anomaly, boundary risk, critical health, and emergency stop.
+The `InformationGainEstimator` gives a low-compute, explicitly *hedged*
+estimate (every estimate carries confidence and uncertainty, and gain is
+capped under weak evidence), and scores the *observed* gain after the fact.
+The `StagnationDetector` reports a cautious status (stable / stagnating /
+inert / overactive / unknown) — because a calm stable phase is not the same
+as being stuck.
+
+**The policy decides; safety and governance dominate.** The `SamplingPolicy`
+selects actions by mode (passive, balanced, curiosity_driven, conservative,
+recovery, stabilization, emergency); emergency and critical health force the
+emergency mode, overload forces recovery, and curiosity-driven mode requires
+explicit governance config (`enable_curiosity_driven_sampling`, approval-
+gated). When no safe sampling exists it chooses `no_sampling_action`, and it
+is deterministic given its seed and the context. The `ActiveSensingController`
+orchestrates: it assembles context, asks the policy, routes the chosen action
+through the `ActivePerceptionSafetyValidator` (ten hard rules: no real-world
+action, no stream modification, no network, no browser/OS automation, no
+sidecar commit, no out-of-bounds sampling, no unbounded loop, no curiosity
+override of safety, no pilot-stream-as-command, no ClaimGuard violations),
+through governance, and through ego boundary classification (simulated /
+internal / read-only / sidecar-observation / forbidden), and only then
+applies it within its scope. Sampling actions also become executive
+`ActionCandidate`s, so inhibition and prospection apply and no unsafe action
+can win arbitration.
+
+**Exploration is measured.** The `ExplorationMemory` records every episode —
+the action, the context before, the result after, expected vs observed
+information gain, before/after Mysterium / prediction / world-model /
+proto-symbol metrics, cost, safety status, and an outcome (useful / neutral /
+harmful / unknown / blocked) — to `exploration_memory.jsonl`. The
+`ActiveAttentionController` allocates bounded attention (resource allocation,
+never awareness; emergency focus overrides all). Curiosity, stagnation, and
+overload feed homeostatic need pressure (reduce-uncertainty, explore-safely,
+rest); the ops supervisor surfaces curiosity-runaway / sampling-loop /
+no-useful-sampling / forbidden-boundary warnings; the Inner MAP carries the
+sampling policy mode, attention focus, top salience/uncertainty target,
+curiosity pressure, latest action/result, useful-sampling rate, and blocked
+count (a world the system samples, never authority); and the evaluation layer
+adds sampling/uncertainty/curiosity/stagnation protocols and metrics. The
+governing principle throughout: **the system regulates its own exposure
+inside bounded simulation and internal runtime, and governance, safety,
+executive inhibition, ego boundaries, and the emergency stop always
+dominate.**

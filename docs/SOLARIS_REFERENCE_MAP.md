@@ -448,3 +448,23 @@ environment, and the system infers structure from them with no answer key.
 | Slow becoming (seasons, long horizons) | `ecology/seasonality.py` — deterministic four-season drift reshapes the world's profile over months/years simulated |
 | Inner MAP (self-observation) | `InnerMapModel.ecology` + twelve state-graph nodes — regime, cycle phase, season, and event structure as observed world-state (a world, never authority) |
 | Safety / boundaries (no real-world reach) | `ecology/safety.py` — ten hard rules: no network, no actuation, no human feedback as ecology, no labels, no unbounded run/memory/rate, no operator-command payloads; the ego attributes events as nursery-generated, never operator/human/real-world |
+
+---
+
+## Active perception / intrinsic exploration mapping (Phase 24)
+
+The active perception layer (`active_perception/`) realises Solaris_Ai's
+move from *being affected by* a world to *sampling* it: the organism turns
+the pull of the unknown and the gap in its predictions into safe,
+self-directed sensing — never real-world autonomy.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| Mysterium (pull of the unknown) | `active_perception/uncertainty.py` + `curiosity.py` — unknown pressure becomes uncertainty targets and an intrinsic sampling pressure (a drive to reduce uncertainty, never a desire) |
+| Anticipation (forward prediction) | prediction error / anticipation miss feed `salience.py` and `information_gain.py`; sampling prefers actions that should improve prediction |
+| Complexity (inertia vs chaos) | `active_perception/stagnation.py` — cautious detection of stable / stagnating / inert / overactive, recommending more or less sampling pressure |
+| Sensory integration (the senses as one field) | `active_sensing.py` + nursery sampling hooks (`ecology/nursery.py::sample`) — look / focus / ping / sample boundary, simulation-only |
+| Action / Push (intent into the world) | `SamplingAction.to_action_candidate()` — sampling enters executive arbitration as a suggestion; inhibition and prospection apply, nothing commits |
+| Synthesis (becoming through subtraction) | `seek_absence` / `rest` / `consolidate_before_sampling` — sampling can choose *less* exposure after overstimulation |
+| Inner MAP (self-observation) | `InnerMapModel.active_perception` + ten state-graph nodes — sampling policy, attention focus, salience/uncertainty/curiosity, exploration memory as observed self-state (never authority) |
+| Safety / boundaries (no real-world reach) | `active_perception/safety.py` — ten hard rules; the ego classifies sampling as simulated/internal/read-only/sidecar-observe/forbidden, and curiosity can never override safety, governance, or the emergency stop |

@@ -67,8 +67,8 @@ def test_all_scopes_in_default_set():
     # + 4 homeostasis (P16) + 4 executive (P17) + 3 ego (P18)
     # + 7 communication (P19) + 5 LLM adapter (P20)
     # + 6 developmental (P21) + 4 proto-language (P22)
-    # + 6 ecology (P23).
-    assert len(PermissionScope.ALL) == 60
+    # + 6 ecology (P23) + 5 active perception (P24).
+    assert len(PermissionScope.ALL) == 65
 
 
 def test_executive_scope_defaults():
@@ -126,6 +126,18 @@ def test_ecology_scope_defaults():
     assert ps.allows(PermissionScope.ENABLE_ANOMALY_GENERATION)
     assert ps.requires_approval(PermissionScope.ENABLE_MONTH_SCALE_ECOLOGY)
     assert ps.requires_approval(PermissionScope.ENABLE_YEAR_SCALE_ECOLOGY)
+
+
+def test_active_perception_scope_defaults():
+    ps = PermissionSet.default()
+    assert ps.allows(PermissionScope.ENABLE_ACTIVE_PERCEPTION)
+    assert ps.allows(PermissionScope.ENABLE_NURSERY_SAMPLING_REQUESTS)
+    assert ps.allows(PermissionScope.ENABLE_READ_ONLY_STREAM_SAMPLING)
+    assert ps.allows(PermissionScope.ENABLE_SIDECAR_OBSERVATION_SAMPLING)
+    # Curiosity-driven sampling is off by default; it needs explicit config.
+    assert ps.requires_approval(
+        PermissionScope.ENABLE_CURIOSITY_DRIVEN_SAMPLING)
+    assert not ps.allows(PermissionScope.ENABLE_CURIOSITY_DRIVEN_SAMPLING)
 
 
 def test_proto_language_scope_defaults():
