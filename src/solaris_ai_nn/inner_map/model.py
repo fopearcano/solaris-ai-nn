@@ -282,6 +282,12 @@ class InnerMapModel:
     # inconclusive_count, unsafe_to_test_count, long_lived_unknown_count,
     # last_evidence_result, hypothesis_report_path, authority.
     hypothesis: Optional[Dict[str, Any]] = None
+    # Auto-regeneration status (Prompt 26); None when self-repair is off.
+    # Keys: enabled, repair_policy_mode, latest_degradation_severity,
+    # latest_degradation_type, proposed_repair_count, applied_repair_count,
+    # refused_repair_count, rollback_count, quarantine_count,
+    # last_repair_report_path, authority.
+    autoregeneration: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

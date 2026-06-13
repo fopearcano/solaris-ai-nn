@@ -33,6 +33,10 @@ AVAILABLE_QUERIES = (
     "what hypotheses exist?", "what is the top hypothesis?",
     "what was tested?", "what was falsified?", "what remains unknown?",
     "why was a test blocked?", "did testing reduce mysterium?",
+    "what degradation was detected?", "what repair was proposed?",
+    "what repair was applied?", "what repair was refused?",
+    "why was repair blocked?", "what was quarantined?",
+    "did repair improve the system?", "is source code being modified?",
 )
 
 
@@ -103,6 +107,7 @@ class QueryRouter:
             "last_event": "last_event",
             "active_perception": "active_perception",
             "hypothesis": "hypothesis",
+            "autoregeneration": "autoregeneration",
         }
         key = component_keys.get(topic)
         if key is None:
@@ -170,6 +175,14 @@ class QueryRouter:
 
             interfaces.append(("hypothesis",
                                HypothesisQueryInterface(hypothesis)))
+        autoregen = self.components.get("autoregeneration")
+        if autoregen is not None:
+            from ..autoregeneration.reports import (
+                AutoRegenerationQueryInterface,
+            )
+
+            interfaces.append(("autoregeneration",
+                               AutoRegenerationQueryInterface(autoregen)))
         return interfaces
 
     # -- meta queries -----------------------------------------------------------------

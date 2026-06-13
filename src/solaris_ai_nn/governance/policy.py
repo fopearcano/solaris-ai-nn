@@ -389,6 +389,27 @@ DEFAULT_RULES: List[PolicyRule] = [
     PolicyRule("no_llm_generated_hypotheses", "hypothesis",
                "LLM-generated hypotheses are not authoritative and are not "
                "tested", forbidden=True),
+    # S. Auto-regeneration / self-repair (Prompt 26).
+    PolicyRule("autoregeneration_diagnostics_allowed", "autoregeneration",
+               "diagnostics and state hygiene are allowed in bounded runs; "
+               "observe-only is the default"),
+    PolicyRule("safe_auto_repair_requires_config", "autoregeneration",
+               "applying repairs automatically requires explicit config",
+               requires_approval_scope=
+               PermissionScope.ENABLE_SAFE_AUTO_REPAIR),
+    PolicyRule("identity_repair_requires_governance", "autoregeneration",
+               "checkpoint/identity-affecting repair requires governance",
+               requires_approval_scope=
+               PermissionScope.ENABLE_CHECKPOINT_REPAIR),
+    PolicyRule("no_source_code_repair", "autoregeneration",
+               "auto-regeneration may never modify source code, "
+               "dependencies, Git, the OS, or the network", forbidden=True),
+    PolicyRule("no_evidence_deletion_without_archive", "autoregeneration",
+               "evidence may not be deleted without an archive/summary",
+               forbidden=True),
+    PolicyRule("repair_cannot_disable_safety", "autoregeneration",
+               "no repair may disable governance, safety, ClaimGuard, or "
+               "the emergency stop", forbidden=True),
 ]
 
 
@@ -713,6 +734,39 @@ class GovernancePolicy:
                 decision.violations.append(PolicyViolation(
                     "counterfactual_evidence_stays_offline", "hypothesis",
                     "counterfactual evidence must remain offline"))
+
+        # S. Auto-regeneration: diagnostics are cheap; applying repairs and
+        # identity-affecting repair are gated; source repair is forbidden.
+        if features.get("autoregeneration"):
+            if not self._approved(
+                    PermissionScope.ENABLE_AUTOREGENERATION, ctx):
+                need_approval(PermissionScope.ENABLE_AUTOREGENERATION,
+                              "auto-regeneration is not permitted")
+            if (features.get("safe_auto_repair")
+                    or ctx.get("safe_auto_repair")) \
+                    and not self._approved(
+                        PermissionScope.ENABLE_SAFE_AUTO_REPAIR, ctx):
+                need_approval(PermissionScope.ENABLE_SAFE_AUTO_REPAIR,
+                              "applying repairs automatically requires "
+                              "explicit config")
+            if ctx.get("identity_affecting_repair") and not self._approved(
+                    PermissionScope.ENABLE_CHECKPOINT_REPAIR, ctx):
+                need_approval(PermissionScope.ENABLE_CHECKPOINT_REPAIR,
+                              "identity-affecting repair requires governance")
+            if ctx.get("source_code_repair") \
+                    or ctx.get("dependency_repair") \
+                    or ctx.get("real_world_actuation"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_source_code_repair", "autoregeneration",
+                    "auto-regeneration may never modify source code, "
+                    "dependencies, Git, the OS, or the network"))
+            if ctx.get("repair_disables_safety"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "repair_cannot_disable_safety", "autoregeneration",
+                    "no repair may disable governance, safety, ClaimGuard, "
+                    "or the emergency stop"))
 
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):

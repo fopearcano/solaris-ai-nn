@@ -107,6 +107,16 @@ class PermissionScope:
         "enable_counterfactual_hypothesis_tests")
     ENABLE_HYPOTHESIS_WORLD_MODEL_UPDATES = (
         "enable_hypothesis_world_model_updates")
+    # Auto-regeneration / self-repair (Prompt 26).
+    ENABLE_AUTOREGENERATION = "enable_autoregeneration"
+    ENABLE_STATE_HYGIENE = "enable_state_hygiene"
+    ENABLE_SAFE_AUTO_REPAIR = "enable_safe_auto_repair"
+    ENABLE_CHECKPOINT_REPAIR = "enable_checkpoint_repair"
+    ENABLE_MEMORY_COMPACTION = "enable_memory_compaction"
+    ENABLE_SYMBOL_HYGIENE = "enable_symbol_hygiene"
+    ENABLE_WORLD_MODEL_HYGIENE = "enable_world_model_hygiene"
+    ENABLE_HABIT_HYGIENE = "enable_habit_hygiene"
+    ENABLE_REPAIR_ROLLBACK = "enable_repair_rollback"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -147,6 +157,11 @@ class PermissionScope:
         ENABLE_NURSERY_INTERVENTIONS, ENABLE_LATENT_HYPOTHESIS_TESTS,
         ENABLE_COUNTERFACTUAL_HYPOTHESIS_TESTS,
         ENABLE_HYPOTHESIS_WORLD_MODEL_UPDATES,
+        ENABLE_AUTOREGENERATION, ENABLE_STATE_HYGIENE,
+        ENABLE_SAFE_AUTO_REPAIR, ENABLE_CHECKPOINT_REPAIR,
+        ENABLE_MEMORY_COMPACTION, ENABLE_SYMBOL_HYGIENE,
+        ENABLE_WORLD_MODEL_HYGIENE, ENABLE_HABIT_HYGIENE,
+        ENABLE_REPAIR_ROLLBACK,
     )
 
 
@@ -391,6 +406,35 @@ class PermissionSet:
                        note="updating the world model from supported "
                             "hypotheses needs approval and an evidence "
                             "threshold; offline support never promotes"),
+            Permission(S.ENABLE_AUTOREGENERATION, granted=True,
+                       note="diagnostics + state hygiene in bounded runs; "
+                            "repairs runtime state, never source code"),
+            Permission(S.ENABLE_STATE_HYGIENE, granted=True,
+                       note="archive/quarantine inside the state dir; "
+                            "evidence is preserved, never silently deleted"),
+            Permission(S.ENABLE_SAFE_AUTO_REPAIR, requires_approval=True,
+                       note="applying low-risk reversible repairs "
+                            "automatically is off by default and needs "
+                            "explicit config/approval"),
+            Permission(S.ENABLE_CHECKPOINT_REPAIR, requires_approval=True,
+                       note="checkpoint/identity-affecting repair needs "
+                            "governance; history is never rewritten "
+                            "silently"),
+            Permission(S.ENABLE_MEMORY_COMPACTION, granted=True,
+                       note="compaction preserves evidence summaries; "
+                            "safety events are never compacted away"),
+            Permission(S.ENABLE_SYMBOL_HYGIENE, granted=True,
+                       note="mark stale/merge duplicates; symbols are never "
+                            "renamed with human language"),
+            Permission(S.ENABLE_WORLD_MODEL_HYGIENE, granted=True,
+                       note="mark/weaken edges; contradiction evidence is "
+                            "never deleted silently"),
+            Permission(S.ENABLE_HABIT_HYGIENE, granted=True,
+                       note="decay/retire within bounds; safety habits need "
+                            "governance to weaken"),
+            Permission(S.ENABLE_REPAIR_ROLLBACK, granted=True,
+                       note="rolling back a harmful repair is always "
+                            "allowed"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

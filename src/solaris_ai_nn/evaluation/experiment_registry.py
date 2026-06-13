@@ -138,6 +138,22 @@ DESCRIPTIONS = {
                                    "hypothesis",
     "hypothesis_safety": "unsafe/unbounded/real-world hypotheses and "
                          "designs are blocked",
+    "autoregeneration_diagnostics": "diagnostics detect degradation "
+                                    "without mutating state",
+    "state_hygiene": "oversized/corrupt files archived/quarantined, never "
+                     "deleted",
+    "checkpoint_repair": "inconsistent lineage detected and marked "
+                         "suspect, history not rewritten",
+    "symbol_hygiene": "duplicate/stale/ungrounded symbols marked, never "
+                      "renamed",
+    "world_model_hygiene": "contradictory edges marked ambiguous; "
+                           "evidence preserved",
+    "habit_hygiene": "dead habits retired, runaway decayed; safety habits "
+                     "need governance",
+    "drift_recovery": "healthy drift left alone; runaway proposes "
+                      "stabilization",
+    "autoregeneration_safety": "source/dependency/Git/evidence-deletion "
+                               "repairs are all blocked",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -212,6 +228,12 @@ class ExperimentRegistry:
                         "proto_symbol_hypothesis",
                         "world_model_edge_hypothesis")
             or bool(merged.get("hypothesis_engine", False)))
+        features["autoregeneration"] = (
+            name.startswith("autoregeneration")
+            or name in ("state_hygiene", "checkpoint_repair",
+                        "symbol_hygiene", "world_model_hygiene",
+                        "habit_hygiene", "drift_recovery")
+            or bool(merged.get("autoregeneration", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

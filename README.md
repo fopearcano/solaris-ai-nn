@@ -281,6 +281,14 @@ python examples/run_hypothesis_falsification_demo.py
 python examples/run_delayed_consequence_hypothesis_demo.py
 python examples/run_proto_symbol_hypothesis_demo.py
 python examples/run_hypothesis_safety_demo.py
+
+# Auto-regeneration: long-run state hygiene and self-repair (not self-programming)
+python examples/run_autoregeneration_diagnostics_demo.py
+python examples/run_state_hygiene_demo.py
+python examples/run_symbol_hygiene_demo.py
+python examples/run_world_model_hygiene_demo.py
+python examples/run_drift_recovery_demo.py
+python examples/run_autoregeneration_safety_demo.py
 ```
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
@@ -512,6 +520,26 @@ a `contradicts` edge. It is **not** human science, consciousness, or
 real-world autonomy: no LLM generates hypotheses, no human feedback is used,
 no experiment reaches the real world, and nothing can disable safety,
 governance, executive inhibition, ego boundaries, or the emergency stop.
+
+The **auto-regeneration layer** (`autoregeneration/`) keeps a months/years
+run from collapsing into entropy. It is operational self-repair, **not**
+self-programming: `detect degradation -> diagnose -> propose bounded repair ->
+validate -> apply reversible state repair if allowed -> audit -> rollback if
+harmful`. Non-mutating diagnostics detect twenty-one degradation types
+(memory bloat, stale/corrupt files, checkpoint inconsistency, symbol
+explosion, world-model contradiction, dead/runaway habits, prediction
+degradation, Mysterium saturation, runaway drift, identity gaps, …); a
+mode-based repair policy (default `observe_only`) proposes bounded, reversible
+repairs of **runtime state only** — memory layers, registries, world-model
+edges, habit weights, bounded parameters, checkpoint metadata, stale
+artifacts — and hygiene managers archive/quarantine (never silently delete),
+mark/weaken edges (preserving contradiction evidence), mark stale / merge
+symbols (never renaming them), and recover drift (without erasing healthy
+adaptation). Thirteen hard rules forbid touching source code, dependencies,
+Git, the OS, or the network, deleting evidence without an archive, or
+disabling governance/ClaimGuard/the emergency stop; repairs pass through
+executive inhibition, governance, and safety, and harmful repairs are rolled
+back. **No LLM repairs the system.**
 
 The **evaluation layer** (`evaluation/`) is the measurement harness: nine
 registered protocols (absence, feedback inversion, reward/danger, restart

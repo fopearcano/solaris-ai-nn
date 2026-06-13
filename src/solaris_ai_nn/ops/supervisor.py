@@ -583,6 +583,62 @@ class OperationalSupervisor:
                     suggested_debug_step="testing is not resolving "
                                          "uncertainty; review priority/design")
 
+        # Auto-regeneration monitoring (Prompt 26): evidence only. Repair
+        # never has stop authority; these warnings surface degradation that
+        # is not being resolved, or repair behaving badly.
+        autoregen = snapshot.get("autoregeneration") or {}
+        if autoregen:
+            summary = autoregen.get("summary") or {}
+            mem = autoregen.get("repair_memory") or {}
+            diag = (autoregen.get("diagnostics") or {}).get(
+                "last_state") or {}
+            if summary.get("latest_degradation_severity") == "critical":
+                self.incidents.record(
+                    I.CRITICAL_DEGRADATION, "critical",
+                    f"critical degradation: "
+                    f"{summary.get('latest_degradation_type')}",
+                    related_metric="degradation_severity",
+                    suggested_debug_step="see the auto-regeneration report")
+            if float(mem.get("harm_rate", 0.0) or 0.0) > 0.3 \
+                    and int(mem.get("applied_count", 0) or 0) >= 5:
+                self.incidents.record(
+                    I.REPEATED_HARMFUL_REPAIRS, "warning",
+                    f"harmful repair rate {mem.get('harm_rate')}",
+                    related_metric="repair_harm_rate",
+                    suggested_debug_step="switch repair policy to "
+                                         "suggest_only and review")
+            counts = diag.get("counts_by_type") or {}
+            if int(counts.get("memory_bloat", 0) or 0) >= 1 \
+                    and int(mem.get("applied_count", 0) or 0) == 0:
+                self.incidents.record(
+                    I.MEMORY_BLOAT_UNRESOLVED, "warning",
+                    "memory bloat detected and no repair applied",
+                    related_metric="memory_bloat",
+                    suggested_debug_step="enable safe_auto_repair or run "
+                                         "consolidation")
+            if int(counts.get("symbol_explosion", 0) or 0) >= 1 \
+                    and int(mem.get("applied_count", 0) or 0) == 0:
+                self.incidents.record(
+                    I.SYMBOL_EXPLOSION_UNRESOLVED, "warning",
+                    "symbol explosion detected and unresolved",
+                    related_metric="symbol_explosion",
+                    suggested_debug_step="enable symbol hygiene")
+            if int(counts.get("world_model_contradiction", 0) or 0) >= 1:
+                self.incidents.record(
+                    I.WORLD_MODEL_CONTRADICTION_UNRESOLVED, "warning",
+                    "world-model contradiction present",
+                    related_metric="world_model_contradiction",
+                    suggested_debug_step="request a hypothesis test for the "
+                                         "contradiction")
+            if int(counts.get("checkpoint_inconsistency", 0) or 0) >= 1 \
+                    and int(mem.get("applied_count", 0) or 0) == 0:
+                self.incidents.record(
+                    I.UNRECOVERABLE_CHECKPOINT, "warning",
+                    "checkpoint inconsistency not yet repaired",
+                    related_metric="checkpoint_inconsistency",
+                    suggested_debug_step="governance review of checkpoint "
+                                         "lineage")
+
         # LLM adapter monitoring (Prompt 20): evidence only.
         communication = snapshot.get("communication") or {}
         if communication.get("llm_adapter_enabled"):
@@ -967,6 +1023,11 @@ class OperationalSupervisor:
             hypothesis = getattr(developmental, "hypothesis_engine", None)
         if hypothesis is not None and hasattr(hypothesis, "snapshot"):
             snapshot["hypothesis"] = hypothesis.snapshot()
+        autoregen = getattr(runner, "autoregeneration", None)
+        if autoregen is None and developmental is not None:
+            autoregen = getattr(developmental, "autoregeneration", None)
+        if autoregen is not None and hasattr(autoregen, "snapshot"):
+            snapshot["autoregeneration"] = autoregen.snapshot()
         return snapshot
 
     def _build_status(self) -> OperationalStatus:

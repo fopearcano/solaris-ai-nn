@@ -1631,3 +1631,78 @@ self-experiment, falsification, delayed-consequence, proto-symbol,
 world-model-edge, and safety protocols with their metrics. Throughout: **no
 human feedback, no operator correction as the learning source, no LLM
 hypothesis generation, and no real-world autonomy.**
+
+## Auto-Regeneration and Long-Run State Hygiene
+
+For Solaris-AI-NN to run for months or years, it must keep its own *runtime
+state* from collapsing into unmanaged entropy. The auto-regeneration layer
+(`solaris_ai_nn.autoregeneration`) is a low-compute operational loop -- not
+self-programming, not recursive self-improvement, not autonomous code
+mutation, and not proof of life:
+
+    detect degradation -> diagnose probable source -> propose bounded repair
+    -> validate safety/governance -> apply reversible state repair if allowed
+    -> audit result -> rollback if harmful
+
+**Regeneration repairs runtime state, never source code.** The allowed repair
+targets are runtime parameters, memory layers, cached traces, the symbol
+registry, world-model edges, habit weights, bounded readout/executive/
+homeostatic parameters within policy, stale reports/artifacts, checkpoint
+lineage metadata, indexes/registries, and broken references. Python source
+files, dependency files, Git history, OS/network settings, files outside the
+state/artifact directories, governance hard rules, the emergency stop, and
+ClaimGuard rules are all **forbidden** targets.
+
+**Diagnostics detect, they never mutate.** The
+`AutoRegenerationDiagnostics` reads a normalized context and emits
+`DegradationSignal`s across twenty-one operational degradation types --
+memory bloat, state-file corruption, checkpoint inconsistency, broken
+references, telemetry overgrowth, symbol explosion/staleness, world-model
+contradiction/edge decay, dead/runaway habits, prediction degradation,
+Mysterium saturation, executive loops, homeostatic instability, runaway
+drift, stagnation, inconclusive-hypothesis loops, unsafe-sampling repetition,
+and identity-continuity gaps. Severities are info/watch/warning/critical, and
+warning/critical signals must carry evidence refs. Scans are partial-safe and
+never crash on missing or corrupted optional inputs.
+
+**Repairs are bounded, reversible, and audited.** A `RepairAction` carries a
+scope (one of which, ``forbidden``, never executes), a reversibility flag,
+and its safety/governance status. The `RepairPolicy` maps degradation onto
+candidate repairs and decides applicability by mode: ``observe_only``
+(diagnostics only, the default), ``suggest_only`` (propose, never apply),
+``safe_auto_repair`` (low-risk reversible repairs only), ``governed_repair``
+(mutation needs approval), and ``emergency_stabilization`` (only
+risk-reducing repairs; an emergency forces this mode). Specialized hygiene
+managers cover state (archive/quarantine inside the state dir, never silent
+delete), checkpoints (continuity without rewriting identity history),
+references (deterministic repair only; ambiguous stays ambiguous; dangling is
+quarantined, never invented), memory (compaction that preserves
+safety/boundary/milestone records and evidence summaries), the world-model
+graph (mark/weaken edges, never delete contradiction evidence; request a
+hypothesis test), symbols (mark stale / merge duplicates / request
+disambiguation; never rename with human words), habits (decay/retire within
+bounds; safety habits need governance), and drift (distinguish healthy
+adaptation from runaway, recover carefully, never erase adaptation).
+
+**Evidence is preserved; harmful repairs are rolled back.** The
+`RepairMemory` records every episode -- degradation signal, proposed/applied/
+refused repair, safety/governance decision, before/after metrics, rollback,
+and a result class (improved / neutral / harmful / inconclusive /
+rolled_back / refused) -- append-only. The `AutoRegenerationSafetyValidator`
+enforces thirteen hard rules (no source/dependency/Git modification, no
+OS/network/browser automation, no real-world action, no disabling
+governance/emergency-stop/ClaimGuard, no deleting evidence without an
+archive/summary, no fabricated evidence refs, no counterfactual-as-real
+repair justification, no repair outside the state/artifact directories, no
+hidden repair). Repairs enter executive arbitration as ordinary
+`ActionCandidate`s (inhibition applies); degradation feeds homeostatic
+repair/consolidation/stabilization/checkpoint pressure; the developmental
+runtime schedules periodic diagnostics and hygiene passes and fires seven new
+milestones (first scan, first safe repair, first quarantined record, first
+rollback, first stagnation recovery, first symbol/world-model hygiene pass);
+the ops supervisor surfaces critical-degradation / repeated-harmful-repair /
+unresolved-bloat / unresolved-contradiction warnings; and the Inner MAP
+carries the repair state (runtime regeneration, never authority). Throughout:
+**no LLM repairs the system, no human feedback is required, and governance,
+safety, executive inhibition, ego boundaries, ClaimGuard, and the emergency
+stop all dominate every repair.**

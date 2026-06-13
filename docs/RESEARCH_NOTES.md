@@ -924,3 +924,55 @@ inhibited like any other; an emergency blocks all testing. Forming and
 testing guesses about a bounded simulation and one's own memory is a
 developmental capability — it is not, and must not be confused with,
 permission to act in the world.
+
+---
+
+## Phase 26 — Auto-regeneration and long-run state hygiene
+
+**Self-maintenance in long-running cognitive systems.** Every prior phase
+adds something that accumulates: traces, symbols, world-model edges, habits,
+hypotheses, exploration records, fossil memory. Over months or years of
+runtime, accumulation without maintenance is entropy: bloat, staleness,
+contradiction, broken references, drift. Phase 26 is the janitor the system
+needs to survive its own history — a low-compute loop that detects
+degradation and repairs *runtime state* so the long run does not collapse.
+
+**Degradation vs adaptation.** The hardest judgement here is not detecting
+change but deciding which change is decay and which is growth. Slow drift is
+life; flat-but-calm is often a healthy stable phase; a runaway is genuinely
+dangerous. The drift recovery classifier is deliberately cautious: it refuses
+to "repair away" healthy adaptation, it does not treat every flat window as
+death, and when it cannot tell, it stabilizes and asks for review rather than
+acting. Mistaking adaptation for illness would be its own kind of damage.
+
+**Memory hygiene.** Compaction is necessary but dangerous: the easy version
+loses exactly the records that matter. So safety incidents, boundary
+violations, emergency events, and milestones are never compacted away;
+fossil memory is append-first; and compression must preserve a transformation
+summary so the *evidence that compaction happened* survives the compaction.
+Hygiene that hides what it did is worse than no hygiene.
+
+**Symbol ecology maintenance.** The proto-symbol registry is an ecology, and
+ecologies need tending: stale signs marked, duplicates merged, ungrounded
+signs flagged, explosion bounded. But symbols are not human words, so hygiene
+never renames them, and a stable symbol is never deleted without an archive.
+The aim is to keep the sign system legible over a long life, not to curate it
+toward human meaning.
+
+**Checkpoint continuity.** Identity continuity is the one place where repair
+is most tempting and most dangerous. The checkpoint repair manager can
+restore last-known-good *metadata*, but it never silently rewrites identity
+history; an ambiguous continuity gap becomes an operator/governance review
+request, not a quiet fix. A system that edits its own past to look continuous
+is not repairing continuity — it is faking it.
+
+**Why auto-regeneration is not self-programming.** Repairing the state a
+program holds is categorically different from repairing the program. This
+layer can compact a memory layer, weaken a graph edge, mark a symbol stale,
+reset a bounded parameter, roll back the last plasticity update, and quarantine
+a corrupt file — all reversible, audited, inside the state directory. It can
+never touch a source file, a dependency, Git, the OS, or the network; it
+cannot disable governance, ClaimGuard, or the emergency stop; and every repair
+passes through the same safety/executive/governance gates as any other
+suggestion. Operational regeneration buys long-run survival; it buys no new
+authority, and that boundary is the whole point.

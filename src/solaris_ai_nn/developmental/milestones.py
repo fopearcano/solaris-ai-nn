@@ -51,6 +51,14 @@ class MilestoneType:
     FIRST_DEPRIVATION_RECOVERY = "first_deprivation_recovery"
     FIRST_ANOMALY_SCHEMA = "first_anomaly_schema"
     FIRST_ECOLOGY_PROTO_UTTERANCE = "first_ecology_proto_utterance"
+    # Auto-regeneration / self-repair (Prompt 26).
+    FIRST_AUTO_REGENERATION_SCAN = "first_auto_regeneration_scan"
+    FIRST_SAFE_REPAIR = "first_safe_repair"
+    FIRST_QUARANTINED_RECORD = "first_quarantined_record"
+    FIRST_REPAIR_ROLLBACK = "first_repair_rollback"
+    FIRST_STAGNATION_RECOVERY = "first_stagnation_recovery"
+    FIRST_SYMBOL_HYGIENE_PASS = "first_symbol_hygiene_pass"
+    FIRST_WORLD_MODEL_HYGIENE_PASS = "first_world_model_hygiene_pass"
 
     ALL = (FIRST_24H_SURVIVAL, FIRST_WEEK_SURVIVAL,
            FIRST_MONTH_SURVIVAL, FIRST_STABLE_HABIT,
@@ -68,7 +76,11 @@ class MilestoneType:
            FIRST_ADAPTATION_TO_SEASONAL_SHIFT,
            FIRST_DELAYED_CONSEQUENCE_ASSOCIATION,
            FIRST_BOUNDARY_PATTERN_LEARNED, FIRST_DEPRIVATION_RECOVERY,
-           FIRST_ANOMALY_SCHEMA, FIRST_ECOLOGY_PROTO_UTTERANCE)
+           FIRST_ANOMALY_SCHEMA, FIRST_ECOLOGY_PROTO_UTTERANCE,
+           FIRST_AUTO_REGENERATION_SCAN, FIRST_SAFE_REPAIR,
+           FIRST_QUARANTINED_RECORD, FIRST_REPAIR_ROLLBACK,
+           FIRST_STAGNATION_RECOVERY, FIRST_SYMBOL_HYGIENE_PASS,
+           FIRST_WORLD_MODEL_HYGIENE_PASS)
 
 
 @dataclass
@@ -197,6 +209,27 @@ _RULES = (
     (MilestoneType.FIRST_ECOLOGY_PROTO_UTTERANCE,
      "First proto-utterance grounded in an ecology event sequence.",
      lambda c: c.get("nursery_ecology_utterances", 0) >= 1),
+    (MilestoneType.FIRST_AUTO_REGENERATION_SCAN,
+     "First auto-regeneration diagnostics scan completed.",
+     lambda c: c.get("autoregeneration_scans", 0) >= 1),
+    (MilestoneType.FIRST_SAFE_REPAIR,
+     "First safe, bounded runtime-state repair applied.",
+     lambda c: c.get("autoregeneration_applied_repairs", 0) >= 1),
+    (MilestoneType.FIRST_QUARANTINED_RECORD,
+     "First corrupted record quarantined (archived, never deleted).",
+     lambda c: c.get("autoregeneration_quarantined", 0) >= 1),
+    (MilestoneType.FIRST_REPAIR_ROLLBACK,
+     "First harmful repair rolled back.",
+     lambda c: c.get("autoregeneration_rollbacks", 0) >= 1),
+    (MilestoneType.FIRST_STAGNATION_RECOVERY,
+     "First stagnation recovery action proposed/applied.",
+     lambda c: c.get("autoregeneration_stagnation_recoveries", 0) >= 1),
+    (MilestoneType.FIRST_SYMBOL_HYGIENE_PASS,
+     "First symbol hygiene pass over the proto-symbol registry.",
+     lambda c: c.get("autoregeneration_symbol_hygiene_passes", 0) >= 1),
+    (MilestoneType.FIRST_WORLD_MODEL_HYGIENE_PASS,
+     "First world-model hygiene pass over the graph.",
+     lambda c: c.get("autoregeneration_world_model_hygiene_passes", 0) >= 1),
 )
 
 

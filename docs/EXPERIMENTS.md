@@ -1537,3 +1537,54 @@ protocols measure hypothesis counts, support/falsification/inconclusive
 rates, unsafe-test rate, evidence counts, and Mysterium reduction after
 tests -- describing an internal experimental loop, never proof of
 understanding.
+
+## 143. Auto-Regeneration Diagnostics Demo ✅ (implemented)
+
+**Run:** `python examples/run_autoregeneration_diagnostics_demo.py`
+Builds a context with mock degradation (memory bloat, symbol explosion,
+world-model contradiction, runaway drift, Mysterium saturation) and runs
+diagnostics in observe-only mode: it detects and ranks degradation but
+applies no repair and mutates nothing.
+
+## 144. State Hygiene Demo ✅ (implemented)
+
+**Run:** `python examples/run_state_hygiene_demo.py`
+Writes an oversized log and a corrupt JSONL, then archives the old report and
+quarantines the corrupt file -- both moved (never deleted), inside the state
+directory, with an audit log; source files are untouched.
+
+## 145. Symbol Hygiene Demo ✅ (implemented)
+
+**Run:** `python examples/run_symbol_hygiene_demo.py`
+A proto-symbol context with explosion, duplicates, stale, ungrounded, and
+ambiguous symbols yields hygiene proposals (mark stale, merge duplicates,
+request disambiguation); symbols are never renamed with human words.
+
+## 146. World Model Hygiene Demo ✅ (implemented)
+
+**Run:** `python examples/run_world_model_hygiene_demo.py`
+Contradictory/weak/stale edges are marked ambiguous or weakened (evidence
+preserved) and a hypothesis test is requested to resolve the contradiction.
+
+## 147. Drift Recovery Demo ✅ (implemented)
+
+**Run:** `python examples/run_drift_recovery_demo.py`
+Healthy adaptation is left alone, runaway drift proposes stabilization (and a
+plasticity-rollback), unknown drift prefers stabilization and review; the
+stabilization proposal becomes a safe executive ActionCandidate.
+
+## 148. Auto-Regeneration Safety Demo ✅ (implemented)
+
+**Run:** `python examples/run_autoregeneration_safety_demo.py`
+Source-code, dependency, evidence-deletion, and out-of-state-dir repairs are
+all blocked, and the structural negatives (no source/Git modification, no
+disabling governance) hold.
+
+## 149. Long-Run Hygiene Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment state_hygiene`
+(also `autoregeneration_diagnostics`, `checkpoint_repair`, `symbol_hygiene`,
+`world_model_hygiene`, `habit_hygiene`, `drift_recovery`,
+`autoregeneration_safety`). Eight registered protocols measure degradation
+detection, repair proposal/application, evidence preservation, and the safety
+refusals that keep self-repair from becoming a back door.

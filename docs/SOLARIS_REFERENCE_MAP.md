@@ -489,3 +489,22 @@ science, never a proven cause, never real-world autonomy.
 | Synthesis (becoming through subtraction) | `FalsificationEngine` -- weakening/falsifying verdicts subtract confidence in bounded steps; falsified edges add `contradicts` |
 | Inner MAP (self-observation) | `InnerMapModel.hypothesis` + ten state-graph nodes -- hypothesis counts, top candidate, supported/falsified/inconclusive, long-lived unknowns as observed self-state (never authority, never a belief) |
 | Safety / boundaries (no real-world reach) | `hypothesis/safety.py` -- ten hard rules: no real-world/OS/browser/network experiment, no source rewriting, no sidecar commit, no unbounded test, no counterfactual-as-real, no safety-disabling hypothesis, no LLM-generated hypothesis as authority |
+
+---
+
+## Auto-regeneration / long-run state hygiene mapping (Phase 26)
+
+The auto-regeneration layer (`autoregeneration/`) realises Solaris_Ai's
+self-maintenance: a long-running organism must repair its own runtime state
+to survive, but only its *state* -- never its code, and never bypassing
+safety.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| Auto-regeneration (self-repair) | `autoregeneration/diagnostics.py` (`AutoRegenerationDiagnostics`) + `repair_policy.py` (`RepairPolicy`) -- detect degradation, propose bounded repairs, apply only what is safe |
+| Backpropagation / plasticity (adjusting weights) | bounded rollback + runtime-parameter repair via the plasticity rollback manager; source rewriting remains forbidden |
+| Inner MAP (self-observation) | `InnerMapModel.autoregeneration` + fourteen state-graph nodes -- degradation/repair observability, never authority |
+| Death / restart (continuity) | `checkpoint_repair.py` (`CheckpointRepairManager`) -- continuity repair restores metadata, never rewrites identity history; uncertain continuity requests review |
+| Synthesis (becoming through subtraction) | memory/graph/symbol/habit hygiene -- compaction, weakening, marking stale, retiring dead habits, all evidence-preserving |
+| Complexity (inertia vs chaos) | `drift_recovery.py` (`DriftRecoveryManager`) + the degradation model -- drift/stagnation/runaway monitoring with cautious recovery |
+| Safety / boundaries (no real-world reach) | `autoregeneration/safety.py` -- thirteen hard rules: no source/dependency/Git/OS/network change, no evidence deletion without archive, no disabling governance/ClaimGuard/emergency stop, no repair outside the state dir |

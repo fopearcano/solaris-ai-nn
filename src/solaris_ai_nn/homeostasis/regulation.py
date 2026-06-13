@@ -409,6 +409,40 @@ class HomeostaticRegulator:
                        clamp01(float(cost) * 0.5)),
                    "hypothesis", raw=cost)
 
+        autoregen = ctx.get("autoregeneration") or {}
+        if autoregen:
+            # Auto-regeneration (Prompt 26): degradation becomes repair/
+            # consolidation/stabilization pressure; severe degradation biases
+            # checkpoint and review. Repair makes pressure, never commands.
+            severity = str(autoregen.get("latest_degradation_severity",
+                                         "info"))
+            sev_level = {"info": 0.0, "watch": 0.3, "warning": 0.6,
+                         "critical": 0.9}.get(severity, 0.0)
+            if sev_level:
+                up("repair_pressure",
+                   max(self.state.value("repair_pressure", 0.0), sev_level),
+                   "autoregeneration", raw=severity)
+            dtype = autoregen.get("latest_degradation_type")
+            if dtype in ("memory_bloat", "telemetry_overgrowth"):
+                up("consolidation_pressure",
+                   max(self.state.value("consolidation_pressure", 0.0),
+                       clamp01(sev_level)), "autoregeneration")
+            if dtype in ("drift_runaway", "executive_loop",
+                         "homeostatic_instability", "mysterium_saturation"):
+                up("stabilization_pressure",
+                   max(self.state.value("stabilization_pressure", 0.0),
+                       clamp01(sev_level)), "autoregeneration", raw=dtype)
+            if dtype in ("checkpoint_inconsistency",
+                         "identity_continuity_gap",
+                         "state_file_corruption"):
+                up("checkpoint_pressure",
+                   max(self.state.value("checkpoint_pressure", 0.0), 0.6),
+                   "autoregeneration", raw=dtype)
+            if severity == "critical":
+                up("incident_pressure",
+                   max(self.state.value("incident_pressure", 0.0), 0.7),
+                   "autoregeneration", raw="critical degradation")
+
     def _auto_context(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
         valence = self.valence.rolling()
         return {

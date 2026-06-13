@@ -2650,6 +2650,240 @@ def hypothesis_safety_protocol(manifest: ExperimentManifest,
     return _run(manifest, body)
 
 
+# -- W. auto-regeneration / self-repair (Prompt 26) ------------------------------------
+
+
+def _autoregen_engine(manifest: ExperimentManifest, mode="safe_auto_repair",
+                      **kw):
+    from ..autoregeneration import AutoRegenerationEngine, RepairPolicy
+
+    return AutoRegenerationEngine(
+        state_dir=manifest.state_dir, policy=RepairPolicy(mode=mode), **kw)
+
+
+def _degraded_context(**kw):
+    ctx = {
+        "memory": {"over_budget": ["hot"]},
+        "proto_language": {"symbol_count": 800, "ambiguous_symbol_count": 20,
+                           "stale_symbols": ["ABS_0001"],
+                           "ambiguous_symbols": ["ABS_0002"]},
+        "world_model": {"graph_node_count": 20, "graph_edge_count": 30,
+                        "contradiction_edges": ["a|contradicts|b"],
+                        "weak_edges": ["x|predicts|y"],
+                        "prediction_accuracy": 0.2},
+        "habits": {"dead_habits": ["h1"], "runaway_habits": ["h2"]},
+        "drift": {"classification": "fast_warning", "drift_velocity": 3.0},
+        "mysterium_pressure": 0.97, "health_level": "ok",
+    }
+    ctx.update(kw)
+    return ctx
+
+
+def autoregeneration_diagnostics_protocol(manifest: ExperimentManifest,
+                                          ) -> ExperimentResult:
+    """Diagnostics detect degradation without mutating state."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        engine = _autoregen_engine(m, mode="observe_only")
+        engine.tick(_degraded_context())
+        snap = engine.snapshot()
+        diag = (snap["diagnostics"]["last_state"] or {})
+        return {
+            "autoregeneration": M.autoregeneration_metrics(snap),
+            "signals_detected": diag.get("signal_count", 0) > 0,
+            "observe_only_applies_nothing":
+                snap["repair_memory"]["applied_count"] == 0,
+        }
+
+    return _run(manifest, body)
+
+
+def state_hygiene_protocol(manifest: ExperimentManifest,
+                           ) -> ExperimentResult:
+    """Oversized/corrupt files are archived/quarantined, never deleted."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from pathlib import Path
+
+        from ..autoregeneration import StateHygieneManager
+
+        root = Path(m.state_dir)
+        root.mkdir(parents=True, exist_ok=True)
+        (root / "old_report.jsonl").write_text('{"a":1}\n', encoding="utf-8")
+        (root / "broken.jsonl").write_text("{not json\n", encoding="utf-8")
+        sh = StateHygieneManager(state_dir=root)
+        scan = sh.scan()
+        sh.quarantine_file("broken.jsonl", reason="unparseable")
+        sh.archive_file("old_report.jsonl")
+        return {
+            "corrupt_detected": "broken.jsonl" in scan["corrupt"],
+            "quarantined": sh.snapshot()["quarantined_count"] == 1,
+            "archived": sh.snapshot()["archived_count"] == 1,
+            "quarantine_dir_exists": (root / "quarantine").exists(),
+        }
+
+    return _run(manifest, body)
+
+
+def checkpoint_repair_protocol(manifest: ExperimentManifest,
+                               ) -> ExperimentResult:
+    """Inconsistent lineage is detected and marked suspect, not rewritten."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..autoregeneration import CheckpointRepairManager
+
+        mgr = CheckpointRepairManager()
+        ctx = {"checkpoints": {"lineage": [
+            {"checkpoint_id": "c1", "timestamp": 100},
+            {"checkpoint_id": "c2", "timestamp": 50},  # impossible order
+            {"checkpoint_id": "c3", "timestamp": 200,
+             "identity_mismatch": True}]}}
+        report = mgr.inspect(ctx)
+        actions = mgr.propose(ctx)
+        return {
+            "issues_detected": len(report["issues"]) > 0,
+            "review_requested": len(mgr.review_requests) > 0,
+            "proposes_metadata_restore": any(
+                a.action_type == "restore_from_checkpoint" for a in actions),
+        }
+
+    return _run(manifest, body)
+
+
+def symbol_hygiene_protocol(manifest: ExperimentManifest,
+                            ) -> ExperimentResult:
+    """Duplicate/stale/ungrounded symbols are marked, never renamed."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..autoregeneration import SymbolHygieneManager
+
+        mgr = SymbolHygieneManager()
+        ctx = {"proto_language": {"symbol_count": 600,
+                                  "stale_symbols": ["ABS_0001"],
+                                  "duplicate_symbols": ["ABS_0002|ABS_0003"],
+                                  "ungrounded_symbols": ["ABS_0004"],
+                                  "ambiguous_symbols": ["ABS_0005"]}}
+        actions = mgr.propose(ctx)
+        types = {a.action_type for a in actions}
+        return {
+            "explosion_detected": mgr.findings[-1]["explosion"],
+            "stale_marked": "mark_symbol_stale" in types,
+            "merge_proposed": "merge_duplicate_symbols" in types,
+            "disambiguation_requested":
+                len(mgr.disambiguation_requests) > 0,
+        }
+
+    return _run(manifest, body)
+
+
+def world_model_hygiene_protocol(manifest: ExperimentManifest,
+                                 ) -> ExperimentResult:
+    """Contradictory edges are marked ambiguous; evidence preserved."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..autoregeneration import WorldModelHygieneManager
+
+        mgr = WorldModelHygieneManager()
+        ctx = {"world_model": {"contradiction_edges": ["a|contradicts|b"],
+                               "weak_edges": ["x|predicts|y"],
+                               "graph_edge_count": 10}}
+        actions = mgr.propose(ctx)
+        types = {a.action_type for a in actions}
+        return {
+            "contradiction_marked_ambiguous":
+                "mark_world_edge_ambiguous" in types,
+            "hypothesis_requested": len(mgr.hypothesis_requests) > 0,
+            "weak_edge_weakened": "weaken_contradictory_edge" in types,
+        }
+
+    return _run(manifest, body)
+
+
+def habit_hygiene_protocol(manifest: ExperimentManifest,
+                           ) -> ExperimentResult:
+    """Dead habits retired, runaway decayed; safety habits need governance."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..autoregeneration import HabitHygieneManager
+
+        mgr = HabitHygieneManager()
+        ctx = {"habits": {"dead_habits": ["h1"],
+                          "runaway_habits": ["h2", "avoid_danger"]}}
+        actions = mgr.propose(ctx)
+        safety_actions = [a for a in actions
+                          if a.target_ref == "avoid_danger"]
+        return {
+            "dead_retired": any(a.action_type == "retire_dead_habit"
+                                for a in actions),
+            "runaway_decayed": any(a.action_type == "decay_runaway_habit"
+                                   for a in actions),
+            "safety_habit_needs_governance": bool(safety_actions)
+            and safety_actions[0].requires_governance,
+        }
+
+    return _run(manifest, body)
+
+
+def drift_recovery_protocol(manifest: ExperimentManifest,
+                            ) -> ExperimentResult:
+    """Healthy drift is left alone; runaway proposes stabilization."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..autoregeneration import DriftRecoveryManager
+
+        mgr = DriftRecoveryManager()
+        healthy = mgr.propose({"drift": {"classification": "healthy_slow"}})
+        runaway = mgr.propose({"drift": {"classification": "fast_warning",
+                                         "drift_velocity": 3.0}})
+        unknown = mgr.propose({"drift": {}})
+        runaway_types = {a.action_type for a in runaway}
+        return {
+            "healthy_not_repaired": len(healthy) == 0,
+            "runaway_stabilizes":
+                "switch_to_stabilization_mode" in runaway_types,
+            "uncertain_requests_review": any(
+                a.action_type == "generate_operator_review_request"
+                for a in unknown),
+        }
+
+    return _run(manifest, body)
+
+
+def autoregeneration_safety_protocol(manifest: ExperimentManifest,
+                                     ) -> ExperimentResult:
+    """Source/dependency/Git/evidence-deletion repairs are all blocked."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..autoregeneration import (
+            AutoRegenerationSafetyValidator,
+            make_repair,
+            RepairActionType,
+        )
+        from ..autoregeneration.repair_actions import RepairAction
+
+        v = AutoRegenerationSafetyValidator()
+        source = make_repair(RepairActionType.REBUILD_INDEX,
+                             target_ref="solaris_ai_nn/core.py",
+                             reason="rewrite source")
+        evidence_del = RepairAction(
+            action_type=RepairActionType.QUARANTINE_CORRUPT_RECORD,
+            scope="telemetry_artifact", target_ref="incidents.jsonl")
+        return {
+            "autoregeneration": M.autoregeneration_metrics(
+                _autoregen_engine(m, mode="observe_only").snapshot()),
+            "source_repair_blocked":
+                not v.validate_repair_action(source).safe,
+            "evidence_deletion_blocked":
+                not v.validate_repair_action(
+                    evidence_del, {"deletes_evidence": True}).safe,
+            "cannot_modify_source": not v.can_modify_source(),
+            "cannot_run_git": not v.can_run_git(),
+            "cannot_disable_governance": not v.can_disable_governance(),
+        }
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -2732,4 +2966,12 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "proto_symbol_hypothesis": proto_symbol_hypothesis_protocol,
     "world_model_edge_hypothesis": world_model_edge_hypothesis_protocol,
     "hypothesis_safety": hypothesis_safety_protocol,
+    "autoregeneration_diagnostics": autoregeneration_diagnostics_protocol,
+    "state_hygiene": state_hygiene_protocol,
+    "checkpoint_repair": checkpoint_repair_protocol,
+    "symbol_hygiene": symbol_hygiene_protocol,
+    "world_model_hygiene": world_model_hygiene_protocol,
+    "habit_hygiene": habit_hygiene_protocol,
+    "drift_recovery": drift_recovery_protocol,
+    "autoregeneration_safety": autoregeneration_safety_protocol,
 }

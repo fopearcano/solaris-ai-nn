@@ -808,3 +808,54 @@ def hypothesis_metrics(hypothesis: Optional[Dict[str, Any]],
             memory, "long_lived_unknown_count", 0)),
         "authority": False,  # structural; hypotheses are never authority
     }
+
+
+# -- X. auto-regeneration / self-repair (Prompt 26) ------------------------------------
+
+
+def autoregeneration_metrics(autoregeneration: Optional[Dict[str, Any]],
+                             ) -> Dict[str, Any]:
+    """Objective self-repair metrics: how much degradation, how many repairs,
+    how often they helped or harmed, and how much was resolved. These describe
+    operational regeneration of runtime state, never self-programming."""
+    if not autoregeneration:
+        return {"present": False}
+    snap = autoregeneration
+    diag = (snap.get("diagnostics") or {}).get("last_state") or {}
+    mem = snap.get("repair_memory") or {}
+    proposed = snap.get("proposed_repairs") or []
+    drift = snap.get("drift_recovery") or {}
+    counts = diag.get("counts_by_type") or {}
+    recent_drift = drift.get("recent_classes") or []
+    recovered = sum(1 for c in recent_drift
+                    if c in ("instability", "runaway", "stagnation"))
+    return {
+        "present": True,
+        "degradation_signal_count": int(_get(diag, "signal_count", 0)),
+        "critical_degradation_count": int(_get(diag, "critical_count", 0)),
+        "proposed_repair_count": len(proposed),
+        "applied_repair_count": int(_get(mem, "applied_count", 0)),
+        "refused_repair_count": int(_get(mem, "refused_count", 0)),
+        "rollback_count": int(_get(mem, "rollback_count", 0)),
+        "repair_success_rate": mem.get("success_rate"),
+        "repair_harm_rate": mem.get("harm_rate"),
+        "quarantine_count": int((snap.get("state_hygiene") or {}).get(
+            "quarantined_count", 0)),
+        "memory_bloat_reduction": (int(_get(mem, "applied_count", 0))
+                                   if counts.get("memory_bloat") else 0),
+        "symbol_explosion_reduction": (int(_get(mem, "applied_count", 0))
+                                       if counts.get("symbol_explosion")
+                                       else 0),
+        "world_model_contradiction_reduction": (
+            len((snap.get("graph_hygiene") or {}).get(
+                "hypothesis_requests", []))),
+        "habit_loop_reduction": len((snap.get("habit_hygiene") or {}).get(
+            "stabilization_requests", [])),
+        "drift_recovery_rate": (round(recovered / len(recent_drift), 4)
+                                if recent_drift else None),
+        "checkpoint_consistency_score": (
+            0.0 if (snap.get("checkpoint_repair") or {}).get(
+                "suspect_checkpoints") else 1.0),
+        "repair_policy_mode": (snap.get("policy") or {}).get("mode"),
+        "authority": False,  # structural; repair is never authority
+    }

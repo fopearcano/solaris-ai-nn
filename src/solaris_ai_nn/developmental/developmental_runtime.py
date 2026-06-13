@@ -72,6 +72,9 @@ class DevelopmentalRuntime:
     # Hypothesis engine / self-experimentation (Prompt 25).
     enable_hypothesis_engine: bool = False
     enable_hypothesis_world_model_updates: bool = False
+    # Auto-regeneration / self-repair (Prompt 26).
+    enable_autoregeneration: bool = False
+    repair_policy_mode: str = "observe_only"
 
     def __post_init__(self) -> None:
         self.state_dir = Path(self.state_dir)
@@ -140,6 +143,21 @@ class DevelopmentalRuntime:
                 governance=self.governance,
                 enable_world_model_updates=(
                     self.enable_hypothesis_world_model_updates))
+        self.autoregeneration = None
+        if self.enable_autoregeneration:
+            from ..autoregeneration import (
+                AutoRegenerationEngine,
+                RepairPolicy,
+            )
+
+            sym_registry = (getattr(self.protolanguage, "registry", None)
+                            if self.protolanguage is not None else None)
+            self.autoregeneration = AutoRegenerationEngine(
+                state_dir=self.state_dir,
+                policy=RepairPolicy(mode=self.repair_policy_mode),
+                symbol_registry=sym_registry,
+                active_perception=self.active_perception,
+                governance=self.governance)
         self.segments_run = 0
         self.last_runner_snapshot: Dict[str, Any] = {}
         self.last_report_path: Optional[str] = None
@@ -272,6 +290,8 @@ class DevelopmentalRuntime:
             self._active_perception_tick(snapshot, signals, lifetime)
         if self.hypothesis_engine is not None:
             self._hypothesis_tick(snapshot, signals, lifetime)
+        if self.autoregeneration is not None:
+            self._autoregeneration_tick(snapshot, signals, lifetime)
         transition = self.epochs.evaluate(signals, lifetime_s=lifetime)
         if transition is not None:
             self.clock.note_epoch_transition()
@@ -484,6 +504,52 @@ class DevelopmentalRuntime:
             summary.get("falsified_count", 0))
         signals["hypothesis_tests_run"] = int(summary.get("tests_run", 0))
 
+    def _autoregeneration_tick(self, snapshot: Dict[str, Any],
+                               signals: Dict[str, Any],
+                               lifetime: float) -> None:
+        """Run one diagnose -> propose -> (apply) auto-regeneration cycle."""
+        engine = self.autoregeneration
+        latent = snapshot.get("latent") or {}
+        world = snapshot.get("world_model") or {}
+        proto = (self.protolanguage.summary()
+                 if self.protolanguage is not None else {})
+        ctx = {
+            "step": self.segments_run,
+            "memory": {"over_budget": self.memory.state().over_budget,
+                       "compression_ratio":
+                           self.memory.state().compression_ratio()},
+            "world_model": world,
+            "proto_language": {
+                "symbol_count": proto.get("symbol_count", 0),
+                "ambiguous_symbol_count": proto.get(
+                    "ambiguous_symbol_count", 0)},
+            "drift": self.drift.snapshot(),
+            "stagnation_status": ("stagnating"
+                                  if signals.get("stagnation_windows", 0)
+                                  else None),
+            "mysterium_pressure": float(latent.get("mysterium_pressure", 0.0)
+                                        or 0.0),
+            "state_dir": str(self.state_dir),
+        }
+        engine.tick(ctx)
+        summary = engine.summary()
+        # Surface autoregeneration signals for milestones / ops / Inner MAP.
+        signals["autoregeneration_scans"] = int(
+            (engine.diagnostics.snapshot() or {}).get("scans_run", 0))
+        signals["autoregeneration_applied_repairs"] = int(
+            summary.get("applied_repair_count", 0))
+        signals["autoregeneration_quarantined"] = int(
+            summary.get("quarantine_count", 0))
+        signals["autoregeneration_rollbacks"] = int(
+            summary.get("rollback_count", 0))
+        if summary.get("latest_degradation_type") in (
+                "developmental_stagnation", "drift_runaway"):
+            signals["autoregeneration_stagnation_recoveries"] = 1
+        if engine.symbol_hygiene.findings:
+            signals["autoregeneration_symbol_hygiene_passes"] = 1
+        if engine.graph_hygiene.findings:
+            signals["autoregeneration_world_model_hygiene_passes"] = 1
+
     def _signals(self, snapshot: Dict[str, Any]) -> Dict[str, Any]:
         habit_weights = ((snapshot.get("bridge") or {}).get("habit")
                          or {})
@@ -663,6 +729,9 @@ class DevelopmentalRuntime:
                                   else None),
             "hypothesis": (self.hypothesis_engine.summary()
                            if self.hypothesis_engine is not None else None),
+            "autoregeneration": (self.autoregeneration.summary()
+                                 if self.autoregeneration is not None
+                                 else None),
             "note": "a persistent developmental process; labels are "
                     "measurements, not consciousness claims",
         }
@@ -711,5 +780,8 @@ class DevelopmentalRuntime:
                                   else None),
             "hypothesis": (self.hypothesis_engine.snapshot()
                            if self.hypothesis_engine is not None else None),
+            "autoregeneration": (self.autoregeneration.snapshot()
+                                 if self.autoregeneration is not None
+                                 else None),
             "metrics": self.metrics(),
         }

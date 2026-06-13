@@ -68,8 +68,8 @@ def test_all_scopes_in_default_set():
     # + 7 communication (P19) + 5 LLM adapter (P20)
     # + 6 developmental (P21) + 4 proto-language (P22)
     # + 6 ecology (P23) + 5 active perception (P24)
-    # + 6 hypothesis engine (P25).
-    assert len(PermissionScope.ALL) == 71
+    # + 6 hypothesis engine (P25) + 9 auto-regeneration (P26).
+    assert len(PermissionScope.ALL) == 80
 
 
 def test_executive_scope_defaults():
@@ -139,6 +139,20 @@ def test_active_perception_scope_defaults():
     assert ps.requires_approval(
         PermissionScope.ENABLE_CURIOSITY_DRIVEN_SAMPLING)
     assert not ps.allows(PermissionScope.ENABLE_CURIOSITY_DRIVEN_SAMPLING)
+
+
+def test_autoregeneration_scope_defaults():
+    ps = PermissionSet.default()
+    assert ps.allows(PermissionScope.ENABLE_AUTOREGENERATION)
+    assert ps.allows(PermissionScope.ENABLE_STATE_HYGIENE)
+    assert ps.allows(PermissionScope.ENABLE_MEMORY_COMPACTION)
+    assert ps.allows(PermissionScope.ENABLE_SYMBOL_HYGIENE)
+    assert ps.allows(PermissionScope.ENABLE_WORLD_MODEL_HYGIENE)
+    assert ps.allows(PermissionScope.ENABLE_HABIT_HYGIENE)
+    assert ps.allows(PermissionScope.ENABLE_REPAIR_ROLLBACK)
+    # Auto-applying repairs and identity-affecting repair need approval.
+    assert ps.requires_approval(PermissionScope.ENABLE_SAFE_AUTO_REPAIR)
+    assert ps.requires_approval(PermissionScope.ENABLE_CHECKPOINT_REPAIR)
 
 
 def test_hypothesis_scope_defaults():

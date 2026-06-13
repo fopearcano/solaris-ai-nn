@@ -758,4 +758,71 @@ def build_default_state_graph() -> StateGraph:
                "hypothesis memory feeds developmental reports")
     g.add_edge("hypothesis_memory", "inner_map",
                "hypothesis state feeds Inner MAP")
+
+    # Auto-regeneration / long-run state hygiene (Prompt 26). Repairs
+    # runtime state, never source code; governance and safety dominate.
+    for name, role in [
+        ("autoregeneration_diagnostics", "non-mutating degradation scans"),
+        ("degradation_state", "operational degradation signals"),
+        ("repair_policy", "which bounded repairs to apply, by mode"),
+        ("repair_action", "bounded, reversible runtime-state repair"),
+        ("state_hygiene_manager", "archive/quarantine inside state dir"),
+        ("checkpoint_repair_manager", "continuity without rewriting history"),
+        ("reference_repair_manager", "fix broken links, never invent them"),
+        ("memory_hygiene_manager", "compaction preserving evidence"),
+        ("world_model_hygiene_manager", "mark/weaken edges, keep evidence"),
+        ("symbol_hygiene_manager", "tend the proto-symbol ecology"),
+        ("habit_hygiene_manager", "decay/retire habits, bounded"),
+        ("drift_recovery_manager", "adaptation vs runaway, recover safely"),
+        ("repair_memory", "audited before/after repair record"),
+        ("autoregeneration_safety", "repair never a back door"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("telemetry", "autoregeneration_diagnostics",
+               "telemetry feeds diagnostics")
+    g.add_edge("autoregeneration_diagnostics", "degradation_state",
+               "scans produce degradation signals")
+    g.add_edge("degradation_state", "repair_policy",
+               "degradation feeds the repair policy")
+    g.add_edge("repair_policy", "repair_action",
+               "the policy proposes bounded repairs")
+    g.add_edge("autoregeneration_safety", "repair_action",
+               "safety gates every repair")
+    g.add_edge("repair_policy",
+               "action_arbitrator" if "action_arbitrator" in g.nodes
+               else "desire_queue",
+               "repairs become ActionCandidates for the executive")
+    g.add_edge("repair_policy",
+               "governance_policy" if "governance_policy" in g.nodes
+               else "inner_map",
+               "governed/identity repairs feed governance")
+    g.add_edge("repair_action", "plasticity_engine"
+               if "plasticity_engine" in g.nodes else "readout",
+               "rollback/parameter repair routes through plasticity")
+    g.add_edge("state_hygiene_manager", "repair_memory",
+               "hygiene results feed repair memory")
+    g.add_edge("memory_hygiene_manager", "memory"
+               if "memory" in g.nodes else "repair_memory",
+               "memory hygiene compacts the trace, preserving evidence")
+    g.add_edge("symbol_hygiene_manager",
+               "symbol_registry" if "symbol_registry" in g.nodes
+               else "repair_memory",
+               "symbol hygiene marks/merges symbols")
+    g.add_edge("world_model_hygiene_manager",
+               "knowledge_graph" if "knowledge_graph" in g.nodes
+               else "repair_memory",
+               "graph hygiene marks/weakens edges")
+    g.add_edge("checkpoint_repair_manager", "continuity"
+               if "continuity" in g.nodes else "repair_memory",
+               "checkpoint repair restores metadata, not history")
+    g.add_edge("drift_recovery_manager", "repair_policy",
+               "drift recovery proposes stabilization")
+    g.add_edge("repair_action", "repair_memory",
+               "safe repairs feed repair memory")
+    g.add_edge("repair_memory",
+               "metric_collector" if "metric_collector" in g.nodes
+               else "inner_map",
+               "repair memory feeds evaluation")
+    g.add_edge("repair_memory", "inner_map",
+               "auto-regeneration state feeds Inner MAP")
     return g
