@@ -426,3 +426,25 @@ human words.
 | Synthesis (becoming through subtraction) | `compression.py` — symbolization as measured subtraction, with safety events kept verbatim and decay/extinction on the record |
 | Inner MAP (self-observation) | `InnerMapModel.proto_language` + eleven state-graph nodes — symbol counts, utility, and ambiguity as observed self-state |
 | Developmental runtime (long becoming) | symbol birth/survival/extinction tracked across simulated months; births fossilize; seven proto-language milestones mark the firsts |
+
+---
+
+## Developmental nursery / stimulus ecology mapping (Phase 23)
+
+The ecology layer (`ecology/`) realises Solaris_Ai's premise that a
+developing being is shaped by *the world it lives in*, not by a teacher:
+repetition, absence, scarcity, rhythm, novelty, danger/reward, boundaries,
+rare events, seasonal drift, and delayed consequence become the
+environment, and the system infers structure from them with no answer key.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| The organism in its environment (`conscience.py` assembled world) | `ecology/stimulus_ecology.py` (`StimulusEcology`) — per-step world physics; `nursery.py` (`DevelopmentalNursery`) wires it to the runtime |
+| Rhythm and cycle (day/night, waking/rest) | `ecology/cycles.py` — eight cycle types modulate stimulus frequency and intensity; silence phases hand control to latent cognition |
+| Habit (reinforced pathways) | stable-repetition / mixed regimes + recurring base patterns — repetition the world supplies, never a label it gives |
+| Mysterium (pull of the unknown) | `ecology/anomalies.py` + `novelty.py` — controlled perturbations and bounded novelty raise unknown pressure (never errors); the latent layer regulates the response |
+| Synthesis (becoming through subtraction) | `ecology/deprivation.py` + `scarcity.py` — absence and lean phases create seek-signal / rest pressure through homeostasis, not commands |
+| Delayed consequence / time-binding | `ecology/delayed_consequence.py` — a cause now, an effect later, linked only by a group id; the world model must infer the association |
+| Slow becoming (seasons, long horizons) | `ecology/seasonality.py` — deterministic four-season drift reshapes the world's profile over months/years simulated |
+| Inner MAP (self-observation) | `InnerMapModel.ecology` + twelve state-graph nodes — regime, cycle phase, season, and event structure as observed world-state (a world, never authority) |
+| Safety / boundaries (no real-world reach) | `ecology/safety.py` — ten hard rules: no network, no actuation, no human feedback as ecology, no labels, no unbounded run/memory/rate, no operator-command payloads; the ego attributes events as nursery-generated, never operator/human/real-world |

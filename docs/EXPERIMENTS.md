@@ -1391,3 +1391,56 @@ references survive and safety incidents stay verbatim.
 Type-level regularities inferred from repeated sequences and validated
 against held-out traces — tested statistical patterns over internal
 symbols, never human grammar.
+
+## 125. Developmental Nursery Demo ✅ (implemented)
+
+**Run:** `python examples/run_developmental_nursery_demo.py --steps 600`
+A bounded simulated-time developmental run whose only input is a
+`DevelopmentalNursery`: regimes, cycles, scarcity, novelty, anomalies,
+seasonal drift, deprivation, and delayed consequences. Proto-language is
+enabled so recurring and absent stimuli can earn internal signs — no human
+teaching, no labels, no LLM. A ClaimGuard-scanned ecology report closes the
+run.
+
+## 126. Deprivation Nursery Demo ✅ (implemented)
+
+**Run:** `python examples/run_deprivation_nursery_demo.py --steps 400`
+A sparse, deprivation-heavy ecology (long silence, scarcity, absence
+windows). On silent steps the stimulus provider returns `None`, so the
+runner's own absence/continuity machinery activates — exercising latent
+cognition during deprivation. Windows are bounded and recoverable.
+
+## 127. Delayed-Consequence Demo ✅ (implemented)
+
+**Run:** `python examples/run_delayed_consequence_demo.py --steps 500`
+A delayed-feedback world schedules consequences several steps after their
+cause, tagged only with a shared `delay_group` id and no label. The
+association must be inferred over recurrences; a world model is enabled to
+receive the structure.
+
+## 128. Seasonal-Shift Demo ✅ (implemented)
+
+**Run:** `python examples/run_seasonal_shift_demo.py --steps 800`
+A seasonal-drift ecology slowly changes its absence/novelty/danger/reward
+profile across spring, summer, autumn, and winter. The drift is gradual and
+deterministic with the seed; the system lives through changing conditions
+with nothing taught.
+
+## 129. Anomaly Nursery Demo ✅ (implemented)
+
+**Run:** `python examples/run_anomaly_nursery_demo.py --steps 500`
+A novelty-and-anomaly-rich ecology where established patterns break,
+expected consequences fail, rewards turn neutral, and danger appears in safe
+contexts — controlled perturbations logged `is_error=False`, never errors.
+The anomaly rate is bounded; anomalies raise novelty and unknown pressure
+for the latent layer to regulate.
+
+## 130. Ecology Benchmark Protocols ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment nursery_short_run`
+(also `absence_deprivation`, `delayed_consequence`, `seasonal_shift`,
+`anomaly_adaptation`, `ecology_proto_symbol`). Six registered protocols
+measure event-distribution entropy, absence windows, delayed-consequence
+resolution, seasonal adaptation, anomaly bounding, and ecology-driven
+proto-symbol emergence — each reporting a stimulus world, never a score of
+understanding.

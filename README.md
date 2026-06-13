@@ -260,6 +260,13 @@ python examples/run_symbol_emergence_demo.py
 python examples/run_proto_utterance_demo.py
 python examples/run_symbol_prediction_demo.py
 python examples/run_proto_language_safety_demo.py
+
+# Developmental nursery: a controlled stimulus world, not a teacher
+python examples/run_developmental_nursery_demo.py --steps 600
+python examples/run_deprivation_nursery_demo.py --steps 400
+python examples/run_delayed_consequence_demo.py --steps 500
+python examples/run_seasonal_shift_demo.py --steps 800
+python examples/run_anomaly_nursery_demo.py --steps 500
 ```
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
@@ -431,6 +438,27 @@ proto-syntactic structures (never grammar), proto-utterances are
 internal structure (never speech), translations are ClaimGuard-gated
 debug renderings, and the answer to "is this human language?" is a flat
 No. Symbols command nothing, approve nothing, and carry no authority.
+
+The **developmental nursery / stimulus ecology** (`ecology/`) gives that
+proto-language something to grow in: a controlled artificial world, not a
+teacher. `StimulusEcology` composes ten regime profiles, eight cycle
+rhythms, four-season slow drift, scarcity, bounded novelty, controlled
+anomalies (logged `is_error=False`, never errors), bounded deprivation
+windows, and delayed consequences (cause now, effect later, linked only by
+a group id) into a per-step world — seventeen event types, deterministic
+with the seed, low-compute. The `DevelopmentalNursery` exposes a
+`stimulus_provider(step)` that becomes the runtime's only input; on
+absence/silence steps it returns `None`, handing control to the runner's own
+continuity machinery so latent cognition activates. Stimuli are provenance,
+never an answer key: ten hard safety rules forbid networks, real-world
+action, human feedback masquerading as ecology, correct-answer labels,
+command-shaped payloads, unbounded runs, and stimulus-rate explosion;
+month/year-scale ecology needs explicit governance approval; the ego layer
+attributes events as nursery-generated (never operator command, never human
+feedback, never the real world). It feeds proto-language, the world model,
+homeostatic pressure, and seven new milestones — and there is **no teaching
+loop, no operator correction as learning source, no human-language symbols,
+and no LLM learning environment** anywhere in it.
 
 The **evaluation layer** (`evaluation/`) is the measurement harness: nine
 registered protocols (absence, feedback inversion, reward/danger, restart

@@ -262,6 +262,13 @@ class InnerMapModel:
     # compression_utility, prediction_utility, first_stable_symbol,
     # latest_proto_utterance, proto_language_report_path, authority.
     proto_language: Optional[Dict[str, Any]] = None
+    # Stimulus ecology status (Prompt 23); None when no nursery is
+    # attached. Keys: enabled, nursery_id, current_regime,
+    # current_cycle_phase, current_season, ecology_event_count,
+    # absence_window_count, novelty_count, anomaly_count,
+    # delayed_consequence_group_count, seasonal_shift_count,
+    # ecology_report_path, authority.
+    ecology: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

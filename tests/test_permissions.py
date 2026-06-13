@@ -66,8 +66,9 @@ def test_all_scopes_in_default_set():
     # 13 governance (P12) + 5 latent (P14) + 3 world model (P15)
     # + 4 homeostasis (P16) + 4 executive (P17) + 3 ego (P18)
     # + 7 communication (P19) + 5 LLM adapter (P20)
-    # + 6 developmental (P21) + 4 proto-language (P22).
-    assert len(PermissionScope.ALL) == 54
+    # + 6 developmental (P21) + 4 proto-language (P22)
+    # + 6 ecology (P23).
+    assert len(PermissionScope.ALL) == 60
 
 
 def test_executive_scope_defaults():
@@ -115,6 +116,16 @@ def test_developmental_scope_defaults():
     assert ps.allows(PermissionScope.ENABLE_FOSSIL_MEMORY)
     assert ps.requires_approval(
         PermissionScope.ENABLE_DEVELOPMENTAL_PRUNING)
+
+
+def test_ecology_scope_defaults():
+    ps = PermissionSet.default()
+    assert ps.allows(PermissionScope.ENABLE_DEVELOPMENTAL_NURSERY)
+    assert ps.allows(PermissionScope.ENABLE_ECOLOGY_STREAM)
+    assert ps.allows(PermissionScope.ENABLE_DEPRIVATION_WINDOWS)
+    assert ps.allows(PermissionScope.ENABLE_ANOMALY_GENERATION)
+    assert ps.requires_approval(PermissionScope.ENABLE_MONTH_SCALE_ECOLOGY)
+    assert ps.requires_approval(PermissionScope.ENABLE_YEAR_SCALE_ECOLOGY)
 
 
 def test_proto_language_scope_defaults():

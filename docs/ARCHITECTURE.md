@@ -1401,3 +1401,77 @@ across simulated months, and seven new milestones (first proto-symbol
 through first proto-utterance) mark the firsts — with no human teaching,
 no LLM, and no consciousness or understanding claim anywhere in the
 chain.
+
+## Developmental Nursery and Stimulus Ecology
+
+A developmental system needs an *ecology*, not a teacher. The
+`solaris_ai_nn.ecology` package builds a controlled artificial world that
+feeds the rest of the stack structured, recurring, sparse, noisy, rhythmic,
+anomalous, and slowly-evolving stimuli over long (months/years simulated)
+horizons — so habits, proto-symbols, categories, prediction patterns,
+Mysterium regulation, memory consolidation, world-model structure,
+proto-language, executive preferences, homeostatic rhythms, and
+developmental milestones can develop **without direct teaching**. The
+ecology is simple, inspectable, deterministic with the seed, low-compute,
+and safe.
+
+**The world has physics, not lessons.** `StimulusEcology.generate_step` is
+the per-step world: it composes the active `EcologyRegime` (one of ten
+probability profiles — stable repetition, sparse desert, noisy environment,
+novelty burst, danger/reward field, boundary maze, long silence, delayed
+feedback world, seasonal drift, mixed nursery — each a *pressure*, never a
+correct answer), the `CycleManager` rhythms (eight cycle types: day/night,
+active/quiet, signal/silence, reward/scarcity, danger/recovery,
+novelty/decay, consolidation window, seasonal), the `SeasonalityModel`
+slow drift across spring/summer/autumn/winter, the `ScarcityModel` resource
+economy, the bounded `NoveltyGenerator` (novelty that recurs becomes
+familiar), the `AnomalyGenerator` (controlled perturbations, logged
+`is_error=False`, never system errors), the `DeprivationModel` (bounded
+absence/silence windows), and the `DelayedConsequenceModel` (a cause now,
+an effect several steps later, linked only by a shared group id — never a
+label). Seventeen `EcologyEventType`s span regular signals, absence
+windows, novel signals, repeated patterns and breaks, scarcity, reward and
+danger analogues, boundaries, delayed consequences, seasonal shifts, noise
+bursts, quiet and recovery phases, rare events, anomalies, and milestone
+triggers.
+
+**Stimuli are provenance, not an answer key.** An `EcologyStimulus` carries
+human-readable `payload`/`metadata` for inspection only; the developing
+system is expected to infer structure from recurrence, consequence, and
+context. The `EcologyStream` turns each non-absence stimulus into a
+canonical `C.Stimulus` (origin `developmental_nursery`) and writes a
+deterministic JSONL replay log. The `DevelopmentalNursery` wires these
+together and exposes a `stimulus_provider(step)` the runner consumes: it
+returns the most-intense salient signal, or **`None`** on absence/silence
+steps — which lets the runner's own absence/continuity machinery (the
+latent "I exist!" pathway) take over, directly exercising latent cognition.
+The nursery becomes the `DevelopmentalRuntime`'s stimulus source when
+`enable_ecology=True`, grounds proto-symbols in absence/anomaly/season/
+regime context, feeds scarcity and absence into homeostatic pressure,
+drives the world model with delayed consequences, and fires seven new
+developmental milestones (first absence symbol from nursery, first
+adaptation to seasonal shift, first delayed-consequence association, first
+boundary pattern learned, first deprivation recovery, first anomaly schema,
+first ecology proto-utterance).
+
+**Safety is structural.** `EcologySafetyValidator` enforces ten hard rules:
+no external data source unless an explicit read-only stream, no network, no
+OS/browser automation, no real-world action, no human feedback masquerading
+as ecology, no correct-answer labels, no unbounded run without governance
+approval, no unbounded memory, no stimulus-rate explosion, and no payload
+pretending to be an operator command. Command-shaped payloads and
+label-keyed metadata are dropped before emission; month/year-scale ecology
+requires explicit governance approval (`ENABLE_MONTH_SCALE_ECOLOGY` /
+`ENABLE_YEAR_SCALE_ECOLOGY`). The ego layer attributes nursery events as
+`generated_by_developmental_nursery` / `simulated_environment_input` —
+explicitly never an operator command, never human feedback, never the real
+world. Ops health surfaces ecology incidents (stimulus rate too high,
+silence too long without a latent layer, anomaly rate too high, memory
+growth). The Inner MAP carries the ecology status (a world, never
+authority), and the state graph maps the nursery, ecology, cycles, regimes,
+scarcity, novelty, anomalies, seasonality, deprivation, delayed
+consequences, stream, and memory and their edges into the substrate.
+**No human teaching loop, no operator correction as learning source, no
+human language injected as the symbol system, no LLM-generated learning
+environment** — the system grows up by living in a world, not by being
+told the answers.

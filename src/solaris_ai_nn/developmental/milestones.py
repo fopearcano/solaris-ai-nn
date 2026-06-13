@@ -40,6 +40,17 @@ class MilestoneType:
         "first_symbol_prediction_improvement")
     FIRST_SYMBOL_EXTINCTION = "first_symbol_extinction"
     FIRST_PROTO_UTTERANCE = "first_proto_utterance"
+    # Developmental nursery / stimulus ecology (Prompt 23).
+    FIRST_ABSENCE_SYMBOL_FROM_NURSERY = (
+        "first_absence_symbol_from_nursery")
+    FIRST_ADAPTATION_TO_SEASONAL_SHIFT = (
+        "first_adaptation_to_seasonal_shift")
+    FIRST_DELAYED_CONSEQUENCE_ASSOCIATION = (
+        "first_delayed_consequence_association")
+    FIRST_BOUNDARY_PATTERN_LEARNED = "first_boundary_pattern_learned"
+    FIRST_DEPRIVATION_RECOVERY = "first_deprivation_recovery"
+    FIRST_ANOMALY_SCHEMA = "first_anomaly_schema"
+    FIRST_ECOLOGY_PROTO_UTTERANCE = "first_ecology_proto_utterance"
 
     ALL = (FIRST_24H_SURVIVAL, FIRST_WEEK_SURVIVAL,
            FIRST_MONTH_SURVIVAL, FIRST_STABLE_HABIT,
@@ -52,7 +63,12 @@ class MilestoneType:
            FIRST_PROTO_SYMBOL, FIRST_STABLE_SYMBOL,
            FIRST_SYMBOL_SEQUENCE, FIRST_PROTO_SYNTAX_RULE,
            FIRST_SYMBOL_PREDICTION_IMPROVEMENT,
-           FIRST_SYMBOL_EXTINCTION, FIRST_PROTO_UTTERANCE)
+           FIRST_SYMBOL_EXTINCTION, FIRST_PROTO_UTTERANCE,
+           FIRST_ABSENCE_SYMBOL_FROM_NURSERY,
+           FIRST_ADAPTATION_TO_SEASONAL_SHIFT,
+           FIRST_DELAYED_CONSEQUENCE_ASSOCIATION,
+           FIRST_BOUNDARY_PATTERN_LEARNED, FIRST_DEPRIVATION_RECOVERY,
+           FIRST_ANOMALY_SCHEMA, FIRST_ECOLOGY_PROTO_UTTERANCE)
 
 
 @dataclass
@@ -157,6 +173,30 @@ _RULES = (
      "First proto-utterance built (an internal symbolic sequence, not "
      "speech).",
      lambda c: c.get("proto_utterance_count", 0) >= 1),
+    (MilestoneType.FIRST_ABSENCE_SYMBOL_FROM_NURSERY,
+     "First absence symbol emerged from nursery silence windows.",
+     lambda c: c.get("nursery_absence_windows", 0) >= 3
+     and c.get("stable_symbol_count", 0) >= 1),
+    (MilestoneType.FIRST_ADAPTATION_TO_SEASONAL_SHIFT,
+     "First seasonal shift was followed by structural adaptation.",
+     lambda c: c.get("nursery_seasonal_shifts", 0) >= 1
+     and c.get("structural_change_score", 0.0) > 0.0),
+    (MilestoneType.FIRST_DELAYED_CONSEQUENCE_ASSOCIATION,
+     "First candidate association across a delayed-consequence group.",
+     lambda c: c.get("nursery_delayed_groups", 0) >= 1
+     and c.get("world_model_node_count", 0) >= 5),
+    (MilestoneType.FIRST_BOUNDARY_PATTERN_LEARNED,
+     "First recurring boundary pattern recorded from the ecology.",
+     lambda c: c.get("nursery_boundary_events", 0) >= 3),
+    (MilestoneType.FIRST_DEPRIVATION_RECOVERY,
+     "First recovery after a bounded deprivation/silence window.",
+     lambda c: c.get("nursery_deprivation_recoveries", 0) >= 1),
+    (MilestoneType.FIRST_ANOMALY_SCHEMA,
+     "First schema-like response to a repeated anomaly pattern.",
+     lambda c: c.get("nursery_anomaly_events", 0) >= 2),
+    (MilestoneType.FIRST_ECOLOGY_PROTO_UTTERANCE,
+     "First proto-utterance grounded in an ecology event sequence.",
+     lambda c: c.get("nursery_ecology_utterances", 0) >= 1),
 )
 
 

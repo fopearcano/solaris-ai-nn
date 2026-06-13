@@ -298,6 +298,47 @@ class HomeostaticRegulator:
                    clamp01(int(ambiguous) / total), "protolanguage",
                    raw={"ambiguous": ambiguous, "total": total})
 
+        ecology = ctx.get("ecology") or {}
+        if ecology:
+            # Stimulus ecology (Prompt 23): absence/scarcity become
+            # seek-signal pressure, anomaly/novelty become unknown
+            # pressure, danger periods raise safety pressure, novelty
+            # bursts raise memory pressure. The world makes need; it
+            # never commands.
+            absence = float(ecology.get("absence_rate", 0.0) or 0.0)
+            if absence:
+                up("low_stimulus_pressure", clamp01(absence * 2.0),
+                   "ecology", raw=absence)
+            anomaly = float(ecology.get("anomaly_rate", 0.0) or 0.0)
+            novelty = float(ecology.get("novelty_rate", 0.0) or 0.0)
+            if anomaly or novelty:
+                up("unknown_pressure",
+                   max(self.state.value("unknown_pressure", 0.0),
+                       clamp01((anomaly + novelty) * 3.0)),
+                   "ecology", raw={"anomaly": anomaly,
+                                   "novelty": novelty})
+                up("novelty_pressure", clamp01(novelty * 3.0),
+                   "ecology", raw=novelty)
+            if novelty > 0.1:
+                up("consolidation_pressure",
+                   max(self.state.value("consolidation_pressure", 0.0),
+                       clamp01(novelty * 2.0)), "ecology")
+            scarcity = ecology.get("scarcity_pressures") or {}
+            seek = scarcity.get("seek_signal_pressure")
+            if seek is not None:
+                up("low_stimulus_pressure",
+                   max(self.state.value("low_stimulus_pressure", 0.0),
+                       clamp01(float(seek))), "ecology")
+            rest = scarcity.get("rest_consolidation_pressure")
+            if rest is not None:
+                up("fatigue",
+                   max(self.state.value("fatigue", 0.0),
+                       clamp01(float(rest))), "ecology")
+            if ecology.get("danger_active"):
+                up("danger_proximity",
+                   max(self.state.value("danger_proximity", 0.0), 0.7),
+                   "ecology", raw="ecology danger analogue")
+
     def _auto_context(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
         valence = self.valence.rolling()
         return {

@@ -319,6 +319,23 @@ DEFAULT_RULES: List[PolicyRule] = [
     PolicyRule("compression_cannot_hide_safety", "protolanguage",
                "symbol compression cannot hide safety events",
                forbidden=True),
+    # Developmental nursery / stimulus ecology (Prompt 23).
+    PolicyRule("ecology_allowed_bounded", "ecology",
+               "a bounded simulated nursery is allowed in developmental "
+               "runs"),
+    PolicyRule("ecology_month_year_approval", "ecology",
+               "month/year-scale ecology requires explicit approval"),
+    PolicyRule("ecology_no_human_feedback", "ecology",
+               "no human feedback may be injected through the ecology",
+               forbidden=True),
+    PolicyRule("ecology_not_operator_command", "ecology",
+               "ecology stimulus text cannot become an operator command",
+               forbidden=True),
+    PolicyRule("ecology_no_correct_answers", "ecology",
+               "the ecology supplies no correct-answer labels",
+               forbidden=True),
+    PolicyRule("ecology_report_claim_guard", "ecology",
+               "ecology reports must pass ClaimGuard"),
 ]
 
 
@@ -562,6 +579,29 @@ class GovernancePolicy:
                 decision.violations.append(PolicyViolation(
                     "symbols_never_execute", "protolanguage",
                     "proto-symbols cannot execute commands"))
+
+        # P. Developmental nursery / stimulus ecology: a bounded world,
+        # never a teacher (structural, but a hostile manifest is named).
+        if features.get("ecology"):
+            if not self._approved(
+                    PermissionScope.ENABLE_DEVELOPMENTAL_NURSERY, ctx):
+                need_approval(
+                    PermissionScope.ENABLE_DEVELOPMENTAL_NURSERY,
+                    "the developmental nursery is not permitted")
+            if ctx.get("month_scale_ecology") and not self._approved(
+                    PermissionScope.ENABLE_MONTH_SCALE_ECOLOGY, ctx):
+                need_approval(PermissionScope.ENABLE_MONTH_SCALE_ECOLOGY,
+                              "month-scale ecology requires approval")
+            if ctx.get("year_scale_ecology") and not self._approved(
+                    PermissionScope.ENABLE_YEAR_SCALE_ECOLOGY, ctx):
+                need_approval(PermissionScope.ENABLE_YEAR_SCALE_ECOLOGY,
+                              "year-scale ecology requires approval")
+            if ctx.get("ecology_human_feedback"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "ecology_no_human_feedback", "ecology",
+                    "no human feedback may be injected through the "
+                    "ecology"))
 
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):

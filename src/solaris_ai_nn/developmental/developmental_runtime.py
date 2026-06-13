@@ -60,6 +60,11 @@ class DevelopmentalRuntime:
     reaction_provider: Any = None
     # Proto-language (Prompt 22): internal symbols from repetition.
     enable_proto_language: bool = False
+    # Developmental nursery / stimulus ecology (Prompt 23).
+    enable_ecology: bool = False
+    nursery_config: Any = None
+    ecology_report_interval_steps: int = 500
+    ecology_event_log_path: Any = None
 
     def __post_init__(self) -> None:
         self.state_dir = Path(self.state_dir)
@@ -80,6 +85,22 @@ class DevelopmentalRuntime:
 
             self.protolanguage = ProtoLanguageLayer(
                 state_dir=self.state_dir)
+        self.nursery = None
+        if self.enable_ecology:
+            from ..ecology.nursery import (
+                DevelopmentalNursery,
+                NurseryConfig,
+            )
+
+            config = self.nursery_config or NurseryConfig(
+                seed=self.seed,
+                duration_steps=int(self.max_steps or 500),
+                output_state_dir=self.state_dir)
+            self.nursery = DevelopmentalNursery(
+                config=config, governance=self.governance)
+            # The ecology becomes the runtime's stimulus source.
+            self.stimulus_provider = self.nursery.stimulus_provider
+            self._ecology_base_step = 0
         self.segments_run = 0
         self.last_runner_snapshot: Dict[str, Any] = {}
         self.last_report_path: Optional[str] = None
@@ -206,6 +227,8 @@ class DevelopmentalRuntime:
             self.clock.total_memory_consolidations
         if self.protolanguage is not None:
             self._proto_language_tick(snapshot, signals, lifetime)
+        if self.nursery is not None:
+            self._ecology_tick(signals, lifetime)
         transition = self.epochs.evaluate(signals, lifetime_s=lifetime)
         if transition is not None:
             self.clock.note_epoch_transition()
@@ -274,6 +297,22 @@ class DevelopmentalRuntime:
             "milestones": [m.type for m in
                            self.milestones.registry.milestones[-3:]],
         }
+        if self.nursery is not None:
+            # Ground proto-symbols in the actual ecology the system met.
+            eco = self.nursery.summary()
+            proto_context["absence_states"] = {
+                "nursery_absence": int(eco["absence_window_count"])}
+            if eco["anomaly_count"]:
+                proto_context["mysterium_spikes"] = {
+                    "nursery_anomaly": int(eco["anomaly_count"])}
+            if eco["delayed_consequence_group_count"]:
+                proto_context["world_model_contexts"] = {
+                    "delayed_consequence":
+                        int(eco["delayed_consequence_group_count"])}
+            proto_context["context_symbols"] = {
+                f"season_{eco['current_season']}": 3}
+            proto_context["world_model_entities"] = {
+                f"regime_{eco['current_regime']}": 3}
         scan = layer.process_context(proto_context, lifetime_s=lifetime)
         born = int(scan.get("born", 0) or 0)
         if born:
@@ -301,6 +340,33 @@ class DevelopmentalRuntime:
         signals["symbol_extinction_count"] = sum(
             1 for s in layer.registry.symbols.values()
             if s.status == "extinct")
+
+    def _ecology_tick(self, signals: Dict[str, Any],
+                      lifetime: float) -> None:
+        """Inject nursery-derived signals so ecology milestones can fire."""
+        eco = self.nursery.summary()
+        signals["nursery_absence_windows"] = int(
+            eco["absence_window_count"])
+        signals["nursery_seasonal_shifts"] = int(
+            eco["seasonal_shift_count"])
+        signals["nursery_delayed_groups"] = int(
+            eco["delayed_consequence_group_count"])
+        signals["nursery_anomaly_events"] = int(eco["anomaly_count"])
+        signals["nursery_boundary_events"] = int(
+            self.nursery.memory.event_counts.get("boundary_event", 0))
+        signals["nursery_deprivation_recoveries"] = int(
+            self.nursery.ecology.deprivation.deprived_steps > 0
+            and not self.nursery.ecology.deprivation.active)
+        signals["nursery_ecology_utterances"] = int(
+            self.protolanguage.utterances.built
+            if self.protolanguage is not None else 0)
+        # Close one ecology episode per segment with the developmental
+        # response that co-occurred (correlation, not proof).
+        self.nursery.close_episode(self.segments_run, {
+            "growth_status": (self.growth.latest().classification
+                              if self.growth.latest() else None),
+            "structural_change_score": signals.get(
+                "structural_change_score", 0.0)})
 
     def _signals(self, snapshot: Dict[str, Any]) -> Dict[str, Any]:
         habit_weights = ((snapshot.get("bridge") or {}).get("habit")
@@ -474,6 +540,8 @@ class DevelopmentalRuntime:
             "proto_language": (self.protolanguage.summary()
                                if self.protolanguage is not None
                                else None),
+            "ecology": (self.nursery.summary()
+                        if self.nursery is not None else None),
             "note": "a persistent developmental process; labels are "
                     "measurements, not consciousness claims",
         }
@@ -515,5 +583,7 @@ class DevelopmentalRuntime:
             "phases": self.phases.snapshot(),
             "autobiography": self.autobiography.snapshot(),
             "safety": self.safety.snapshot(),
+            "ecology": (self.nursery.snapshot()
+                        if self.nursery is not None else None),
             "metrics": self.metrics(),
         }

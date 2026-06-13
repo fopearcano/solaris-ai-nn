@@ -25,6 +25,8 @@ ATTRIBUTION_CATEGORIES = (
     "generated_by_world_model_prediction",
     "generated_by_executive_arbitration",
     "generated_by_llm_adapter",
+    "generated_by_developmental_nursery",
+    "simulated_environment_input",
     "unknown_source",
 )
 
@@ -36,8 +38,14 @@ _INTERNAL_SOURCES = frozenset({
     "proto_symbol",
 })
 
-# (keyword, category) checked in order against source/kind text.
+# (keyword, category) checked in order against source/kind text. Ecology
+# rules come first so "developmental_nursery" is never read as a plain
+# environment sensor, an operator command, or human feedback.
 _SOURCE_RULES = (
+    ("developmental_nursery", "generated_by_developmental_nursery"),
+    ("nursery", "generated_by_developmental_nursery"),
+    ("ecology", "generated_by_developmental_nursery"),
+    ("simulated_environment", "simulated_environment_input"),
     ("operator", "generated_by_operator"),
     ("approval", "generated_by_operator"),
     ("governance", "generated_by_governance"),
@@ -64,6 +72,7 @@ _SOURCE_RULES = (
 EXTERNAL_CATEGORIES = frozenset({
     "observed_from_environment", "observed_from_stream",
     "observed_from_solaris_sidecar", "generated_by_operator",
+    "generated_by_developmental_nursery", "simulated_environment_input",
 })
 
 OFFLINE_CATEGORIES = frozenset({
@@ -154,6 +163,12 @@ class OwnershipAttributor:
         if category == "generated_by_llm_adapter":
             reasons.append("a paraphrase of grounded output: not primary "
                            "evidence, not system authority")
+        if category in ("generated_by_developmental_nursery",
+                        "simulated_environment_input"):
+            reasons.append("a stimulus from the controlled developmental "
+                           "ecology: a simulated world, never an operator "
+                           "command, never human feedback, never the real "
+                           "world, and carrying no correct-answer label")
         # Stream data is never an executable instruction.
         executable = False
         if category == "observed_from_stream":

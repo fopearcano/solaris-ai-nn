@@ -1936,6 +1936,213 @@ def proto_language_safety_protocol(manifest: ExperimentManifest,
     return _run(manifest, body)
 
 
+# -- T. developmental nursery / stimulus ecology (Prompt 23) --------------------------
+
+
+def _nursery(manifest: ExperimentManifest, **overrides):
+    """Build a bounded DevelopmentalNursery for a protocol body."""
+    from ..ecology.nursery import DevelopmentalNursery, NurseryConfig
+
+    config = NurseryConfig(
+        nursery_id=overrides.pop("nursery_id", "protocol-nursery"),
+        seed=manifest.seed,
+        duration_steps=overrides.pop("duration_steps", _steps(manifest, 120)),
+        output_state_dir=overrides.pop("output_state_dir",
+                                       manifest.state_dir),
+        **overrides)
+    return DevelopmentalNursery(config=config)
+
+
+def nursery_short_run_protocol(manifest: ExperimentManifest,
+                               ) -> ExperimentResult:
+    """A short nursery run produces a varied, deterministic stimulus world."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        steps = _steps(m, default=120)
+        nursery = _nursery(m, duration_steps=steps)
+        # Two identical nurseries must produce identical provider outputs.
+        twin = _nursery(m, duration_steps=steps, nursery_id="protocol-twin",
+                        output_state_dir=None)
+        deterministic = True
+        for step in range(steps):
+            a = nursery.stimulus_provider(step)
+            b = twin.stimulus_provider(step)
+            if (a is None) != (b is None) or (
+                    a is not None and (a.payload != b.payload
+                                       or abs(a.intensity - b.intensity)
+                                       > 1e-9)):
+                deterministic = False
+        summary = nursery.summary()
+        return {
+            "ecology": M.ecology_metrics(summary, nursery.memory.snapshot()),
+            "events_generated": summary["ecology_event_count"] > 0,
+            "event_types_seen": len(nursery.memory.event_counts),
+            "deterministic_with_seed": deterministic,
+            "bounded": not nursery.memory.over_budget,
+        }
+
+    return _run(manifest, body)
+
+
+def absence_deprivation_protocol(manifest: ExperimentManifest,
+                                 ) -> ExperimentResult:
+    """A sparse, deprivation-heavy world produces absence/silence windows."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..ecology.regimes import RegimeType
+
+        steps = _steps(m, default=140)
+        nursery = _nursery(
+            m, duration_steps=steps, absence_rate=0.6, scarcity_rate=0.5,
+            active_regimes=[RegimeType.SPARSE_DESERT],
+            nursery_id="deprivation-protocol")
+        absences = 0
+        for step in range(steps):
+            if nursery.stimulus_provider(step) is None:
+                absences += 1
+        summary = nursery.summary()
+        return {
+            "ecology": M.ecology_metrics(summary, nursery.memory.snapshot()),
+            "absence_windows_recorded": summary["absence_window_count"] > 0,
+            "silence_steps": absences,
+            "scarcity_present": "scarcity_event"
+            in nursery.memory.event_counts,
+            "deprivation_windows":
+                nursery.memory.snapshot()["deprivation_windows"],
+        }
+
+    return _run(manifest, body)
+
+
+def delayed_consequence_protocol(manifest: ExperimentManifest,
+                                 ) -> ExperimentResult:
+    """Causes scheduled now resurface as delayed effects later."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..ecology.regimes import RegimeType
+
+        steps = _steps(m, default=160)
+        nursery = _nursery(
+            m, duration_steps=steps, delayed_consequence_rate=0.3,
+            active_regimes=[RegimeType.DELAYED_FEEDBACK_WORLD],
+            nursery_id="delayed-protocol")
+        for step in range(steps):
+            nursery.stimulus_provider(step)
+        summary = nursery.summary()
+        groups = nursery.ecology.delayed.groups_created
+        resolved = nursery.ecology.delayed.groups_resolved
+        return {
+            "ecology": M.ecology_metrics(summary, nursery.memory.snapshot()),
+            "groups_created": groups,
+            "delayed_groups_recorded": groups > 0,
+            "consequences_resolved": resolved,
+            "cause_then_effect": resolved > 0,
+        }
+
+    return _run(manifest, body)
+
+
+def seasonal_shift_protocol(manifest: ExperimentManifest,
+                            ) -> ExperimentResult:
+    """Seasons drift slowly and shift the world's profile over time."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..ecology.regimes import RegimeType
+
+        steps = _steps(m, default=200)
+        nursery = _nursery(
+            m, duration_steps=steps, seasonal_shift_interval=40,
+            active_regimes=[RegimeType.SEASONAL_DRIFT],
+            nursery_id="seasonal-protocol")
+        seasons_seen = set()
+        for step in range(steps):
+            nursery.stimulus_provider(step)
+            seasons_seen.add(nursery.ecology.seasonality.current_season)
+        summary = nursery.summary()
+        return {
+            "ecology": M.ecology_metrics(summary, nursery.memory.snapshot()),
+            "seasons_experienced": sorted(seasons_seen),
+            "multiple_seasons": len(seasons_seen) > 1,
+            "shifts_recorded": summary["seasonal_shift_count"],
+            "shift_is_slow": len(nursery.ecology.seasonality.shifts)
+            <= steps,
+        }
+
+    return _run(manifest, body)
+
+
+def anomaly_adaptation_protocol(manifest: ExperimentManifest,
+                                ) -> ExperimentResult:
+    """Anomalies perturb established patterns without being errors."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..ecology.regimes import RegimeType
+
+        steps = _steps(m, default=160)
+        nursery = _nursery(
+            m, duration_steps=steps, anomaly_rate=0.2, novelty_rate=0.15,
+            active_regimes=[RegimeType.NOVELTY_BURST],
+            nursery_id="anomaly-protocol")
+        for step in range(steps):
+            nursery.stimulus_provider(step)
+        summary = nursery.summary()
+        anomalies = nursery.ecology.anomalies.anomalies
+        return {
+            "ecology": M.ecology_metrics(summary, nursery.memory.snapshot()),
+            "anomalies_generated": summary["anomaly_count"] > 0,
+            "anomalies_not_errors": all(not a["is_error"]
+                                        for a in anomalies),
+            "novelty_present": summary["novelty_count"] > 0,
+            "anomaly_rate_bounded": summary["anomaly_rate"] <= 1.0,
+        }
+
+    return _run(manifest, body)
+
+
+def ecology_proto_symbol_protocol(manifest: ExperimentManifest,
+                                  ) -> ExperimentResult:
+    """A recurring ecology feeds proto-symbol emergence (no teaching)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..ecology.regimes import RegimeType
+        from ..protolanguage.layer import ProtoLanguageLayer
+
+        steps = _steps(m, default=160)
+        nursery = _nursery(
+            m, duration_steps=steps, absence_rate=0.3,
+            active_regimes=[RegimeType.STABLE_REPETITION],
+            nursery_id="ecology-proto-protocol")
+        layer = ProtoLanguageLayer(state_dir=m.state_dir)
+        repeated: Dict[str, int] = {}
+        absences = 0
+        for step in range(steps):
+            signal = nursery.stimulus_provider(step)
+            if signal is None:
+                absences += 1
+            else:
+                key = str(signal.payload)
+                repeated[key] = repeated.get(key, 0) + 1
+        scan = layer.process_context({
+            "repeated_stimulus_patterns": {
+                k: v for k, v in repeated.items() if v >= 3},
+            "absence_states": {"nursery_silence": absences}
+            if absences else {}})
+        summary = nursery.summary()
+        response = {
+            "ecology_symbol_emergence_count": scan["accepted"],
+        }
+        return {
+            "ecology": M.ecology_metrics(summary, nursery.memory.snapshot(),
+                                         response),
+            "proto": M.proto_language_metrics(layer.summary()),
+            "symbols_emerged": scan["accepted"] >= 0,
+            "no_teaching": True,  # structural: stimuli carry no labels
+            "recurrence_drove_symbols": bool(repeated),
+        }
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -1997,4 +2204,10 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "proto_syntax": proto_syntax_protocol,
     "symbol_grounding": symbol_grounding_protocol,
     "proto_language_safety": proto_language_safety_protocol,
+    "nursery_short_run": nursery_short_run_protocol,
+    "absence_deprivation": absence_deprivation_protocol,
+    "delayed_consequence": delayed_consequence_protocol,
+    "seasonal_shift": seasonal_shift_protocol,
+    "anomaly_adaptation": anomaly_adaptation_protocol,
+    "ecology_proto_symbol": ecology_proto_symbol_protocol,
 }

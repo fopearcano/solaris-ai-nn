@@ -84,6 +84,13 @@ class PermissionScope:
     ENABLE_SYMBOLIC_COMPRESSION = "enable_symbolic_compression"
     ENABLE_PROTO_LANGUAGE_TRANSLATION = (
         "enable_proto_language_translation")
+    # Developmental nursery / stimulus ecology (Prompt 23).
+    ENABLE_DEVELOPMENTAL_NURSERY = "enable_developmental_nursery"
+    ENABLE_ECOLOGY_STREAM = "enable_ecology_stream"
+    ENABLE_MONTH_SCALE_ECOLOGY = "enable_month_scale_ecology"
+    ENABLE_YEAR_SCALE_ECOLOGY = "enable_year_scale_ecology"
+    ENABLE_DEPRIVATION_WINDOWS = "enable_deprivation_windows"
+    ENABLE_ANOMALY_GENERATION = "enable_anomaly_generation"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -114,6 +121,9 @@ class PermissionScope:
         ENABLE_FOSSIL_MEMORY, ENABLE_DEVELOPMENTAL_PRUNING,
         ENABLE_PROTO_LANGUAGE, ENABLE_SYMBOL_EMERGENCE,
         ENABLE_SYMBOLIC_COMPRESSION, ENABLE_PROTO_LANGUAGE_TRANSLATION,
+        ENABLE_DEVELOPMENTAL_NURSERY, ENABLE_ECOLOGY_STREAM,
+        ENABLE_MONTH_SCALE_ECOLOGY, ENABLE_YEAR_SCALE_ECOLOGY,
+        ENABLE_DEPRIVATION_WINDOWS, ENABLE_ANOMALY_GENERATION,
     )
 
 
@@ -300,6 +310,26 @@ class PermissionSet:
                        granted=True,
                        note="debug translations only; ClaimGuard gates "
                             "every rendering"),
+            Permission(S.ENABLE_DEVELOPMENTAL_NURSERY, granted=True,
+                       note="a bounded simulated stimulus world; no "
+                            "teaching, no real-world input"),
+            Permission(S.ENABLE_ECOLOGY_STREAM, granted=True,
+                       note="canonical-signal stream from the nursery; "
+                            "deterministic and replayable"),
+            Permission(S.ENABLE_MONTH_SCALE_ECOLOGY,
+                       requires_approval=True,
+                       note="month-scale ecology requires explicit "
+                            "human approval"),
+            Permission(S.ENABLE_YEAR_SCALE_ECOLOGY,
+                       requires_approval=True,
+                       note="year-scale ecology requires explicit "
+                            "human approval"),
+            Permission(S.ENABLE_DEPRIVATION_WINDOWS, granted=True,
+                       note="bounded silence windows; tests latent "
+                            "activation, never starves the system"),
+            Permission(S.ENABLE_ANOMALY_GENERATION, granted=True,
+                       note="bounded controlled perturbations, not "
+                            "errors"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

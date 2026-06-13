@@ -770,3 +770,51 @@ structure is confounded. Keeping the first symbols teacher-free keeps
 the research question clean: what sign system does repetition plus
 utility produce on its own? Human alignment of the vocabulary can be
 layered on later; un-teaching it later is impossible.
+
+---
+
+## Phase 23 — Developmental nursery and stimulus ecology
+
+**A developmental system needs an ecology, not a teacher.** Phases 21–22
+gave the system time (a lifetime across restarts) and the beginning of
+signs (proto-symbols from repetition). But repetition needs *something to
+repeat*, and so far that something was a thin synthetic stream. Phase 23
+supplies the missing piece: a controlled artificial world with the texture
+real development requires — recurrence and absence, scarcity and plenty,
+rhythm and arrhythmia, novelty that fades into familiarity, danger and
+reward analogues, boundaries, rare events, slow seasonal drift, long quiet
+periods, pattern breaks, delayed consequences, and recoverable disruption.
+
+**Why a world rather than a dataset.** A dataset is a fixed answer key
+sampled i.i.d.; a world is a non-stationary process with rhythm, memory,
+and consequence. Habits only mean something against a world that rewards
+them sometimes and not others; absence symbols only form where signals were
+expected and did not come; delayed-consequence association only matters
+when cause and effect are separated in time and *not* labelled as a pair.
+The ecology is built to make those structures *available to be discovered*,
+never to hand them over.
+
+**Silence as a feature, not a gap.** The single most deliberate design
+choice is that the nursery's `stimulus_provider` returns `None` on
+absence/silence steps. It would have been easy to emit an explicit
+"absence" signal; instead the world simply goes quiet, and the runner's own
+continuity machinery (the latent "I exist!" pathway) must carry the system
+through. Long quiet periods are where latent cognition earns its place, and
+where the system's persistence is tested against nothing at all.
+
+**Anomalies are perturbations, not errors.** Every anomaly is logged with
+`is_error=False`. This is a research stance as much as a flag: an
+established pattern that suddenly breaks is not a bug in the world or a
+failure of the system — it is information. Conflating perturbation with
+error would teach the system (and the operator reading the report) exactly
+the wrong lesson about what a surprising world is for.
+
+**The discipline of no labels.** The hard rules forbid correct-answer keys,
+command-shaped payloads, human feedback masquerading as ecology, and LLM
+text as the learning environment — and the ego layer attributes every
+nursery event as generated-by-nursery, never operator, never human
+feedback, never real-world. The same logic as Phase 22's teacher-free
+symbols applies one layer down: the moment the world contains answers, the
+emergent structure is confounded by them. A clean question demands a world
+that pressures but never tells. Adaptation to that world can be measured;
+it cannot be taught here, and that is the point.

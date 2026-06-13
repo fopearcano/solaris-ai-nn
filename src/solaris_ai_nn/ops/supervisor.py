@@ -444,6 +444,50 @@ class OperationalSupervisor:
                                              "but none stabilize; check "
                                              "grounding repetition")
 
+        # Developmental nursery / ecology monitoring (Prompt 23): evidence
+        # only. The ecology is a world, never authority; these warnings
+        # surface a world that has slipped out of safe, inspectable bounds.
+        ecology = snapshot.get("ecology") or {}
+        if ecology:
+            cap = float(self.manifest.enabled_features.get(
+                "ecology_max_event_rate", 6.0) or 6.0)
+            if float(ecology.get("event_rate", 0.0) or 0.0) > cap:
+                self.incidents.record(
+                    I.ECOLOGY_STIMULUS_RATE_HIGH, "warning",
+                    f"ecology stimulus rate {ecology['event_rate']} exceeds "
+                    f"{cap} events/step",
+                    related_metric="ecology_event_rate",
+                    suggested_debug_step="lower max_events_per_step or the "
+                                         "regime probabilities; a developing "
+                                         "system needs a calm world")
+            if float(ecology.get("absence_rate", 0.0) or 0.0) > 0.9 \
+                    and not (snapshot.get("latent") or {}).get("enabled"):
+                self.incidents.record(
+                    I.ECOLOGY_SILENCE_TOO_LONG, "warning",
+                    f"absence rate {ecology['absence_rate']} with no latent "
+                    "layer to occupy the silence",
+                    related_metric="ecology_absence_rate",
+                    suggested_debug_step="enable latent cognition for long "
+                                         "quiet phases, or lower absence_rate")
+            if float(ecology.get("anomaly_rate", 0.0) or 0.0) > 0.3:
+                self.incidents.record(
+                    I.ECOLOGY_ANOMALY_RATE_HIGH, "warning",
+                    f"anomaly rate {ecology['anomaly_rate']} is high; the "
+                    "world is mostly perturbation",
+                    related_metric="ecology_anomaly_rate",
+                    suggested_debug_step="lower anomaly_rate; anomalies are "
+                                         "rare events, not the baseline")
+            eco_mem = (snapshot.get("ecology_snapshot") or {}).get(
+                "memory") or {}
+            if int(eco_mem.get("total_events", 0) or 0) > 1_000_000:
+                self.incidents.record(
+                    I.ECOLOGY_MEMORY_GROWTH, "warning",
+                    f"ecology recorded {eco_mem['total_events']} events; "
+                    "history must stay bounded",
+                    related_metric="ecology_memory",
+                    suggested_debug_step="ecology memory is bounded by "
+                                         "design; verify the window caps")
+
         # LLM adapter monitoring (Prompt 20): evidence only.
         communication = snapshot.get("communication") or {}
         if communication.get("llm_adapter_enabled"):
@@ -807,6 +851,15 @@ class OperationalSupervisor:
         developmental = getattr(runner, "developmental", None)
         if developmental is not None:
             snapshot["developmental"] = developmental.summary()
+        nursery = getattr(runner, "nursery", None)
+        if nursery is None and developmental is not None:
+            nursery = getattr(developmental, "nursery", None)
+        if nursery is not None:
+            snapshot["ecology"] = nursery.summary()
+            snapshot["ecology_snapshot"] = {
+                "memory": nursery.memory.snapshot(),
+                "stream": nursery.stream.snapshot(),
+            }
         return snapshot
 
     def _build_status(self) -> OperationalStatus:

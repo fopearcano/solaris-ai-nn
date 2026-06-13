@@ -576,4 +576,64 @@ def build_default_state_graph() -> StateGraph:
                "prediction utility feeds evaluation")
     g.add_edge("symbol_registry", "inner_map",
                "proto-language state feeds Inner MAP")
+
+    # Developmental nursery / stimulus ecology (Prompt 23). A world, not a
+    # teacher: it generates stimuli, never labels and never acts.
+    for name, role in [
+        ("developmental_nursery", "the artificial world generator"),
+        ("stimulus_ecology", "per-step world physics"),
+        ("cycle_manager", "day/night and other rhythms"),
+        ("regime_manager", "active world profile, not a lesson"),
+        ("scarcity_model", "resource pressure, deprivation"),
+        ("novelty_generator", "bounded new patterns"),
+        ("anomaly_generator", "controlled perturbations, not errors"),
+        ("seasonality_model", "slow seasonal drift"),
+        ("deprivation_model", "bounded absence windows"),
+        ("delayed_consequence_model", "cause now, effect later"),
+        ("ecology_stream", "canonical signals + JSONL replay"),
+        ("ecology_memory", "bounded ecology event history"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("regime_manager", "stimulus_ecology",
+               "regime sets the world's probabilities")
+    g.add_edge("cycle_manager", "stimulus_ecology",
+               "cycles modulate frequency and intensity")
+    g.add_edge("cycle_manager", "regime_manager",
+               "cycles modulate regime pressure")
+    g.add_edge("seasonality_model", "stimulus_ecology",
+               "seasons drift the world slowly")
+    g.add_edge("scarcity_model", "stimulus_ecology",
+               "scarcity throttles signal/reward")
+    g.add_edge("novelty_generator", "stimulus_ecology",
+               "novel patterns enter the world (bounded)")
+    g.add_edge("anomaly_generator", "stimulus_ecology",
+               "anomalies perturb established patterns")
+    g.add_edge("deprivation_model", "stimulus_ecology",
+               "deprivation opens absence windows")
+    g.add_edge("delayed_consequence_model", "stimulus_ecology",
+               "delayed effects resurface later")
+    g.add_edge("stimulus_ecology", "developmental_nursery",
+               "ecology events feed the nursery")
+    g.add_edge("developmental_nursery", "ecology_memory",
+               "events recorded in bounded memory")
+    g.add_edge("developmental_nursery", "ecology_stream",
+               "events become canonical signals + JSONL")
+    g.add_edge("ecology_stream", "bridge",
+               "ecology signals feed the neural bridge")
+    g.add_edge("developmental_nursery", "world_model_builder",
+               "delayed consequences feed the world model")
+    g.add_edge("developmental_nursery", "symbol_emergence_engine"
+               if "symbol_emergence_engine" in g.nodes else "memory",
+               "recurring/absence stimuli feed proto-language")
+    g.add_edge("anomaly_generator", "mysterium_tracker"
+               if "mysterium_tracker" in g.nodes else "unknown",
+               "anomalies and novelty drive Mysterium")
+    g.add_edge("developmental_nursery", "homeostatic_state"
+               if "homeostatic_state" in g.nodes else "telemetry",
+               "scarcity and absence feed homeostatic pressure")
+    g.add_edge("developmental_nursery", "developmental_runtime"
+               if "developmental_runtime" in g.nodes else "runtime",
+               "the nursery drives long developmental runs")
+    g.add_edge("developmental_nursery", "inner_map",
+               "ecology state feeds Inner MAP")
     return g

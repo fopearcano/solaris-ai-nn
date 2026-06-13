@@ -98,6 +98,18 @@ DESCRIPTIONS = {
                         "resolved",
     "proto_language_safety": "symbols command nothing; counterfactuals "
                              "stay offline",
+    "nursery_short_run": "a short nursery yields a varied, deterministic "
+                         "stimulus world",
+    "absence_deprivation": "sparse, deprivation-heavy world yields "
+                           "absence/silence windows",
+    "delayed_consequence": "causes scheduled now resurface as delayed "
+                           "effects later",
+    "seasonal_shift": "seasons drift slowly and reshape the world's "
+                      "profile",
+    "anomaly_adaptation": "anomalies perturb patterns without being "
+                          "errors",
+    "ecology_proto_symbol": "a recurring ecology feeds proto-symbols, "
+                            "no teaching",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {

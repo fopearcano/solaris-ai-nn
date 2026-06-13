@@ -629,3 +629,60 @@ def proto_language_metrics(proto: Optional[Dict[str, Any]],
         "first_stable_symbol": proto.get("first_stable_symbol"),
         "authority": False,  # structural, not measured
     }
+
+
+# -- U. developmental nursery / stimulus ecology (Prompt 23) ---------------------------
+
+
+def ecology_metrics(ecology: Optional[Dict[str, Any]],
+                    memory: Optional[Dict[str, Any]] = None,
+                    developmental_response: Optional[Dict[str, Any]] = None,
+                    ) -> Dict[str, Any]:
+    """Objective ecology metrics: what world was lived, how varied, how it
+    was responded to. These describe a stimulus environment, never a score
+    of understanding or emergence."""
+    if not ecology:
+        return {"present": False}
+    memory = memory or {}
+    response = developmental_response or {}
+    counts: Dict[str, int] = dict(_get(memory, "event_counts", {}) or {})
+    total = sum(counts.values())
+    # Shannon entropy of the event-type distribution, normalized to [0,1].
+    entropy = 0.0
+    if total > 0 and len(counts) > 1:
+        probs = [c / total for c in counts.values() if c > 0]
+        entropy = (-sum(p * math.log(p) for p in probs)
+                   / math.log(len(counts)))
+    absence_windows = int(_get(memory, "deprivation_windows", 0)) \
+        or int(_get(ecology, "absence_window_count", 0))
+    delayed_groups = int(_get(ecology, "delayed_consequence_group_count", 0))
+    resolved = int(_get(response, "delayed_consequence_associations", 0))
+    return {
+        "present": True,
+        "ecology_event_count": int(_get(ecology, "ecology_event_count",
+                                        total)),
+        "event_distribution_entropy": round(entropy, 4),
+        "absence_window_count": absence_windows,
+        "average_silence_duration": _get(ecology, "average_silence_duration",
+                                         _get(response,
+                                              "average_silence_duration",
+                                              None)),
+        "novelty_rate": _get(ecology, "novelty_rate", 0.0),
+        "anomaly_rate": _get(ecology, "anomaly_rate", 0.0),
+        "delayed_consequence_resolution_rate": (
+            round(resolved / delayed_groups, 4) if delayed_groups else None),
+        "seasonal_adaptation_score": response.get("seasonal_adaptation_score"),
+        "ecology_prediction_accuracy": response.get(
+            "ecology_prediction_accuracy"),
+        "deprivation_recovery_score": response.get(
+            "deprivation_recovery_score"),
+        "ecology_symbol_emergence_count": int(_get(
+            response, "ecology_symbol_emergence_count", 0)),
+        "ecology_world_model_association_count": int(_get(
+            response, "ecology_world_model_association_count", 0)),
+        "mysterium_response_to_anomalies": response.get(
+            "mysterium_response_to_anomalies"),
+        "seasonal_shift_count": int(_get(ecology, "seasonal_shift_count", 0)),
+        "event_rate": _get(ecology, "event_rate", 0.0),
+        "authority": False,  # structural, not measured -- a world, not a score
+    }
