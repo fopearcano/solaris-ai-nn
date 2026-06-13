@@ -75,6 +75,9 @@ class DevelopmentalRuntime:
     # Auto-regeneration / self-repair (Prompt 26).
     enable_autoregeneration: bool = False
     repair_policy_mode: str = "observe_only"
+    # LOGOS fracture/synthesis and complexity regulation (Prompt 27).
+    enable_logos_complexity: bool = False
+    logos_resolution_mode: str = "balanced_resolution"
 
     def __post_init__(self) -> None:
         self.state_dir = Path(self.state_dir)
@@ -158,6 +161,22 @@ class DevelopmentalRuntime:
                 symbol_registry=sym_registry,
                 active_perception=self.active_perception,
                 governance=self.governance)
+        self.logos = None
+        if self.enable_logos_complexity:
+            from ..logos_complexity import (
+                LogosComplexityEngine,
+                ResolutionPolicy,
+            )
+
+            sym_registry = (getattr(self.protolanguage, "registry", None)
+                            if self.protolanguage is not None else None)
+            self.logos = LogosComplexityEngine(
+                state_dir=self.state_dir,
+                policy=ResolutionPolicy(mode=self.logos_resolution_mode),
+                hypothesis_engine=self.hypothesis_engine,
+                active_perception=self.active_perception,
+                autoregeneration=self.autoregeneration,
+                symbol_registry=sym_registry, governance=self.governance)
         self.segments_run = 0
         self.last_runner_snapshot: Dict[str, Any] = {}
         self.last_report_path: Optional[str] = None
@@ -292,6 +311,8 @@ class DevelopmentalRuntime:
             self._hypothesis_tick(snapshot, signals, lifetime)
         if self.autoregeneration is not None:
             self._autoregeneration_tick(snapshot, signals, lifetime)
+        if self.logos is not None:
+            self._logos_tick(snapshot, signals, lifetime)
         transition = self.epochs.evaluate(signals, lifetime_s=lifetime)
         if transition is not None:
             self.clock.note_epoch_transition()
@@ -550,6 +571,52 @@ class DevelopmentalRuntime:
         if engine.graph_hygiene.findings:
             signals["autoregeneration_world_model_hygiene_passes"] = 1
 
+    def _logos_tick(self, snapshot: Dict[str, Any],
+                    signals: Dict[str, Any], lifetime: float) -> None:
+        """Run one LOGOS fracture-scan -> synthesis -> complexity cycle."""
+        engine = self.logos
+        latent = snapshot.get("latent") or {}
+        world = snapshot.get("world_model") or {}
+        proto = (self.protolanguage.summary()
+                 if self.protolanguage is not None else {})
+        ctx = {
+            "step": self.segments_run,
+            "world_model": world,
+            "proto_language": {
+                "symbol_count": proto.get("symbol_count", 0),
+                "ambiguous_symbol_count": proto.get(
+                    "ambiguous_symbol_count", 0)},
+            "mysterium_pressure": float(latent.get("mysterium_pressure", 0.0)
+                                        or 0.0),
+            "stagnation_status": ("stagnating"
+                                  if signals.get("stagnation_windows", 0)
+                                  else None),
+            "structural_change_score": float(
+                signals.get("structural_change_score", 0.0) or 0.0),
+            "autoregeneration": (self.autoregeneration.summary()
+                                 if self.autoregeneration is not None
+                                 else {}),
+            "health_level": "ok",
+        }
+        engine.tick(ctx)
+        summary = engine.summary()
+        opp = engine.opposition_memory.snapshot()
+        trace = engine.dialectical_trace.counts
+        signals["logos_tension_count"] = int(
+            summary.get("active_tension_count", 0))
+        signals["logos_preserved_count"] = int(
+            summary.get("preserved_tension_count", 0))
+        signals["logos_synthesis_candidates"] = int(
+            summary.get("latest_synthesis_candidate", 0) or 0)
+        signals["logos_applied_synthesis"] = int(
+            summary.get("applied_synthesis_count", 0))
+        signals["logos_became_hypotheses"] = int(
+            opp.get("became_hypotheses", 0))
+        signals["logos_complexity_shifts"] = int(
+            trace.get("complexity_shift", 0))
+        signals["logos_esc_triggers"] = int(summary.get("esc_trigger_count",
+                                                        0))
+
     def _signals(self, snapshot: Dict[str, Any]) -> Dict[str, Any]:
         habit_weights = ((snapshot.get("bridge") or {}).get("habit")
                          or {})
@@ -732,6 +799,8 @@ class DevelopmentalRuntime:
             "autoregeneration": (self.autoregeneration.summary()
                                  if self.autoregeneration is not None
                                  else None),
+            "logos": (self.logos.summary()
+                      if self.logos is not None else None),
             "note": "a persistent developmental process; labels are "
                     "measurements, not consciousness claims",
         }
@@ -783,5 +852,7 @@ class DevelopmentalRuntime:
             "autoregeneration": (self.autoregeneration.snapshot()
                                  if self.autoregeneration is not None
                                  else None),
+            "logos": (self.logos.snapshot()
+                      if self.logos is not None else None),
             "metrics": self.metrics(),
         }

@@ -66,6 +66,7 @@ class InnerMapObserver:
     active_perception: Any = None  # optional dict or ActiveSensingController
     hypothesis: Any = None  # optional dict or HypothesisEngine
     autoregeneration: Any = None  # optional dict or AutoRegenerationEngine
+    logos: Any = None  # optional dict or LogosComplexityEngine
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -508,6 +509,17 @@ class InnerMapObserver:
                 model.autoregeneration = autoregen.summary()
             elif isinstance(autoregen, dict):
                 model.autoregeneration = dict(autoregen)
+        logos = self.logos
+        if logos is None and self.runner is not None:
+            logos = getattr(self.runner, "logos", None)
+        if logos is None and developmental is not None:
+            logos = getattr(developmental, "logos", None)
+        if logos is not None:
+            # LOGOS status (read-only; a tension engine, never authority).
+            if hasattr(logos, "summary"):
+                model.logos = logos.summary()
+            elif isinstance(logos, dict):
+                model.logos = dict(logos)
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

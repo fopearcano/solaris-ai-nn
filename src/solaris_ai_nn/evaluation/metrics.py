@@ -859,3 +859,22 @@ def autoregeneration_metrics(autoregeneration: Optional[Dict[str, Any]],
         "repair_policy_mode": (snap.get("policy") or {}).get("mode"),
         "authority": False,  # structural; repair is never authority
     }
+
+
+# -- Y. LOGOS fracture/synthesis and complexity regulation (Prompt 27) -----------------
+
+
+def logos_metrics(logos: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective LOGOS/complexity metrics from an engine snapshot. Describes
+    tension dynamics, never a consciousness or life score."""
+    if not logos:
+        return {"present": False}
+    from ..logos_complexity.complexity_metrics import (
+        compute_complexity_metrics,
+    )
+
+    base = compute_complexity_metrics(logos)
+    complexity = logos.get("complexity") or {}
+    base["complexity_band_distribution"] = complexity.get(
+        "band_distribution", {})
+    return base

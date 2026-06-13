@@ -976,3 +976,59 @@ cannot disable governance, ClaimGuard, or the emergency stop; and every repair
 passes through the same safety/executive/governance gates as any other
 suggestion. Operational regeneration buys long-run survival; it buys no new
 authority, and that boundary is the whole point.
+
+---
+
+## Phase 27 — LOGOS fracture/synthesis and complexity regulation
+
+**Contradiction as productive pressure.** Every prior layer treats a
+contradiction, an ambiguity, or a failed prediction as something to fix.
+LOGOS treats it as something to *use*. A tension between two internal poles
+is information: it marks exactly where the system's model is incomplete, and
+it is the raw material of structural change. The reframe is deliberate — a
+fracture is not, by default, an error.
+
+**LOGOS as an operational tension engine, not authority.** The single most
+important design decision is what LOGOS is *not*. It does not decide truth, it
+does not resolve the unknown by fiat, and it holds no authority. It detects
+oppositions and proposes bounded resolution paths — preserve, split, merge,
+synthesize, prune, stabilize, hypothesize, sample, replay, repair, or mark
+unresolved — and every one of those is a suggestion that passes through the
+same safety/executive/governance gates as any other. Calling it a tension
+engine rather than a reasoner keeps the philosophy from leaking into
+authority it should not have.
+
+**Synthesis vs destructive merge.** Synthesis is the dangerous half: the easy
+version "resolves" a contradiction by deleting one side of it, which destroys
+evidence and manufactures false coherence. So synthesis here is reversible and
+low-risk by default, contradiction evidence is preserved (edges are marked
+ambiguous or weakened, never deleted), a destructive evidence merge is
+refused outright, and offline/counterfactual evidence can never justify an
+irreversible synthesis alone. A contradiction the system cannot yet resolve is
+kept as a preserved, unresolved tension — that is the honest state.
+
+**Complexity regulation.** A system can fail in two opposite directions: it
+can go inert (no change, effectively dead) or it can overload (too many
+tensions, symbols, edges, and unresolved questions to function). Productive
+cognition lives in the bounded middle. The complexity regulator names the
+band and recommends a direction — more exploration when inert, more
+consolidation when unstable, auto-regeneration when overloaded — without ever
+collapsing this into a single "how alive is it" number, which would be both
+meaningless and unsafe.
+
+**Preserving unknowns.** The most counter-cultural rule in the layer is that
+some tensions should never be resolved. Safety/boundary oppositions, the
+known/unknown divide, the habit/novelty pull — these are kept open on
+purpose. A system that resolves every tension is a system that has stopped
+learning or has started lying to itself about its own gaps. Preserving an
+unknown as an unknown is treated as a first-class outcome, with its own
+milestone.
+
+**Why LOGOS is not authority.** The Esc process makes the boundary concrete:
+under rising instability LOGOS can *request* stabilization, replay,
+diagnostics, or even a safe-shutdown review — but it performs none of them.
+Esc is an instability signal, not panic and not an emotion; the ops watchdog
+still decides. LOGOS gives long-run development structure — a vocabulary for
+its own fractures and a disciplined way to propose resolving them — and it
+buys exactly no new authority in doing so. That separation is the whole
+point.

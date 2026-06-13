@@ -68,8 +68,9 @@ def test_all_scopes_in_default_set():
     # + 7 communication (P19) + 5 LLM adapter (P20)
     # + 6 developmental (P21) + 4 proto-language (P22)
     # + 6 ecology (P23) + 5 active perception (P24)
-    # + 6 hypothesis engine (P25) + 9 auto-regeneration (P26).
-    assert len(PermissionScope.ALL) == 80
+    # + 6 hypothesis engine (P25) + 9 auto-regeneration (P26)
+    # + 6 LOGOS complexity (P27).
+    assert len(PermissionScope.ALL) == 86
 
 
 def test_executive_scope_defaults():
@@ -139,6 +140,17 @@ def test_active_perception_scope_defaults():
     assert ps.requires_approval(
         PermissionScope.ENABLE_CURIOSITY_DRIVEN_SAMPLING)
     assert not ps.allows(PermissionScope.ENABLE_CURIOSITY_DRIVEN_SAMPLING)
+
+
+def test_logos_complexity_scope_defaults():
+    ps = PermissionSet.default()
+    assert ps.allows(PermissionScope.ENABLE_LOGOS_COMPLEXITY)
+    assert ps.allows(PermissionScope.ENABLE_FRACTURE_DETECTION)
+    assert ps.allows(PermissionScope.ENABLE_SYNTHESIS_CANDIDATES)
+    assert ps.allows(PermissionScope.ENABLE_ESC_PROCESS)
+    assert ps.allows(PermissionScope.ENABLE_COMPLEXITY_REGULATION)
+    # Applying synthesis automatically needs explicit config.
+    assert ps.requires_approval(PermissionScope.ENABLE_SAFE_SYNTHESIS)
 
 
 def test_autoregeneration_scope_defaults():

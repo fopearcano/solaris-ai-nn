@@ -37,6 +37,11 @@ AVAILABLE_QUERIES = (
     "what repair was applied?", "what repair was refused?",
     "why was repair blocked?", "what was quarantined?",
     "did repair improve the system?", "is source code being modified?",
+    "what tensions are active?", "what is the current complexity band?",
+    "what was synthesized?", "what tension was preserved?",
+    "why was synthesis refused?", "what triggered esc?",
+    "is contradiction being treated as truth?",
+    "did logos produce structural change?",
 )
 
 
@@ -108,6 +113,7 @@ class QueryRouter:
             "active_perception": "active_perception",
             "hypothesis": "hypothesis",
             "autoregeneration": "autoregeneration",
+            "logos": "logos",
         }
         key = component_keys.get(topic)
         if key is None:
@@ -183,6 +189,14 @@ class QueryRouter:
 
             interfaces.append(("autoregeneration",
                                AutoRegenerationQueryInterface(autoregen)))
+        logos = self.components.get("logos")
+        if logos is not None:
+            from ..logos_complexity.reports import (
+                LogosComplexityQueryInterface,
+            )
+
+            interfaces.append(("logos",
+                               LogosComplexityQueryInterface(logos)))
         return interfaces
 
     # -- meta queries -----------------------------------------------------------------

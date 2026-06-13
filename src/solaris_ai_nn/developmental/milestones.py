@@ -59,6 +59,14 @@ class MilestoneType:
     FIRST_STAGNATION_RECOVERY = "first_stagnation_recovery"
     FIRST_SYMBOL_HYGIENE_PASS = "first_symbol_hygiene_pass"
     FIRST_WORLD_MODEL_HYGIENE_PASS = "first_world_model_hygiene_pass"
+    # LOGOS fracture/synthesis and complexity regulation (Prompt 27).
+    FIRST_LOGOS_TENSION = "first_logos_tension"
+    FIRST_PRESERVED_TENSION = "first_preserved_tension"
+    FIRST_SYNTHESIS_CANDIDATE = "first_synthesis_candidate"
+    FIRST_SAFE_SYNTHESIS = "first_safe_synthesis"
+    FIRST_TENSION_SPAWNED_HYPOTHESIS = "first_tension_spawned_hypothesis"
+    FIRST_COMPLEXITY_BAND_SHIFT = "first_complexity_band_shift"
+    FIRST_ESC_TRIGGER = "first_esc_trigger"
 
     ALL = (FIRST_24H_SURVIVAL, FIRST_WEEK_SURVIVAL,
            FIRST_MONTH_SURVIVAL, FIRST_STABLE_HABIT,
@@ -80,7 +88,11 @@ class MilestoneType:
            FIRST_AUTO_REGENERATION_SCAN, FIRST_SAFE_REPAIR,
            FIRST_QUARANTINED_RECORD, FIRST_REPAIR_ROLLBACK,
            FIRST_STAGNATION_RECOVERY, FIRST_SYMBOL_HYGIENE_PASS,
-           FIRST_WORLD_MODEL_HYGIENE_PASS)
+           FIRST_WORLD_MODEL_HYGIENE_PASS,
+           FIRST_LOGOS_TENSION, FIRST_PRESERVED_TENSION,
+           FIRST_SYNTHESIS_CANDIDATE, FIRST_SAFE_SYNTHESIS,
+           FIRST_TENSION_SPAWNED_HYPOTHESIS, FIRST_COMPLEXITY_BAND_SHIFT,
+           FIRST_ESC_TRIGGER)
 
 
 @dataclass
@@ -230,6 +242,27 @@ _RULES = (
     (MilestoneType.FIRST_WORLD_MODEL_HYGIENE_PASS,
      "First world-model hygiene pass over the graph.",
      lambda c: c.get("autoregeneration_world_model_hygiene_passes", 0) >= 1),
+    (MilestoneType.FIRST_LOGOS_TENSION,
+     "First LOGOS tension detected between opposed internal poles.",
+     lambda c: c.get("logos_tension_count", 0) >= 1),
+    (MilestoneType.FIRST_PRESERVED_TENSION,
+     "First tension preserved as productive, unresolved evidence.",
+     lambda c: c.get("logos_preserved_count", 0) >= 1),
+    (MilestoneType.FIRST_SYNTHESIS_CANDIDATE,
+     "First bounded synthesis candidate proposed for a tension.",
+     lambda c: c.get("logos_synthesis_candidates", 0) >= 1),
+    (MilestoneType.FIRST_SAFE_SYNTHESIS,
+     "First safe, bounded synthesis applied.",
+     lambda c: c.get("logos_applied_synthesis", 0) >= 1),
+    (MilestoneType.FIRST_TENSION_SPAWNED_HYPOTHESIS,
+     "First hypothesis spawned from a tension.",
+     lambda c: c.get("logos_became_hypotheses", 0) >= 1),
+    (MilestoneType.FIRST_COMPLEXITY_BAND_SHIFT,
+     "First shift of the complexity band.",
+     lambda c: c.get("logos_complexity_shifts", 0) >= 1),
+    (MilestoneType.FIRST_ESC_TRIGGER,
+     "First Esc instability signal triggered.",
+     lambda c: c.get("logos_esc_triggers", 0) >= 1),
 )
 
 

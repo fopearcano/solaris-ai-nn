@@ -443,6 +443,39 @@ class HomeostaticRegulator:
                    max(self.state.value("incident_pressure", 0.0), 0.7),
                    "autoregeneration", raw="critical degradation")
 
+        logos = ctx.get("logos") or {}
+        if logos:
+            # LOGOS (Prompt 27): complexity and unresolved tension become
+            # pressure; Esc adds instability pressure. Tensions make
+            # operational pressure, never human emotions or commands.
+            band = str(logos.get("complexity_band", "unknown"))
+            band_level = {"inert": 0.4, "simple_stable": 0.1,
+                          "productive": 0.2, "complex_unstable": 0.6,
+                          "overloaded": 0.9, "unknown": 0.0}.get(band, 0.0)
+            if band_level:
+                up("complexity_pressure",
+                   max(self.state.value("complexity_pressure", 0.0),
+                       clamp01(band_level)), "logos", raw=band)
+            unresolved = float(logos.get("unresolved_tension_count", 0) or 0)
+            if unresolved:
+                up("unresolved_tension_pressure",
+                   clamp01(unresolved / 10.0), "logos", raw=unresolved)
+                up("unknown_pressure",
+                   max(self.state.value("unknown_pressure", 0.0),
+                       clamp01(unresolved / 20.0)), "logos")
+            if band == "overloaded":
+                up("stabilization_pressure",
+                   max(self.state.value("stabilization_pressure", 0.0), 0.7),
+                   "logos", raw="complexity overload")
+            elif band == "inert":
+                up("stagnation_pressure",
+                   max(self.state.value("stagnation_pressure", 0.0), 0.5),
+                   "logos", raw="inert simplicity")
+            if logos.get("esc_triggered"):
+                up("incident_pressure",
+                   max(self.state.value("incident_pressure", 0.0), 0.5),
+                   "logos", raw="Esc instability signal")
+
     def _auto_context(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
         valence = self.valence.rolling()
         return {

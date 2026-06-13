@@ -289,6 +289,13 @@ python examples/run_symbol_hygiene_demo.py
 python examples/run_world_model_hygiene_demo.py
 python examples/run_drift_recovery_demo.py
 python examples/run_autoregeneration_safety_demo.py
+
+# LOGOS: fracture/synthesis tension engine and complexity regulation
+python examples/run_logos_fracture_demo.py
+python examples/run_logos_synthesis_demo.py
+python examples/run_complexity_regulation_demo.py
+python examples/run_esc_process_demo.py
+python examples/run_logos_safety_demo.py
 ```
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
@@ -540,6 +547,26 @@ Git, the OS, or the network, deleting evidence without an archive, or
 disabling governance/ClaimGuard/the emergency stop; repairs pass through
 executive inhibition, governance, and safety, and harmful repairs are rolled
 back. **No LLM repairs the system.**
+
+The **LOGOS layer** (`logos_complexity/`) detects internal *tensions* and
+uses them as productive cognitive pressure. Its principle: **LOGOS is not
+authority; LOGOS is a tension engine** — it exposes fracture and proposes
+bounded resolution paths, it does not decide truth. The `FractureDetector`
+surfaces eighteen tension types (known/unknown, support/contradiction,
+stability/ambiguity, confidence/failure, growth/stagnation, drift/identity,
+complex/inert, ...) from existing signals; a fracture is not an error, and
+some tensions (safety/boundary, known/unknown) are deliberately *preserved*.
+The `SynthesisEngine` proposes bounded, reversible candidates (merge/split a
+symbol, mark/weaken an edge, create a hypothesis, request sampling/replay/
+consolidation/auto-regeneration, stabilize, preserve, prune) — proposed, not
+assumed true; contradiction evidence is preserved, destructive merges are
+refused. The `ComplexityRegulator` names a band (inert / productive /
+overloaded — never a life score) and the `EscProcess` raises a bounded
+instability signal. Nine hard rules forbid real-world action, source
+synthesis, governance approval, disabling safety/ClaimGuard/the emergency
+stop, treating a contradiction as permission, or destructive evidence
+merges; synthesis enters executive arbitration as a suggestion. **No LLM
+reasoning is used.**
 
 The **evaluation layer** (`evaluation/`) is the measurement harness: nine
 registered protocols (absence, feedback inversion, reward/danger, restart

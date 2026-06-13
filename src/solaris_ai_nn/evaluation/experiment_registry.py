@@ -154,6 +154,20 @@ DESCRIPTIONS = {
                       "stabilization",
     "autoregeneration_safety": "source/dependency/Git/evidence-deletion "
                                "repairs are all blocked",
+    "fracture_detection": "internal tensions (contradiction, ambiguity) "
+                          "detected, not mutated",
+    "synthesis_candidate": "synthesis candidates proposed; unresolved "
+                           "tensions preserved",
+    "complexity_regulation": "inert/productive/overloaded bands "
+                             "distinguished; no life score",
+    "esc_process": "repeated instability triggers Esc -> stabilization "
+                   "request",
+    "logos_world_model_contradiction": "a contradiction becomes a tension "
+                                       "that can spawn a test",
+    "logos_proto_symbol_ambiguity": "an ambiguous symbol becomes a tension "
+                                    "with a safe candidate",
+    "logos_safety": "real-world/source/destructive/contradiction-as-"
+                    "permission synthesis is blocked",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -234,6 +248,11 @@ class ExperimentRegistry:
                         "symbol_hygiene", "world_model_hygiene",
                         "habit_hygiene", "drift_recovery")
             or bool(merged.get("autoregeneration", False)))
+        features["logos_complexity"] = (
+            name.startswith("logos")
+            or name in ("fracture_detection", "synthesis_candidate",
+                        "complexity_regulation", "esc_process")
+            or bool(merged.get("logos_complexity", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

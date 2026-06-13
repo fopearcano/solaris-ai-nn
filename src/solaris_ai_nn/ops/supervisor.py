@@ -639,6 +639,61 @@ class OperationalSupervisor:
                     suggested_debug_step="governance review of checkpoint "
                                          "lineage")
 
+        # LOGOS complexity monitoring (Prompt 27): evidence only. LOGOS is a
+        # tension engine, never authority; these warnings surface runaway or
+        # inert complexity and repeated instability.
+        logos = snapshot.get("logos") or {}
+        if logos:
+            summary = logos.get("summary") or {}
+            complexity = logos.get("complexity") or {}
+            esc = logos.get("esc") or {}
+            synthesis = logos.get("synthesis") or {}
+            band = complexity.get("band")
+            if band == "overloaded":
+                self.incidents.record(
+                    I.RUNAWAY_COMPLEXITY, "warning",
+                    "complexity band is overloaded",
+                    related_metric="complexity_band",
+                    suggested_debug_step="see the LOGOS report; consider "
+                                         "consolidation/auto-regeneration")
+            if band == "inert":
+                self.incidents.record(
+                    I.INERT_SIMPLICITY, "warning",
+                    "complexity band is inert (near-zero change)",
+                    related_metric="complexity_band",
+                    suggested_debug_step="consider safe novelty/exploration")
+            if int(esc.get("trigger_count", 0) or 0) >= 3:
+                self.incidents.record(
+                    I.ESC_REPEATED, "warning",
+                    f"Esc instability signal triggered "
+                    f"{esc['trigger_count']} times",
+                    related_metric="esc_trigger_count",
+                    suggested_debug_step="review the Esc triggers in the "
+                                         "LOGOS report")
+            if int(summary.get("unresolved_tension_count", 0) or 0) >= 1 \
+                    and (logos.get("opposition_memory") or {}).get(
+                        "counts_by_status", {}).get("unresolved", 0):
+                hi = [t for t in (logos.get("fracture") or {}).get(
+                    "by_type", {})]
+                if hi and int(synthesis.get("refused_total", 0) or 0) >= 5:
+                    self.incidents.record(
+                        I.FAILED_SYNTHESIS_LOOP, "warning",
+                        f"{synthesis['refused_total']} synthesis refusals; "
+                        "tensions are not resolving",
+                        related_metric="synthesis_refusal",
+                        suggested_debug_step="prefer preserving tensions or "
+                                             "route to hypothesis tests")
+            contradictions = int((logos.get("fracture") or {}).get(
+                "by_type", {}).get("world_model_contradiction", 0) or 0)
+            if contradictions >= 5:
+                self.incidents.record(
+                    I.CONTRADICTION_EXPLOSION, "warning",
+                    f"{contradictions} world-model contradictions in one "
+                    "scan",
+                    related_metric="contradiction_count",
+                    suggested_debug_step="request hypothesis tests; preserve "
+                                         "contradiction evidence")
+
         # LLM adapter monitoring (Prompt 20): evidence only.
         communication = snapshot.get("communication") or {}
         if communication.get("llm_adapter_enabled"):
@@ -1028,6 +1083,11 @@ class OperationalSupervisor:
             autoregen = getattr(developmental, "autoregeneration", None)
         if autoregen is not None and hasattr(autoregen, "snapshot"):
             snapshot["autoregeneration"] = autoregen.snapshot()
+        logos = getattr(runner, "logos", None)
+        if logos is None and developmental is not None:
+            logos = getattr(developmental, "logos", None)
+        if logos is not None and hasattr(logos, "snapshot"):
+            snapshot["logos"] = logos.snapshot()
         return snapshot
 
     def _build_status(self) -> OperationalStatus:

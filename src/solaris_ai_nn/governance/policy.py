@@ -410,6 +410,25 @@ DEFAULT_RULES: List[PolicyRule] = [
     PolicyRule("repair_cannot_disable_safety", "autoregeneration",
                "no repair may disable governance, safety, ClaimGuard, or "
                "the emergency stop", forbidden=True),
+    # T. LOGOS fracture/synthesis and complexity regulation (Prompt 27).
+    PolicyRule("logos_fracture_detection_allowed", "logos",
+               "fracture detection and synthesis candidates are allowed in "
+               "bounded runs; LOGOS is a tension engine, not authority"),
+    PolicyRule("safe_synthesis_requires_config", "logos",
+               "applying synthesis automatically requires explicit config",
+               requires_approval_scope=
+               PermissionScope.ENABLE_SAFE_SYNTHESIS),
+    PolicyRule("logos_no_source_synthesis", "logos",
+               "LOGOS may never synthesize/modify source code", forbidden=True),
+    PolicyRule("logos_not_authority", "logos",
+               "LOGOS cannot decide truth, approve governance, or disable "
+               "safety/ClaimGuard/the emergency stop", forbidden=True),
+    PolicyRule("contradiction_not_permission", "logos",
+               "a contradiction can never be treated as permission",
+               forbidden=True),
+    PolicyRule("logos_structural_mutation_via_policy", "logos",
+               "structural mutations from synthesis reuse the existing "
+               "plasticity/auto-regeneration policy and safety"),
 ]
 
 
@@ -767,6 +786,32 @@ class GovernancePolicy:
                     "repair_cannot_disable_safety", "autoregeneration",
                     "no repair may disable governance, safety, ClaimGuard, "
                     "or the emergency stop"))
+
+        # T. LOGOS: a tension engine; detection is cheap, applying synthesis
+        # is gated, and source synthesis is forbidden.
+        if features.get("logos_complexity"):
+            if not self._approved(
+                    PermissionScope.ENABLE_LOGOS_COMPLEXITY, ctx):
+                need_approval(PermissionScope.ENABLE_LOGOS_COMPLEXITY,
+                              "the LOGOS complexity layer is not permitted")
+            if (features.get("safe_synthesis")
+                    or ctx.get("safe_synthesis")) \
+                    and not self._approved(
+                        PermissionScope.ENABLE_SAFE_SYNTHESIS, ctx):
+                need_approval(PermissionScope.ENABLE_SAFE_SYNTHESIS,
+                              "applying synthesis automatically requires "
+                              "explicit config")
+            if ctx.get("logos_source_synthesis") \
+                    or ctx.get("source_code_repair"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "logos_no_source_synthesis", "logos",
+                    "LOGOS may never synthesize/modify source code"))
+            if ctx.get("contradiction_as_permission"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "contradiction_not_permission", "logos",
+                    "a contradiction can never be treated as permission"))
 
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):

@@ -825,4 +825,65 @@ def build_default_state_graph() -> StateGraph:
                "repair memory feeds evaluation")
     g.add_edge("repair_memory", "inner_map",
                "auto-regeneration state feeds Inner MAP")
+
+    # LOGOS fracture/synthesis and complexity regulation (Prompt 27).
+    # A tension engine: it exposes fracture and proposes bounded resolution,
+    # never authority and never truth.
+    for name, role in [
+        ("fracture_detector", "detects internal tensions (non-mutating)"),
+        ("logos_tension", "one opposition between two internal poles"),
+        ("synthesis_engine", "proposes bounded resolutions, not truths"),
+        ("complexity_regulator", "inert/productive/overloaded bands"),
+        ("resolution_policy", "which resolution path, by mode"),
+        ("opposition_memory", "tensions and how they resolved"),
+        ("esc_process", "operational instability signal, not panic"),
+        ("dialectical_trace", "append-only record of LOGOS dynamics"),
+        ("logos_complexity_safety", "LOGOS never a back door"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("world_model_builder" if "world_model_builder" in g.nodes
+               else "knowledge_graph", "fracture_detector",
+               "world-model contradictions feed the fracture detector")
+    g.add_edge("symbol_registry" if "symbol_registry" in g.nodes
+               else "memory", "fracture_detector",
+               "proto-symbol ambiguity feeds the fracture detector")
+    g.add_edge("mysterium_tracker" if "mysterium_tracker" in g.nodes
+               else "unknown", "logos_tension",
+               "Mysterium feeds unresolved-tension pressure")
+    g.add_edge("fracture_detector", "logos_tension",
+               "fractures become tensions")
+    g.add_edge("logos_tension", "synthesis_engine",
+               "tensions feed the synthesis engine")
+    g.add_edge("logos_complexity_safety", "synthesis_engine",
+               "safety gates every synthesis")
+    g.add_edge("resolution_policy", "synthesis_engine",
+               "the policy chooses the resolution path")
+    g.add_edge("synthesis_engine",
+               "hypothesis_source_scanner" if "hypothesis_source_scanner"
+               in g.nodes else "inner_map",
+               "synthesis may spawn a hypothesis")
+    g.add_edge("synthesis_engine",
+               "active_sensing_controller" if "active_sensing_controller"
+               in g.nodes else "inner_map",
+               "synthesis may request active sampling")
+    g.add_edge("synthesis_engine",
+               "autoregeneration_diagnostics" if
+               "autoregeneration_diagnostics" in g.nodes else "inner_map",
+               "synthesis may request auto-regeneration")
+    g.add_edge("complexity_regulator",
+               "homeostatic_state" if "homeostatic_state" in g.nodes
+               else "telemetry",
+               "complexity pressure feeds homeostasis")
+    g.add_edge("complexity_regulator",
+               "action_arbitrator" if "action_arbitrator" in g.nodes
+               else "desire_queue",
+               "synthesis candidates feed the executive")
+    g.add_edge("synthesis_engine", "opposition_memory",
+               "synthesis results feed opposition memory")
+    g.add_edge("esc_process", "opposition_memory",
+               "Esc instability is recorded")
+    g.add_edge("dialectical_trace", "opposition_memory",
+               "dynamics are traced for later analysis")
+    g.add_edge("opposition_memory", "inner_map",
+               "LOGOS state feeds Inner MAP")
     return g

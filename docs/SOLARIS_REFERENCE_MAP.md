@@ -508,3 +508,23 @@ safety.
 | Synthesis (becoming through subtraction) | memory/graph/symbol/habit hygiene -- compaction, weakening, marking stale, retiring dead habits, all evidence-preserving |
 | Complexity (inertia vs chaos) | `drift_recovery.py` (`DriftRecoveryManager`) + the degradation model -- drift/stagnation/runaway monitoring with cautious recovery |
 | Safety / boundaries (no real-world reach) | `autoregeneration/safety.py` -- thirteen hard rules: no source/dependency/Git/OS/network change, no evidence deletion without archive, no disabling governance/ClaimGuard/emergency stop, no repair outside the state dir |
+
+---
+
+## LOGOS fracture/synthesis and complexity regulation mapping (Phase 27)
+
+The LOGOS layer (`logos_complexity/`) realises Solaris_Ai's LOGOS as an
+operational *tension engine*: opposition (dia-ballein) detected, bounded
+synthesis (sun-ballein) proposed, complexity regulated -- never authority,
+never truth by fiat.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| LOGOS | `logos_complexity/fracture.py` (`FractureDetector`) + `synthesis.py` (`SynthesisEngine`) -- detect tensions, propose bounded resolutions |
+| dia-ballein (to throw apart) | tension/fracture detection -- contradiction, ambiguity, failure, drift surfaced as opposed poles |
+| sun-ballein (to throw together) | bounded `SynthesisCandidate`s -- merge/split/mark/weaken/strengthen/hypothesize, proposed and reversible, never assumed true |
+| Mysterium (pull of the unknown) | `mysterium_synthesis` tension -- unresolved-tension pressure; LOGOS does not resolve the unknown by fiat |
+| Complexity / Esc | `complexity_state.py` (`ComplexityRegulator`) + `esc_process.py` (`EscProcess`) -- inert/productive/overloaded bands and a bounded instability signal |
+| Inner MAP (self-observation) | `InnerMapModel.logos` + nine state-graph nodes -- complexity band, tensions, synthesis, Esc as observed self-state (never authority) |
+| Synthesis (becoming through subtraction/integration) | safe structural integration/pruning via the existing plasticity/auto-regeneration policy; contradiction evidence is preserved, never deleted |
+| Safety / boundaries | `logos_complexity/safety.py` -- nine hard rules: no real-world action, no source synthesis, no governance approval, no disabling safety/ClaimGuard/emergency stop, no contradiction-as-permission, no destructive evidence merge |

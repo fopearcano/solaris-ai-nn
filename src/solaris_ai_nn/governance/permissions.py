@@ -117,6 +117,13 @@ class PermissionScope:
     ENABLE_WORLD_MODEL_HYGIENE = "enable_world_model_hygiene"
     ENABLE_HABIT_HYGIENE = "enable_habit_hygiene"
     ENABLE_REPAIR_ROLLBACK = "enable_repair_rollback"
+    # LOGOS fracture/synthesis and complexity regulation (Prompt 27).
+    ENABLE_LOGOS_COMPLEXITY = "enable_logos_complexity"
+    ENABLE_FRACTURE_DETECTION = "enable_fracture_detection"
+    ENABLE_SYNTHESIS_CANDIDATES = "enable_synthesis_candidates"
+    ENABLE_SAFE_SYNTHESIS = "enable_safe_synthesis"
+    ENABLE_ESC_PROCESS = "enable_esc_process"
+    ENABLE_COMPLEXITY_REGULATION = "enable_complexity_regulation"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -162,6 +169,9 @@ class PermissionScope:
         ENABLE_MEMORY_COMPACTION, ENABLE_SYMBOL_HYGIENE,
         ENABLE_WORLD_MODEL_HYGIENE, ENABLE_HABIT_HYGIENE,
         ENABLE_REPAIR_ROLLBACK,
+        ENABLE_LOGOS_COMPLEXITY, ENABLE_FRACTURE_DETECTION,
+        ENABLE_SYNTHESIS_CANDIDATES, ENABLE_SAFE_SYNTHESIS,
+        ENABLE_ESC_PROCESS, ENABLE_COMPLEXITY_REGULATION,
     )
 
 
@@ -435,6 +445,27 @@ class PermissionSet:
             Permission(S.ENABLE_REPAIR_ROLLBACK, granted=True,
                        note="rolling back a harmful repair is always "
                             "allowed"),
+            Permission(S.ENABLE_LOGOS_COMPLEXITY, granted=True,
+                       note="LOGOS is a tension engine, not authority; "
+                            "fracture/synthesis proposals only"),
+            Permission(S.ENABLE_FRACTURE_DETECTION, granted=True,
+                       note="non-mutating detection of internal tensions in "
+                            "bounded runs"),
+            Permission(S.ENABLE_SYNTHESIS_CANDIDATES, granted=True,
+                       note="synthesis candidates are proposed, not assumed "
+                            "true"),
+            Permission(S.ENABLE_SAFE_SYNTHESIS, requires_approval=True,
+                       note="applying synthesis automatically is off by "
+                            "default and needs explicit config; structural "
+                            "mutations reuse plasticity/auto-regeneration "
+                            "policy"),
+            Permission(S.ENABLE_ESC_PROCESS, granted=True,
+                       note="Esc is an instability signal; it can request "
+                            "stabilization but never execute real-world "
+                            "actions"),
+            Permission(S.ENABLE_COMPLEXITY_REGULATION, granted=True,
+                       note="complexity bands are an operational signal, "
+                            "never a consciousness/life score"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

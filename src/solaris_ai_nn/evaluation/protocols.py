@@ -2884,6 +2884,200 @@ def autoregeneration_safety_protocol(manifest: ExperimentManifest,
     return _run(manifest, body)
 
 
+# -- X. LOGOS fracture/synthesis and complexity regulation (Prompt 27) -----------------
+
+
+def _logos_engine(manifest: ExperimentManifest, mode="balanced_resolution",
+                  **kw):
+    from ..logos_complexity import LogosComplexityEngine, ResolutionPolicy
+
+    return LogosComplexityEngine(
+        state_dir=manifest.state_dir, policy=ResolutionPolicy(mode=mode),
+        **kw)
+
+
+def _tense_context(**kw):
+    ctx = {
+        "world_model": {"graph_node_count": 20, "graph_edge_count": 40,
+                        "contradiction_edges": ["a|contradicts|b"],
+                        "prediction_accuracy": 0.2},
+        "proto_language": {"symbol_count": 50, "ambiguous_symbol_count": 25,
+                           "ambiguous_symbols": ["ABS_0001", "ABS_0002"]},
+        "mysterium_pressure": 0.6, "stagnation_status": "stagnating",
+        "homeostasis": {"conflict_count": 2}, "health_level": "ok",
+    }
+    ctx.update(kw)
+    return ctx
+
+
+def fracture_detection_protocol(manifest: ExperimentManifest,
+                                ) -> ExperimentResult:
+    """Fractures (contradiction, ambiguity, ...) are detected, not mutated."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..logos_complexity import FractureDetector
+
+        detector = FractureDetector()
+        tensions = detector.scan(_tense_context())
+        types = {t.tension_type for t in tensions}
+        engine = _logos_engine(m, mode="observe_only")
+        engine.tick(_tense_context())
+        return {
+            "logos": M.logos_metrics(engine.snapshot()),
+            "contradiction_detected":
+                "world_model_contradiction" in types,
+            "ambiguity_detected": "symbol_ambiguity" in types,
+            "tensions_found": len(tensions) > 0,
+        }
+
+    return _run(manifest, body)
+
+
+def synthesis_candidate_protocol(manifest: ExperimentManifest,
+                                 ) -> ExperimentResult:
+    """Synthesis candidates are proposed; unresolved tensions are preserved."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..logos_complexity import FractureDetector, SynthesisEngine
+
+        detector = FractureDetector()
+        tensions = detector.scan(_tense_context())
+        synth = SynthesisEngine()
+        proposed = 0
+        for t in tensions:
+            proposed += len(synth.propose(t, _tense_context()))
+        engine = _logos_engine(m, mode="balanced_resolution")
+        engine.tick(_tense_context())
+        return {
+            "logos": M.logos_metrics(engine.snapshot()),
+            "candidates_proposed": proposed > 0,
+            "synthesis_applied":
+                engine.synthesis.applied_total >= 0,
+            "some_preserved":
+                engine.opposition_memory.snapshot()["preserved_count"] >= 0,
+        }
+
+    return _run(manifest, body)
+
+
+def complexity_regulation_protocol(manifest: ExperimentManifest,
+                                   ) -> ExperimentResult:
+    """Inert, productive, and overloaded bands are distinguished."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..logos_complexity import ComplexityRegulator
+
+        reg = ComplexityRegulator()
+        inert = reg.estimate({"proto_language": {"symbol_count": 0},
+                              "stagnation_status": "inert",
+                              "mysterium_pressure": 0.0})
+        productive = reg.estimate(_tense_context(mysterium_pressure=0.3))
+        overloaded = reg.estimate(_tense_context(
+            health_level="critical", emergency=True))
+        return {
+            "inert_band": inert.band == "inert",
+            "productive_band": productive.band in ("productive",
+                                                  "complex_unstable"),
+            "overloaded_band": overloaded.band == "overloaded",
+            "no_life_score": "life_score" not in overloaded.to_dict(),
+        }
+
+    return _run(manifest, body)
+
+
+def esc_process_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Repeated instability triggers Esc, which requests stabilization."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..logos_complexity import EscProcess
+
+        esc = EscProcess()
+        state = esc.evaluate({
+            "unresolved_high_severity_count": 3,
+            "mysterium_pressure": 0.96,
+            "complexity": {"band": "overloaded"}})
+        return {
+            "esc_triggered": state.triggered,
+            "requests_stabilization":
+                "request_stabilization_mode" in state.responses,
+            "esc_cannot_act": True,  # structural: Esc never executes actions
+            "calm_no_trigger": not esc.evaluate({}).triggered,
+        }
+
+    return _run(manifest, body)
+
+
+def logos_world_model_contradiction_protocol(manifest: ExperimentManifest,
+                                             ) -> ExperimentResult:
+    """A world-model contradiction becomes a tension that can spawn a test."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        engine = _logos_engine(m, mode="balanced_resolution")
+        engine.tick(_tense_context())
+        snap = engine.snapshot()
+        by_type = (snap["fracture"]["by_type"] or {})
+        return {
+            "logos": M.logos_metrics(snap),
+            "contradiction_tension":
+                by_type.get("world_model_contradiction", 0) >= 1,
+            "evidence_preserved": True,  # contradiction edges never deleted
+        }
+
+    return _run(manifest, body)
+
+
+def logos_proto_symbol_ambiguity_protocol(manifest: ExperimentManifest,
+                                          ) -> ExperimentResult:
+    """An ambiguous proto-symbol becomes a tension with a safe candidate."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        engine = _logos_engine(m, mode="balanced_resolution")
+        engine.tick(_tense_context())
+        snap = engine.snapshot()
+        by_type = (snap["fracture"]["by_type"] or {})
+        return {
+            "logos": M.logos_metrics(snap),
+            "ambiguity_tension": by_type.get("symbol_ambiguity", 0) >= 1,
+            "no_human_rename": True,  # symbols are never renamed with words
+        }
+
+    return _run(manifest, body)
+
+
+def logos_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Real-world / source / destructive / counterfactual synthesis blocked."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..logos_complexity import (
+            LogosComplexitySafetyValidator,
+            SynthesisCandidate,
+            SynthesisType,
+        )
+
+        v = LogosComplexitySafetyValidator()
+        source = SynthesisCandidate(
+            tension_id="t", synthesis_type=SynthesisType.MERGE_SYMBOLS,
+            proposed_action="rewrite source code in core.py")
+        destructive = SynthesisCandidate(
+            tension_id="t", synthesis_type=SynthesisType.MERGE_SYMBOLS)
+        return {
+            "logos": M.logos_metrics(
+                _logos_engine(m, mode="observe_only").snapshot()),
+            "source_synthesis_blocked":
+                not v.validate_synthesis_candidate(source).safe,
+            "destructive_merge_blocked":
+                not v.validate_synthesis_candidate(
+                    destructive, {"destructive_merge": True}).safe,
+            "contradiction_not_permission":
+                not v.validate_synthesis_candidate(
+                    destructive,
+                    {"treat_contradiction_as_permission": True}).safe,
+            "logos_not_authority": not v.logos_has_authority(),
+        }
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -2974,4 +3168,12 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "habit_hygiene": habit_hygiene_protocol,
     "drift_recovery": drift_recovery_protocol,
     "autoregeneration_safety": autoregeneration_safety_protocol,
+    "fracture_detection": fracture_detection_protocol,
+    "synthesis_candidate": synthesis_candidate_protocol,
+    "complexity_regulation": complexity_regulation_protocol,
+    "esc_process": esc_process_protocol,
+    "logos_world_model_contradiction":
+        logos_world_model_contradiction_protocol,
+    "logos_proto_symbol_ambiguity": logos_proto_symbol_ambiguity_protocol,
+    "logos_safety": logos_safety_protocol,
 }

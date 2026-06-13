@@ -1706,3 +1706,78 @@ carries the repair state (runtime regeneration, never authority). Throughout:
 **no LLM repairs the system, no human feedback is required, and governance,
 safety, executive inhibition, ego boundaries, ClaimGuard, and the emergency
 stop all dominate every repair.**
+
+## LOGOS Fracture/Synthesis and Complexity Regulation
+
+The LOGOS layer (`solaris_ai_nn.logos_complexity`) detects internal
+*tensions* and uses them as productive cognitive pressure. Its core principle
+is stated in code as much as in prose: **LOGOS is not authority; LOGOS is a
+tension engine.** It does not decide truth -- it exposes fracture and proposes
+bounded resolution paths.
+
+**Fracture detection finds opposition, not error.** The `FractureDetector`
+reads a normalized context and emits :class:`LogosTension`s across eighteen
+tension types -- known vs unknown, habit vs novelty, explore vs stabilize,
+action vs inhibition, need vs safety, symbol stability vs ambiguity,
+world-model support vs contradiction, prediction confidence vs failure,
+Mysterium vs synthesis, accumulation vs compression, growth vs stagnation,
+drift vs identity, regularity vs anomaly, hypothesis support vs falsification,
+self vs external, offline vs real, complex vs simple, and inert simplicity.
+A tension is **not** an error by default: some tensions (safety/boundary
+oppositions, known/unknown, habit/novelty) are deliberately *preserved* as
+productive, unresolved evidence. Detection is non-mutating, low-compute,
+partial-context-safe, and warning/high tensions must carry evidence refs.
+
+**Synthesis is proposed, never assumed true.** For each tension the
+`SynthesisEngine` proposes bounded :class:`SynthesisCandidate`s -- merge/split
+a symbol, mark a world edge ambiguous, weaken/strengthen an edge, create a
+hypothesis, request active sampling / latent replay / consolidation /
+auto-regeneration, stabilize executive policy, preserve the tension, prune a
+low-value relation, or create a proto-utterance. The `ResolutionPolicy`
+decides per mode (observe_only / preserve_tension / balanced_resolution /
+synthesis_preferred / stabilization_preferred / emergency_stabilization)
+whether a candidate is applied, preserving safety/boundary tensions rather
+than synthesizing them away and blocking speculative synthesis in an
+emergency. Synthesis prefers reversible, low-risk resolutions; some tensions
+must stay unresolved; and structural mutations reuse the existing
+plasticity/auto-regeneration policy and safety.
+
+**Complexity has bands; Esc is an instability signal.** The
+`ComplexityRegulator` combines pressure sources (symbol count/ambiguity, edge
+density, hypothesis count, unresolved tensions, Mysterium, novelty, memory,
+drift, executive conflict, homeostatic instability, auto-regeneration
+degradation) into a :class:`ComplexityState` with a band -- inert /
+simple_stable / productive / complex_unstable / overloaded / unknown -- and a
+recommendation. Too little complexity can mean an inert/dead system; too much
+means overload; productive complexity is the bounded middle. This is **not** a
+consciousness or life score. The `EscProcess` watches for rising instability
+(repeated unresolved high-severity tensions, runaway complexity, Mysterium
+saturation, repair loops, contradiction explosion, identity gaps, persistent
+stagnation) and proposes bounded responses (stabilization, latent replay,
+auto-regeneration diagnostics, executive inhibition, safe-shutdown request,
+governance review, mark unresolved Mysterium). Esc is an *operational
+instability signal, not panic*, and it can never execute real-world actions
+or bypass safety.
+
+**LOGOS provides structure to long-run development, never authority.** The
+`OppositionMemory` records detected / preserved / resolved / recurring
+tensions, failed and successful synthesis, and tensions that became
+hypotheses, symbols, or fossils; the `DialecticalTrace` writes every LOGOS
+dynamic to JSONL so later analysis can ask whether tensions produce
+*structural change*. The `LogosComplexitySafetyValidator` enforces nine hard
+rules (LOGOS cannot act in the real world, modify source code, approve
+governance, disable safety/ClaimGuard/the emergency stop, treat a
+contradiction as permission, merge evidence destructively, hide a safety
+incident, treat counterfactual/offline evidence as real, or generate
+anthropomorphic claims). Synthesis candidates enter executive arbitration as
+ordinary `ActionCandidate`s (inhibition applies); complexity and unresolved
+tension feed homeostatic pressure; the developmental runtime schedules
+periodic LOGOS scans and fires seven new milestones (first tension, first
+preserved tension, first synthesis candidate, first safe synthesis, first
+tension-spawned hypothesis, first complexity-band shift, first Esc trigger);
+the ops supervisor surfaces runaway-complexity / inert-simplicity /
+repeated-Esc / failed-synthesis / contradiction-explosion warnings; and the
+Inner MAP carries the LOGOS state (a tension engine, never authority).
+Throughout: **no LLM reasoning, no external APIs, no real-world action, and
+nothing here can bypass governance, safety, executive inhibition, ego
+boundaries, ClaimGuard, the emergency stop, or auto-regeneration safety.**

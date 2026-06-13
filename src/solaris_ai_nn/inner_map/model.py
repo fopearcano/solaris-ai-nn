@@ -288,6 +288,12 @@ class InnerMapModel:
     # refused_repair_count, rollback_count, quarantine_count,
     # last_repair_report_path, authority.
     autoregeneration: Optional[Dict[str, Any]] = None
+    # LOGOS complexity status (Prompt 27); None when LOGOS is off.
+    # Keys: enabled, complexity_band, complexity_pressure,
+    # active_tension_count, unresolved_tension_count, latest_tension,
+    # latest_synthesis_candidate, applied_synthesis_count,
+    # preserved_tension_count, esc_triggered, logos_report_path, authority.
+    logos: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

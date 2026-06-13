@@ -1588,3 +1588,47 @@ disabling governance) hold.
 `autoregeneration_safety`). Eight registered protocols measure degradation
 detection, repair proposal/application, evidence preservation, and the safety
 refusals that keep self-repair from becoming a back door.
+
+## 150. LOGOS Fracture Demo ✅ (implemented)
+
+**Run:** `python examples/run_logos_fracture_demo.py`
+Builds a context with a world-model contradiction, an ambiguous proto-symbol,
+a prediction failure, and high Mysterium, then surfaces the active tensions
+between opposed internal poles in observe-only mode -- mutating nothing.
+
+## 151. LOGOS Synthesis Demo ✅ (implemented)
+
+**Run:** `python examples/run_logos_synthesis_demo.py`
+Detects tensions, proposes synthesis candidates, runs them through the safety
+validator and resolution policy, and shows which were applied, preserved, or
+refused. Synthesis is proposed, not assumed true.
+
+## 152. Complexity Regulation Demo ✅ (implemented)
+
+**Run:** `python examples/run_complexity_regulation_demo.py`
+Runs the complexity regulator on inert, productive, and overloaded contexts
+and shows the band and recommendation for each. Complexity is an operational
+regulation signal, not a consciousness or life score.
+
+## 153. Esc Process Demo ✅ (implemented)
+
+**Run:** `python examples/run_esc_process_demo.py`
+Repeated unresolved high-severity instability triggers Esc, which proposes
+bounded stabilization responses; Esc is an instability signal, not an
+emotion, and cannot execute real-world actions.
+
+## 154. LOGOS Safety Demo ✅ (implemented)
+
+**Run:** `python examples/run_logos_safety_demo.py`
+A contradiction cannot bypass safety or be treated as permission, a
+source-code synthesis is blocked, a destructive evidence merge is blocked,
+and an irreversible synthesis cannot be justified by offline evidence alone.
+
+## 155. Complexity Regulation Benchmark ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment complexity_regulation`
+(also `fracture_detection`, `synthesis_candidate`, `esc_process`,
+`logos_world_model_contradiction`, `logos_proto_symbol_ambiguity`,
+`logos_safety`). Seven registered protocols measure tension detection,
+synthesis proposal, complexity bands, Esc triggering, and the safety refusals
+that keep LOGOS from becoming authority.
