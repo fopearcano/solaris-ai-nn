@@ -1737,3 +1737,46 @@ are never started from tests or examples. Follow `OPERATOR_RUNBOOK.md`:
 `pilot1_daily_review`, `pilot1_exit_criteria`, `pilot1_safety`). Seven
 registered protocols measure planning, preflight, restart drills, dashboards,
 daily reviews, exit criteria, and the safety refusals that gate real soaks.
+
+## 170. Post-Pilot Analysis Demo ✅ (implemented)
+
+**Run:** `python examples/run_post_pilot_analysis_demo.py --state-dir .solaris_ai_nn_pilot1/test_post_pilot`
+Writes a small mock Pilot-1 artifact set, runs the read-only post-pilot
+forensic pipeline, and generates the post-pilot analysis report and research
+dossier. No real pilot required; no runtime state mutated; no consciousness
+claim made.
+
+## 171. Baseline Comparison Demo ✅ (implemented)
+
+**Run:** `python examples/run_baseline_comparison_demo.py --state-dir .solaris_ai_nn_pilot1/test_baseline`
+Compares an initial and a final mock snapshot and shows which deltas are mere
+count increases (not growth) versus genuine improvements.
+
+## 172. Accumulation vs Growth Demo ✅ (implemented)
+
+**Run:** `python examples/run_accumulation_vs_growth_demo.py --state-dir .solaris_ai_nn_pilot1/test_growth_discrimination`
+Runs the discriminator on accumulation-only, weak-growth, and regression
+cases, printing the conservative classification for each.
+
+## 173. Phase-2 Decision Gate Demo ✅ (implemented)
+
+**Run:** `python examples/run_phase2_decision_gate_demo.py --state-dir .solaris_ai_nn_pilot1/test_phase2_gate`
+Drives the decision gate with mock inputs to show repeat_pilot1,
+revise_architecture, ready_for_pilot2, and safety-blocked outcomes.
+
+## 174. Reproducibility Package Demo ✅ (implemented)
+
+**Run:** `python examples/run_reproducibility_package_demo.py --state-dir .solaris_ai_nn_pilot1/test_repro_package`
+Builds a reproducibility package from a mock artifact set: artifact index,
+checksum manifest, indexed-only large logs, and a missing-artifact list, with
+no secrets included.
+
+## 175. Post-Pilot Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment baseline_comparison`
+(also `post_pilot_artifact_loading`, `structural_change_evidence`,
+`accumulation_vs_growth`, `trace_audit`, `decision_gate`, `research_dossier`,
+`post_pilot_safety`). Eight registered protocols measure artifact loading,
+baseline comparison, structural-change evidence, accumulation/growth
+discrimination, traceability, the Phase-2 gate, the dossier, and the safety
+refusals.

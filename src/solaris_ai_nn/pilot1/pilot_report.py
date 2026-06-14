@@ -224,3 +224,26 @@ class PilotReportBuilder:
         report = self.build(**kwargs)
         report.sections["report_paths"] = self.write(report)
         return report
+
+    def run_post_pilot_analysis(self, state_dir: Optional[str] = None,
+                                ) -> Optional[Dict[str, Any]]:
+        """After the final phase, optionally run post-pilot forensics.
+
+        This reads the just-written artifacts read-only and produces the
+        post-pilot analysis + research dossier. It never mutates runtime state
+        and never starts a run; failures are reported, not raised.
+        """
+        try:
+            from ..post_pilot import PostPilotForensics
+        except Exception:
+            return None
+        try:
+            forensics = PostPilotForensics(
+                base_dir=self.base_dir,
+                state_dir=state_dir or ".solaris_ai_nn_state")
+            out = forensics.run()
+            return {"summary": out["summary"],
+                    "report_paths": out["report_paths"],
+                    "dossier_paths": out["dossier_paths"]}
+        except Exception as exc:  # analysis must never break a pilot
+            return {"error": f"post-pilot analysis failed: {exc}"}

@@ -51,6 +51,11 @@ AVAILABLE_QUERIES = (
     "what is the latest weekly review?", "what failure modes are active?",
     "should the pilot continue?", "is this simulated or real month-scale?",
     "can I start the 30-day run?",
+    "did the pilot show growth?", "was it just accumulation?",
+    "what evidence supports structural change?",
+    "what evidence contradicts growth?", "what should happen next?",
+    "is it ready for Pilot-2?", "what artifacts are missing?",
+    "can we claim consciousness?",
 )
 
 
@@ -111,6 +116,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("pp_"):
+            return self._post_pilot(topic)
         if topic.startswith("pilot"):
             return self._pilot(topic)
         if topic.startswith("conscience"):
@@ -378,6 +385,60 @@ class QueryRouter:
         else:
             text = (f"pilot phase: {status.get('pilot_phase')}; "
                     f"mode: {status.get('pilot_mode')}")
+        return self.builder.status_response(text, refs)
+
+    def _post_pilot(self, topic: str) -> CommunicationResponse:
+        """Answer post-pilot forensic queries from the attached analysis.
+
+        The consciousness question is answered safely even with no component;
+        every answer is evidence-scoped and never claims consciousness.
+        """
+        if topic == "pp_consciousness":
+            return self.builder.status_response(
+                "No. The post-pilot analysis can only evaluate operational "
+                "continuity, traceability, structural-change proxies, and "
+                "developmental evidence. It cannot prove consciousness, "
+                "personhood, sentience, or life.",
+                ["policy:no_consciousness_claim"])
+        component = self.components.get("post_pilot")
+        if component is None:
+            return self.builder.missing_component_response("post_pilot")
+        status = (component.summary() if hasattr(component, "summary")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:post_pilot"]
+        if topic == "pp_growth":
+            cls = status.get("growth_classification", "inconclusive")
+            text = (f"growth classification: {cls}. Note: 'growth' is durable "
+                    "operational structural change, not consciousness.")
+        elif topic == "pp_accumulation":
+            cls = status.get("growth_classification", "inconclusive")
+            text = ("classified as mostly accumulation"
+                    if cls == "mostly_accumulation"
+                    else f"not purely accumulation; classification: {cls}")
+        elif topic == "pp_evidence_support":
+            text = (f"{status.get('structural_evidence_count', 0)} "
+                    "structural-change evidence record(s); see the post-pilot "
+                    "report and research dossier for confidences")
+        elif topic == "pp_evidence_contradict":
+            contradicted = status.get("contradicted_claims") or []
+            text = ("contradicting evidence: "
+                    + (", ".join(contradicted) if contradicted
+                       else "none recorded; absence of contradiction is not "
+                       "confirmation"))
+        elif topic == "pp_next_step":
+            text = (f"recommended next step: "
+                    f"{status.get('phase2_recommendation', 'unknown')}")
+        elif topic == "pp_ready_pilot2":
+            rec = status.get("phase2_recommendation")
+            text = ("ready for Pilot-2" if rec == "ready_for_pilot2"
+                    else f"not yet ready for Pilot-2; recommendation: {rec}")
+        elif topic == "pp_missing_artifacts":
+            missing = status.get("missing_artifacts") or []
+            text = ("missing artifacts: "
+                    + (", ".join(missing) if missing else "none"))
+        else:
+            text = (f"post-pilot growth classification: "
+                    f"{status.get('growth_classification', 'inconclusive')}")
         return self.builder.status_response(text, refs)
 
     # -- views --------------------------------------------------------------------

@@ -1918,3 +1918,59 @@ remain available throughout. **This prompt added no new cognitive theory, no
 human-feedback loop, no real-world actuation, no browser/OS/network
 automation, and no LLM runtime authority; it prepares Solaris-AI-NN to be run,
 observed, restarted, and audited over a month — safely.**
+
+## Post-Pilot Developmental Forensics
+
+A long run is only valuable if it is analyzable. The `post_pilot` package is
+the read-only forensic layer that runs *after* Pilot-1 (or any long-horizon
+run) and answers the only question that matters once the logs exist: **did the
+system merely accumulate data, or did it structurally change for traceable
+reasons derived from its own runtime?** It performs no cognition loop, mutates
+no runtime state, performs no repairs, and starts no pilot.
+
+The pipeline is deliberately ordered and conservative. The
+`PilotArtifactLoader` reads the run's artifacts read-only -- missing optional
+artifacts are *reported*, corrupted ones are *quarantined* (marked unreadable,
+never edited). The `BaselineComparator` builds before/after snapshots (initial
+vs final, day 1 vs day 30, week 1 vs week 4, dry-run vs real) and is explicit
+that more data, more symbols, more hypotheses, and more complexity are **not**
+automatically growth. The `StructuralChangeAnalyzer` emits evidence records
+that each point to artifacts, carry an alternative explanation, a conservative
+confidence, and a stability flag (transient/persistent/unknown). The
+`AccumulationVsGrowthAnalyzer` weighs accumulation signals (counts rising
+without payoff) against growth signals (durable, useful structural change) and
+returns a graded classification -- `mostly_accumulation`, `weak`/`moderate`/
+`strong` growth, `regression`, or `inconclusive` -- defaulting to
+`inconclusive` whenever the artifacts needed to judge are missing.
+
+Honesty is enforced structurally. The `DevelopmentalTraceAuditor` checks that
+conclusions are backed by artifacts, that simulated and real-time records are
+separated, and that counterfactual/offline evidence is not presented as
+observed. The `DevelopmentalEvidenceLedger` requires every claim to carry
+evidence references and grades a claim *strong* only with multiple artifact
+types or stable persistence; contradicted claims are highlighted. The
+`RegressionAnalyzer` detects worsening and recommends a conservative next
+step. The `ReproducibilityPackager` writes an index and checksum manifest
+(indexing large logs rather than copying them, never including secrets, always
+marking simulated vs real time). The `Phase2DecisionGate` then weighs all of
+this into a single recommendation -- `repeat_pilot1`, `revise_architecture`,
+`extend_to_60/90_days`, `ready_for_pilot2`, and so on -- where
+`ready_for_pilot2` is reachable only with no unresolved critical safety
+incidents, analyzable artifacts, acceptable uptime/checkpoint reliability, at
+least weak structural-change evidence (or a clear reason to continue), a
+managed resource budget, and no unresolved identity-continuity failure.
+
+The layer integrates without bypassing anything: the Pilot-1 report can
+trigger the analysis after the final phase and the pilot exit criteria can
+require the analysis artifacts; the conscience orchestrator gains a plan-only
+`post_pilot_analysis` profile (no cognition loop, no runtime mutation);
+evaluation adds ten post-pilot metrics and eight protocols; the Inner MAP
+carries a `post_pilot` field and twelve new state-graph nodes; and the
+operator dialogue answers eight forensic questions -- including the
+deliberately safe answer to *"can we claim consciousness?"*: **no -- the
+analysis evaluates operational continuity, traceability, and
+structural-change proxies, and cannot prove consciousness, personhood,
+sentience, or life.** Every output is ClaimGuard-scanned and uses research
+language. Success here is operational and analyzability success -- never proof
+of consciousness, and structural change is never treated as meaningful unless
+the evidence supports it.

@@ -566,3 +566,22 @@ simulated time with real time, or treating completion as proof of mind.
 | long-run telemetry / monitoring | `pilot1/observability.py` + `pilot1/health_dashboard.py` + daily/weekly reviews -- low-overhead observation and text dashboards |
 | resource discipline | `pilot1/resource_budget.py` + `retention_policy.py` -- stdlib disk projection and keep/compress/fossilize/archive decisions |
 | operational completion (not consciousness) | `pilot1/exit_criteria.py` (`PilotExitCriteria`) -- success means an analyzable trace; the disclaimer is explicit |
+
+## Post-pilot developmental forensics mapping (Phase 30)
+
+The post_pilot package (`post_pilot/`) realises the analysis half of
+Solaris_Ai's long-horizon ambition: after a run, read its own artifacts and
+ask whether it developed or merely accumulated -- conservatively, and without
+any consciousness claim.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| 30-day soak / long-horizon outcome | `post_pilot/forensics.py` + `reports.py` -- read-only forensic analysis of the finished run |
+| Inner MAP (self-representation) | `post_pilot/baseline.py` + `developmental_evidence.py` -- post-run developmental state and graded evidence ledger |
+| plasticity / development | `post_pilot/structural_change.py` (`StructuralChangeAnalyzer`) -- structural-change evidence vs count increase |
+| proto-language | `post_pilot/structural_change.py` symbol-stability categories + `accumulation_vs_growth.py` -- symbol stabilization vs ambiguity |
+| LOGOS | tension/synthesis evidence categories in `structural_change.py` and the trace audit -- resolution distinguished from premature synthesis |
+| auto-regeneration | `post_pilot/structural_change.py` repair-effect evidence + `regression_analysis.py` -- repair effectiveness vs repair loops |
+| ethics / off-switch | `post_pilot/safety.py` (`PostPilotSafetyValidator`) -- safety/governance postmortem; no consciousness claims, no destructive ops |
+| reproducibility / provenance | `post_pilot/reproducibility.py` -- index + checksum manifest; simulated vs real clearly marked |
+| decision to continue | `post_pilot/decision_gate.py` (`Phase2DecisionGate`) -- repeat / revise / extend / ready-for-Pilot-2 |

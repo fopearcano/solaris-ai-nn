@@ -107,6 +107,16 @@ class PilotExitCriteria:
           not obs.get("disk_over_budget") or bool(obs.get("budget_managed")))
         s("structural_metrics_available",
           obs.get("structural_change_score") is not None)
+        # Post-pilot analysis artifacts (only required when requested).
+        if obs.get("require_post_pilot_analysis"):
+            s("post_pilot_analysis_generated",
+              bool(obs.get("post_pilot_analysis_generated")))
+            s("research_dossier_generated",
+              bool(obs.get("research_dossier_generated")))
+            s("reproducibility_package_generated",
+              bool(obs.get("reproducibility_package_generated")))
+            s("decision_gate_generated",
+              bool(obs.get("decision_gate_generated")))
 
         # -- stop / failure criteria --
         x("emergency_stop", bool(obs.get("emergency_stop")))

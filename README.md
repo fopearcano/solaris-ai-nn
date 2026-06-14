@@ -311,6 +311,20 @@ python examples/run_pilot1_dashboard_demo.py              # observability -> das
 python examples/run_pilot1_restart_drill_demo.py          # simulated restart drills (no kills)
 python examples/run_pilot1_daily_review_demo.py           # daily review + recommendation
 python examples/run_pilot1_exit_criteria_demo.py          # success/failure/inconclusive
+
+# Post-pilot forensics: did it grow, or just accumulate? (read-only analysis)
+python examples/run_post_pilot_analysis_demo.py           # full forensic pipeline + dossier
+python examples/run_baseline_comparison_demo.py           # count increase != growth
+python examples/run_accumulation_vs_growth_demo.py        # accumulation/weak-growth/regression
+python examples/run_phase2_decision_gate_demo.py          # repeat/revise/extend/ready
+python examples/run_reproducibility_package_demo.py       # index + checksums, no secrets
+```
+
+The post-pilot analysis also runs as a plan-only conscience profile (read-only;
+no cognition loop, no runtime mutation):
+
+```bash
+solaris-nn run-profile post_pilot_analysis                # loads artifacts, writes reports
 ```
 
 Pilot-1 also has governance-gated conscience profiles (plan-only and preflight
@@ -368,6 +382,21 @@ automatically; real 24h/7d/30d soaks are governance-gated and operator-driven,
 simulated time is never presented as real time, and operational success is
 never treated as proof of consciousness. `PilotConfig` defaults to `plan_only`
 and the emergency stop is always available and never disabled.
+
+The **post-pilot layer** (`post_pilot/`) is the read-only forensic analysis
+that runs *after* a long run. It loads the run's artifacts (reporting missing
+ones, quarantining corrupt ones), compares baselines, and distinguishes
+**accumulation** (counts rising without payoff) from **structural growth**
+(durable, useful change) with a conservative, graded classification. It audits
+traceability, builds an evidence ledger where every claim needs references,
+detects regression, packages reproducibility material (index + checksums, no
+secrets), and applies a Phase-2 decision gate (`repeat_pilot1`,
+`revise_architecture`, `extend_to_60/90_days`, `ready_for_pilot2`, ...). It
+runs no cognition loop and mutates no runtime state. Every output —
+`POST_PILOT_ANALYSIS.md`, `RESEARCH_DOSSIER.md` — is ClaimGuard-scanned and
+uses research language: it evaluates operational continuity, traceability, and
+structural-change proxies, and **cannot, and does not, claim consciousness,
+sentience, understanding, or life.**
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
 > explicit acknowledgement flags in the run manifest and should only be
@@ -747,6 +776,9 @@ src/solaris_ai_nn/
   pilot1/       month-scale soak: protocol, config, observability, dashboard,
                 resource budget, retention, daily/weekly reviews, restart
                 drills, failure modes, exit criteria, runbook, report, safety
+  post_pilot/   forensic analysis: artifact loader, baseline, structural
+                change, accumulation-vs-growth, trace audit, evidence ledger,
+                regression, reproducibility, decision gate, dossier, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

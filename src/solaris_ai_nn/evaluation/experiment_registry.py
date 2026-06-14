@@ -187,6 +187,14 @@ DESCRIPTIONS = {
     "pilot1_daily_review": "Pilot-1 daily review built and ClaimGuard-scanned",
     "pilot1_exit_criteria": "Pilot-1 exit criteria evaluate success/stop",
     "pilot1_safety": "Pilot-1 30d real blocked without governance",
+    "post_pilot_artifact_loading": "post-pilot loads artifacts read-only",
+    "baseline_comparison": "post-pilot count increase is not growth",
+    "structural_change_evidence": "post-pilot evidence points to artifacts",
+    "accumulation_vs_growth": "post-pilot accumulation/growth discrimination",
+    "trace_audit": "post-pilot traceability audit",
+    "decision_gate": "post-pilot Phase-2 decision gate",
+    "research_dossier": "post-pilot research dossier, ClaimGuard-safe",
+    "post_pilot_safety": "post-pilot blocks consciousness/destructive claims",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -279,6 +287,12 @@ class ExperimentRegistry:
             or bool(merged.get("conscience_orchestrator", False)))
         features["pilot1"] = (name.startswith("pilot1")
                               or bool(merged.get("pilot1", False)))
+        features["post_pilot"] = (
+            name.startswith("post_pilot")
+            or name in ("baseline_comparison", "structural_change_evidence",
+                        "accumulation_vs_growth", "trace_audit",
+                        "decision_gate", "research_dossier")
+            or bool(merged.get("post_pilot", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

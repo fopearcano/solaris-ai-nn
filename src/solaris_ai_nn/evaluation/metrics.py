@@ -986,3 +986,43 @@ def pilot1_metrics(pilot: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "pilot_analyzability_score": analyzability,
         "authority": "bounded software test; not consciousness evidence",
     }
+
+
+def post_pilot_metrics(analysis: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective post-pilot forensics metrics from an analysis snapshot.
+
+    These describe how analyzable a run was and what its evidence supported;
+    they are operational/analyzability measures, never proof of consciousness.
+    """
+    if not analysis:
+        return {"present": False}
+    growth = analysis.get("accumulation_vs_growth") or {}
+    regression = analysis.get("regression_analysis") or {}
+    ledger = analysis.get("developmental_evidence_ledger") or {}
+    trace = analysis.get("trace_audit") or {}
+    completeness = analysis.get("artifact_completeness") or {}
+    decision = analysis.get("decision_gate") or {}
+    return {
+        "present": True,
+        "artifact_completeness_score": float(
+            completeness.get("completeness", 0.0) or 0.0),
+        "traceability_score": float(
+            trace.get("traceability_score", 0.0) or 0.0),
+        "evidence_strength_distribution": ledger.get(
+            "strength_distribution", {}),
+        "accumulation_score": float(growth.get("accumulation_score", 0.0)
+                                    or 0.0),
+        "growth_score": float(growth.get("growth_score", 0.0) or 0.0),
+        "regression_score": float(regression.get("regression_score", 0.0)
+                                  or 0.0),
+        "reproducibility_score": (1.0 if analysis.get(
+            "reproducibility_package", {}).get("paths") else 0.0),
+        "decision_confidence": float(decision.get("confidence", 0.0) or 0.0),
+        "post_pilot_claim_guard_warning_count": int(
+            analysis.get("claim_guard_warning_count", 0) or 0),
+        "unsupported_claim_count": int(
+            analysis.get("unsupported_claim_count", 0) or 0),
+        "growth_classification": growth.get("final_classification",
+                                            "inconclusive"),
+        "authority": "operational/analyzability metrics; not cognitive proof",
+    }

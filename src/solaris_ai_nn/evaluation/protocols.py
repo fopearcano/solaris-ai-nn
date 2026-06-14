@@ -3419,6 +3419,209 @@ def pilot1_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
     return _run(manifest, body)
 
 
+# -- AD. Post-pilot developmental forensics (Prompt 30) -------------------------
+
+def _post_pilot_fixture(state_dir: str) -> "tuple[str, str]":
+    """Write a minimal Pilot-1 artifact fixture; return (base_dir, state_dir)."""
+    import json as _json
+
+    base = os.path.join(state_dir, "pilot1")
+    st = os.path.join(state_dir, "state")
+    os.makedirs(os.path.join(base, "daily"), exist_ok=True)
+    os.makedirs(st, exist_ok=True)
+    with open(os.path.join(base, "observability.jsonl"), "w",
+              encoding="utf-8") as fh:
+        for i in range(5):
+            fh.write(_json.dumps({"kind": "metrics",
+                                  "payload": {"structural_change_score":
+                                              0.05 * i}}) + "\n")
+    with open(os.path.join(base, "incidents.jsonl"), "w",
+              encoding="utf-8") as fh:
+        fh.write(_json.dumps({"kind": "incident",
+                              "payload": {"severity": "warning"}}) + "\n")
+    with open(os.path.join(base, "PILOT_REPORT.json"), "w",
+              encoding="utf-8") as fh:
+        _json.dump({"sections": {"run": {"mode": "developmental_simulated",
+                                         "steps": 120}, "uptime_ratio": 0.99},
+                    "claim_guard_safe": True}, fh)
+    for day, sym in (("day_001", 2), ("day_030", 12)):
+        with open(os.path.join(base, "daily", f"{day}.json"), "w",
+                  encoding="utf-8") as fh:
+            _json.dump({"proto_symbol_changes": sym,
+                        "structural_change_delta": 0.1,
+                        "safety_incidents": 0, "stagnation_hours": 1}, fh)
+    for name, payload in (("developmental_state.json", {"epoch": "infancy"}),
+                          ("proto_symbols.json", {"count": 12}),
+                          ("hypotheses.json", {"count": 3})):
+        with open(os.path.join(st, name), "w", encoding="utf-8") as fh:
+            _json.dump(payload, fh)
+    return base, st
+
+
+def post_pilot_artifact_loading_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Artifacts load read-only; missing/corrupt are reported, not fatal."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..post_pilot import PilotArtifactLoader
+
+        base, st = _post_pilot_fixture(m.state_dir or ".sann_pp/load")
+        arts = PilotArtifactLoader(base, st).load()
+        return {"post_pilot": M.post_pilot_metrics(
+            {"artifact_completeness": arts.index.to_dict()}),
+            "loading": {"present": len(arts.index.present),
+                        "missing": len(arts.index.missing),
+                        "completeness": arts.completeness}}
+
+    return _run(manifest, body)
+
+
+def baseline_comparison_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A count increase is not, by itself, growth."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..post_pilot import BaselineComparator
+
+        cmp = BaselineComparator().compare_dicts(
+            "initial", {"proto_symbol_count": 2, "compression_ratio": 1.0},
+            "final", {"proto_symbol_count": 40, "compression_ratio": 1.0})
+        return {"post_pilot": M.post_pilot_metrics({"artifact_completeness":
+                                                    {"completeness": 1.0}}),
+                "baseline": {"count_only_increases": cmp.count_only_increases,
+                             "improved": cmp.improved_dimensions}}
+
+    return _run(manifest, body)
+
+
+def structural_change_evidence_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Structural-change evidence points to artifacts with conservative conf."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..post_pilot import (
+            BaselineComparator,
+            PilotArtifactLoader,
+            StructuralChangeAnalyzer,
+        )
+
+        base, st = _post_pilot_fixture(m.state_dir or ".sann_pp/struct")
+        arts = PilotArtifactLoader(base, st).load()
+        cmp = BaselineComparator().compare_dicts(
+            "before", {"ambiguous_symbol_ratio": 0.6, "compression_ratio": 1.0},
+            "after", {"ambiguous_symbol_ratio": 0.3, "compression_ratio": 1.4})
+        evidence = StructuralChangeAnalyzer().analyze(cmp, arts)
+        summary = StructuralChangeAnalyzer().summarize(evidence)
+        return {"post_pilot": M.post_pilot_metrics({"artifact_completeness":
+                                                    arts.index.to_dict()}),
+                "structural": summary}
+
+    return _run(manifest, body)
+
+
+def accumulation_vs_growth_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Accumulation and growth cases classify conservatively."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..post_pilot import (
+            AccumulationVsGrowthAnalyzer,
+            BaselineComparator,
+            PilotArtifactLoader,
+        )
+
+        base, st = _post_pilot_fixture(m.state_dir or ".sann_pp/grow")
+        arts = PilotArtifactLoader(base, st).load()
+        cmp = BaselineComparator().compare_dicts(
+            "before", {"compression_ratio": 1.0, "prediction_score": 0.4},
+            "after", {"compression_ratio": 1.5, "prediction_score": 0.7,
+                      "ambiguous_symbol_ratio": -0.2})
+        result = AccumulationVsGrowthAnalyzer().analyze(cmp, [], arts)
+        return {"post_pilot": M.post_pilot_metrics({
+            "accumulation_vs_growth": result.to_dict(),
+            "artifact_completeness": arts.index.to_dict()}),
+            "growth": {"classification": result.final_classification}}
+
+    return _run(manifest, body)
+
+
+def trace_audit_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Trace audit scores traceability and flags contradictions."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..post_pilot import DevelopmentalTraceAuditor, PilotArtifactLoader
+
+        base, st = _post_pilot_fixture(m.state_dir or ".sann_pp/trace")
+        arts = PilotArtifactLoader(base, st).load()
+        audit = DevelopmentalTraceAuditor().audit(arts)
+        return {"post_pilot": M.post_pilot_metrics({
+            "trace_audit": audit.to_dict(),
+            "artifact_completeness": arts.index.to_dict()}),
+            "trace": audit.to_dict()}
+
+    return _run(manifest, body)
+
+
+def decision_gate_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Phase-2 gate produces a recommendation with rationale."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..post_pilot import PostPilotForensics
+
+        base, st = _post_pilot_fixture(m.state_dir or ".sann_pp/gate")
+        out = PostPilotForensics(base_dir=base, state_dir=st).run()
+        return {"post_pilot": M.post_pilot_metrics(
+            getattr(out["analysis"], "_sections_cache", {})),
+            "decision": {"recommendation":
+                         out["summary"]["phase2_recommendation"]}}
+
+    return _run(manifest, body)
+
+
+def research_dossier_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Research dossier generates and passes ClaimGuard."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..post_pilot import PostPilotForensics
+
+        base, st = _post_pilot_fixture(m.state_dir or ".sann_pp/dossier")
+        out = PostPilotForensics(base_dir=base, state_dir=st).run()
+        dossier = out["dossier"]
+        return {"post_pilot": M.post_pilot_metrics(
+            getattr(out["analysis"], "_sections_cache", {})),
+            "dossier": {"claim_guard_safe": dossier.claim_guard_safe,
+                        "written": bool(out["dossier_paths"])}}
+
+    return _run(manifest, body)
+
+
+def post_pilot_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Post-pilot safety blocks consciousness claims and destructive ops."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..post_pilot import PostPilotSafetyValidator
+
+        sv = PostPilotSafetyValidator()
+        claim_blocked = not sv.validate_claim_text(
+            "the system is conscious and proves consciousness").safe
+        sim_blocked = not sv.validate_time_label(
+            is_simulated=True, claimed_real=True).safe
+        delete_blocked = not sv.validate_operation("delete artifacts").safe
+        offline_blocked = not sv.validate_evidence_origin(
+            is_offline=True, claimed_observed=True).safe
+        return {"post_pilot": M.post_pilot_metrics({"artifact_completeness":
+                                                    {"completeness": 1.0}}),
+                "safety": {"consciousness_claim_blocked": claim_blocked,
+                           "sim_as_real_blocked": sim_blocked,
+                           "delete_blocked": delete_blocked,
+                           "offline_as_observed_blocked": offline_blocked,
+                           "llm_is_authority": sv.llm_is_authority()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -3531,4 +3734,12 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "pilot1_daily_review": pilot1_daily_review_protocol,
     "pilot1_exit_criteria": pilot1_exit_criteria_protocol,
     "pilot1_safety": pilot1_safety_protocol,
+    "post_pilot_artifact_loading": post_pilot_artifact_loading_protocol,
+    "baseline_comparison": baseline_comparison_protocol,
+    "structural_change_evidence": structural_change_evidence_protocol,
+    "accumulation_vs_growth": accumulation_vs_growth_protocol,
+    "trace_audit": trace_audit_protocol,
+    "decision_gate": decision_gate_protocol,
+    "research_dossier": research_dossier_protocol,
+    "post_pilot_safety": post_pilot_safety_protocol,
 }

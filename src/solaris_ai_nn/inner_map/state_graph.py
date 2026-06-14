@@ -978,4 +978,52 @@ def build_default_state_graph() -> StateGraph:
                "pilot reports feed Inner MAP / Evaluation")
     g.add_edge("restart_drill_runner", "pilot_protocol",
                "restart drills must pass before a real soak")
+
+    # Post-pilot developmental forensics (Prompt 30). Read-only analysis of a
+    # finished run: it loads artifacts, weighs accumulation vs growth, audits
+    # traceability, and recommends the Phase-2 next step. It never mutates
+    # runtime state and never claims consciousness.
+    for name, role in [
+        ("pilot_artifact_loader", "reads run artifacts read-only"),
+        ("baseline_comparator", "before vs after, conservatively read"),
+        ("structural_change_analyzer", "evidence, not count-watching"),
+        ("accumulation_vs_growth_analyzer", "accumulation vs growth"),
+        ("developmental_trace_auditor", "are claims backed by artifacts?"),
+        ("developmental_evidence_ledger", "every claim needs evidence"),
+        ("regression_analyzer", "did things get worse, and what to do"),
+        ("reproducibility_packager", "index + checksums, not a data dump"),
+        ("phase2_decision_gate", "what should happen next, and why"),
+        ("research_dossier_builder", "evidence-scoped research write-up"),
+        ("post_pilot_report_builder", "the post-pilot analysis summary"),
+        ("post_pilot_safety_validator", "no consciousness claims; non-"
+                                        "destructive"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("pilot_observability_collector", "pilot_artifact_loader",
+               "pilot artifacts feed the artifact loader")
+    g.add_edge("pilot_artifact_loader", "baseline_comparator",
+               "loaded artifacts feed the baseline comparator")
+    g.add_edge("baseline_comparator", "structural_change_analyzer",
+               "baseline deltas feed structural-change analysis")
+    g.add_edge("structural_change_analyzer",
+               "accumulation_vs_growth_analyzer",
+               "structural evidence feeds accumulation/growth")
+    g.add_edge("developmental_trace_auditor", "developmental_evidence_ledger",
+               "the trace audit validates ledger claims")
+    g.add_edge("structural_change_analyzer", "developmental_evidence_ledger",
+               "structural evidence becomes graded claims")
+    g.add_edge("regression_analyzer", "phase2_decision_gate",
+               "regression analysis feeds the decision gate")
+    g.add_edge("accumulation_vs_growth_analyzer", "phase2_decision_gate",
+               "growth classification feeds the decision gate")
+    g.add_edge("reproducibility_packager", "phase2_decision_gate",
+               "reproducibility completeness feeds the decision gate")
+    g.add_edge("phase2_decision_gate", "post_pilot_report_builder",
+               "the decision feeds the post-pilot report")
+    g.add_edge("post_pilot_report_builder", "research_dossier_builder",
+               "the report feeds the research dossier")
+    g.add_edge("post_pilot_safety_validator", "post_pilot_report_builder",
+               "safety gates every post-pilot claim")
+    g.add_edge("post_pilot_report_builder", "inner_map",
+               "post-pilot state feeds Inner MAP")
     return g

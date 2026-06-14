@@ -308,6 +308,13 @@ class InnerMapModel:
     # dashboard_path, pilot_report_path. Operational status only; a pilot is
     # a bounded software test, never evidence of consciousness.
     pilot1: Optional[Dict[str, Any]] = None
+    # Post-pilot forensic analysis status (Prompt 30); None when no analysis
+    # has run. Keys: post_pilot_analysis_available, artifact_completeness,
+    # growth_classification, structural_evidence_count, regression_severity,
+    # traceability_score, reproducibility_score, phase2_recommendation,
+    # post_pilot_report_path, research_dossier_path. Analyzability/operational
+    # findings only; never a consciousness claim.
+    post_pilot: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

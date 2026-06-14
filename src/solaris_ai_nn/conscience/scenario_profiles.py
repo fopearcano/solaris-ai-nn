@@ -300,6 +300,25 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
                               "scenario_exit_success"],
             max_runtime_s=120.0))
 
+    # Post-pilot analysis (Prompt 30): plan-only so the cognition loop never
+    # runs; it loads existing artifacts and produces forensic reports without
+    # mutating runtime state, performing repairs, or starting a pilot.
+    add(ScenarioProfile(
+        profile_id="post_pilot_analysis",
+        description="Post-pilot forensic analysis (read-only; no cognition "
+                    "loop, no runtime mutation).",
+        run_context=_ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                         max_duration_s=None),
+        enabled_modules=["governance", "ops", "evaluation", "inner_map"],
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "read-only forensic analysis; no cognition loop",
+            "does not mutate runtime state or perform repairs"],
+        governance_requirements=["enable_pilot1"],
+        expected_artifacts=["POST_PILOT_ANALYSIS.json",
+                            "RESEARCH_DOSSIER.json"],
+        expected_metrics=["report_generation_success"],
+        max_runtime_s=30.0))
+
     return profiles
 
 

@@ -1132,3 +1132,51 @@ Operational success means the run completed and left an analyzable
 developmental trace. It says nothing about sentience, understanding, or
 personhood, and the framework is written so that no artifact it produces can
 be mistaken for such a claim.
+
+## Phase 30 — Post-pilot developmental forensics
+
+**A long run is only valuable if it is analyzable.** Phase 29 made the system
+runnable over a month; Phase 30 makes a finished run *answerable*. The danger
+of long-horizon runs is not that they fail loudly — it is that they succeed
+quietly and produce a mountain of logs that nobody can interrogate. The whole
+package exists to convert artifacts into evidence-scoped conclusions.
+
+**Accumulation is the null hypothesis.** The single most important discipline
+here is refusing to read growth into a graph that is merely going up. More
+data, more symbols, more hypotheses, more edges, more complexity — each is, by
+default, accumulation. The analyzer only upgrades to "growth" when increases
+are accompanied by payoff: compression that holds, ambiguity that falls,
+predictions that improve, contradictions that resolve, repairs that stop the
+problem recurring. The classification is graded and conservative, and it
+returns `inconclusive` whenever the artifacts needed to judge are absent.
+
+**Evidence must point somewhere.** Every structural-change record names the
+artifacts behind it, an alternative explanation, a conservative confidence,
+and a stability flag — and stability requires persistence across time windows,
+not a single snapshot. The evidence ledger refuses to call a claim *strong*
+without multiple artifact types or durable persistence, and it highlights
+contradicted claims rather than hiding them. This is what keeps a forensic
+report from becoming an advocacy document.
+
+**Traceability and reproducibility are part of the science, not an afterthought.**
+The trace audit checks that conclusions are backed by raw observability, that
+simulated and real-time records stay separated, and that offline/counterfactual
+evidence is never presented as observed. The reproducibility packager records
+the seed, modules, config, and a checksum manifest — indexing large logs rather
+than copying them, and never packaging secrets. Without these, a "result" is
+just an anecdote.
+
+**Conservative interpretation is a safety property.** The decision gate makes
+`ready_for_pilot2` hard to reach on purpose: it requires no unresolved critical
+safety incidents, analyzable artifacts, acceptable reliability, at least weak
+structural-change evidence, a managed budget, and intact identity continuity.
+Severe regression routes to architecture revision, not to "try again harder".
+
+**Why long-run success is not consciousness proof.** This is repeated in the
+exit criteria, the report, the dossier, and the safety validator because the
+failure mode is seductive: a system that ran for a month, restarted cleanly,
+and "developed" invites the leap to claiming mind. The post-pilot layer is
+built so that no artifact it produces can support that leap. It evaluates
+operational continuity, traceability, and structural-change proxies — and says,
+plainly and everywhere, that it cannot evaluate consciousness, sentience,
+understanding, or life.

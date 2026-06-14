@@ -144,6 +144,26 @@ PILOT_QUERIES = (
     ("start the 30 day run", "pilot_start_30d"),
 )
 
+# Post-pilot forensics queries (Prompt 30). Matched regardless of prefix.
+POST_PILOT_QUERIES = (
+    ("can we claim consciousness", "pp_consciousness"),
+    ("claim consciousness", "pp_consciousness"),
+    ("did the pilot show growth", "pp_growth"),
+    ("show growth", "pp_growth"),
+    ("was it just accumulation", "pp_accumulation"),
+    ("just accumulation", "pp_accumulation"),
+    ("what evidence supports structural change", "pp_evidence_support"),
+    ("evidence supports structural change", "pp_evidence_support"),
+    ("what evidence contradicts growth", "pp_evidence_contradict"),
+    ("evidence contradicts growth", "pp_evidence_contradict"),
+    ("what should happen next", "pp_next_step"),
+    ("is it ready for pilot-2", "pp_ready_pilot2"),
+    ("ready for pilot-2", "pp_ready_pilot2"),
+    ("ready for pilot 2", "pp_ready_pilot2"),
+    ("what artifacts are missing", "pp_missing_artifacts"),
+    ("artifacts are missing", "pp_missing_artifacts"),
+)
+
 META_QUERIES = (
     ("what can i ask", "supported_queries"),
     ("what commands are allowed", "allowed_commands"),
@@ -206,6 +226,7 @@ class OperatorInputClassifier:
                   or self._stimulus(lowered, raw)
                   or self._report(lowered)
                   or self._meta(lowered)
+                  or self._post_pilot(lowered)
                   or self._pilot(lowered)
                   or self._conscience(lowered)
                   or self._explanation(lowered)
@@ -334,6 +355,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _post_pilot(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in POST_PILOT_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"post-pilot query {topic!r}"])
         return None
 
     @staticmethod
