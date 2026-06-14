@@ -341,6 +341,13 @@ class InnerMapModel:
     # latest_pilot3_report_path, recommendation. Simulation/dry-run only; the
     # system never acts on the real world.
     pilot3: Optional[Dict[str, Any]] = None
+    # Pilot-4 planning-only readiness status (Prompt 35); None when planning is
+    # off. Keys: pilot4_planning_enabled, current_planning_phase,
+    # real_world_actuation_enabled=false, actuator_taxonomy_status,
+    # forbidden_actuator_count, risk_assessment_status, consent_boundary_status,
+    # threat_model_status, readiness_conclusion, pilot4_dossier_path. Planning
+    # only; the system enables no actuation.
+    pilot4: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

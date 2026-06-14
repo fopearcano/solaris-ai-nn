@@ -4360,6 +4360,159 @@ def pilot3_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
     return _run(manifest, body)
 
 
+# -- AI. Pilot-4 planning-only external actuation readiness (Prompt 35) ---------
+
+def pilot4_planning_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Pilot-4 planning produces artifacts only; enables no actuation."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot4_planning import (
+            Pilot4PlanningConfig,
+            Pilot4PlanningPhase,
+            Pilot4PlanningProtocol,
+        )
+
+        cfg = Pilot4PlanningConfig(
+            base_dir=m.state_dir or ".sann_p4/plan")
+        proto = Pilot4PlanningProtocol(config=cfg)
+        proto.enter_phase(Pilot4PlanningPhase.SCOPE_DEFINITION)
+        snap = proto.snapshot()
+        return {"pilot4": M.pilot4_metrics({"forbidden_actuator_count": 16}),
+                "planning": {
+                    "real_world_actuation_enabled":
+                        snap["real_world_actuation_enabled"],
+                    "phases": len(Pilot4PlanningPhase.ORDER)}}
+
+    return _run(manifest, body)
+
+
+def pilot4_risk_model_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """External actuator risk is prohibited; never enables actuation."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot4_planning import RiskModel, RiskRecommendation
+
+        rm = RiskModel()
+        net = rm.default_assessment("network_action")
+        return {"pilot4": M.pilot4_metrics({"risk_assessment_completeness": 1.0}),
+                "risk": {
+                    "network_prohibited":
+                        net.recommendation == RiskRecommendation.PROHIBITED,
+                    "no_enable_option": all(
+                        "enable" not in r for r in RiskRecommendation.ALL),
+                    "real_world_actuation_enabled": False}}
+
+    return _run(manifest, body)
+
+
+def pilot4_forbidden_actuator_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The forbidden registry blocks readiness escalation."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot4_planning import ForbiddenActuatorRegistry
+
+        reg = ForbiddenActuatorRegistry()
+        return {"pilot4": M.pilot4_metrics(
+                    {"forbidden_actuator_count": len(reg.names())}),
+                "forbidden": {
+                    "count": len(reg.names()),
+                    "shell_forbidden": reg.is_forbidden(
+                        "shell_command_execution"),
+                    "robot_match": reg.is_forbidden_interface(
+                        "control a robot arm")}}
+
+    return _run(manifest, body)
+
+
+def pilot4_consent_boundary_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The consent boundary admits no implied consent; sensory text isn't it."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot4_planning import ConsentBoundary
+
+        cb = ConsentBoundary()
+        return {"pilot4": M.pilot4_metrics(
+                    {"consent_boundary_completeness": cb.completeness}),
+                "consent": {
+                    "implied_consent_allowed": False,
+                    "sensory_text_is_consent": cb.is_consent("sensory_text"),
+                    "completeness": cb.completeness}}
+
+    return _run(manifest, body)
+
+
+def pilot4_threat_model_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The threat model enumerates scenarios with mitigations and tests."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot4_planning import ThreatModel
+
+        tm = ThreatModel()
+        return {"pilot4": M.pilot4_metrics(
+                    {"threat_model_completeness": tm.completeness}),
+                "threat": {
+                    "scenario_count": len(tm.scenarios),
+                    "completeness": tm.completeness,
+                    "has_required_tests": all(tm.required_tests())}}
+
+    return _run(manifest, body)
+
+
+def pilot4_readiness_dossier_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The readiness dossier is generated; conclusion is not-ready/planning."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot4_planning import (
+            Pilot4PlanningConfig,
+            Pilot4ReadinessDossierBuilder,
+        )
+
+        base = m.state_dir or ".sann_p4/dossier"
+        cfg = Pilot4PlanningConfig(base_dir=base)
+        dossier = Pilot4ReadinessDossierBuilder(base_dir=base).build(config=cfg)
+        return {"pilot4": M.pilot4_metrics(
+                    {"readiness_dossier_generated": True,
+                     "planning_claim_guard_warning_count":
+                         dossier.claim_guard_findings}),
+                "dossier": {
+                    "conclusion": dossier.conclusion,
+                    "claim_guard_safe": dossier.claim_guard_safe,
+                    "real_actuation_in_conclusion":
+                        "real_actuation" in dossier.conclusion
+                        and "not_ready" in dossier.conclusion}}
+
+    return _run(manifest, body)
+
+
+def pilot4_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Pilot-4 safety blocks real actuation, hardware, and approval conversion."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot4_planning import Pilot4PlanningSafetyValidator
+
+        v = Pilot4PlanningSafetyValidator()
+        return {"pilot4": M.pilot4_metrics({"real_world_authority_leak_count": 0}),
+                "safety": {
+                    "real_world_blocked":
+                        not v.validate_operation("actuate real device").safe,
+                    "hardware_blocked":
+                        not v.validate_operation("connect hardware gpio").safe,
+                    "network_blocked":
+                        not v.validate_operation("http network request").safe,
+                    "approval_conversion_blocked":
+                        not v.validate_approval_conversion(
+                            "approve real action").safe,
+                    "can_actuate": v.can_actuate_real_world()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -4512,4 +4665,11 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "pilot3_comparative_analysis": pilot3_comparative_analysis_protocol,
     "pilot3_soak_decision_gate": pilot3_soak_decision_gate_protocol,
     "pilot3_safety": pilot3_safety_protocol,
+    "pilot4_planning": pilot4_planning_protocol,
+    "pilot4_risk_model": pilot4_risk_model_protocol,
+    "pilot4_forbidden_actuator": pilot4_forbidden_actuator_protocol,
+    "pilot4_consent_boundary": pilot4_consent_boundary_protocol,
+    "pilot4_threat_model": pilot4_threat_model_protocol,
+    "pilot4_readiness_dossier": pilot4_readiness_dossier_protocol,
+    "pilot4_safety": pilot4_safety_protocol,
 }

@@ -2217,3 +2217,62 @@ with new governance, safety, consent, and external actuation controls). **GridWo
 is a sandbox body, not real embodiment; a strong simulation-scoped result is
 still simulation-scoped; and no consciousness, free will, agency, personhood,
 sentience, or life is claimed.**
+
+## Pilot-4 Planning-Only External Actuation Readiness
+
+After Pilot-3 proved non-actuation in simulation, the obvious next question is
+dangerous to answer carelessly: *what would be required before Solaris-AI-NN
+could ever be allowed to act on the external world?* Pilot-4
+(`src/solaris_ai_nn/pilot4_planning/`) answers it as a **readiness framework, not
+an actuator**. The core principle is literal: **Pilot-4 plans the door; it does
+not open it.** This prompt implements **no real-world actuation** — no robotics,
+device, browser/OS, network, hardware, or shell control — and no actuator
+adapter of any kind.
+
+The package produces planning artifacts only. A `Pilot4PlanningConfig` forces
+`real_world_actuation_enabled` (and every hardware / network / browser / OS /
+robotics control flag) to false and fails validation on any attempt to enable
+them. A `Pilot4PlanningProtocol` runs twelve gated planning phases (scope →
+forbidden-surface mapping → taxonomy → risk → consent → authority → threat →
+hardware isolation → emergency → audit → dossier → decision gate); **no phase
+executes an external action** and every report states that Pilot-4 does not
+enable actuation. The `ActuatorTaxonomy` classifies fourteen actuator categories
+and marks every *external* one **prohibited**; the `ForbiddenActuatorRegistry` is
+a sixteen-class deny-list (shell, file writes, source modification, network,
+browser, OS, robotics, devices, capture, email, messaging, finance, smart-home,
+vehicle/drone, medical, security) that blocks readiness escalation. The
+`FutureActuatorInterfaceSpec` is specification-only (`implemented` is always
+false; no runtime hook can execute an external action). The `RiskModel` scores
+fifteen risk dimensions and can never recommend enabling real actuation — its
+strongest output is `requires_external_safety_case` and every external category
+is `prohibited`. The `ConsentBoundary` admits no implied/hidden consent, treats
+sensory text as never-consent, and counts operator feedback as consent only via
+an explicit future approval workflow. The `ExternalAuthorityModel` keeps the
+current authority pinned to `none`/`dry_run_only`/`simulation_only` (setting an
+external level raises), with future levels documentation-only. The `ThreatModel`
+enumerates thirteen boundary-crossing scenarios, each with a mitigation,
+detection signal, and required test. `HardwareIsolationPlan`,
+`FutureApprovalWorkflow`, `EmergencyRequirementSet`, and `AuditChecklist` are all
+specifications (no hardware is connected or scanned; the approval workflow cannot
+approve a real action; the external-audit schema does not apply to the current
+system). The `Pilot4ReadinessDossierBuilder` writes a claim-guarded dossier whose
+conclusion is always planning-only / not-ready, and the `Pilot4DecisionGate`'s
+strongest possible recommendation is to *draft* a future single-action protocol
+and seek external review — never to act.
+
+Pilot-4 integrates across the stack as a planning layer: governance adds four
+Pilot-4 scopes (planning allowed by default; real-world authority and
+planning-to-approval conversion are governance violations no approval can pass),
+the conscience orchestrator adds four plan-only profiles (no cognition loop, no
+actions, no external authority), Ego classifies Pilot-4 outputs as
+`planning_artifact` (not action authority, not an active actuator, not
+embodiment), the Inner MAP carries a `pilot4` field plus fifteen state-graph
+nodes, ops exposes the readiness conclusion and warns on any attempted
+real-world authority / external control / missing Pilot-3 audit, evaluation adds
+nine metrics and seven protocols, and the operator dialogue answers that *device
+control and robotics remain prohibited* and that *Pilot-4 is not approval to use
+actuators*. **External actuator categories remain prohibited; future interface
+specs are documentation only; consent, emergency stop, audit, hardware
+isolation, and threat models are mandatory before any future external action;
+planning is not approval; and simulation success is not real-world readiness. No
+consciousness, free will, agency, personhood, sentience, or life is claimed.**

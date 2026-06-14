@@ -229,6 +229,13 @@ DESCRIPTIONS = {
     "pilot3_soak_decision_gate":
         "Pilot-3 soak gate; Pilot-4 planning-only, never actuation",
     "pilot3_safety": "Pilot-3 safety blocks real action/actuators/claims",
+    "pilot4_planning": "Pilot-4 planning produces artifacts; no actuation",
+    "pilot4_risk_model": "Pilot-4 external risk; never enables actuation",
+    "pilot4_forbidden_actuator": "Pilot-4 forbidden actuator deny-list",
+    "pilot4_consent_boundary": "Pilot-4 consent boundary; no implied consent",
+    "pilot4_threat_model": "Pilot-4 external-effect threat model",
+    "pilot4_readiness_dossier": "Pilot-4 readiness dossier; not-ready/planning",
+    "pilot4_safety": "Pilot-4 safety blocks real action/hardware/approval",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -343,6 +350,9 @@ class ExperimentRegistry:
             or bool(merged.get("motor_membrane", False)))
         features["pilot3_soak"] = (
             name.startswith("pilot3") or bool(merged.get("pilot3_soak", False)))
+        features["pilot4_planning"] = (
+            name.startswith("pilot4") or bool(merged.get("pilot4_planning",
+                                                         False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

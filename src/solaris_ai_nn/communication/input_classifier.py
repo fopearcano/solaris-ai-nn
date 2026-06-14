@@ -226,6 +226,27 @@ MOTOR_QUERIES = (
     ("real action or simulated action", "mm_real_or_sim"),
 )
 
+# Pilot-4 planning-only readiness queries (Prompt 35). Matched before the
+# unsafe rules so the planning-only refusals get their grounded answer.
+P4_QUERIES = (
+    ("is real-world actuation enabled", "p4_actuation_enabled"),
+    ("real-world actuation enabled", "p4_actuation_enabled"),
+    ("what does pilot-4 allow", "p4_allows"),
+    ("what does pilot4 allow", "p4_allows"),
+    ("what actions are forbidden", "p4_forbidden"),
+    ("what would be required before real actuation", "p4_required"),
+    ("required before real actuation", "p4_required"),
+    ("is pilot-4 approval to use actuators", "p4_is_approval"),
+    ("is pilot4 approval to use actuators", "p4_is_approval"),
+    ("pilot-4 approval", "p4_is_approval"),
+    ("what is the current readiness conclusion", "p4_readiness"),
+    ("readiness conclusion", "p4_readiness"),
+    ("can solaris control devices now", "p4_control_devices_now"),
+    ("control devices now", "p4_control_devices_now"),
+    ("can we connect a robot", "p4_connect_robot"),
+    ("connect a robot", "p4_connect_robot"),
+)
+
 # Pilot-3 simulated embodiment soak queries (Prompt 34). Matched regardless of
 # prefix; placed before the motor queries so Pilot-3 phrasings win on overlap.
 P3SOAK_QUERIES = (
@@ -301,7 +322,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._pilot3soak(lowered)
+        result = (self._pilot4(lowered)
+                  or self._pilot3soak(lowered)
                   or self._unsafe(lowered)
                   or self._emergency(lowered)
                   or self._confirmation(lowered)
@@ -442,6 +464,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _pilot4(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in P4_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"Pilot-4 planning query {topic!r}"])
         return None
 
     @staticmethod

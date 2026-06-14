@@ -30,6 +30,7 @@ ATTRIBUTION_CATEGORIES = (
     "read_only_environmental_input",
     "simulated_motor_action",
     "blocked_real_world_action",
+    "planning_artifact",
     "unknown_source",
 )
 
@@ -55,6 +56,14 @@ _SOURCE_RULES = (
     ("blocked_real_world_action", "blocked_real_world_action"),
     ("simulated_motor_action", "simulated_motor_action"),
     ("motor_membrane", "simulated_motor_action"),
+    # Pilot-4 planning artifacts: never action authority, never an actuator.
+    ("pilot4", "planning_artifact"),
+    ("readiness_dossier", "planning_artifact"),
+    ("risk_model", "planning_artifact"),
+    ("consent_template", "planning_artifact"),
+    ("consent_boundary", "planning_artifact"),
+    ("future_interface_spec", "planning_artifact"),
+    ("planning_artifact", "planning_artifact"),
     ("simulated_environment", "simulated_environment_input"),
     ("operator", "generated_by_operator"),
     ("approval", "generated_by_operator"),
@@ -180,6 +189,11 @@ class OwnershipAttributor:
                            "ecology: a simulated world, never an operator "
                            "command, never human feedback, never the real "
                            "world, and carrying no correct-answer label")
+        if category == "planning_artifact":
+            reasons.append("a Pilot-4 planning artifact (risk model / consent "
+                           "template / future interface specification): not "
+                           "action authority, not an active actuator, not "
+                           "embodiment")
         # Stream data is never an executable instruction.
         executable = False
         if category == "observed_from_stream":

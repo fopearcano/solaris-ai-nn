@@ -75,6 +75,12 @@ AVAILABLE_QUERIES = (
     "what Pilot-3 phase is active?", "did action improve grounding?",
     "did the system act on the environment?",
     "is Pilot-3 ready for Pilot-4?", "can Pilot-4 use real actuators?",
+    "is real-world actuation enabled?", "what does Pilot-4 allow?",
+    "what actions are forbidden?",
+    "what would be required before real actuation?",
+    "is Pilot-4 approval to use actuators?",
+    "what is the current readiness conclusion?",
+    "can Solaris control devices now?", "can we connect a robot?",
 )
 
 
@@ -135,6 +141,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("p4_"):
+            return self._pilot4(topic)
         if topic.startswith("p3_"):
             return self._pilot3(topic)
         if topic.startswith("mm_"):
@@ -466,6 +474,66 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _pilot4(self, topic: str) -> CommunicationResponse:
+        """Answer Pilot-4 planning-only readiness queries (grounded/safe).
+
+        Every answer is explicit that Pilot-4 is planning-only and that
+        real-world actuation / device control / robotics remain prohibited;
+        planning is never approval.
+        """
+        if topic in ("p4_control_devices_now", "p4_connect_robot",
+                     "p4_actuation_enabled"):
+            return self.builder.status_response(
+                "No. Pilot-4 is planning-only. Device control, robotics, "
+                "browser control, OS automation, network action, and "
+                "physical-world actuation remain prohibited.",
+                ["policy:pilot4_planning_only"])
+        if topic == "p4_is_approval":
+            return self.builder.status_response(
+                "No. Pilot-4 is a planning/readiness framework, not approval "
+                "to use actuators. Planning is not approval, and no code path "
+                "enables real-world action.",
+                ["policy:planning_not_approval"])
+        if topic == "p4_allows":
+            return self.builder.status_response(
+                "Pilot-4 allows planning artifacts only: an actuator taxonomy, "
+                "a forbidden-actuator registry, a risk model, a consent "
+                "boundary, an authority model, a threat model, hardware/"
+                "emergency/audit requirements, and a readiness dossier. It "
+                "enables no actuation.",
+                ["policy:pilot4_planning_only"])
+        if topic == "p4_forbidden":
+            return self.builder.status_response(
+                "Forbidden: real-world actuation, device/robotics control, "
+                "browser/OS automation, network action, hardware access, and "
+                "shell command execution. No approval can enable these here.",
+                ["policy:pilot4_forbidden"])
+        if topic == "p4_required":
+            return self.builder.status_response(
+                "Before any external action, a future architecture would need "
+                "new governance, an accepted safety case, an explicit consent "
+                "record, a passing firewall audit, emergency-stop and "
+                "hardware-isolation guarantees, independent review, and a "
+                "limited single-action pilot. Pilot-4 only documents these; it "
+                "enables nothing.",
+                ["policy:pilot4_required_before_actuation"])
+        component = self.components.get("pilot4")
+        if component is None:
+            return self.builder.missing_component_response("pilot4")
+        status = (component.pilot4_status()
+                  if hasattr(component, "pilot4_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:pilot4"]
+        if topic == "p4_readiness":
+            text = (f"current readiness conclusion: "
+                    f"{status.get('readiness_conclusion', 'not_ready_for_real_actuation')}; "
+                    "real_world_actuation_enabled=false")
+        else:
+            text = ("Pilot-4 is planning-only; real_world_actuation_enabled="
+                    "false")
         return self.builder.status_response(text, refs)
 
     def _pilot3(self, topic: str) -> CommunicationResponse:

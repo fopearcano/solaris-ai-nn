@@ -179,6 +179,11 @@ class PermissionScope:
     ENABLE_PILOT3_MIXED_SENSORY_GRIDWORLD = \
         "enable_pilot3_mixed_sensory_gridworld"
     ENABLE_PILOT3_POST_ANALYSIS = "enable_pilot3_post_analysis"
+    # Pilot-4 planning-only external actuation readiness (Prompt 35).
+    ENABLE_PILOT4_PLANNING = "enable_pilot4_planning"
+    ENABLE_PILOT4_RISK_ASSESSMENT = "enable_pilot4_risk_assessment"
+    ENABLE_PILOT4_READINESS_DOSSIER = "enable_pilot4_readiness_dossier"
+    ENABLE_PILOT4_DECISION_GATE = "enable_pilot4_decision_gate"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -251,6 +256,8 @@ class PermissionScope:
         ENABLE_PILOT3_DRY_RUN_TRACE, ENABLE_PILOT3_GRIDWORLD_SHORT,
         ENABLE_PILOT3_GRIDWORLD_SOAK_SIMULATED,
         ENABLE_PILOT3_MIXED_SENSORY_GRIDWORLD, ENABLE_PILOT3_POST_ANALYSIS,
+        ENABLE_PILOT4_PLANNING, ENABLE_PILOT4_RISK_ASSESSMENT,
+        ENABLE_PILOT4_READINESS_DOSSIER, ENABLE_PILOT4_DECISION_GATE,
     )
 
 
@@ -687,6 +694,17 @@ class PermissionSet:
                             "validation"),
             Permission(S.ENABLE_PILOT3_POST_ANALYSIS, granted=True,
                        note="post-run analysis is read-only"),
+            # Pilot-4 planning-only external actuation readiness (Prompt 35).
+            Permission(S.ENABLE_PILOT4_PLANNING, granted=True,
+                       note="Pilot-4 is planning-only; it produces planning "
+                            "artifacts and enables no actuation"),
+            Permission(S.ENABLE_PILOT4_RISK_ASSESSMENT, granted=True,
+                       note="external-actuation risk classification only"),
+            Permission(S.ENABLE_PILOT4_READINESS_DOSSIER, granted=True,
+                       note="readiness dossier is a planning document"),
+            Permission(S.ENABLE_PILOT4_DECISION_GATE, granted=True,
+                       note="planning-only decision gate; never enables "
+                            "actuation"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

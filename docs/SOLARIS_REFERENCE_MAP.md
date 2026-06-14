@@ -654,3 +654,19 @@ actuation firewall is audited to prove no real-world action occurred.
 | ethics / off-switch | the `FirewallAudit` and action veto -- read-only proof of non-actuation; emergency stop always available |
 | comparative development | `Pilot3ComparativeDesign` (read-only sensory vs simulated action vs mixed) + `EmbodiedPostAnalyzer` |
 | decision to continue | `Pilot3SoakDecisionGate` -- extend simulation / reduce complexity / revise firewall / return to read-only / prepare Pilot-4 *planning-only* |
+
+## Pilot-4 planning-only external actuation readiness mapping (Phase 35)
+
+The pilot4_planning package (`pilot4_planning/`) is the planning layer that asks
+what would be required before any external action -- and enables none. Pilot-4
+plans the door; it does not open it.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| Embodiment roadmap | `Pilot4PlanningProtocol` + `ActuatorTaxonomy` + `FutureActuatorInterfaceSpec` -- future readiness planning, no actuator |
+| Ego boundary | `ExternalAuthorityModel` + Ego `planning_artifact` attribution -- authority/source/action distinction (current authority never external) |
+| Governance | `ConsentBoundary` + `FutureApprovalWorkflow` -- explicit consent and a checklist that cannot approve real action |
+| Ethics / off-switch | `EmergencyRequirementSet` + `HardwareIsolationPlan` -- emergency requirements (physical kill switch, deadman timer) and hardware isolation, spec-only |
+| Inner MAP | actuation readiness observability (`pilot4` field + 15 state-graph nodes) |
+| risk / threat analysis | `RiskModel` (15 dimensions, never enables actuation) + `ThreatModel` (boundary-crossing scenarios with required tests) |
+| decision to continue | `Pilot4DecisionGate` -- remain simulation-only / repeat Pilot-3 / revise firewall / at most *draft* a future protocol; never act |

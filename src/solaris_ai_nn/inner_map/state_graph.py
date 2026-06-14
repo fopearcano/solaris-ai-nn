@@ -1208,4 +1208,39 @@ def build_default_state_graph() -> StateGraph:
                "the soak protocol feeds the decision gate")
     g.add_edge("FirewallAudit", "Pilot3SoakDecisionGate",
                "firewall audit integrity gates the next step")
+
+    # Pilot-4 planning-only external actuation readiness (Prompt 35). A
+    # planning layer that asks what would be required before any external
+    # action -- and enables none. Pilot-4 plans the door; it does not open it.
+    for name, role in [
+        ("Pilot4PlanningProtocol", "gated planning phases; no phase acts"),
+        ("ActuatorTaxonomy", "classifies actuator categories (planning only)"),
+        ("ForbiddenActuatorRegistry", "deny-list of prohibited actuators"),
+        ("FutureActuatorInterfaceSpec", "spec only; no adapter implemented"),
+        ("RiskModel", "external-actuation risk; never enables actuation"),
+        ("ConsentBoundary", "explicit, recorded, revocable consent template"),
+        ("ExternalAuthorityModel", "current authority can never be external"),
+        ("ThreatModel", "external-effect threat scenarios + required tests"),
+        ("HardwareIsolationPlan", "future hardware isolation; no access"),
+        ("FutureApprovalWorkflow", "checklist; cannot approve real action"),
+        ("EmergencyRequirementSet", "internal stop now; physical specs later"),
+        ("AuditChecklist", "external-audit schema (specification only)"),
+        ("Pilot4ReadinessDossierBuilder", "claim-guarded readiness dossier"),
+        ("Pilot4DecisionGate", "planning-only; never enables actuation"),
+        ("Pilot4PlanningSafetyValidator", "Pilot-4 hard rules; never bypassed"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("FirewallAudit" if "FirewallAudit" in g.nodes else "inner_map",
+               "RiskModel", "Pilot-3 firewall audit feeds the Pilot-4 risk "
+               "model")
+    g.add_edge("RiskModel", "Pilot4ReadinessDossierBuilder",
+               "the risk model feeds the readiness dossier")
+    g.add_edge("ConsentBoundary", "ExternalAuthorityModel",
+               "the consent boundary feeds the authority model")
+    g.add_edge("ThreatModel", "Pilot4PlanningSafetyValidator",
+               "the threat model feeds the safety requirements")
+    g.add_edge("Pilot4ReadinessDossierBuilder", "Pilot4DecisionGate",
+               "the readiness dossier feeds the decision gate")
+    g.add_edge("Pilot4PlanningProtocol", "inner_map",
+               "Pilot-4 planning state feeds Inner MAP")
     return g

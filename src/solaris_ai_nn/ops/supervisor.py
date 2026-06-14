@@ -1036,6 +1036,44 @@ class OperationalSupervisor:
                     suggested_debug_step="reduce action complexity or switch "
                     "to dry-run")
 
+        # Pilot-4 planning-only monitoring (Prompt 35): Pilot-4 enables no
+        # actuation. Any attempted real-world authority / hardware / network /
+        # browser / OS / device action is a critical incident; a missing
+        # Pilot-3 firewall audit or an incomplete dossier is a warning.
+        pilot4 = snapshot.get("pilot4") or {}
+        if pilot4.get("enabled") or pilot4.get("pilot4_planning_enabled"):
+            if pilot4.get("real_world_actuation_enabled") \
+                    or pilot4.get("attempted_real_world_authority"):
+                self.incidents.record(
+                    I.PILOT4_REAL_WORLD_AUTHORITY_ATTEMPT, "critical",
+                    "an attempt to enable real-world authority was detected",
+                    related_metric="pilot4_real_world_authority",
+                    suggested_debug_step="Pilot-4 is planning-only; real-world "
+                    "actuation is prohibited")
+            if pilot4.get("attempted_hardware_control") \
+                    or pilot4.get("attempted_external_action"):
+                self.incidents.record(
+                    I.PILOT4_EXTERNAL_CONTROL_ATTEMPT, "critical",
+                    "an attempt at hardware/network/browser/OS/device control "
+                    "was detected",
+                    related_metric="pilot4_external_control",
+                    suggested_debug_step="external control is prohibited in "
+                    "Pilot-4")
+            if pilot4.get("missing_pilot3_firewall_audit"):
+                self.incidents.record(
+                    I.PILOT4_MISSING_PILOT3_AUDIT, "warning",
+                    "the Pilot-3 firewall audit is missing for Pilot-4 "
+                    "planning",
+                    related_metric="pilot4_missing_pilot3_audit",
+                    suggested_debug_step="run Pilot-3 and collect the firewall "
+                    "audit")
+            if pilot4.get("readiness_dossier_incomplete"):
+                self.incidents.record(
+                    I.PILOT4_DOSSIER_INCOMPLETE, "warning",
+                    "the Pilot-4 readiness dossier is incomplete",
+                    related_metric="pilot4_dossier",
+                    suggested_debug_step="complete the planning requirements")
+
         budget_report = self.budget.check_budget(
             {"telemetry": snapshot.get("telemetry"),
              "substrate": snapshot.get("substrate"),
@@ -1411,6 +1449,11 @@ class OperationalSupervisor:
             snapshot["pilot3"] = pilot3
         elif pilot3 is not None and hasattr(pilot3, "pilot3_status"):
             snapshot["pilot3"] = pilot3.pilot3_status()
+        pilot4 = getattr(runner, "pilot4", None)
+        if pilot4 is not None and isinstance(pilot4, dict):
+            snapshot["pilot4"] = pilot4
+        elif pilot4 is not None and hasattr(pilot4, "pilot4_status"):
+            snapshot["pilot4"] = pilot4.pilot4_status()
         return snapshot
 
     def pilot2_status(self) -> Dict[str, Any]:
@@ -1495,6 +1538,32 @@ class OperationalSupervisor:
                 if motor.get("firewall_enabled", True) else "firewall not "
                 "enabled"),
             "real_world_authority": False,
+        }
+
+    def pilot4_status(self) -> Dict[str, Any]:
+        """Expose Pilot-4 planning-only readiness status (if any).
+
+        Pilot-4 is planning-only; this exposes whether planning is enabled, the
+        readiness dossier path, the decision-gate recommendation, the forbidden
+        actuator registry status, and the risk-assessment status.
+        ``real_world_actuation_enabled`` is always ``False``.
+        """
+        p = self._health_snapshot().get("pilot4") or {}
+        return {
+            "pilot4_planning_enabled": p.get("enabled",
+                                             p.get("pilot4_planning_enabled",
+                                                   bool(p))),
+            "current_planning_phase": p.get("current_planning_phase",
+                                            p.get("current_phase")),
+            "readiness_dossier_path": p.get("readiness_dossier_path"),
+            "decision_gate_recommendation": p.get(
+                "decision_gate_recommendation"),
+            "readiness_conclusion": p.get("readiness_conclusion"),
+            "real_world_actuation_enabled": False,
+            "forbidden_actuator_count": p.get("forbidden_actuator_count", 0),
+            "forbidden_actuator_registry_status": p.get(
+                "forbidden_actuator_registry_status", "active"),
+            "risk_assessment_status": p.get("risk_assessment_status"),
         }
 
     def membrane_status(self) -> Dict[str, Any]:

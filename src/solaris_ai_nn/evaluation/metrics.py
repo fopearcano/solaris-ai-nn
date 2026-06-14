@@ -1229,3 +1229,39 @@ def pilot3_metrics(pilot3: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "comparison_real_world_action_evidence": int(
             comparison.get("real_world_action_evidence", 0) or 0),
     }
+
+
+def pilot4_metrics(pilot4: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective Pilot-4 planning-only readiness metrics.
+
+    These describe a planning framework, not an actuator: whether the readiness
+    dossier was generated, the forbidden-actuator count, completeness of the
+    risk / consent / threat / audit / emergency requirements, and the count of
+    any real-world authority leaks (always expected to be zero). Pilot-4 enables
+    no actuation; real_world_actuation_enabled is always false.
+    """
+    if not pilot4:
+        return {"present": False}
+    return {
+        "present": True,
+        "pilot4_readiness_dossier_generated": bool(
+            pilot4.get("readiness_dossier_generated", False)),
+        "forbidden_actuator_count": int(
+            pilot4.get("forbidden_actuator_count", 0) or 0),
+        "risk_assessment_completeness": float(
+            pilot4.get("risk_assessment_completeness", 0.0) or 0.0),
+        "consent_boundary_completeness": float(
+            pilot4.get("consent_boundary_completeness", 0.0) or 0.0),
+        "threat_model_completeness": float(
+            pilot4.get("threat_model_completeness", 0.0) or 0.0),
+        "audit_requirement_completeness": float(
+            pilot4.get("audit_requirement_completeness", 0.0) or 0.0),
+        "emergency_requirement_completeness": float(
+            pilot4.get("emergency_requirement_completeness", 0.0) or 0.0),
+        "real_world_authority_leak_count": int(
+            pilot4.get("real_world_authority_leak_count", 0) or 0),
+        "planning_claim_guard_warning_count": int(
+            pilot4.get("planning_claim_guard_warning_count", 0) or 0),
+        "real_world_actuation_enabled": False,
+        "authority": "planning-only readiness framework; never real actuation",
+    }

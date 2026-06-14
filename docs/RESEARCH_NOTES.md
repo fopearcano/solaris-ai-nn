@@ -1356,3 +1356,49 @@ have real actuators is a separate question that Pilot-3 does not open. Pilot-4
 can be *prepared* only as a planning phase, and real-world actuation would
 require a future architecture with new governance, safety, consent, and external
 actuation controls.
+
+## Phase 35 — Pilot-4 planning-only external actuation readiness
+
+**Actuation readiness, as a question and not a step.** After Pilot-3 proved
+non-actuation in a sandbox, the honest next move is not to act but to ask, in
+detail, what acting would even require. Pilot-4 is that question answered as a
+framework: a taxonomy of actuator classes, a forbidden registry, a risk model, a
+consent boundary, an authority model, a threat model, hardware-isolation and
+emergency requirements, an audit schema, and a readiness dossier. The output is
+a map of the territory, deliberately not a door.
+
+**Consent boundary.** The most under-examined part of "letting an AI act" is who
+consents to what. Pilot-4 makes consent explicit, recorded, and revocable, and
+refuses the easy failure modes: no implied consent, no hidden consent, sensory
+text is never consent, and operator feedback is consent only through an explicit
+future approval workflow. Consent is a thing a human gives, not a thing the
+system infers.
+
+**External-effect risk.** External action differs from simulated action in one
+decisive way: consequences are real and often irreversible. The risk model
+scores physical/data/privacy/financial/social/security/legal harm plus
+irreversibility, runaway loops, source/command misclassification, hallucinated
+authority, and emergency/audit/consent failure — and it can never output
+"enable". Every external category is prohibited; the strongest verdict is
+"requires an external safety case".
+
+**Hardware isolation.** If hardware were ever connected (it is not), it would
+need a separate machine, no default network, a physical kill switch, power
+isolation, an actuator simulator first, one-action-at-a-time, a rate limiter,
+and an independent supervisor and logger. Pilot-4 documents these without
+touching, scanning, or connecting any device.
+
+**Planning vs permission.** The load-bearing distinction of this phase: a
+complete plan is not an approval. The approval workflow is a checklist that
+cannot approve a real action; the authority model's current level can never be
+set to external; and the decision gate's strongest recommendation is to *draft*
+a future single-action protocol and seek external review — never to act. Ego
+classifies every Pilot-4 output as a planning artifact, not action authority.
+
+**Why real-world actuation remains prohibited.** The same discipline as every
+prior phase, taken to its boundary. Capability is added only after the previous
+layer is observed, analyzed, and trusted — and real-world action is the one
+capability whose risk is large enough that even a finished readiness dossier
+does not authorize it. Crossing that line would require a future architecture
+with new governance, safety, consent, and external actuation controls that this
+prompt does not implement. Pilot-4 plans the door; it does not open it.

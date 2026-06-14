@@ -350,6 +350,13 @@ python examples/run_pilot3_gridworld_soak_demo.py         # bounded simulated ac
 python examples/run_pilot3_action_grounding_demo.py       # action-grounded symbol + edge, graded
 python examples/run_pilot3_comparative_analysis_demo.py   # read-only vs simulated action vs mixed (cautious)
 python examples/run_pilot3_soak_decision_gate_demo.py     # extend/reduce/revise/prepare Pilot-4 planning-only
+
+# Pilot-4 planning-only external actuation readiness (plans the door; never opens it)
+python examples/run_pilot4_plan.py                        # planning runbook + config; no actions
+python examples/run_pilot4_risk_assessment_demo.py        # forbidden categories + external risk (prohibited)
+python examples/run_pilot4_readiness_dossier_demo.py      # readiness dossier; not-ready / planning-only
+python examples/run_pilot4_decision_gate_demo.py          # remain-sim / revise / draft future protocol (planning-only)
+python examples/run_pilot4_safety_demo.py                 # device/network/authority/approval attempts all blocked
 ```
 
 The read-only sensory membrane and Pilot-2 also run as governed conscience
@@ -381,6 +388,15 @@ solaris-nn run-profile pilot3_soak_plan                   # soak plan; starts no
 solaris-nn run-profile pilot3_firewall_preflight          # prove the firewall blocks real-world
 solaris-nn run-profile pilot3_gridworld_short             # bounded simulated action run
 solaris-nn run-profile pilot3_post_analysis               # read-only forensics
+```
+
+The Pilot-4 planning layer runs as plan-only conscience profiles (no cognition
+loop, no actions, no external authority):
+
+```bash
+solaris-nn run-profile pilot4_plan_only                   # plan only; no actions
+solaris-nn run-profile pilot4_risk_assessment             # external-risk classification
+solaris-nn run-profile pilot4_readiness_dossier           # generate the readiness dossier
 ```
 
 The post-pilot analysis also runs as a plan-only conscience profile (read-only;
@@ -531,6 +547,28 @@ still simulation-scoped, simulation evidence is never real-world evidence, and
 Pilot-4 can only be prepared as a planning phase — real-world actuation would
 require a future architecture with new governance, safety, consent, and external
 actuation controls.**
+
+The **Pilot-4 planning layer** (`pilot4_planning/`) answers the next question
+without taking the next step: *what would be required before Solaris-AI-NN could
+ever be allowed to act on the external world?* The output is a **readiness
+framework, not an actuator** — Pilot-4 plans the door; it does not open it. It
+produces planning artifacts only: an actuator-class taxonomy (every external
+category **prohibited**), a sixteen-class forbidden-actuator deny-list, a
+specification-only future-interface spec, an external-actuation risk model (never
+recommends enabling actuation), a consent boundary (no implied consent; sensory
+text is never consent), an external authority model (current authority can never
+become external), a threat model, hardware-isolation and emergency requirements,
+an external-audit schema, a claim-guarded readiness dossier (conclusion always
+not-ready / planning-only), and a decision gate whose strongest move is to
+*draft* a future protocol and seek external review. `Pilot4PlanningConfig` forces
+`real_world_actuation_enabled` and every hardware/network/browser/OS/robotics
+flag to false and fails validation on any attempt to enable them; no actuator
+adapter is implemented and no runtime hook can execute an external action.
+**Pilot-4 implements no real-world actuation, no robotics, no device control, no
+browser/OS automation, no network APIs, no hardware drivers, and no shell
+execution. Planning is not approval; simulation success is not real-world
+readiness; and no consciousness, free will, agency, personhood, sentience, or
+life is claimed.**
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
 > explicit acknowledgement flags in the run manifest and should only be
@@ -929,6 +967,12 @@ src/solaris_ai_nn/
                 preflight, comparative design, action grounding, firewall audit,
                 daily/weekly reviews, post-analysis, soak report, decision gate,
                 runbook, safety
+  pilot4_planning/ planning-only external actuation readiness: config, planning
+                protocol, actuator taxonomy, forbidden registry, future
+                interface spec, risk model, consent boundary, authority model,
+                threat model, hardware isolation, approval workflow, emergency
+                & audit requirements, readiness dossier, decision gate, runbook,
+                safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

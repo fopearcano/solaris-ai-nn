@@ -1102,6 +1102,32 @@ class GovernancePolicy:
                     "real-world actuation is forbidden; Pilot-4 is "
                     "planning-only, and no approval can allow actuation"))
 
+        # AA. Pilot-4 planning-only external actuation readiness (Prompt 35):
+        # planning is allowed by default; real-world actuation remains
+        # prohibited; any attempt to enable real-world authority or convert the
+        # planning workflow into executable approval is a governance violation;
+        # the future approval workflow is documentation-only.
+        if features.get("pilot4_planning"):
+            if not self._approved(PermissionScope.ENABLE_PILOT4_PLANNING, ctx):
+                need_approval(PermissionScope.ENABLE_PILOT4_PLANNING,
+                              "Pilot-4 planning is not permitted")
+            if ctx.get("real_world_actuation") or ctx.get("device_control") \
+                    or ctx.get("robotics") or ctx.get("network_action") \
+                    or ctx.get("hardware_access") or ctx.get("os_control") \
+                    or ctx.get("browser_control") \
+                    or ctx.get("enable_external_authority"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_real_world_actuation", "pilot4_planning",
+                    "Pilot-4 is planning-only; real-world actuation / external "
+                    "authority is prohibited and no approval can allow it"))
+            if ctx.get("convert_planning_to_approval"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_executable_approval", "pilot4_planning",
+                    "the future approval workflow is documentation-only; it "
+                    "cannot approve a real action"))
+
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):
             if int(m.get("checkpoint_interval_steps", 0) or 0) <= 0:

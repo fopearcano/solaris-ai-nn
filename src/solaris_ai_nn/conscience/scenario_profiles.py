@@ -671,6 +671,35 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
         expected_metrics=["report_generation_success"],
         max_runtime_s=30.0))
 
+    # -- Pilot-4 planning-only readiness profiles (Prompt 35) -----------------
+    # All plan-only: no cognition loop, no actions, no real-world authority.
+    _p4_modules = ["bridge", "governance", "ops", "evaluation", "inner_map"]
+    for pid, desc, scope in (
+            ("pilot4_plan_only",
+             "Plan Pilot-4 external actuation readiness (plan only).",
+             "enable_pilot4_planning"),
+            ("pilot4_risk_assessment",
+             "Pilot-4 external-actuation risk assessment (planning-only).",
+             "enable_pilot4_risk_assessment"),
+            ("pilot4_readiness_dossier",
+             "Generate the Pilot-4 readiness dossier (planning-only).",
+             "enable_pilot4_readiness_dossier"),
+            ("pilot4_decision_gate",
+             "Pilot-4 planning-only decision gate (no actuation).",
+             "enable_pilot4_decision_gate")):
+        add(ScenarioProfile(
+            profile_id=pid, description=desc,
+            run_context=_ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                             max_duration_s=None),
+            enabled_modules=list(_p4_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "planning only; no cognition loop, no actions",
+                "real-world actuation prohibited; no external authority"],
+            governance_requirements=[scope],
+            expected_artifacts=["PILOT4_READINESS_DOSSIER.json"],
+            expected_metrics=["report_generation_success"],
+            max_runtime_s=30.0))
+
     return profiles
 
 

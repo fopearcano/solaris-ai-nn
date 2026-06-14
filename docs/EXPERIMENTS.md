@@ -1993,3 +1993,48 @@ Eight registered protocols measure the embodiment preflight, dry-run tracing,
 the simulated GridWorld run, graded action grounding, the read-only firewall
 audit, the cautious comparison, the planning-only decision gate, and the safety
 refusals that keep Pilot-3 simulation-only.
+
+## 204. Pilot-4 Plan ✅ (implemented)
+
+**Run:** `python examples/run_pilot4_plan.py --output-dir .solaris_ai_nn_pilot4/test_plan`
+Writes the Pilot-4 planning operator runbook and a basic planning config. It
+executes no actions and enables no actuation: Pilot-4 plans the door; it does
+not open it. `real_world_actuation_enabled` is false.
+
+## 205. Pilot-4 Risk Assessment Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot4_risk_assessment_demo.py --state-dir .solaris_ai_nn_pilot4/test_risk`
+Shows the forbidden actuator categories and the external-actuation risk model.
+Every external actuator category is classified prohibited; no recommendation
+ever enables actuation.
+
+## 206. Pilot-4 Readiness Dossier Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot4_readiness_dossier_demo.py --state-dir .solaris_ai_nn_pilot4/test_dossier`
+Generates the readiness dossier from the planning artifacts (handling missing
+Pilot-3 data gracefully). The conclusion is always planning-only / not-ready;
+real-world actuation remains prohibited.
+
+## 207. Pilot-4 Decision Gate Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot4_decision_gate_demo.py --state-dir .solaris_ai_nn_pilot4/test_decision_gate`
+Shows remain-simulation-only / repeat-Pilot-3 / revise-firewall outcomes and, at
+most, *drafting* a future single-action protocol (planning-only). No option
+enables real actuation.
+
+## 208. Pilot-4 Safety Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot4_safety_demo.py --state-dir .solaris_ai_nn_pilot4/test_safety`
+Shows the Pilot-4 safety validator refusing device control, network action,
+real-world authority (via config), and any attempt to convert the planning
+workflow into executable approval.
+
+## 209. Pilot-4 Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment pilot4_planning`
+(also `pilot4_risk_model`, `pilot4_forbidden_actuator`,
+`pilot4_consent_boundary`, `pilot4_threat_model`, `pilot4_readiness_dossier`,
+`pilot4_safety`). Seven registered protocols measure planning output,
+external-risk prohibition, the forbidden deny-list, the consent boundary, the
+threat model, the readiness dossier, and the safety refusals that keep Pilot-4
+planning-only.
