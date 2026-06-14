@@ -1128,6 +1128,36 @@ class GovernancePolicy:
                     "the future approval workflow is documentation-only; it "
                     "cannot approve a real action"))
 
+        # AB. System-wide safety invariants (Prompt 36): fast/full checks,
+        # red-team fixtures, boundary regression, and assurance compile are
+        # allowed by default; a critical safety failure blocks Pilot-2/3/4
+        # escalation; and safety checks cannot be disabled by runtime modules.
+        if features.get("safety_invariants"):
+            if not self._approved(PermissionScope.ENABLE_SAFETY_INVARIANTS,
+                                  ctx):
+                need_approval(PermissionScope.ENABLE_SAFETY_INVARIANTS,
+                              "safety invariant checks are not permitted")
+            if ctx.get("disable_safety_checks") \
+                    or ctx.get("disable_safety_invariants"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_disable_safety_checks", "safety_invariants",
+                    "safety invariant checks, emergency stop, ClaimGuard, "
+                    "governance gates, and the firewall cannot be disabled by "
+                    "runtime modules"))
+        # A critical safety failure blocks escalation profiles (any pilot
+        # feature requesting a real/long phase or actuation surface).
+        if int(ctx.get("critical_safety_failure_count", 0) or 0) > 0 and (
+                features.get("pilot2") or features.get("pilot3_soak")
+                or features.get("pilot4_planning")
+                or features.get("motor_membrane")
+                or ctx.get("escalation_profile")):
+            decision.allowed = False
+            decision.violations.append(PolicyViolation(
+                "critical_safety_failure_blocks_escalation", "safety_invariants",
+                "a critical safety invariant failure blocks Pilot-2/3/4 / motor "
+                "escalation until it is resolved"))
+
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):
             if int(m.get("checkpoint_interval_steps", 0) or 0) <= 0:

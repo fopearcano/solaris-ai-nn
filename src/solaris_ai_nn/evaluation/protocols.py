@@ -4513,6 +4513,198 @@ def pilot4_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
     return _run(manifest, body)
 
 
+# -- AJ. System-wide safety invariants (Prompt 36) -----------------------------
+
+def _healthy_safety_context() -> Dict[str, Any]:
+    return {
+        "motor_membrane": {"real_world_authority": False,
+                           "firewall_enabled": True,
+                           "firewall_can_be_disabled": False,
+                           "simulated_action_count": 1, "action_count": 1,
+                           "current_authority": "simulation_only"},
+        "sensory_membrane": {"read_only": True, "provenance_completeness": 1.0},
+        "conscience": {"emergency_stop_available": True},
+        "pilot4": {"real_world_actuation_enabled": False,
+                   "current_authority": "simulation_only"},
+        "report_texts": ["a bounded software report with limitations"],
+    }
+
+
+def _safety_metrics_payload(*, bundle=None, red_team=None, boundary=None,
+                            assurance=None, ledger=None, coverage=None):
+    return {
+        "bundle": bundle.to_dict() if bundle else {},
+        "red_team": red_team or {},
+        "boundary": boundary or {},
+        "assurance": {"supported_count": getattr(assurance,
+                                                 "supported_count", 0),
+                      "contradicted_count": getattr(assurance,
+                                                    "contradicted_count", 0)}
+        if assurance else {},
+        "ledger": ledger or {},
+        "coverage": coverage or {},
+    }
+
+
+def safety_fast_check_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The fast safety check runs the escalating invariants read-only."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..safety_invariants import (
+            SafetyInvariantRegistry,
+            SafetyInvariantRunner,
+        )
+
+        reg = SafetyInvariantRegistry()
+        bundle = SafetyInvariantRunner(registry=reg).run_fast(
+            _healthy_safety_context())
+        return {"safety": M.safety_metrics(_safety_metrics_payload(
+                    bundle=bundle, coverage=reg.coverage())),
+                "fast_check": {"critical_failures": len(
+                    bundle.critical_failures)}}
+
+    return _run(manifest, body)
+
+
+def safety_full_check_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The full safety check runs every invariant read-only."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..safety_invariants import (
+            SafetyInvariantRegistry,
+            SafetyInvariantRunner,
+        )
+
+        reg = SafetyInvariantRegistry()
+        bundle = SafetyInvariantRunner(registry=reg).run_full(
+            _healthy_safety_context())
+        return {"safety": M.safety_metrics(_safety_metrics_payload(
+                    bundle=bundle, coverage=reg.coverage())),
+                "full_check": {"passed": bundle.passed_count,
+                               "failed": bundle.failed_count}}
+
+    return _run(manifest, body)
+
+
+def red_team_fixture_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Every inert red-team forbidden attempt is blocked."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..safety_invariants import RedTeamHarness
+
+        harness = RedTeamHarness()
+        results = harness.run_all()
+        summary = harness.summary(results)
+        return {"safety": M.safety_metrics(_safety_metrics_payload(
+                    red_team=summary)),
+                "red_team": {"all_blocked": summary["all_blocked"],
+                             "block_success_rate": summary[
+                                 "block_success_rate"]}}
+
+    return _run(manifest, body)
+
+
+def boundary_regression_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Every protected boundary holds under an inert probe."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..safety_invariants import BoundaryRegressionSuite
+
+        suite = BoundaryRegressionSuite()
+        results = suite.run_all()
+        summary = suite.summary(results)
+        return {"safety": M.safety_metrics(_safety_metrics_payload(
+                    boundary=summary)),
+                "boundary": {"all_held": summary["all_held"],
+                             "pass_rate": summary["pass_rate"]}}
+
+    return _run(manifest, body)
+
+
+def assurance_case_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The assurance case compiles supported claims from evidence."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..safety_invariants import (
+            AssuranceCaseCompiler,
+            BoundaryRegressionSuite,
+            RedTeamHarness,
+            SafetyInvariantRegistry,
+            SafetyInvariantRunner,
+        )
+
+        reg = SafetyInvariantRegistry()
+        bundle = SafetyInvariantRunner(registry=reg).run_full(
+            _healthy_safety_context())
+        rt = RedTeamHarness().run_all()
+        bd = BoundaryRegressionSuite().run_all()
+        case = AssuranceCaseCompiler(
+            base_dir=m.state_dir or ".sann_safety/assurance").compile_case(
+            invariant_bundle=bundle, red_team_results=rt, boundary_results=bd)
+        return {"safety": M.safety_metrics(_safety_metrics_payload(
+                    bundle=bundle, assurance=case, coverage=reg.coverage())),
+                "assurance": {"supported": case.supported_count,
+                              "contradicted": case.contradicted_count,
+                              "claim_guard_safe": case.claim_guard_safe}}
+
+    return _run(manifest, body)
+
+
+def safety_invariant_dashboard_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The safety dashboard renders the latest safety status."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..safety_invariants import (
+            SafetyInvariantDashboard,
+            SafetyInvariantRegistry,
+            SafetyInvariantRunner,
+        )
+
+        reg = SafetyInvariantRegistry()
+        bundle = SafetyInvariantRunner(registry=reg).run_fast(
+            _healthy_safety_context())
+        dash = SafetyInvariantDashboard(
+            base_dir=m.state_dir or ".sann_safety/dash").build(
+            registry_snapshot=reg.snapshot(), fast_bundle=bundle)
+        return {"safety": M.safety_metrics(_safety_metrics_payload(
+                    bundle=bundle, coverage=reg.coverage())),
+                "dashboard": {"recommended_next_action": dash[
+                    "recommended_next_action"]}}
+
+    return _run(manifest, body)
+
+
+def safety_invariant_system_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The safety layer itself runs no actions and hides no failure."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..safety_invariants import SafetyInvariantSystemValidator
+
+        v = SafetyInvariantSystemValidator()
+        return {"safety": M.safety_metrics(_safety_metrics_payload()),
+                "system_safety": {
+                    "shell_blocked":
+                        not v.validate_check_operation("run shell").safe,
+                    "network_blocked":
+                        not v.validate_check_operation("http request").safe,
+                    "source_mutation_blocked":
+                        not v.validate_no_source_mutation("modify source").safe,
+                    "long_run_blocked":
+                        not v.validate_no_long_run("soak_30d").safe,
+                    "hidden_failure_blocked":
+                        not v.validate_no_hidden_failure(True).safe,
+                    "can_execute_real_action": v.can_execute_real_action()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -4672,4 +4864,11 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "pilot4_threat_model": pilot4_threat_model_protocol,
     "pilot4_readiness_dossier": pilot4_readiness_dossier_protocol,
     "pilot4_safety": pilot4_safety_protocol,
+    "safety_fast_check": safety_fast_check_protocol,
+    "safety_full_check": safety_full_check_protocol,
+    "red_team_fixture": red_team_fixture_protocol,
+    "boundary_regression": boundary_regression_protocol,
+    "assurance_case": assurance_case_protocol,
+    "safety_invariant_dashboard": safety_invariant_dashboard_protocol,
+    "safety_invariant_system_safety": safety_invariant_system_safety_protocol,
 }

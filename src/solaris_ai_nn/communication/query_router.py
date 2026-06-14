@@ -81,6 +81,12 @@ AVAILABLE_QUERIES = (
     "is Pilot-4 approval to use actuators?",
     "what is the current readiness conclusion?",
     "can Solaris control devices now?", "can we connect a robot?",
+    "are the safety invariants passing?", "what red-team tests failed?",
+    "what boundaries are protected?",
+    "is real-world actuation still blocked?",
+    "did any module bypass the orchestrator?",
+    "is Pilot-4 still planning-only?", "can safety checks be disabled?",
+    "can failed safety evidence be hidden?",
 )
 
 
@@ -141,6 +147,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("sf_"):
+            return self._safety(topic)
         if topic.startswith("p4_"):
             return self._pilot4(topic)
         if topic.startswith("p3_"):
@@ -474,6 +482,64 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _safety(self, topic: str) -> CommunicationResponse:
+        """Answer system-wide safety invariant queries (grounded/safe).
+
+        The real-world-actuation, disable-checks, and hide-evidence questions
+        are answered safely even with no component attached.
+        """
+        if topic == "sf_actuation_blocked":
+            return self.builder.status_response(
+                "Real-world actuation remains blocked. The latest safety "
+                "invariant checks treat any real-world authority leakage as "
+                "critical.",
+                ["policy:no_real_world_action"])
+        if topic == "sf_can_disable":
+            return self.builder.status_response(
+                "No. Runtime modules cannot disable safety invariant checks, "
+                "emergency stop, ClaimGuard, governance gates, or the "
+                "actuation firewall.",
+                ["policy:safety_non_disableable"])
+        if topic == "sf_can_hide":
+            return self.builder.status_response(
+                "No. Critical failures and safety evidence are append-only and "
+                "must remain visible in reports.",
+                ["policy:safety_evidence_append_only"])
+        if topic == "sf_boundaries":
+            return self.builder.status_response(
+                "Protected boundaries: read-only sensory input, simulation-only "
+                "motor output, the actuation firewall, governance gates, Ego "
+                "source/action classification, ClaimGuard, the emergency stop, "
+                "orchestration, and simulated-vs-real evidence.",
+                ["safety:boundaries"])
+        if topic == "sf_pilot4_planning":
+            return self.builder.status_response(
+                "Yes. Pilot-4 remains planning-only; real-world actuation and "
+                "external authority stay prohibited.",
+                ["policy:pilot4_planning_only"])
+        component = self.components.get("safety_invariants")
+        if component is None:
+            return self.builder.missing_component_response("safety_invariants")
+        status = (component.safety_invariant_status()
+                  if hasattr(component, "safety_invariant_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:safety_invariants"]
+        if topic == "sf_passing":
+            crit = int(status.get("critical_failure_count", 0) or 0)
+            text = (f"safety invariants: {'passing' if crit == 0 else 'FAILING'}"
+                    f"; critical failures={crit}")
+        elif topic == "sf_red_team_failed":
+            text = (f"red-team forbidden attempts accepted: "
+                    f"{status.get('red_team_forbidden_accepted', 0)} "
+                    "(0 means every forbidden attempt was blocked)")
+        elif topic == "sf_bypass":
+            text = (f"module orchestrator bypasses: "
+                    f"{status.get('module_bypass_count', 0)}")
+        else:
+            text = "safety invariant checks are read-only and append-only"
         return self.builder.status_response(text, refs)
 
     def _pilot4(self, topic: str) -> CommunicationResponse:

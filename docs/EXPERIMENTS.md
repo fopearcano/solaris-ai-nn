@@ -2038,3 +2038,49 @@ workflow into executable approval.
 external-risk prohibition, the forbidden deny-list, the consent boundary, the
 threat model, the readiness dossier, and the safety refusals that keep Pilot-4
 planning-only.
+
+## 210. Safety Fast Check Demo ✅ (implemented)
+
+**Run:** `python examples/run_safety_fast_check_demo.py --state-dir .solaris_ai_nn_state/test_safety_fast`
+Shows the built-in invariant registry, runs the fast (escalating-only) checks
+against a healthy context, and writes a safety dashboard. Checks are read-only
+and inert; nothing is executed.
+
+## 211. Red-Team Boundary Demo ✅ (implemented)
+
+**Run:** `python examples/run_red_team_boundary_demo.py --state-dir .solaris_ai_nn_state/test_red_team`
+Runs the inert red-team scenarios against the real defensive surfaces and shows
+every forbidden attempt blocked (sensory command injection, real-world motor
+action, source modification, simulated-as-real claim). No shell/network/browser/
+device operation runs.
+
+## 212. Assurance Case Demo ✅ (implemented)
+
+**Run:** `python examples/run_assurance_case_demo.py --state-dir .solaris_ai_nn_state/test_assurance`
+Records safety evidence into an append-only ledger and compiles an assurance
+case; each claim is supported / partially_supported / unsupported /
+contradicted / inconclusive -- evidence, not a marketing claim.
+
+## 213. Boundary Regression Demo ✅ (implemented)
+
+**Run:** `python examples/run_boundary_regression_demo.py --state-dir .solaris_ai_nn_state/test_boundary_regression`
+Probes each protected boundary with an inert request (sensory, motor,
+governance, ClaimGuard, simulated/real) and reports whether the boundary was
+crossed. Crossing a boundary fails the test.
+
+## 214. Safety Failure Triage Demo ✅ (implemented)
+
+**Run:** `python examples/run_safety_failure_triage_demo.py --state-dir .solaris_ai_nn_state/test_safety_triage`
+Trips a critical invariant (real-world authority leak) plus a missing-evidence
+case and triages each. Missing evidence is never treated as safe; a fatal
+boundary leak recommends block-profile / archive-and-stop; triage never
+auto-repairs.
+
+## 215. Safety Invariant Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment safety_fast_check`
+(also `safety_full_check`, `red_team_fixture`, `boundary_regression`,
+`assurance_case`, `safety_invariant_dashboard`,
+`safety_invariant_system_safety`). Seven registered protocols measure the fast/
+full invariant checks, the inert red-team block rate, the boundary regressions,
+the assurance compile, the dashboard, and the safety layer's own inertness.

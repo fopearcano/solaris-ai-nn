@@ -73,8 +73,9 @@ def test_all_scopes_in_default_set():
     # + 7 Pilot-1 soak protocol (P29) + 9 sensory membrane (P31)
     # + 10 Pilot-2 soak protocol (P32) + 7 motor membrane (P33)
     # + 7 Pilot-3 simulated embodiment soak (P34)
-    # + 4 Pilot-4 planning-only readiness (P35).
-    assert len(PermissionScope.ALL) == 136
+    # + 4 Pilot-4 planning-only readiness (P35)
+    # + 4 system-wide safety invariants (P36).
+    assert len(PermissionScope.ALL) == 140
 
 
 def test_motor_membrane_scope_defaults():

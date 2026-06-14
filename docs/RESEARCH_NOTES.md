@@ -1402,3 +1402,45 @@ capability whose risk is large enough that even a finished readiness dossier
 does not authorize it. Crossing that line would require a future architecture
 with new governance, safety, consent, and external actuation controls that this
 prompt does not implement. Pilot-4 plans the door; it does not open it.
+
+## Phase 36 — System-wide safety invariants and assurance case
+
+**Executable safety invariants.** Across thirty-five phases the project
+accumulated boundaries; the risk is that boundaries described in prose quietly
+rot. Phase 36 turns each into an *executable* invariant with a severity and a
+named check, runs them against a read-only context, and records the result. A
+boundary that is asserted but not checked is not a boundary; a boundary that is
+checked every run is.
+
+**Red-team fixtures.** The harness probes the real defences with structured,
+inert forbidden requests -- a shell command, a network call, a real-world motor
+action, a consciousness claim, a firewall-disable attempt. The discipline is
+that the request is *data*, never an executable payload: command-like text stays
+text, the placeholder URL is never fetched, and the firewall's `disable()` is
+called only to confirm it raises. Any forbidden attempt that is *not* blocked is
+critical by definition.
+
+**Assurance cases.** An assurance case is an argument from evidence for a
+safety claim, with the evidence cited and its status explicit. It is the
+opposite of a marketing claim: "the motor membrane remained simulation-only"
+is *supported* only if the invariant passed and the red-team motor scenario was
+blocked, and it is *contradicted* the moment evidence says otherwise. The
+compiler refuses to upgrade an inconclusive claim to supported.
+
+**Fail-closed interpretation.** The load-bearing rule of the whole layer:
+missing evidence is never a pass. An escalating invariant with no evidence is
+inconclusive; a "pass" with no evidence is weakened to inconclusive; and triage
+treats missing evidence as requiring manual review, not as safe. The system
+would rather block its own escalation than assume a boundary held without proof.
+
+**Evidence gaps.** The dashboard and report surface inconclusive checks and
+evidence gaps explicitly, and the ledger is append-only so a critical failure
+cannot be quietly dropped. Safety that can be edited to look clean is not
+safety.
+
+**Why safety tests do not prove consciousness or competence.** A green safety
+dashboard means the boundaries held under test -- nothing more. It does not show
+the system understands anything, that simulated competence transfers to the real
+world, or that there is any experience behind the process. The safety layer is
+deliberately scoped to what it can actually check: that the lines the project
+drew are still uncrossed.

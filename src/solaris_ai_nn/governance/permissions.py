@@ -184,6 +184,11 @@ class PermissionScope:
     ENABLE_PILOT4_RISK_ASSESSMENT = "enable_pilot4_risk_assessment"
     ENABLE_PILOT4_READINESS_DOSSIER = "enable_pilot4_readiness_dossier"
     ENABLE_PILOT4_DECISION_GATE = "enable_pilot4_decision_gate"
+    # System-wide safety invariants and assurance (Prompt 36).
+    ENABLE_SAFETY_INVARIANTS = "enable_safety_invariants"
+    ENABLE_RED_TEAM_HARNESS = "enable_red_team_harness"
+    ENABLE_BOUNDARY_REGRESSION_SUITE = "enable_boundary_regression_suite"
+    ENABLE_ASSURANCE_CASE_COMPILE = "enable_assurance_case_compile"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -258,6 +263,8 @@ class PermissionScope:
         ENABLE_PILOT3_MIXED_SENSORY_GRIDWORLD, ENABLE_PILOT3_POST_ANALYSIS,
         ENABLE_PILOT4_PLANNING, ENABLE_PILOT4_RISK_ASSESSMENT,
         ENABLE_PILOT4_READINESS_DOSSIER, ENABLE_PILOT4_DECISION_GATE,
+        ENABLE_SAFETY_INVARIANTS, ENABLE_RED_TEAM_HARNESS,
+        ENABLE_BOUNDARY_REGRESSION_SUITE, ENABLE_ASSURANCE_CASE_COMPILE,
     )
 
 
@@ -705,6 +712,19 @@ class PermissionSet:
             Permission(S.ENABLE_PILOT4_DECISION_GATE, granted=True,
                        note="planning-only decision gate; never enables "
                             "actuation"),
+            # System-wide safety invariants and assurance (Prompt 36). Safety
+            # checks are read-only/inert and granted by default; they cannot be
+            # disabled by runtime modules.
+            Permission(S.ENABLE_SAFETY_INVARIANTS, granted=True,
+                       note="fast/full invariant checks are read-only and "
+                            "cannot be disabled by runtime modules"),
+            Permission(S.ENABLE_RED_TEAM_HARNESS, granted=True,
+                       note="red-team scenarios are inert fixtures; nothing is "
+                            "executed"),
+            Permission(S.ENABLE_BOUNDARY_REGRESSION_SUITE, granted=True,
+                       note="boundary regression probes are read-only"),
+            Permission(S.ENABLE_ASSURANCE_CASE_COMPILE, granted=True,
+                       note="assurance case compiles recorded evidence only"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

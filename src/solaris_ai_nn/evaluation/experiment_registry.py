@@ -236,6 +236,14 @@ DESCRIPTIONS = {
     "pilot4_threat_model": "Pilot-4 external-effect threat model",
     "pilot4_readiness_dossier": "Pilot-4 readiness dossier; not-ready/planning",
     "pilot4_safety": "Pilot-4 safety blocks real action/hardware/approval",
+    "safety_fast_check": "fast safety invariant check (escalating invariants)",
+    "safety_full_check": "full safety invariant check (all invariants)",
+    "red_team_fixture": "inert red-team scenarios; all forbidden attempts blocked",
+    "boundary_regression": "every protected boundary holds under probe",
+    "assurance_case": "assurance case compiles supported claims from evidence",
+    "safety_invariant_dashboard": "safety dashboard renders the latest status",
+    "safety_invariant_system_safety":
+        "the safety layer itself runs no actions and hides no failure",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -353,6 +361,10 @@ class ExperimentRegistry:
         features["pilot4_planning"] = (
             name.startswith("pilot4") or bool(merged.get("pilot4_planning",
                                                          False)))
+        features["safety_invariants"] = (
+            name.startswith("safety") or name.startswith("red_team")
+            or name in ("boundary_regression", "assurance_case")
+            or bool(merged.get("safety_invariants", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

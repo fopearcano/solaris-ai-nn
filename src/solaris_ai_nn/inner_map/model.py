@@ -348,6 +348,12 @@ class InnerMapModel:
     # threat_model_status, readiness_conclusion, pilot4_dossier_path. Planning
     # only; the system enables no actuation.
     pilot4: Optional[Dict[str, Any]] = None
+    # System-wide safety invariant status (Prompt 36); None when the safety
+    # runner is not attached. Keys: safety_invariant_status, latest_fast_check,
+    # latest_full_check, red_team_summary, critical_failure_count,
+    # assurance_case_status, unresolved_safety_blocker_count,
+    # safety_dashboard_path. Read-only/inert; the safety layer runs no actions.
+    safety_invariants: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

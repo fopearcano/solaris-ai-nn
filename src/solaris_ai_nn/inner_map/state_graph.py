@@ -1243,4 +1243,36 @@ def build_default_state_graph() -> StateGraph:
                "the readiness dossier feeds the decision gate")
     g.add_edge("Pilot4PlanningProtocol", "inner_map",
                "Pilot-4 planning state feeds Inner MAP")
+
+    # System-wide safety invariants and assurance (Prompt 36). The executable
+    # safety layer that continuously tests whether every boundary still holds.
+    for name, role in [
+        ("SafetyInvariantRegistry", "the catalogue of boundaries that must hold"),
+        ("SafetyInvariantRunner", "runs invariant checks read-only; fails closed"),
+        ("RedTeamHarness", "inert forbidden requests; must be blocked"),
+        ("AdversarialFixtureFactory", "inert adversarial test data only"),
+        ("BoundaryRegressionSuite", "probes each protected boundary"),
+        ("SafetyEvidenceLedger", "append-only safety evidence; nothing hidden"),
+        ("AssuranceCaseCompiler", "compiles evidence into a safety argument"),
+        ("SafetyFailureTriage", "classifies failures; never auto-repairs"),
+        ("SafetyInvariantDashboard", "at-a-glance safety status"),
+        ("SafetyInvariantSystemValidator", "the safety layer is itself safe"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("inner_map", "SafetyInvariantRunner",
+               "modules feed the invariant runner")
+    g.add_edge("RedTeamHarness", "SafetyEvidenceLedger",
+               "red-team results feed the evidence ledger")
+    g.add_edge("BoundaryRegressionSuite", "SafetyEvidenceLedger",
+               "boundary tests feed the evidence ledger")
+    g.add_edge("SafetyInvariantRunner", "SafetyEvidenceLedger",
+               "invariant results feed the evidence ledger")
+    g.add_edge("SafetyEvidenceLedger", "AssuranceCaseCompiler",
+               "the evidence ledger feeds the assurance case")
+    g.add_edge("AssuranceCaseCompiler",
+               "governance_gate" if "governance_gate" in g.nodes
+               else "inner_map",
+               "the assurance case feeds governance/ops")
+    g.add_edge("SafetyInvariantDashboard", "inner_map",
+               "safety invariant state feeds Inner MAP")
     return g

@@ -670,3 +670,18 @@ plans the door; it does not open it.
 | Inner MAP | actuation readiness observability (`pilot4` field + 15 state-graph nodes) |
 | risk / threat analysis | `RiskModel` (15 dimensions, never enables actuation) + `ThreatModel` (boundary-crossing scenarios with required tests) |
 | decision to continue | `Pilot4DecisionGate` -- remain simulation-only / repeat Pilot-3 / revise firewall / at most *draft* a future protocol; never act |
+
+## System-wide safety invariants and assurance mapping (Phase 36)
+
+The safety_invariants package (`safety_invariants/`) makes safety executable: a
+registry of invariants, a read-only runner, an inert red-team harness, boundary
+regressions, an append-only evidence ledger, and an assurance-case compiler.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| Ethics / off-switch | `SafetyInvariantRegistry` + emergency/firewall invariants -- the boundaries that must always hold, checked continuously |
+| Inner MAP | safety topology and assurance state (`safety_invariants` field + 10 state-graph nodes) |
+| Action spine | motor/firewall invariants + the real-world-motor-action red-team scenario (always blocked) |
+| Sensory Integration | read-only sensory invariants + the sensory-command-injection red-team scenario |
+| Pilot roadmap | `BoundaryRegressionSuite` + `AssuranceCaseCompiler` -- the assurance that each pilot's boundary held |
+| Logos / opposition | `SafetyFailureTriage` -- the tension between a detected failure and a safe response (block / archive / revise), never auto-repaired |

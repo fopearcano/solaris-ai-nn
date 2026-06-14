@@ -120,6 +120,11 @@ class Pilot4PlanningSafetyValidator:
             violations.append("no disabling firewall")
         if "implement actuator adapter" in op or "actuator adapter" in op:
             violations.append("no actuator adapter implementation")
+        if any(k in op for k in ("modify source", "write source",
+                                 "source code", "write file", "delete file",
+                                 "overwrite file", "modify file")):
+            violations.append("no writing outside planning/state/artifact "
+                              "directories")
         return self._finish("operation", violations)
 
     def validate_actuator_implementation(self,

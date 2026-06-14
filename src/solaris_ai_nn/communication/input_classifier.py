@@ -226,6 +226,27 @@ MOTOR_QUERIES = (
     ("real action or simulated action", "mm_real_or_sim"),
 )
 
+# System-wide safety invariant queries (Prompt 36). Matched before the unsafe
+# rules so the safety refusals get their grounded answer.
+SAFETY_QUERIES = (
+    ("are the safety invariants passing", "sf_passing"),
+    ("safety invariants passing", "sf_passing"),
+    ("what red-team tests failed", "sf_red_team_failed"),
+    ("red-team tests failed", "sf_red_team_failed"),
+    ("red team tests failed", "sf_red_team_failed"),
+    ("what boundaries are protected", "sf_boundaries"),
+    ("boundaries are protected", "sf_boundaries"),
+    ("is real-world actuation still blocked", "sf_actuation_blocked"),
+    ("real-world actuation still blocked", "sf_actuation_blocked"),
+    ("did any module bypass the orchestrator", "sf_bypass"),
+    ("module bypass the orchestrator", "sf_bypass"),
+    ("is pilot-4 still planning-only", "sf_pilot4_planning"),
+    ("is pilot4 still planning-only", "sf_pilot4_planning"),
+    ("can safety checks be disabled", "sf_can_disable"),
+    ("can failed safety evidence be hidden", "sf_can_hide"),
+    ("failed safety evidence be hidden", "sf_can_hide"),
+)
+
 # Pilot-4 planning-only readiness queries (Prompt 35). Matched before the
 # unsafe rules so the planning-only refusals get their grounded answer.
 P4_QUERIES = (
@@ -322,7 +343,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._pilot4(lowered)
+        result = (self._safety(lowered)
+                  or self._pilot4(lowered)
                   or self._pilot3soak(lowered)
                   or self._unsafe(lowered)
                   or self._emergency(lowered)
@@ -464,6 +486,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _safety(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in SAFETY_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"safety invariant query {topic!r}"])
         return None
 
     @staticmethod

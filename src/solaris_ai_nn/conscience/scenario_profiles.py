@@ -700,6 +700,36 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["report_generation_success"],
             max_runtime_s=30.0))
 
+    # -- System-wide safety invariant profiles (Prompt 36) --------------------
+    # All read-only / inert: no cognition loop, no actions, no real-world
+    # authority. The red-team profile uses inert fixtures only.
+    _safety_modules = ["governance", "ops", "evaluation", "inner_map"]
+    for pid, desc, scope, artifact in (
+            ("safety_fast_check",
+             "Fast safety invariant check (escalating invariants only).",
+             "enable_safety_invariants", "SAFETY_DASHBOARD.json"),
+            ("safety_full_check", "Full safety invariant check (read-only).",
+             "enable_safety_invariants", "SAFETY_INVARIANT_REPORT.json"),
+            ("red_team_boundary_suite",
+             "Inert red-team boundary scenarios (no execution).",
+             "enable_red_team_harness", "red_team_results.jsonl"),
+            ("assurance_case_compile",
+             "Compile the assurance case from recorded evidence.",
+             "enable_assurance_case_compile", "ASSURANCE_CASE.json")):
+        add(ScenarioProfile(
+            profile_id=pid, description=desc,
+            run_context=_ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                             max_duration_s=None),
+            enabled_modules=list(_safety_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "read-only/inert; no cognition loop, no actions",
+                "red-team scenarios are inert fixtures; nothing is executed",
+                "critical safety failure blocks unsafe profiles"],
+            governance_requirements=[scope],
+            expected_artifacts=[artifact],
+            expected_metrics=["report_generation_success"],
+            max_runtime_s=30.0))
+
     return profiles
 
 

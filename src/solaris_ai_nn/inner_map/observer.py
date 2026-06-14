@@ -75,6 +75,7 @@ class InnerMapObserver:
     motor_membrane: Any = None  # optional dict/object of motor membrane status
     pilot3: Any = None  # optional dict/object of Pilot-3 soak status
     pilot4: Any = None  # optional dict/object of Pilot-4 planning status
+    safety_invariants: Any = None  # optional dict/object of safety status
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -616,6 +617,18 @@ class InnerMapObserver:
                 model.pilot4 = pilot4.pilot4_status()
             elif hasattr(pilot4, "snapshot"):
                 model.pilot4 = pilot4.snapshot()
+        safety = self.safety_invariants
+        if safety is None and self.runner is not None:
+            safety = getattr(self.runner, "safety_invariants", None)
+        if safety is not None:
+            # System-wide safety invariant status (read-only view; the safety
+            # layer runs no actions and hides no critical failure).
+            if isinstance(safety, dict):
+                model.safety_invariants = dict(safety)
+            elif hasattr(safety, "safety_invariant_status"):
+                model.safety_invariants = safety.safety_invariant_status()
+            elif hasattr(safety, "snapshot"):
+                model.safety_invariants = safety.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

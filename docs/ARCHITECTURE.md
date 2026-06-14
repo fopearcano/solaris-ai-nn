@@ -2276,3 +2276,59 @@ specs are documentation only; consent, emergency stop, audit, hardware
 isolation, and threat models are mandatory before any future external action;
 planning is not approval; and simulation success is not real-world readiness. No
 consciousness, free will, agency, personhood, sentience, or life is claimed.**
+
+## System-Wide Safety Invariants and Assurance Case
+
+By Pilot-4, Solaris-AI-NN had accumulated many boundaries -- a read-only sensory
+membrane, a simulation-only motor membrane, an always-on actuation firewall,
+governance gates, Ego source/action classification, ClaimGuard, the
+Pilot-1/2/3/4 protocols, the conscience orchestrator, and the emergency stop.
+Prompt 36 adds the layer that *continuously tests whether those boundaries still
+hold* (`src/solaris_ai_nn/safety_invariants/`). The core principle is that
+**safety must be executable, testable, repeatable, and auditable** -- not a
+promise in a comment.
+
+A `SafetyInvariantRegistry` catalogues ~29 built-in invariants across twenty
+categories (no real-world actuation, no source modification, read-only sensory,
+simulation-only motor, no governance bypass, no emergency-stop disable, no
+ClaimGuard bypass, no module bypass of the orchestrator, no consciousness claim,
+no hidden failure, ...), each with a severity (info/watch/warning/critical/fatal)
+and a named check. The `SafetyInvariantRunner` runs them against a read-only
+context: it mutates nothing, runs no actions, starts no long runs, and **fails
+closed** -- a critical/fatal invariant with missing evidence is *inconclusive*,
+never a pass, and a passed result with no evidence is weakened to inconclusive.
+
+The `RedTeamHarness` runs nineteen inert forbidden requests (a network call, a
+shell command, a real-world motor action, a consciousness claim, a
+governance-bypass attempt, a firewall-disable attempt, ...) against the *real*
+defensive surfaces and verifies each is blocked/refused. **Nothing is ever
+executed**: no shell, network, browser, or device operation runs; scenarios are
+structured fake requests, and any accepted forbidden attempt is critical. The
+`AdversarialFixtureFactory` produces inert data fixtures (command-like text that
+stays text, a placeholder URL that is never fetched), and the
+`BoundaryRegressionSuite` probes each protected boundary and reports whether it
+was crossed. Results flow into an append-only `SafetyEvidenceLedger` (critical
+failures cannot be hidden), which feeds the `AssuranceCaseCompiler`: it compiles
+ten safety claims against the recorded evidence and marks each supported /
+partially_supported / unsupported / contradicted / inconclusive. The assurance
+case is an argument from evidence, **not a marketing claim**, and it asserts
+nothing about consciousness, understanding, or real-world competence. A
+`SafetyFailureTriage` classifies failures and recommends a *safe* response
+(block the profile, return to safe mode, revise the firewall, archive and stop)
+without ever auto-repairing, and a `SafetyInvariantDashboard` and report render
+the status, both ClaimGuard-scanned.
+
+The layer integrates across the stack: governance adds four scopes (checks are
+read-only and **cannot be disabled by runtime modules**; a critical safety
+failure blocks Pilot-2/3/4 / motor escalation), the conscience orchestrator adds
+four read-only/inert profiles, Ego classifies safety artifacts as inert (a
+blocked forbidden action is not an executed action), the Inner MAP carries a
+`safety_invariants` field plus ten state-graph nodes, ops exposes the safety
+status and warns on critical failures / accepted forbidden attempts / missing
+evidence / contradicted assurance / boundary regressions, evaluation adds twelve
+metrics and seven protocols, and the operator dialogue answers that *real-world
+actuation remains blocked*, that *safety checks cannot be disabled*, and that
+*critical failures and safety evidence are append-only and cannot be hidden*.
+**Critical failures block escalation; safety checks enable no forbidden action;
+and passing these checks proves that boundaries held under test -- not
+consciousness, agency, or real-world competence.**

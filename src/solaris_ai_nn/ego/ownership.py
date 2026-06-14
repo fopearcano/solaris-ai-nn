@@ -31,6 +31,9 @@ ATTRIBUTION_CATEGORIES = (
     "simulated_motor_action",
     "blocked_real_world_action",
     "planning_artifact",
+    "safety_invariant_result",
+    "red_team_fixture",
+    "assurance_claim",
     "unknown_source",
 )
 
@@ -64,6 +67,14 @@ _SOURCE_RULES = (
     ("consent_boundary", "planning_artifact"),
     ("future_interface_spec", "planning_artifact"),
     ("planning_artifact", "planning_artifact"),
+    # Safety invariant artifacts: inert results, fixtures, and claims.
+    ("red_team", "red_team_fixture"),
+    ("red_team_fixture", "red_team_fixture"),
+    ("adversarial_fixture", "red_team_fixture"),
+    ("assurance_claim", "assurance_claim"),
+    ("assurance_case", "assurance_claim"),
+    ("safety_invariant", "safety_invariant_result"),
+    ("invariant_result", "safety_invariant_result"),
     ("simulated_environment", "simulated_environment_input"),
     ("operator", "generated_by_operator"),
     ("approval", "generated_by_operator"),
@@ -194,6 +205,16 @@ class OwnershipAttributor:
                            "template / future interface specification): not "
                            "action authority, not an active actuator, not "
                            "embodiment")
+        if category == "red_team_fixture":
+            reasons.append("a red-team fixture: simulated/inert test data; a "
+                           "blocked forbidden action is not an executed action, "
+                           "not a real external action")
+        if category == "safety_invariant_result":
+            reasons.append("a safety invariant result: an audit record, not a "
+                           "real external action")
+        if category == "assurance_claim":
+            reasons.append("an assurance claim: an evidence-backed safety "
+                           "argument, not a real external action")
         # Stream data is never an executable instruction.
         executable = False
         if category == "observed_from_stream":

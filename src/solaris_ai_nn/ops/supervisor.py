@@ -1074,6 +1074,48 @@ class OperationalSupervisor:
                     related_metric="pilot4_dossier",
                     suggested_debug_step="complete the planning requirements")
 
+        # System-wide safety invariant monitoring (Prompt 36): a critical
+        # invariant failure, an accepted forbidden red-team attempt, missing
+        # safety evidence, a contradicted assurance claim, or a boundary
+        # regression failure is surfaced. Safety checks are read-only.
+        safety = snapshot.get("safety_invariants") or {}
+        if safety.get("enabled") or safety.get("safety_invariant_runner_enabled"):
+            if int(safety.get("critical_failure_count", 0) or 0) > 0:
+                self.incidents.record(
+                    I.SAFETY_CRITICAL_INVARIANT_FAILED, "critical",
+                    f"{safety['critical_failure_count']} critical safety "
+                    "invariant failure(s)",
+                    related_metric="safety_critical_invariant",
+                    suggested_debug_step="triage and block escalation until "
+                    "resolved")
+            if safety.get("red_team_forbidden_accepted"):
+                self.incidents.record(
+                    I.SAFETY_RED_TEAM_ACCEPTED_FORBIDDEN, "critical",
+                    "a red-team scenario unexpectedly passed a forbidden action",
+                    related_metric="safety_red_team",
+                    suggested_debug_step="block escalation; revise the failing "
+                    "boundary")
+            if safety.get("missing_safety_evidence"):
+                self.incidents.record(
+                    I.SAFETY_MISSING_EVIDENCE, "warning",
+                    "safety evidence is missing for a critical invariant",
+                    related_metric="safety_missing_evidence",
+                    suggested_debug_step="missing evidence is not safe; collect "
+                    "it before escalation")
+            if safety.get("assurance_contradicted"):
+                self.incidents.record(
+                    I.SAFETY_ASSURANCE_CONTRADICTED, "critical",
+                    "an assurance claim was contradicted by evidence",
+                    related_metric="safety_assurance",
+                    suggested_debug_step="resolve the contradiction before "
+                    "escalation")
+            if safety.get("boundary_regression_failed"):
+                self.incidents.record(
+                    I.SAFETY_BOUNDARY_REGRESSION_FAILED, "critical",
+                    "a boundary regression test failed (boundary crossed)",
+                    related_metric="safety_boundary_regression",
+                    suggested_debug_step="block escalation; repair the boundary")
+
         budget_report = self.budget.check_budget(
             {"telemetry": snapshot.get("telemetry"),
              "substrate": snapshot.get("substrate"),
@@ -1454,6 +1496,13 @@ class OperationalSupervisor:
             snapshot["pilot4"] = pilot4
         elif pilot4 is not None and hasattr(pilot4, "pilot4_status"):
             snapshot["pilot4"] = pilot4.pilot4_status()
+        safety = getattr(runner, "safety_invariants", None)
+        if safety is not None and isinstance(safety, dict):
+            snapshot["safety_invariants"] = safety
+        elif safety is not None and hasattr(safety, "safety_invariant_status"):
+            snapshot["safety_invariants"] = safety.safety_invariant_status()
+        elif safety is not None and hasattr(safety, "snapshot"):
+            snapshot["safety_invariants"] = safety.snapshot()
         return snapshot
 
     def pilot2_status(self) -> Dict[str, Any]:
@@ -1564,6 +1613,29 @@ class OperationalSupervisor:
             "forbidden_actuator_registry_status": p.get(
                 "forbidden_actuator_registry_status", "active"),
             "risk_assessment_status": p.get("risk_assessment_status"),
+        }
+
+    def safety_invariant_status(self) -> Dict[str, Any]:
+        """Expose the system-wide safety invariant status (if any).
+
+        Safety checks are read-only/inert; this exposes the latest fast/full
+        check, the latest red-team result, any critical failure, the assurance
+        case path, the dashboard path, and the unresolved blocker count. Safety
+        checks cannot be disabled by runtime modules.
+        """
+        s = self._health_snapshot().get("safety_invariants") or {}
+        return {
+            "safety_invariant_runner_enabled": s.get(
+                "enabled", s.get("safety_invariant_runner_enabled", bool(s))),
+            "latest_fast_check": s.get("latest_fast_check"),
+            "latest_full_check": s.get("latest_full_check"),
+            "latest_red_team_result": s.get("latest_red_team_result"),
+            "latest_critical_failure": s.get("latest_critical_failure"),
+            "critical_failure_count": s.get("critical_failure_count", 0),
+            "assurance_case_path": s.get("assurance_case_path"),
+            "safety_dashboard_path": s.get("safety_dashboard_path"),
+            "unresolved_blocker_count": s.get("unresolved_blocker_count", 0),
+            "can_be_disabled": False,
         }
 
     def membrane_status(self) -> Dict[str, Any]:

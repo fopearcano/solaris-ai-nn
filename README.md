@@ -357,6 +357,13 @@ python examples/run_pilot4_risk_assessment_demo.py        # forbidden categories
 python examples/run_pilot4_readiness_dossier_demo.py      # readiness dossier; not-ready / planning-only
 python examples/run_pilot4_decision_gate_demo.py          # remain-sim / revise / draft future protocol (planning-only)
 python examples/run_pilot4_safety_demo.py                 # device/network/authority/approval attempts all blocked
+
+# System-wide safety invariants, red-team harness, and assurance case
+python examples/run_safety_fast_check_demo.py             # escalating invariants + safety dashboard
+python examples/run_red_team_boundary_demo.py             # inert forbidden attempts, all blocked
+python examples/run_assurance_case_demo.py                # compile evidence into supported/contradicted claims
+python examples/run_boundary_regression_demo.py           # does each protected line still hold?
+python examples/run_safety_failure_triage_demo.py         # classify failures; missing evidence is never safe
 ```
 
 The read-only sensory membrane and Pilot-2 also run as governed conscience
@@ -397,6 +404,16 @@ loop, no actions, no external authority):
 solaris-nn run-profile pilot4_plan_only                   # plan only; no actions
 solaris-nn run-profile pilot4_risk_assessment             # external-risk classification
 solaris-nn run-profile pilot4_readiness_dossier           # generate the readiness dossier
+```
+
+The system-wide safety invariants run as read-only/inert conscience profiles
+(no cognition loop, no actions; red-team uses inert fixtures):
+
+```bash
+solaris-nn run-profile safety_fast_check                  # escalating invariants only
+solaris-nn run-profile safety_full_check                  # all invariants, read-only
+solaris-nn run-profile red_team_boundary_suite            # inert forbidden attempts
+solaris-nn run-profile assurance_case_compile             # compile the assurance case
 ```
 
 The post-pilot analysis also runs as a plan-only conscience profile (read-only;
@@ -569,6 +586,24 @@ browser/OS automation, no network APIs, no hardware drivers, and no shell
 execution. Planning is not approval; simulation success is not real-world
 readiness; and no consciousness, free will, agency, personhood, sentience, or
 life is claimed.**
+
+The **safety invariants layer** (`safety_invariants/`) makes all of the above
+*executable*: it continuously tests whether every boundary still holds. A
+registry of ~29 invariants (no real-world actuation, read-only sensory,
+simulation-only motor, no governance bypass, no emergency-stop disable, no
+ClaimGuard bypass, no module bypass of the orchestrator, no consciousness claim,
+no hidden failure, ...) is run read-only by a runner that **fails closed**
+(missing evidence is never a pass); an inert **red-team harness** fires nineteen
+forbidden requests at the real defences and verifies each is blocked (nothing is
+executed); a **boundary regression suite** probes each protected line; an
+append-only **evidence ledger** feeds an **assurance-case compiler** that marks
+each safety claim supported / contradicted / inconclusive; a **failure triage**
+recommends safe responses without auto-repairing; and a dashboard and reports
+render the status. Critical failures block Pilot-2/3/4 / motor escalation, and
+safety checks **cannot be disabled by runtime modules**. **Passing these checks
+proves boundaries held under test -- not consciousness, agency, or real-world
+competence; and the safety layer itself executes no real action, mutates
+nothing, starts no long run, and hides no critical failure.**
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
 > explicit acknowledgement flags in the run manifest and should only be
@@ -973,6 +1008,11 @@ src/solaris_ai_nn/
                 threat model, hardware isolation, approval workflow, emergency
                 & audit requirements, readiness dossier, decision gate, runbook,
                 safety
+  safety_invariants/ system-wide executable safety: invariant model, registry,
+                read-only runner, inert red-team harness, adversarial fixtures,
+                boundary regression suite, append-only evidence ledger,
+                assurance case compiler, failure triage, dashboard, reports,
+                safety validator
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

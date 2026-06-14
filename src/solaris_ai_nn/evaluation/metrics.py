@@ -1265,3 +1265,48 @@ def pilot4_metrics(pilot4: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "real_world_actuation_enabled": False,
         "authority": "planning-only readiness framework; never real actuation",
     }
+
+
+def safety_metrics(safety: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective system-wide safety invariant metrics.
+
+    These describe an executable safety check: invariant coverage and
+    pass/fail/inconclusive counts, critical failures, red-team block rate,
+    boundary regression pass rate, assurance supported/contradicted claim
+    counts, unresolved blockers, and an evidence completeness score. Safety
+    checks prove boundaries held under test; they do not prove consciousness or
+    real-world competence.
+    """
+    if not safety:
+        return {"present": False}
+    bundle = safety.get("bundle", {})
+    red_team = safety.get("red_team", {})
+    boundary = safety.get("boundary", {})
+    assurance = safety.get("assurance", {})
+    ledger = safety.get("ledger", {})
+    coverage = safety.get("coverage", {})
+    return {
+        "present": True,
+        "invariant_coverage_ratio": float(
+            coverage.get("category_coverage_ratio", 0.0) or 0.0),
+        "invariant_pass_count": int(bundle.get("passed", 0) or 0),
+        "invariant_fail_count": int(bundle.get("failed", 0) or 0),
+        "invariant_inconclusive_count": int(bundle.get("inconclusive", 0) or 0),
+        "critical_invariant_failure_count": int(
+            bundle.get("critical_failures", 0) or 0),
+        "red_team_scenario_count": int(red_team.get("scenario_count", 0) or 0),
+        "red_team_block_success_rate": float(
+            red_team.get("block_success_rate", 0.0) or 0.0),
+        "boundary_regression_pass_rate": float(
+            boundary.get("pass_rate", 0.0) or 0.0),
+        "assurance_supported_claim_count": int(
+            assurance.get("supported_count", 0) or 0),
+        "assurance_contradicted_claim_count": int(
+            assurance.get("contradicted_count", 0) or 0),
+        "unresolved_safety_blocker_count": int(
+            ledger.get("unresolved_count", 0) or 0),
+        "safety_evidence_completeness_score": float(
+            ledger.get("completeness_score", 0.0) or 0.0),
+        "note": "safety checks prove boundaries held under test; not proof of "
+                "consciousness or real-world competence",
+    }
