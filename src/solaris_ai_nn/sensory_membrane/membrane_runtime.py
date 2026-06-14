@@ -109,6 +109,24 @@ class SensoryMembraneRuntime:
                 "source_count": len(self.registry.sources),
                 "adapter_count": len(self._adapters)}
 
+    def disable_source(self, source_id: str) -> Dict[str, Any]:
+        """Disable a source (Pilot-2 hook). Never deletes/modifies the source.
+
+        The on-disk source is untouched; only the registry status changes and
+        the adapter is dropped from the active poll set.
+        """
+        source = self.registry.get(source_id)
+        path_before = getattr(getattr(source, "config", None), "path", None)
+        self.registry.disable(source_id)
+        self._adapters.pop(source_id, None)
+        import os as _os
+
+        source_intact = (path_before is None
+                         or not _os.path.isabs(str(path_before))
+                         or _os.path.exists(path_before))
+        return {"source_id": source_id, "disabled": True,
+                "source_deleted": False, "source_intact": source_intact}
+
     # -- polling ----------------------------------------------------------------
 
     def poll_once(self) -> Dict[str, Any]:

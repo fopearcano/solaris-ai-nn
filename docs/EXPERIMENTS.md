@@ -1829,3 +1829,52 @@ authority: Pilot-2 begins with read-only grounding, not autonomy.
 `sensory_grounding`, `pilot2_read_only_short`). Eight registered protocols
 measure read-only ingestion, trend detection, the read-only contract, and
 environmental grounding.
+
+## 183. Pilot-2 Plan ✅ (implemented)
+
+**Run:** `python examples/run_pilot2_plan.py --output-dir .solaris_ai_nn_pilot2/test_plan`
+Writes the Pilot-2 operator runbook, a source-curation template, and a
+governance checklist for read-only environmental exposure. Starts no run;
+grants no environmental authority.
+
+## 184. Pilot-2 Source Preflight Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot2_source_preflight_demo.py --state-dir .solaris_ai_nn_pilot2/test_preflight`
+Creates fixture JSONL/text/numeric/folder sources plus an outside-root source,
+and runs read-only preflight checks; the outside-root source correctly fails.
+
+## 185. Pilot-2 Fixture Short Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot2_fixture_short_demo.py --state-dir .solaris_ai_nn_pilot2/test_fixture_short`
+Runs a short bounded fixture exposure through the read-only membrane, tracks
+source reliability, and writes a daily review. No real sources, no actuation.
+
+## 186. Pilot-2 Comparative Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot2_comparative_demo.py --state-dir .solaris_ai_nn_pilot2/test_comparative`
+Builds nursery-only / sensory-only / mixed arms from mock summaries and prints
+a cautious comparison plus an exposure classification. Observed associations
+only, never proven causes.
+
+## 187. Pilot-2 Grounding Analysis Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot2_grounding_analysis_demo.py --state-dir .solaris_ai_nn_pilot2/test_grounding`
+Grades grounding evidence: a provenance-backed persistent cross-module symbol
+(strong), a provenance-backed node (weak), and an unsupported claim. Grounding
+is operational association, not understanding.
+
+## 188. Pilot-2 Decision Gate Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot2_decision_gate_demo.py --state-dir .solaris_ai_nn_pilot2/test_decision_gate`
+Shows extend-soak / repeat-with-curated-sources / revise-membrane /
+reduce-complexity outcomes. Actuation is never an enabled action; a Pilot-3
+embodiment suggestion is planning-only.
+
+## 189. Pilot-2 Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment pilot2_source_preflight`
+(also `pilot2_fixture_short`, `pilot2_nursery_baseline`, `pilot2_mixed_short`,
+`pilot2_grounding_analysis`, `pilot2_comparative_design`, `pilot2_safety`,
+`pilot2_decision_gate`). Eight registered protocols measure read-only
+preflight, fixture exposure, grounding, cautious comparison, and the safety
+refusals that keep Pilot-2 one-way.

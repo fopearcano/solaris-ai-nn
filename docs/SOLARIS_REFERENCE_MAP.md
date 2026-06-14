@@ -601,3 +601,19 @@ world, and input text is never an operator command.
 | Inner MAP | `inner_map` sensory topology observation -- membrane field + 12 state-graph nodes |
 | Pilot deployment | Pilot-2 read-only sensory plan (`pilot2_plan_only` / `pilot2_read_only_short` profiles) -- read-only grounding, not autonomy |
 | Logos (tension) | real read-only source vs simulated source boundary -- a candidate LOGOS tension, made explicit on every event |
+
+## Pilot-2 read-only environmental soak mapping (Phase 32)
+
+The pilot2 package (`pilot2/`) operationalises Solaris_Ai's sensory-integration
+and embodiment roadmap as a strictly read-only environmental soak: the
+environment enters through approved sources, but Solaris-AI-NN never acts on
+the environment.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| Sensory integration | `pilot2` read-only source exposure (preflight, curation, exposure schedule) -- bounded, provenanced |
+| Embodiment roadmap | environmental grounding *without actuation*; a Pilot-3 limited embodiment is planning-only |
+| Ego boundary | source/command separation -- sensory input attributed `read_only_environmental_input`, never operator |
+| Inner MAP | Pilot-2 source topology and grounding state (`pilot2` field + 14 state-graph nodes) |
+| long-run testing | `Pilot2Protocol` soak phases + `ComparativeRunDesign` nursery-vs-sensory comparison |
+| plasticity / development | `GroundingAnalysis` (graded grounding) + post-pilot sensory-exposure classification |

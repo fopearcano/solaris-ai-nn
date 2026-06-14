@@ -1226,3 +1226,47 @@ strictly separated by attribution, so any developmental difference can be
 traced to the source. Camera and audio remain metadata-only here -- no OCR, no
 ASR, no image analysis -- because adding heavy multimodal processing would
 both break the low-compute principle and invite overclaiming.
+
+## Phase 32 — Pilot-2 read-only environmental soak
+
+**Does the environment change development?** Pilot-1 asked whether the system
+develops at all over a long run; Pilot-2 asks a sharper question -- whether
+read-only *environmental* exposure produces different structural development
+than the artificial nursery. The answer must come from comparison, not
+assertion, which is why the whole layer is organized around explicit arms
+(nursery-only, sensory-only, mixed) and cautious deltas.
+
+**One-way, by construction.** The entire risk of "real input" is that it
+invites "real output". Pilot-2 keeps the membrane strictly one-way:
+environment → Solaris-AI-NN, never the reverse. Sources are read-only,
+disabling a source only changes its status (never deletes it), and sensory
+text is attributed as environmental input, never an operator command. The
+decision gate has no "act on the environment" option at all; a Pilot-3
+limited-embodiment suggestion, if it ever appears, is planning-only.
+
+**Provenance is the grounding evidence.** Grounding here is operational
+association, not understanding -- so the evidence that a structure is grounded
+is precisely its provenance plus persistence and cross-module support. A
+proto-symbol that recurs across a provenanced source over time, and that
+improves prediction or compression, is graded "moderate" or "strong"; one
+without provenance is "unsupported". Input words are never the internal
+symbols.
+
+**Source reliability is a first-class signal.** A real(istic) environment is
+noisy. The reliability monitor classifies each source (reliable /
+noisy-but-useful / unstable / malformed / unsafe) so that a noisy source can
+stay if it is bounded and useful, while an unsafe source must be disabled. This
+keeps the comparison honest: a difference driven by a malformed source is not
+a developmental difference.
+
+**Cautious interpretation is mandatory.** Every comparison is reported as an
+observed association from a single run, never a proven cause; a missing
+comparable arm yields "inconclusive"; and the post-pilot classifier
+distinguishes improved-grounding from added-noise-only from caused-overload.
+The point is to resist the pull toward reading any change as progress.
+
+**Why actuation is still postponed.** The same discipline as every prior phase:
+capability is only added after the previous layer is observed, analyzed, and
+trusted. Pilot-2 is the grounding step. Whether the system should ever act on
+an environment is a separate question that Pilot-2 deliberately does not open;
+it only measures whether read-only exposure changes how the system develops.

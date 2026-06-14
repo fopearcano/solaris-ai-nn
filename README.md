@@ -326,14 +326,24 @@ python examples/run_text_sensory_stream_demo.py           # text is environmenta
 python examples/run_numeric_sensory_stream_demo.py        # numeric trend/spike detection
 python examples/run_folder_poll_demo.py                   # file presence/change; no writes
 python examples/run_pilot2_read_only_plan.py              # Pilot-2 read-only plan; no long run
+
+# Pilot-2 read-only environmental soak (environment -> Solaris, never reverse)
+python examples/run_pilot2_plan.py                        # runbook + curation + governance lists
+python examples/run_pilot2_source_preflight_demo.py       # read-only source preflight
+python examples/run_pilot2_fixture_short_demo.py          # bounded fixture exposure + daily review
+python examples/run_pilot2_comparative_demo.py            # nursery vs sensory vs mixed (cautious)
+python examples/run_pilot2_grounding_analysis_demo.py     # graded grounding quality
+python examples/run_pilot2_decision_gate_demo.py          # repeat/reduce/extend/revise
 ```
 
-The read-only sensory membrane also runs as governed conscience profiles
-(dry-run and file-stream sources need no approval; real on-disk sources do):
+The read-only sensory membrane and Pilot-2 also run as governed conscience
+profiles (dry-run, preflight, fixture, and nursery baseline need no approval;
+mixed-short and real soaks do):
 
 ```bash
 solaris-nn run-profile sensory_membrane_dry_run           # validate sources, publish nothing
 solaris-nn run-profile pilot2_plan_only                   # Pilot-2 plan; starts nothing
+solaris-nn run-profile pilot2_fixture_short               # bounded fixture exposure
 ```
 
 The post-pilot analysis also runs as a plan-only conscience profile (read-only;
@@ -429,6 +439,21 @@ never operator) and to the Inner MAP. The membrane is disabled by default;
 real on-disk sources, folder polling, and Pilot-2 runs require governance
 approval. **Pilot-2 begins with read-only grounding, not autonomy: no
 real-world actuation, no robotics, no browser/OS automation.**
+
+The **Pilot-2 layer** (`pilot2/`) is the read-only environmental soak protocol
+that uses the membrane to test whether read-only environmental exposure
+produces different structural development than the artificial nursery. It is
+strictly one-way (environment → Solaris-AI-NN). It plans and preflights
+read-only sources, curates safe ones (excluding secrets/credentials/private
+data by default), schedules nursery/sensory/mixed exposure windows, tracks
+per-source reliability, compares arms *cautiously* (observed associations,
+never proven causes), grades environmental grounding quality (operational
+association, not understanding), writes daily/weekly reviews and a
+claim-guarded Pilot-2 report, and gates the next step. Real 24h/7d/30d soaks
+require governance approval; an unsafe source must be disabled (which never
+deletes it); sensory input is never an operator command; and **actuation is
+never an enabled action** — a Pilot-3 limited embodiment, if ever suggested,
+is planning-only.
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
 > explicit acknowledgement flags in the run manifest and should only be
@@ -814,6 +839,10 @@ src/solaris_ai_nn/
   sensory_membrane/ read-only Pilot-2 membrane: sources, read-only contract,
                 jsonl/text/numeric/folder adapters, normalizer, buffer,
                 grounding, provenance, runtime, reports, safety
+  pilot2/       read-only environmental soak: protocol, config, source
+                preflight/curation, exposure schedule, comparative design,
+                grounding analysis, source reliability, daily/weekly reviews,
+                report, decision gate, runbook, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

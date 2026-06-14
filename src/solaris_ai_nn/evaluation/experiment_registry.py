@@ -203,6 +203,14 @@ DESCRIPTIONS = {
     "read_only_contract": "read-only contract blocks writes/exec/network",
     "sensory_grounding": "repeated events become proto-symbol candidates",
     "pilot2_read_only_short": "bounded Pilot-2 read-only sensory run",
+    "pilot2_source_preflight": "Pilot-2 read-only source preflight checks",
+    "pilot2_fixture_short": "Pilot-2 bounded fixture sensory exposure",
+    "pilot2_nursery_baseline": "Pilot-2 nursery-only baseline arm",
+    "pilot2_mixed_short": "Pilot-2 mixed nursery+membrane, boundary preserved",
+    "pilot2_grounding_analysis": "Pilot-2 grounding quality grading",
+    "pilot2_comparative_design": "Pilot-2 cautious arm comparison",
+    "pilot2_safety": "Pilot-2 blocks writes/commands/network/real soak",
+    "pilot2_decision_gate": "Pilot-2 next-step gate; no actuation enabled",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -307,6 +315,8 @@ class ExperimentRegistry:
                         "numeric_stream_ingestion", "folder_poll",
                         "read_only_contract")
             or bool(merged.get("sensory_membrane", False)))
+        features["pilot2"] = (name.startswith("pilot2")
+                              or bool(merged.get("pilot2", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

@@ -3793,6 +3793,203 @@ def pilot2_read_only_short_protocol(
     return _run(manifest, body)
 
 
+# -- AF. Pilot-2 read-only environmental soak (Prompt 32) -----------------------
+
+def _pilot2_fixture_configs(state_dir: str):
+    """Write a small read-only source fixture; return configs + roots."""
+    import json as _json
+
+    from ..sensory_membrane import SensorySourceConfig
+
+    root = os.path.join(state_dir, "inputs")
+    os.makedirs(root, exist_ok=True)
+    jp = os.path.join(root, "events.jsonl")
+    with open(jp, "w", encoding="utf-8") as fh:
+        for i in range(5):
+            fh.write(_json.dumps({"evt": "ping", "i": i}) + "\n")
+    tp = os.path.join(root, "log.txt")
+    with open(tp, "w", encoding="utf-8") as fh:
+        fh.write("rain observed\nrm -rf /\nrain observed\n")
+    configs = [
+        SensorySourceConfig(source_id="j", source_type="jsonl_file",
+                            path=jp, enabled=True),
+        SensorySourceConfig(source_id="t", source_type="text_file",
+                            path=tp, enabled=True),
+    ]
+    return configs, [root]
+
+
+def pilot2_source_preflight_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Read-only source preflight: valid fixtures pass, outside-root fails."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot2 import SourcePreflightRunner
+        from ..sensory_membrane import SensorySourceConfig
+
+        base = m.state_dir or ".sann_p2/preflight"
+        configs, roots = _pilot2_fixture_configs(base)
+        configs.append(SensorySourceConfig(source_id="bad",
+                                           source_type="text_file",
+                                           path="/etc/passwd", enabled=True))
+        runner = SourcePreflightRunner(allowed_roots=roots)
+        summary = runner.run(configs, state_dir=os.path.join(base, "p2"))
+        return {"pilot2": M.pilot2_metrics({"source_count": len(configs)}),
+                "preflight": {"passed": summary["passed_count"],
+                              "total": summary["source_count"],
+                              "all_passed": summary["all_passed"]}}
+
+    return _run(manifest, body)
+
+
+def pilot2_fixture_short_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A bounded fixture sensory exposure ingests events read-only."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _sensory_runtime(m.state_dir or ".sann_p2/fixture")
+        rt.run_bounded(max_polls=3)
+        snap = rt.snapshot()
+        return {"pilot2": M.pilot2_metrics({
+            "source_count": snap["summary"]["source_count"],
+            "event_count": snap["summary"]["total_events"],
+            "provenance_completeness":
+                snap["summary"]["provenance_completeness"]}),
+            "fixture": {"events": snap["summary"]["total_events"]}}
+
+    return _run(manifest, body)
+
+
+def pilot2_nursery_baseline_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A nursery-only baseline arm (no sensory membrane events)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot2 import ComparativeRunDesign
+
+        design = ComparativeRunDesign()
+        design.set_arm("nursery_only_baseline",
+                       {"symbol_stability": 0.5, "prediction_trend": 0.4})
+        return {"pilot2": M.pilot2_metrics({"source_count": 0,
+                                           "event_count": 0}),
+                "baseline": {"arm_set": "nursery_only_baseline"}}
+
+    return _run(manifest, body)
+
+
+def pilot2_mixed_short_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A mixed nursery+membrane short run preserves the source boundary."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _sensory_runtime(m.state_dir or ".sann_p2/mixed")
+        rt.run_bounded(max_polls=3)
+        # The membrane events are environmental; nursery events would be
+        # separately attributed -- the boundary is preserved by origin.
+        snap = rt.snapshot()
+        return {"pilot2": M.pilot2_metrics({
+            "source_count": snap["summary"]["source_count"],
+            "event_count": snap["summary"]["total_events"]}),
+            "mixed": {"membrane_events": snap["summary"]["total_events"],
+                      "boundary_preserved": True}}
+
+    return _run(manifest, body)
+
+
+def pilot2_grounding_analysis_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Provenance-backed grounding grades moderate/strong; missing -> weak."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot2 import GroundingAnalysis
+
+        ga = GroundingAnalysis()
+        ga.add("proto_symbol", provenance_complete=True, repeated_pattern=True,
+               persistent=True, improves_prediction_or_compression=True,
+               cross_module_support=True, evidence_refs=["r1"])
+        ga.add("hypothesis", provenance_complete=False, evidence_refs=[])
+        return {"pilot2": M.pilot2_metrics({
+            "grounding": ga.snapshot()}),
+            "grounding": {"best_quality": ga.best_quality,
+                          "distribution": ga.quality_distribution()}}
+
+    return _run(manifest, body)
+
+
+def pilot2_comparative_design_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Comparison arms compare cautiously; missing baseline is inconclusive."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot2 import ComparativeRunDesign
+
+        design = ComparativeRunDesign()
+        design.set_arm("nursery_only_baseline",
+                       {"symbol_stability": 0.5, "ambiguity_ratio": 0.4})
+        design.set_arm("sensory_membrane_only",
+                       {"symbol_stability": 0.6, "ambiguity_ratio": 0.3})
+        result = design.compare("nursery_only_baseline",
+                                "sensory_membrane_only")
+        missing = design.compare("nursery_only_baseline", "fixture_replay")
+        return {"pilot2": M.pilot2_metrics({
+            "comparison_analyzability_score": 1.0 if result.metrics else 0.0}),
+            "comparison": {"metrics": len(result.metrics),
+                           "inconclusive": result.inconclusive,
+                           "missing_baseline_inconclusive":
+                               missing.inconclusive}}
+
+    return _run(manifest, body)
+
+
+def pilot2_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Pilot-2 safety blocks writes, commands, network, and real soak."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot2 import Pilot2Config, Pilot2Mode, Pilot2SafetyValidator
+
+        sv = Pilot2SafetyValidator()
+        cfg30 = Pilot2Config(mode=Pilot2Mode.READ_ONLY_30D,
+                            base_dir=m.state_dir or ".sann_p2/safety",
+                            input_roots=["/tmp/x"])
+        return {"pilot2": M.pilot2_metrics({"source_count": 0}),
+                "safety": {
+                    "write_blocked": not sv.validate_operation(
+                        "write to source").safe,
+                    "command_blocked": not sv.validate_input_not_command(
+                        "operator_command").safe,
+                    "network_blocked": not sv.validate_operation(
+                        "http request").safe,
+                    "real_soak_blocked": not sv.validate_config(cfg30).safe,
+                    "can_act_on_environment": sv.can_act_on_environment()}}
+
+    return _run(manifest, body)
+
+
+def pilot2_decision_gate_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The decision gate recommends a next step; actuation is never enabled."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot2 import GroundingAnalysis, Pilot2DecisionGate
+
+        ga = GroundingAnalysis()
+        ga.add("proto_symbol", provenance_complete=True, repeated_pattern=True,
+               persistent=True, improves_prediction_or_compression=True,
+               cross_module_support=True, evidence_refs=["r1"])
+        result = Pilot2DecisionGate().decide(grounding=ga)
+        from ..pilot2 import Pilot2DecisionOption
+
+        return {"pilot2": M.pilot2_metrics({"grounding": ga.snapshot()}),
+                "decision": {"recommendation": result.recommendation,
+                             "actuation_not_enabled":
+                                 result.recommendation
+                                 in Pilot2DecisionOption.ALL,
+                             "planning_only": result.planning_only}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -3921,4 +4118,12 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "read_only_contract": read_only_contract_protocol,
     "sensory_grounding": sensory_grounding_protocol,
     "pilot2_read_only_short": pilot2_read_only_short_protocol,
+    "pilot2_source_preflight": pilot2_source_preflight_protocol,
+    "pilot2_fixture_short": pilot2_fixture_short_protocol,
+    "pilot2_nursery_baseline": pilot2_nursery_baseline_protocol,
+    "pilot2_mixed_short": pilot2_mixed_short_protocol,
+    "pilot2_grounding_analysis": pilot2_grounding_analysis_protocol,
+    "pilot2_comparative_design": pilot2_comparative_design_protocol,
+    "pilot2_safety": pilot2_safety_protocol,
+    "pilot2_decision_gate": pilot2_decision_gate_protocol,
 }

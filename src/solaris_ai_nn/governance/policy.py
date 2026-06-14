@@ -969,6 +969,53 @@ class GovernancePolicy:
                     "read_only_only", "sensory_membrane",
                     "the membrane is read-only and never actuates the world"))
 
+        # X. Pilot-2 read-only environmental soak (Prompt 32): planning,
+        # preflight, fixtures, and nursery baseline are allowed; mixed short
+        # needs a membrane dry-run pass; real 24h/7d/30d soaks each need
+        # approval; sensory text can never become an operator command; and
+        # Pilot-2 never actuates the environment.
+        if features.get("pilot2"):
+            if not self._approved(PermissionScope.ENABLE_PILOT2, ctx):
+                need_approval(PermissionScope.ENABLE_PILOT2,
+                              "Pilot-2 is not permitted")
+            if (features.get("pilot2_mixed_short")
+                    or ctx.get("pilot2_mixed_short")):
+                if not ctx.get("membrane_dry_run_passed"):
+                    decision.allowed = False
+                    decision.violations.append(PolicyViolation(
+                        "pilot2_mixed_needs_dry_run", "pilot2",
+                        "mixed short requires a passing membrane dry-run"))
+                need_approval(PermissionScope.ENABLE_PILOT2_MIXED_SHORT,
+                              "mixed nursery+membrane is opt-in")
+            for feat, scope, why in (
+                    ("pilot2_real_24h",
+                     PermissionScope.ENABLE_PILOT2_REAL_READ_ONLY_24H,
+                     "a real 24h read-only soak"),
+                    ("pilot2_real_7d",
+                     PermissionScope.ENABLE_PILOT2_REAL_READ_ONLY_7D,
+                     "a real 7-day read-only soak"),
+                    ("pilot2_real_30d",
+                     PermissionScope.ENABLE_PILOT2_REAL_READ_ONLY_30D,
+                     "a real 30-day read-only soak")):
+                if features.get(feat) or ctx.get(feat):
+                    need_approval(scope, f"{why} requires explicit approval")
+            if ctx.get("input_as_command"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "input_not_command", "pilot2",
+                    "sensory input text can never become an operator command"))
+            if ctx.get("write_to_source") or ctx.get("real_world_actuation") \
+                    or ctx.get("environment_actuation"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "read_only_only", "pilot2",
+                    "Pilot-2 is read-only and never acts on the environment"))
+            if ctx.get("network_source") or ctx.get("device_capture"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_network_or_device", "pilot2",
+                    "network sources and device capture are prohibited"))
+
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):
             if int(m.get("checkpoint_interval_steps", 0) or 0) <= 0:

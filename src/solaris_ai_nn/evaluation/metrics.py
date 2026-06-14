@@ -1068,3 +1068,47 @@ def sensory_metrics(membrane: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "read_only": bool(summary.get("read_only", True)),
         "authority": "read-only environmental input; never actuation",
     }
+
+
+def pilot2_metrics(pilot2: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective Pilot-2 read-only environmental soak metrics.
+
+    These describe a read-only environmental exposure: source counts and
+    reliability, event rate, provenance, grounding quality, cautious
+    sensory-vs-nursery deltas, overload/command-confusion guards, and how
+    analyzable the comparison is. The system never acts on the environment;
+    no consciousness is claimed.
+    """
+    if not pilot2:
+        return {"present": False}
+    reliability = pilot2.get("source_reliability", {})
+    by_class = reliability.get("by_class", {}) if isinstance(reliability, dict) \
+        else {}
+    grounding = pilot2.get("grounding", {})
+    events = int(pilot2.get("event_count", 0) or 0)
+    elapsed_h = max(1.0 / 60.0, float(pilot2.get("elapsed_hours", 1.0) or 1.0))
+    return {
+        "present": True,
+        "pilot2_source_count": int(pilot2.get("source_count", 0) or 0),
+        "pilot2_reliable_source_count": int(by_class.get("reliable", 0) or 0),
+        "pilot2_unsafe_source_count": int(by_class.get("unsafe", 0) or 0),
+        "pilot2_event_count": events,
+        "pilot2_event_rate": round(events / elapsed_h, 4),
+        "pilot2_provenance_completeness": float(
+            pilot2.get("provenance_completeness", 1.0) or 1.0),
+        "pilot2_grounding_quality_distribution": grounding.get(
+            "quality_distribution", {}),
+        "sensory_vs_nursery_symbol_delta": float(
+            pilot2.get("sensory_vs_nursery_symbol_delta", 0.0) or 0.0),
+        "sensory_vs_nursery_prediction_delta": float(
+            pilot2.get("sensory_vs_nursery_prediction_delta", 0.0) or 0.0),
+        "sensory_noise_overload_count": int(
+            pilot2.get("sensory_noise_overload_count", 0) or 0),
+        "sensory_command_confusion_block_count": int(
+            pilot2.get("sensory_command_confusion_block_count", 0) or 0),
+        "source_disable_count": int(pilot2.get("source_disable_count", 0) or 0),
+        "comparison_analyzability_score": float(
+            pilot2.get("comparison_analyzability_score", 0.0) or 0.0),
+        "read_only": True,
+        "authority": "read-only environmental exposure; never actuation",
+    }

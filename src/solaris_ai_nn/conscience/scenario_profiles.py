@@ -384,6 +384,103 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
                           "scenario_exit_success"],
         max_runtime_s=90.0))
 
+    # -- Pilot-2 read-only environmental soak profiles (Prompt 32) ------------
+    _p2_core = _CORE_MODULES + ["world_model", "protolanguage",
+                                "active_perception", "hypothesis", "logos",
+                                "autoregeneration", "inner_map",
+                                "developmental"]
+
+    # Source preflight: bounded, read-only checks; no cognition loop needed.
+    add(ScenarioProfile(
+        profile_id="pilot2_source_preflight",
+        description="Pilot-2 read-only source preflight checks (bounded).",
+        run_context=_ctx(RunMode.SHORT_DEMO, max_steps=20),
+        enabled_modules=["bridge", "governance", "ops", "sensory_membrane"],
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "read-only source validation; no publishing required"],
+        governance_requirements=["enable_pilot2_source_preflight"],
+        expected_artifacts=["source_preflight.json"],
+        expected_metrics=["run_step_count"],
+        max_runtime_s=30.0))
+
+    # Membrane dry-run via Pilot-2 (validates sources, publishes nothing).
+    add(ScenarioProfile(
+        profile_id="pilot2_membrane_dry_run",
+        description="Pilot-2 sensory membrane dry-run (publishes nothing).",
+        run_context=_ctx(RunMode.SHORT_DEMO, max_steps=20),
+        enabled_modules=["bridge", "ecology", "governance", "ops",
+                         "sensory_membrane"],
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "dry-run: validates and reports, publishes no stimuli"],
+        governance_requirements=["enable_sensory_membrane_dry_run"],
+        expected_artifacts=["SENSORY_MEMBRANE_REPORT.json"],
+        expected_metrics=["run_step_count"],
+        max_runtime_s=30.0))
+
+    # Fixture short: bounded fixture exposure on the sensory spine.
+    add(ScenarioProfile(
+        profile_id="pilot2_fixture_short",
+        description="Pilot-2 bounded fixture sensory exposure.",
+        run_context=_ctx(RunMode.SHORT_DEMO, max_steps=40),
+        enabled_modules=list(_p2_core),
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "read-only fixtures only; environmental input is not a command"],
+        governance_requirements=["enable_pilot2_fixture_short"],
+        expected_artifacts=["conscience_bus.jsonl"],
+        expected_metrics=["run_step_count", "module_success_rate"],
+        max_runtime_s=60.0))
+
+    # Nursery baseline: nursery-only comparison arm (no membrane).
+    add(ScenarioProfile(
+        profile_id="pilot2_nursery_baseline_short",
+        description="Pilot-2 nursery-only baseline (no sensory membrane).",
+        run_context=_ctx(RunMode.NURSERY_SIMULATED, max_steps=40),
+        enabled_modules=_CORE_MODULES + ["world_model", "protolanguage",
+                                         "active_perception", "hypothesis",
+                                         "logos", "inner_map", "developmental"],
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "nursery-only baseline arm for comparison"],
+        governance_requirements=["enable_pilot2_nursery_baseline"],
+        expected_artifacts=["conscience_bus.jsonl"],
+        expected_metrics=["run_step_count", "module_success_rate"],
+        max_runtime_s=60.0))
+
+    # Mixed short: nursery + membrane (needs membrane dry-run pass; governed).
+    add(ScenarioProfile(
+        profile_id="pilot2_mixed_short",
+        description="Pilot-2 mixed nursery+membrane short run (governed).",
+        run_context=_ctx(RunMode.DEVELOPMENTAL_SIMULATED, max_steps=60),
+        enabled_modules=list(_p2_core),
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "mixed mode preserves the nursery/environment boundary"],
+        governance_requirements=["enable_pilot2_mixed_short"],
+        expected_artifacts=["conscience_bus.jsonl",
+                            "SENSORY_MEMBRANE_REPORT.json"],
+        expected_metrics=["run_step_count", "module_success_rate"],
+        max_runtime_s=90.0))
+
+    # Real read-only soak PLANS: plan only; never start a long run.
+    for pid, scope, days in (
+            ("pilot2_read_only_24h_plan",
+             "enable_pilot2_real_read_only_24h", 1.0),
+            ("pilot2_read_only_7d_plan",
+             "enable_pilot2_real_read_only_7d", 7.0),
+            ("pilot2_read_only_30d_plan",
+             "enable_pilot2_real_read_only_30d", 30.0)):
+        add(ScenarioProfile(
+            profile_id=pid,
+            description=f"Plan a Pilot-2 {pid} read-only soak (plan only).",
+            run_context=_ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                             target_days=days, max_duration_s=None),
+            enabled_modules=list(_p2_core),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "plan only; no run is started",
+                "real read-only soak requires governance approval"],
+            governance_requirements=[scope],
+            expected_artifacts=["PILOT2_REPORT.json"],
+            expected_metrics=["report_generation_success"],
+            max_runtime_s=30.0))
+
     return profiles
 
 

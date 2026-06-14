@@ -70,8 +70,27 @@ def test_all_scopes_in_default_set():
     # + 6 ecology (P23) + 5 active perception (P24)
     # + 6 hypothesis engine (P25) + 9 auto-regeneration (P26)
     # + 6 LOGOS complexity (P27) + 6 conscience runtime (P28)
-    # + 7 Pilot-1 soak protocol (P29) + 9 sensory membrane (P31).
-    assert len(PermissionScope.ALL) == 108
+    # + 7 Pilot-1 soak protocol (P29) + 9 sensory membrane (P31)
+    # + 10 Pilot-2 soak protocol (P32).
+    assert len(PermissionScope.ALL) == 118
+
+
+def test_pilot2_scope_defaults():
+    ps = PermissionSet.default()
+    S = PermissionScope
+    # Planning/preflight/fixture/nursery/disable/comparison are allowed;
+    # mixed short and real soaks require approval.
+    assert ps.allows(S.ENABLE_PILOT2)
+    assert ps.allows(S.ENABLE_PILOT2_SOURCE_PREFLIGHT)
+    assert ps.allows(S.ENABLE_PILOT2_FIXTURE_SHORT)
+    assert ps.allows(S.ENABLE_PILOT2_NURSERY_BASELINE)
+    assert ps.allows(S.ENABLE_PILOT2_SOURCE_DISABLE)
+    assert ps.requires_approval(S.ENABLE_PILOT2_MIXED_SHORT)
+    for scope in (S.ENABLE_PILOT2_REAL_READ_ONLY_24H,
+                  S.ENABLE_PILOT2_REAL_READ_ONLY_7D,
+                  S.ENABLE_PILOT2_REAL_READ_ONLY_30D):
+        assert ps.requires_approval(scope)
+        assert not ps.allows(scope)
 
 
 def test_sensory_membrane_scope_defaults():

@@ -71,6 +71,7 @@ class InnerMapObserver:
     pilot1: Any = None  # optional dict/object of Pilot-1 status (observe-only)
     post_pilot: Any = None  # optional dict/object of post-pilot analysis
     sensory_membrane: Any = None  # optional dict/object of membrane status
+    pilot2: Any = None  # optional dict/object of Pilot-2 read-only soak status
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -566,6 +567,18 @@ class InnerMapObserver:
                 model.sensory_membrane = dict(membrane)
             elif hasattr(membrane, "summary"):
                 model.sensory_membrane = membrane.summary()
+        pilot2 = self.pilot2
+        if pilot2 is None and self.runner is not None:
+            pilot2 = getattr(self.runner, "pilot2", None)
+        if pilot2 is not None:
+            # Pilot-2 read-only soak status (read-only; environmental exposure
+            # only, never actuation; no consciousness claim).
+            if isinstance(pilot2, dict):
+                model.pilot2 = dict(pilot2)
+            elif hasattr(pilot2, "snapshot"):
+                model.pilot2 = pilot2.snapshot()
+            elif hasattr(pilot2, "summary"):
+                model.pilot2 = pilot2.summary()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

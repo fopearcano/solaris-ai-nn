@@ -321,6 +321,13 @@ class InnerMapModel:
     # malformed_events, provenance_completeness, read_only, report_path. The
     # membrane is read-only; environmental input is never an operator command.
     sensory_membrane: Optional[Dict[str, Any]] = None
+    # Pilot-2 read-only environmental soak status (Prompt 32); None when no
+    # Pilot-2 is active. Keys: pilot2_enabled, pilot2_phase, source_mode,
+    # source_count, reliable_source_count, unsafe_source_count,
+    # grounding_quality, comparison_arm_active, daily/weekly review paths,
+    # report path, recommendation. Read-only; the system never acts on the
+    # environment, and no consciousness is claimed.
+    pilot2: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

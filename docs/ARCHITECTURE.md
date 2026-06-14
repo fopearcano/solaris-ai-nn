@@ -2033,3 +2033,65 @@ input and cannot become an operator command*. Four scenario profiles
 ways. **Pilot-2 begins with read-only environmental grounding, not autonomy:
 there is no real-world actuation, no robotics, no browser/OS automation, no
 external APIs, and no LLM authority.**
+
+## Pilot-2 Read-Only Environmental Soak
+
+Pilot-2 tests the research question: *does read-only environmental exposure
+produce different structural development than the artificial nursery?* The
+`pilot2` package is the operational layer for that test. It is strictly
+one-way -- environment → Solaris-AI-NN, never the reverse -- and it grants no
+environmental actuation: the sensory membrane only reads, and sensory input is
+never an operator command.
+
+The protocol is gated (`Pilot2Protocol`): plan-only → source preflight →
+membrane dry-run → fixture short → nursery baseline → mixed → real 24h/7d/30d
+soaks → comparative analysis → archive. Real soak phases require governance
+approval *and* a passing source preflight and membrane dry-run; the 24h/7d/30d
+phases never start automatically; and the protocol state persists across
+restarts. `Pilot2Config` defaults to plan-only, requires provenance, and
+needs approved input roots before any real read-only exposure.
+
+Before exposure, the `SourcePreflightRunner` runs read-only checks over each
+candidate source (path inside an allowed root, valid read-only contract,
+bounded size/rate, supported type, provenance present, no command semantics,
+no executable/binary parsing, no recursive scan unless bounded, no
+network/device source), and the `CuratedSourceSet` selects safe, analyzable
+sources -- excluding secrets, credentials, and private data by default and
+preferring synthetic/public/test streams. During exposure, the
+`ExposureSchedule` alternates nursery / sensory / mixed windows with quiet
+periods for latent replay, the `SourceReliabilityMonitor` classifies each
+source (reliable / noisy-but-useful / unstable / malformed / unsafe), and an
+unsafe source must be disabled (disabling marks status only; it never deletes
+or modifies the source).
+
+Analysis is deliberately cautious. The `ComparativeRunDesign` compares arms
+(nursery-only / sensory-only / mixed / fixture replay / post-Pilot-1
+reference) and reports differences only as "observed difference" / "candidate
+effect", with a missing baseline yielding *inconclusive*. The
+`GroundingAnalysis` grades whether read-only input produced grounded
+structures (unsupported / weak / moderate / strong / ambiguous /
+contradicted) from provenance completeness, repeated pattern, persistence,
+contribution to prediction/compression, cross-module support, and the
+preserved command boundary -- grounding is operational association, not
+understanding, and input text is not automatically meaning. Daily/weekly
+reviews, a claim-guarded `Pilot2Report`, and the `Pilot2DecisionGate` (repeat
+/ reduce-complexity / extend-soak / revise-membrane / ... / a *planning-only*
+Pilot-3 limited-embodiment suggestion) complete the loop; actuation is never
+an enabled action.
+
+Pilot-2 integrates across the stack: governance adds ten scopes (planning /
+preflight / fixture / nursery allowed by default; mixed-short and real soaks
+gated) plus a manifest gate that blocks input-as-command and any
+write/actuation/network/device request; the conscience orchestrator gains nine
+Pilot-2 scenario profiles (plans never start long runs; fixtures are bounded;
+real profiles are governed); post-pilot adds a sensory-exposure classifier
+(improved-grounding / added-noise-only / caused-overload / inconclusive); ops
+exposes Pilot-2 status and warnings (unsafe source, source outside root,
+command confusion, degraded reliability, overload, missing provenance); the
+Inner MAP carries a `pilot2` field and fourteen new state-graph nodes;
+evaluation adds thirteen metrics and eight protocols; and the operator
+dialogue answers nine Pilot-2 questions -- including the deliberately safe
+answer that *Solaris-AI-NN is not acting on the environment; Pilot-2 is
+read-only*. **Pilot-2 still has no actuation, no robotics, no browser/OS
+automation, no external APIs, no network sources, and makes no consciousness
+claim.**

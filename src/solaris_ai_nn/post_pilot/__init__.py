@@ -57,6 +57,11 @@ from .reproducibility import (
 )
 from .research_dossier import ResearchDossier, ResearchDossierBuilder
 from .safety import HARD_RULES, PostPilotSafetyReport, PostPilotSafetyValidator
+from .sensory_exposure import (
+    SensoryExposureClassification,
+    SensoryExposureComparison,
+    classify_sensory_exposure,
+)
 from .structural_change import (
     Stability,
     StructuralChangeAnalyzer,
@@ -91,4 +96,7 @@ __all__ = [
     # forensics façade / safety
     "PostPilotForensics",
     "PostPilotSafetyValidator", "PostPilotSafetyReport", "HARD_RULES",
+    # sensory-exposure comparison (Pilot-2)
+    "classify_sensory_exposure", "SensoryExposureComparison",
+    "SensoryExposureClassification",
 ]

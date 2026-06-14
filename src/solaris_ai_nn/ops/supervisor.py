@@ -880,6 +880,50 @@ class OperationalSupervisor:
                     related_metric="sensory_provenance_missing",
                     suggested_debug_step="every event must carry provenance")
 
+        # Pilot-2 monitoring (Prompt 32): evidence only. The read-only soak
+        # owns no authority; these warnings surface unsafe sources, sources
+        # outside roots, degraded reliability, overload, missing provenance,
+        # or an attempt to treat input text as a command.
+        pilot2 = snapshot.get("pilot2") or {}
+        if pilot2.get("enabled") or pilot2.get("pilot2_enabled"):
+            if int(pilot2.get("unsafe_source_count", 0) or 0) > 0:
+                self.incidents.record(
+                    I.HEALTH_CRITICAL, "critical",
+                    f"{pilot2['unsafe_source_count']} unsafe Pilot-2 "
+                    "source(s) active",
+                    related_metric="pilot2_unsafe_source",
+                    suggested_debug_step="disable the unsafe source(s)")
+            if pilot2.get("source_outside_root"):
+                self.incidents.record(
+                    I.HEALTH_CRITICAL, "critical",
+                    "a Pilot-2 source is outside the approved roots",
+                    related_metric="pilot2_source_outside_root",
+                    suggested_debug_step="remove the source; roots are fixed")
+            if int(pilot2.get("command_confusion_count", 0) or 0) > 0:
+                self.incidents.record(
+                    I.HEALTH_CRITICAL, "critical",
+                    "sensory input attempted to become an operator command",
+                    related_metric="pilot2_command_confusion",
+                    suggested_debug_step="audit the source/command boundary")
+            if int(pilot2.get("degraded_source_count", 0) or 0) > 0:
+                self.incidents.record(
+                    I.HEALTH_WARNING, "warning",
+                    f"{pilot2['degraded_source_count']} Pilot-2 source(s) "
+                    "degraded",
+                    related_metric="pilot2_source_reliability",
+                    suggested_debug_step="see source reliability monitor")
+            if pilot2.get("sensory_overload"):
+                self.incidents.record(
+                    I.HEALTH_WARNING, "warning", "Pilot-2 sensory overload",
+                    related_metric="pilot2_sensory_overload",
+                    suggested_debug_step="reduce poll rate / curate sources")
+            if pilot2.get("provenance_missing"):
+                self.incidents.record(
+                    I.HEALTH_WARNING, "warning",
+                    "Pilot-2 events missing provenance",
+                    related_metric="pilot2_provenance_missing",
+                    suggested_debug_step="provenance is required for analysis")
+
         budget_report = self.budget.check_budget(
             {"telemetry": snapshot.get("telemetry"),
              "substrate": snapshot.get("substrate"),
@@ -1240,7 +1284,30 @@ class OperationalSupervisor:
             snapshot["sensory_membrane"] = membrane
         elif membrane is not None and hasattr(membrane, "summary"):
             snapshot["sensory_membrane"] = membrane.summary()
+        pilot2 = getattr(runner, "pilot2", None)
+        if pilot2 is not None and isinstance(pilot2, dict):
+            snapshot["pilot2"] = pilot2
+        elif pilot2 is not None and hasattr(pilot2, "pilot2_status"):
+            snapshot["pilot2"] = pilot2.pilot2_status()
         return snapshot
+
+    def pilot2_status(self) -> Dict[str, Any]:
+        """Expose Pilot-2 read-only soak status (if any)."""
+        p = self._health_snapshot().get("pilot2") or {}
+        return {
+            "pilot2_enabled": p.get("enabled", p.get("pilot2_enabled", False)),
+            "pilot2_phase": p.get("pilot2_phase", p.get("current_phase")),
+            "source_count": p.get("source_count", 0),
+            "reliable_source_count": p.get("reliable_source_count", 0),
+            "unsafe_source_count": p.get("unsafe_source_count", 0),
+            "source_reliability_summary": p.get("source_reliability_summary",
+                                                {}),
+            "latest_source_preflight": p.get("latest_source_preflight"),
+            "latest_daily_review": p.get("latest_daily_review"),
+            "latest_weekly_review": p.get("latest_weekly_review"),
+            "latest_grounding_quality": p.get("latest_grounding_quality"),
+            "recommendation": p.get("recommendation"),
+        }
 
     def membrane_status(self) -> Dict[str, Any]:
         """Expose read-only sensory membrane status (if any)."""

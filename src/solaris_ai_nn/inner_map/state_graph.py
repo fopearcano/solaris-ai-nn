@@ -1080,4 +1080,47 @@ def build_default_state_graph() -> StateGraph:
                "safety gates the membrane runtime")
     g.add_edge("sensory_membrane_runtime", "inner_map",
                "sensory membrane state feeds Inner MAP")
+
+    # Pilot-2 read-only environmental soak (Prompt 32). One-way exposure:
+    # environment -> Solaris-AI-NN, never the reverse. The system never acts
+    # on the environment and input is never an operator command.
+    for name, role in [
+        ("pilot2_protocol", "gated read-only exposure phases"),
+        ("pilot2_config", "read-only, provenance-required pilot config"),
+        ("source_preflight_runner", "read-only source preflight checks"),
+        ("source_curation_report", "safe, analyzable source selection"),
+        ("exposure_schedule", "alternating baseline/exposure windows"),
+        ("comparative_run_design", "nursery vs sensory vs mixed, cautiously"),
+        ("grounding_analysis", "graded environmental grounding quality"),
+        ("source_reliability_monitor", "per-source reliability classes"),
+        ("pilot2_daily_review_builder", "one day of read-only exposure"),
+        ("pilot2_weekly_review_builder", "weekly reliability/grounding trends"),
+        ("pilot2_report_builder", "claim-guarded Pilot-2 report"),
+        ("pilot2_decision_gate", "next step; never enables actuation"),
+        ("pilot2_runbook_builder", "operator how-to and warnings"),
+        ("pilot2_safety_validator", "Pilot-2 hard rules; never bypassed"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("sensory_membrane_runtime", "pilot2_protocol",
+               "sensory membrane feeds Pilot-2 observability")
+    g.add_edge("source_reliability_monitor", "source_curation_report",
+               "reliability feeds source curation")
+    g.add_edge("source_preflight_runner", "pilot2_protocol",
+               "preflight must pass before real exposure")
+    g.add_edge("exposure_schedule",
+               "conscience_orchestrator" if "conscience_orchestrator"
+               in g.nodes else "inner_map",
+               "exposure schedule feeds Conscience profiles")
+    g.add_edge("comparative_run_design",
+               "post_pilot_report_builder" if "post_pilot_report_builder"
+               in g.nodes else "inner_map",
+               "comparative design feeds post-pilot analysis")
+    g.add_edge("grounding_analysis", "pilot2_report_builder",
+               "grounding analysis feeds the Pilot-2 report")
+    g.add_edge("pilot2_decision_gate", "pilot2_report_builder",
+               "the decision is recorded in the report")
+    g.add_edge("pilot2_safety_validator", "pilot2_protocol",
+               "safety gates every Pilot-2 phase")
+    g.add_edge("pilot2_protocol", "inner_map",
+               "Pilot-2 state feeds Inner MAP")
     return g

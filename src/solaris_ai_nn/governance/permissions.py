@@ -150,6 +150,17 @@ class PermissionScope:
     ENABLE_NUMERIC_SOURCE = "enable_numeric_source"
     ENABLE_PILOT2_READ_ONLY_SHORT = "enable_pilot2_read_only_short"
     ENABLE_PILOT2_REAL_READ_ONLY_SOAK = "enable_pilot2_real_read_only_soak"
+    # Pilot-2 read-only environmental soak protocol (Prompt 32).
+    ENABLE_PILOT2 = "enable_pilot2"
+    ENABLE_PILOT2_SOURCE_PREFLIGHT = "enable_pilot2_source_preflight"
+    ENABLE_PILOT2_FIXTURE_SHORT = "enable_pilot2_fixture_short"
+    ENABLE_PILOT2_NURSERY_BASELINE = "enable_pilot2_nursery_baseline"
+    ENABLE_PILOT2_MIXED_SHORT = "enable_pilot2_mixed_short"
+    ENABLE_PILOT2_REAL_READ_ONLY_24H = "enable_pilot2_real_read_only_24h"
+    ENABLE_PILOT2_REAL_READ_ONLY_7D = "enable_pilot2_real_read_only_7d"
+    ENABLE_PILOT2_REAL_READ_ONLY_30D = "enable_pilot2_real_read_only_30d"
+    ENABLE_PILOT2_SOURCE_DISABLE = "enable_pilot2_source_disable"
+    ENABLE_PILOT2_COMPARATIVE_ANALYSIS = "enable_pilot2_comparative_analysis"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -209,6 +220,11 @@ class PermissionScope:
         ENABLE_REAL_READ_ONLY_SOURCES, ENABLE_FOLDER_POLL_SOURCE,
         ENABLE_JSONL_SOURCE, ENABLE_TEXT_SOURCE, ENABLE_NUMERIC_SOURCE,
         ENABLE_PILOT2_READ_ONLY_SHORT, ENABLE_PILOT2_REAL_READ_ONLY_SOAK,
+        ENABLE_PILOT2, ENABLE_PILOT2_SOURCE_PREFLIGHT,
+        ENABLE_PILOT2_FIXTURE_SHORT, ENABLE_PILOT2_NURSERY_BASELINE,
+        ENABLE_PILOT2_MIXED_SHORT, ENABLE_PILOT2_REAL_READ_ONLY_24H,
+        ENABLE_PILOT2_REAL_READ_ONLY_7D, ENABLE_PILOT2_REAL_READ_ONLY_30D,
+        ENABLE_PILOT2_SOURCE_DISABLE, ENABLE_PILOT2_COMPARATIVE_ANALYSIS,
     )
 
 
@@ -576,6 +592,36 @@ class PermissionSet:
                        requires_approval=True,
                        note="a real read-only Pilot-2 soak requires explicit "
                             "approval; still no actuation"),
+            Permission(S.ENABLE_PILOT2, granted=True,
+                       note="Pilot-2 planning and read-only preparation; the "
+                            "system never acts on the environment"),
+            Permission(S.ENABLE_PILOT2_SOURCE_PREFLIGHT, granted=True,
+                       note="read-only source preflight checks"),
+            Permission(S.ENABLE_PILOT2_FIXTURE_SHORT, granted=True,
+                       note="bounded fixture exposure for tests/demos"),
+            Permission(S.ENABLE_PILOT2_NURSERY_BASELINE, granted=True,
+                       note="nursery-only baseline run"),
+            Permission(S.ENABLE_PILOT2_MIXED_SHORT, requires_approval=True,
+                       note="mixed nursery+membrane needs a passing membrane "
+                            "dry-run"),
+            Permission(S.ENABLE_PILOT2_REAL_READ_ONLY_24H, granted=False,
+                       requires_approval=True,
+                       note="a real 24h read-only soak requires explicit "
+                            "approval; still no actuation"),
+            Permission(S.ENABLE_PILOT2_REAL_READ_ONLY_7D, granted=False,
+                       requires_approval=True,
+                       note="a real 7-day read-only soak requires explicit "
+                            "approval; still no actuation"),
+            Permission(S.ENABLE_PILOT2_REAL_READ_ONLY_30D, granted=False,
+                       requires_approval=True,
+                       note="a real 30-day read-only soak requires explicit "
+                            "approval; still no actuation"),
+            Permission(S.ENABLE_PILOT2_SOURCE_DISABLE, granted=True,
+                       note="disabling a source marks it disabled; it never "
+                            "deletes or modifies the source"),
+            Permission(S.ENABLE_PILOT2_COMPARATIVE_ANALYSIS, granted=True,
+                       note="cautious nursery-vs-sensory comparison; no "
+                            "causal claims"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

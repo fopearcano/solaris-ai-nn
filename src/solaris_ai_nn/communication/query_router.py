@@ -61,6 +61,12 @@ AVAILABLE_QUERIES = (
     "did sensory input become a command?",
     "what proto-symbols came from sensory input?",
     "is this real or simulated input?",
+    "what Pilot-2 phase is active?", "which sources are reliable?",
+    "which sources were disabled?", "did read-only input improve grounding?",
+    "was it nursery-only or sensory exposure?",
+    "is this real, simulated, fixture, or nursery input?",
+    "is Pilot-2 ready for a 24h read-only soak?",
+    "is Solaris acting on the environment?",
 )
 
 
@@ -121,6 +127,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("p2_"):
+            return self._pilot2(topic)
         if topic.startswith("sm_"):
             return self._sensory(topic)
         if topic.startswith("pp_"):
@@ -446,6 +454,59 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _pilot2(self, topic: str) -> CommunicationResponse:
+        """Answer Pilot-2 read-only soak queries from the attached status.
+
+        The environment-action question is answered safely even with no
+        component; Pilot-2 is read-only and never acts on the environment.
+        """
+        if topic == "p2_acting":
+            return self.builder.status_response(
+                "No. Pilot-2 is read-only. The environment can enter "
+                "Solaris-AI-NN through approved sources, but Solaris-AI-NN has "
+                "no authority to modify, control, or act on those sources.",
+                ["policy:pilot2_read_only"])
+        component = self.components.get("pilot2")
+        if component is None:
+            return self.builder.missing_component_response("pilot2")
+        status = (component.pilot2_status() if hasattr(component,
+                                                       "pilot2_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:pilot2"]
+        if topic == "p2_phase":
+            text = (f"active Pilot-2 phase: "
+                    f"{status.get('pilot2_phase', status.get('current_phase'))}")
+        elif topic == "p2_reliable":
+            rel = status.get("reliable_source_count",
+                             status.get("source_reliability_summary", {}))
+            text = f"reliable sources: {rel}"
+        elif topic == "p2_disabled":
+            text = (f"disabled sources: "
+                    f"{status.get('disabled_sources', status.get('source_disable_count', 0))}")
+        elif topic == "p2_grounding":
+            gq = status.get("latest_grounding_quality",
+                            status.get("grounding_quality", "unknown"))
+            text = (f"grounding quality: {gq}. Differences are observed "
+                    "associations, not proven causes; grounding is "
+                    "operational association, not understanding.")
+        elif topic == "p2_exposure":
+            mode = status.get("source_mode", "unknown")
+            text = f"source mode: {mode} (nursery / sensory / mixed)"
+        elif topic == "p2_input_kind":
+            text = ("input is labelled by origin: real read-only, simulated, "
+                    "fixture, nursery-generated, offline-replay, or "
+                    "operator-channel -- and these are kept distinct.")
+        elif topic == "p2_ready_24h":
+            rec = status.get("recommendation")
+            text = ("a real 24h read-only soak requires a passing preflight "
+                    "and membrane dry-run, governance approval, and an "
+                    f"operator decision; current recommendation: {rec}")
+        else:
+            text = (f"Pilot-2 phase: "
+                    f"{status.get('pilot2_phase', status.get('current_phase'))}")
         return self.builder.status_response(text, refs)
 
     def _sensory(self, topic: str) -> CommunicationResponse:

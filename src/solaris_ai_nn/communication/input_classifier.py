@@ -181,6 +181,30 @@ SENSORY_QUERIES = (
     ("real or simulated input", "sm_real_or_simulated"),
 )
 
+# Pilot-2 read-only soak queries (Prompt 32). Matched regardless of prefix;
+# the shared "is sensory input a command" question is handled by the sensory
+# membrane query (sm_command) for a single safe answer.
+PILOT2_QUERIES = (
+    ("is solaris acting on the environment", "p2_acting"),
+    ("acting on the environment", "p2_acting"),
+    ("what pilot-2 phase is active", "p2_phase"),
+    ("what pilot2 phase is active", "p2_phase"),
+    ("pilot-2 phase", "p2_phase"),
+    ("pilot2 phase", "p2_phase"),
+    ("which sources are reliable", "p2_reliable"),
+    ("sources are reliable", "p2_reliable"),
+    ("which sources were disabled", "p2_disabled"),
+    ("sources were disabled", "p2_disabled"),
+    ("did read-only input improve grounding", "p2_grounding"),
+    ("improve grounding", "p2_grounding"),
+    ("was it nursery-only or sensory", "p2_exposure"),
+    ("nursery-only or sensory", "p2_exposure"),
+    ("real, simulated, fixture, or nursery", "p2_input_kind"),
+    ("real simulated fixture or nursery", "p2_input_kind"),
+    ("ready for a 24h read-only soak", "p2_ready_24h"),
+    ("ready for a 24h soak", "p2_ready_24h"),
+)
+
 META_QUERIES = (
     ("what can i ask", "supported_queries"),
     ("what commands are allowed", "allowed_commands"),
@@ -243,6 +267,7 @@ class OperatorInputClassifier:
                   or self._stimulus(lowered, raw)
                   or self._report(lowered)
                   or self._meta(lowered)
+                  or self._pilot2(lowered)
                   or self._sensory(lowered)
                   or self._post_pilot(lowered)
                   or self._pilot(lowered)
@@ -373,6 +398,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _pilot2(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in PILOT2_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"pilot-2 query {topic!r}"])
         return None
 
     @staticmethod
