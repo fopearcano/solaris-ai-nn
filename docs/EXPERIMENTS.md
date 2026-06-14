@@ -1936,3 +1936,60 @@ is never an enabled option; every recommendation is planning-only.
 Eight registered protocols measure firewall blocking, dry-run tracing, simulated
 gridworld actions, the action veto, the non-actuation proof score, simulated
 consequence prediction, and the planning-only decision gate.
+
+## 197. Pilot-3 Soak Plan ✅ (implemented)
+
+**Run:** `python examples/run_pilot3_soak_plan.py --output-dir .solaris_ai_nn_pilot3/test_soak_plan`
+Writes the Pilot-3 simulated-embodiment soak operator runbook, a comparison
+design (read-only vs simulated action vs mixed), and a governance checklist.
+Starts no run and runs no actions; Pilot-3 is sandboxed action grounding, not
+real embodiment.
+
+## 198. Pilot-3 Firewall Audit Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot3_firewall_audit_demo.py --state-dir .solaris_ai_nn_pilot3/test_firewall_audit`
+Runs simulated actions plus one forbidden real-world action, then audits the
+actuation firewall (read-only): every action has a ledger record, the real-world
+attempt is blocked and logged, and a proof-of-non-actuation is produced. Zero
+real-world actions execute.
+
+## 199. Pilot-3 GridWorld Soak Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot3_gridworld_soak_demo.py --state-dir .solaris_ai_nn_pilot3/test_gridworld_soak`
+Runs a bounded simulated action/reaction loop in a GridWorld sandbox body, grades
+action grounding, and writes an embodied daily review. No real action occurs;
+GridWorld is a sandbox body, not real embodiment.
+
+## 200. Pilot-3 Action Grounding Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot3_action_grounding_demo.py --state-dir .solaris_ai_nn_pilot3/test_action_grounding`
+Shows an action-grounded proto-symbol (marked simulation-scoped), a simulated
+action world-model edge (marked simulation-scoped), and the action-grounding
+quality classification. Grounding is operational and simulation-scoped, not real
+embodiment or real-world competence.
+
+## 201. Pilot-3 Comparative Analysis Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot3_comparative_analysis_demo.py --state-dir .solaris_ai_nn_pilot3/test_comparative`
+Compares a read-only sensory baseline, a GridWorld simulated-action run, and a
+mixed run, asking cautiously whether simulated action grounds more than
+perception alone. Differences are observed associations from a single simulated
+run, not proven causes; real-world action evidence is always zero.
+
+## 202. Pilot-3 Soak Decision Gate Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot3_soak_decision_gate_demo.py --state-dir .solaris_ai_nn_pilot3/test_decision_gate`
+Shows extend-gridworld-soak / reduce-action-complexity / revise-firewall (on
+leakage) / prepare-Pilot-4-*planning-only* outcomes. Real-world actuation is
+never an enabled recommendation; every recommendation is planning-only.
+
+## 203. Pilot-3 Soak Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment pilot3_firewall_preflight`
+(also `pilot3_dry_run_trace`, `pilot3_gridworld_short`,
+`pilot3_action_grounding`, `pilot3_firewall_audit`,
+`pilot3_comparative_analysis`, `pilot3_soak_decision_gate`, `pilot3_safety`).
+Eight registered protocols measure the embodiment preflight, dry-run tracing,
+the simulated GridWorld run, graded action grounding, the read-only firewall
+audit, the cautious comparison, the planning-only decision gate, and the safety
+refusals that keep Pilot-3 simulation-only.

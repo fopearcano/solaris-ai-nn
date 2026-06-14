@@ -72,6 +72,9 @@ AVAILABLE_QUERIES = (
     "what did the firewall block?", "what is the current embodiment profile?",
     "is this real action or simulated action?",
     "can Pilot-3 control devices?",
+    "what Pilot-3 phase is active?", "did action improve grounding?",
+    "did the system act on the environment?",
+    "is Pilot-3 ready for Pilot-4?", "can Pilot-4 use real actuators?",
 )
 
 
@@ -132,6 +135,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("p3_"):
+            return self._pilot3(topic)
         if topic.startswith("mm_"):
             return self._motor(topic)
         if topic.startswith("p2_"):
@@ -461,6 +466,56 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _pilot3(self, topic: str) -> CommunicationResponse:
+        """Answer Pilot-3 simulated-embodiment soak queries (grounded/safe).
+
+        The real-vs-simulated, act-on-environment, and Pilot-4 actuator
+        questions are answered safely even with no component; Pilot-3 is
+        simulation/dry-run only and Pilot-4 is planning-only.
+        """
+        if topic == "p3_acted_env":
+            return self.builder.status_response(
+                "No. Pilot-3 forms action intentions and runs them only inside "
+                "a sandbox. An always-on actuation firewall blocks every "
+                "real-world effect; the system did not act on the real world "
+                "or the environment.",
+                ["policy:no_real_world_action"])
+        if topic == "p3_pilot4_actuators":
+            return self.builder.status_response(
+                "No. Pilot-4 can only be prepared as a planning phase unless "
+                "the architecture is explicitly extended later with new "
+                "governance, safety, consent, and external actuation controls. "
+                "Prompt 34 does not permit real-world actuation.",
+                ["policy:pilot4_planning_only"])
+        component = self.components.get("pilot3")
+        if component is None:
+            return self.builder.missing_component_response("pilot3")
+        status = (component.pilot3_status()
+                  if hasattr(component, "pilot3_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:pilot3"]
+        if topic == "p3_phase":
+            text = (f"active Pilot-3 soak phase: "
+                    f"{status.get('pilot3_soak_phase', status.get('current_phase'))}; "
+                    f"embodiment condition: "
+                    f"{status.get('embodiment_condition')}")
+        elif topic == "p3_grounding":
+            q = status.get("latest_action_grounding_quality", "unknown")
+            text = (f"latest action-grounding quality: {q}. Action grounding "
+                    "is operational and simulation-scoped; it is not real "
+                    "embodiment or real-world competence.")
+        elif topic == "p3_ready_pilot4":
+            ready = status.get("ready_for_next_planning_phase")
+            text = ("Pilot-4 can only be prepared as a planning phase. "
+                    f"readiness for planning: {ready}. Real-world actuation is "
+                    "never enabled here.")
+        else:
+            text = (f"Pilot-3 soak phase: "
+                    f"{status.get('pilot3_soak_phase')}; "
+                    "simulation/dry-run only")
         return self.builder.status_response(text, refs)
 
     def _motor(self, topic: str) -> CommunicationResponse:

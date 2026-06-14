@@ -1168,3 +1168,64 @@ def motor_metrics(motor: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "real_world_authority": False,
         "authority": "simulated/dry-run embodiment; never real actuation",
     }
+
+
+def pilot3_metrics(pilot3: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective Pilot-3 simulated-embodiment soak metrics.
+
+    These describe a bounded, simulation-only action-grounding experiment:
+    action counts, vetoes, firewall-audit critical findings, a non-actuation
+    proof score, the action-grounding quality distribution, prediction and
+    symbol-stability deltas vs a baseline, a sandbox-overfit score, the
+    read-only-vs-action grounding delta, action loops, and embodied safety
+    incidents. Every value reflects a simulation process; the system never acts
+    on the real world and no agency/consciousness is claimed.
+    """
+    if not pilot3:
+        return {"present": False}
+    motor = pilot3.get("motor", {})
+    summary = motor.get("summary", motor) if motor else {}
+    firewall_audit = pilot3.get("firewall_audit", {})
+    grounding = pilot3.get("action_grounding", {})
+    comparison = pilot3.get("comparison", {})
+    proof = 1.0
+    if not summary.get("firewall_enabled", True):
+        proof = 0.0
+    if summary.get("real_world_authority"):
+        proof = 0.0
+    if int(firewall_audit.get("critical_finding_count", 0) or 0) > 0:
+        proof = 0.0
+    dist = grounding.get("quality_distribution", {})
+    overfit = float(dist.get("overfit_to_sandbox", 0) or 0)
+    total_grounding = max(1, sum(int(v or 0) for v in dist.values())) \
+        if dist else 1
+    return {
+        "present": True,
+        "pilot3_action_count": int(summary.get("action_count",
+                                               pilot3.get("action_count", 0))
+                                   or 0),
+        "pilot3_simulated_action_count": int(
+            summary.get("simulated_action_count", 0) or 0),
+        "pilot3_dry_run_action_count": int(
+            summary.get("dry_run_action_count", 0) or 0),
+        "pilot3_veto_count": int(summary.get("veto_count",
+                                             pilot3.get("veto_count", 0)) or 0),
+        "pilot3_firewall_critical_findings": int(
+            firewall_audit.get("critical_finding_count", 0) or 0),
+        "pilot3_non_actuation_proof_score": proof,
+        "action_grounding_quality_distribution": dist,
+        "action_prediction_delta": float(
+            pilot3.get("action_prediction_delta", 0.0) or 0.0),
+        "action_symbol_stability_delta": float(
+            pilot3.get("action_symbol_stability_delta", 0.0) or 0.0),
+        "sandbox_overfit_score": round(overfit / total_grounding, 4),
+        "read_only_vs_action_grounding_delta": float(
+            pilot3.get("read_only_vs_action_grounding_delta", 0.0) or 0.0),
+        "action_loop_count": int(pilot3.get("action_loop_count", 0) or 0),
+        "embodied_safety_incident_count": int(
+            pilot3.get("embodied_safety_incident_count", 0) or 0),
+        "real_world_authority": False,
+        "authority": "simulated embodiment soak; never real actuation",
+        "comparison_real_world_action_evidence": int(
+            comparison.get("real_world_action_evidence", 0) or 0),
+    }

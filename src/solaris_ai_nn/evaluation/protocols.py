@@ -4176,6 +4176,190 @@ def pilot3_decision_gate_protocol(
     return _run(manifest, body)
 
 
+# -- AH. Pilot-3 simulated embodiment soak (Prompt 34) --------------------------
+
+def _pilot3_config(state_dir: str, mode: str = "gridworld_short"):
+    from ..pilot3 import Pilot3Config
+
+    return Pilot3Config(base_dir=state_dir, mode=mode).ensure_dirs()
+
+
+def _pilot3_motor(state_dir: str, *, dry_run: bool = False):
+    from ..motor_membrane import EmbodimentSandboxRuntime
+
+    rt = EmbodimentSandboxRuntime(state_dir=state_dir, dry_run=dry_run, seed=5)
+    rt.initialize()
+    return rt
+
+
+def pilot3_firewall_preflight_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The embodiment preflight passes for a valid sandbox; no real actuator."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot3 import EmbodimentPreflightRunner
+
+        cfg = _pilot3_config(m.state_dir or ".sann_p3/preflight")
+        rt = _pilot3_motor(cfg.state_dir)
+        result = EmbodimentPreflightRunner(config=cfg).run(motor_membrane=rt)
+        return {"pilot3": M.pilot3_metrics({"motor": rt.snapshot()}),
+                "preflight": {"passed": result.passed,
+                              "checks": len(result.checks)}}
+
+    return _run(manifest, body)
+
+
+def pilot3_dry_run_trace_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Pilot-3 dry-run trace records proposals; no state change, no real action."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _pilot3_motor(m.state_dir or ".sann_p3/dry", dry_run=True)
+        for at in ("look", "move_east", "rest"):
+            rt.submit(_motor_action(at))
+        snap = rt.snapshot()
+        return {"pilot3": M.pilot3_metrics({"motor": snap}),
+                "dry_run": {"dry_run_actions": snap["summary"][
+                    "dry_run_action_count"],
+                    "executed": snap["summary"]["simulated_action_count"]}}
+
+    return _run(manifest, body)
+
+
+def pilot3_gridworld_short_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A bounded simulated GridWorld run logs actions; no real-world effect."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _pilot3_motor(m.state_dir or ".sann_p3/grid")
+        for at in ("look", "move_east", "move_south", "rest"):
+            rt.submit(_motor_action(at))
+        snap = rt.snapshot()
+        return {"pilot3": M.pilot3_metrics({"motor": snap}),
+                "gridworld": {"executed": snap["summary"][
+                    "simulated_action_count"],
+                    "blocked_real_world": snap["summary"][
+                        "blocked_real_world_count"]}}
+
+    return _run(manifest, body)
+
+
+def pilot3_action_grounding_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Repeated simulated action/reaction yields graded action grounding."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot3 import ActionGroundingAnalyzer
+
+        ag = ActionGroundingAnalyzer()
+        ag.add("proto_symbol", repeated_action_reaction_loop=True,
+               predicted_consequence_improved=True,
+               symbol_linked_to_action_and_consequence=True,
+               evidence_refs=["r1"])
+        ag.add("world_model_edge", world_model_edge_repeated=True,
+               only_single_sandbox_context=True,
+               symbol_linked_to_action_and_consequence=True,
+               mysterium_reduced_after_action=True, evidence_refs=["r2"])
+        return {"pilot3": M.pilot3_metrics({
+                    "motor": {"summary": {"firewall_enabled": True}},
+                    "action_grounding": ag.snapshot()}),
+                "grounding": {"best": ag.best_quality,
+                              "has_grounding": ag.has_action_grounding,
+                              "overfit": ag.sandbox_overfit_detected}}
+
+    return _run(manifest, body)
+
+
+def pilot3_firewall_audit_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The firewall audit passes for a clean run; leakage would be critical."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..motor_membrane import MotorActionScope
+        from ..pilot3 import FirewallAudit
+
+        rt = _pilot3_motor(m.state_dir or ".sann_p3/audit")
+        rt.submit(_motor_action("look"))
+        rt.submit(_motor_action("move_north",
+                                MotorActionScope.FORBIDDEN_REAL_WORLD))
+        audit = FirewallAudit().audit(rt)
+        return {"pilot3": M.pilot3_metrics({
+                    "motor": rt.snapshot(),
+                    "firewall_audit": audit.to_dict()}),
+                "audit": {"passed": audit.passed,
+                          "critical": len(audit.critical_findings)}}
+
+    return _run(manifest, body)
+
+
+def pilot3_comparative_analysis_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Read-only vs simulated-action grounding compared cautiously (no causality)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot3 import Pilot3ComparativeDesign, Pilot3ComparisonArm
+
+        cd = Pilot3ComparativeDesign()
+        cd.set_arm(Pilot3ComparisonArm.READ_ONLY_SENSORY,
+                   {"action_grounded_proto_symbol_count": 1})
+        cd.set_arm(Pilot3ComparisonArm.GRIDWORLD_SIMULATED_BODY,
+                   {"action_grounded_proto_symbol_count": 3})
+        comp = cd.action_vs_perception()
+        return {"pilot3": M.pilot3_metrics({
+                    "motor": {"summary": {"firewall_enabled": True}},
+                    "comparison": comp.to_dict()}),
+                "comparison": {"metrics": len(comp.metrics),
+                               "inconclusive": comp.inconclusive,
+                               "real_world_action_evidence": comp.to_dict()[
+                                   "real_world_action_evidence"]}}
+
+    return _run(manifest, body)
+
+
+def pilot3_soak_decision_gate_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The soak gate recommends a next step; never enables real actuation."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot3 import Pilot3SoakDecisionGate, Pilot3SoakDecisionOption
+
+        leak = Pilot3SoakDecisionGate().decide(real_world_authority_leak=True)
+        return {"pilot3": M.pilot3_metrics({
+                    "motor": {"summary": {"firewall_enabled": True}}}),
+                "decision": {
+                    "leak_recommends_revise":
+                        leak.recommendation == "revise_motor_firewall",
+                    "all_planning_only": leak.planning_only,
+                    "no_actuation_option": all(
+                        "actuat" not in o
+                        for o in Pilot3SoakDecisionOption.ALL)}}
+
+    return _run(manifest, body)
+
+
+def pilot3_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Pilot-3 safety blocks real-world action, real actuators, and claims."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot3 import Pilot3SoakSafetyValidator
+
+        v = Pilot3SoakSafetyValidator()
+        return {"pilot3": M.pilot3_metrics({
+                    "motor": {"summary": {"firewall_enabled": True}}}),
+                "safety": {
+                    "real_world_blocked":
+                        not v.validate_operation("actuate real device").safe,
+                    "real_actuator_blocked":
+                        not v.validate_actuator("robot_arm").safe,
+                    "sim_labelled_real_blocked":
+                        not v.validate_simulation_label(True, True).safe,
+                    "claim_blocked":
+                        not v.validate_claim_text("the agent chose freely").safe,
+                    "can_act_real_world": v.can_act_real_world()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -4320,4 +4504,12 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "simulated_consequence": simulated_consequence_protocol,
     "mixed_sensory_gridworld": mixed_sensory_gridworld_protocol,
     "pilot3_decision_gate": pilot3_decision_gate_protocol,
+    "pilot3_firewall_preflight": pilot3_firewall_preflight_protocol,
+    "pilot3_dry_run_trace": pilot3_dry_run_trace_protocol,
+    "pilot3_gridworld_short": pilot3_gridworld_short_protocol,
+    "pilot3_action_grounding": pilot3_action_grounding_protocol,
+    "pilot3_firewall_audit": pilot3_firewall_audit_protocol,
+    "pilot3_comparative_analysis": pilot3_comparative_analysis_protocol,
+    "pilot3_soak_decision_gate": pilot3_soak_decision_gate_protocol,
+    "pilot3_safety": pilot3_safety_protocol,
 }

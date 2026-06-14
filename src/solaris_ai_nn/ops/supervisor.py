@@ -992,6 +992,50 @@ class OperationalSupervisor:
                     suggested_debug_step="reduce actions-per-step or the "
                     "sandbox step rate")
 
+        # Pilot-3 simulated embodiment soak monitoring (Prompt 34): the soak is
+        # simulation-only. A firewall-audit critical finding, a missing action
+        # ledger, or a source-boundary violation is critical; a sandbox-overfit
+        # warning is a watch.
+        pilot3 = snapshot.get("pilot3") or {}
+        if pilot3.get("enabled") or pilot3.get("pilot3_soak_enabled"):
+            if int(pilot3.get("firewall_audit_critical_findings", 0) or 0) > 0:
+                self.incidents.record(
+                    I.PILOT3_FIREWALL_AUDIT_CRITICAL, "critical",
+                    f"{pilot3['firewall_audit_critical_findings']} critical "
+                    "firewall-audit finding(s)",
+                    related_metric="pilot3_firewall_audit",
+                    suggested_debug_step="revise the motor firewall; do not "
+                    "advance the soak")
+            if pilot3.get("missing_action_ledger"):
+                self.incidents.record(
+                    I.PILOT3_MISSING_ACTION_LEDGER, "critical",
+                    "an executed action has no ledger record",
+                    related_metric="pilot3_action_ledger",
+                    suggested_debug_step="every executed action must be logged")
+            if pilot3.get("source_boundary_violation"):
+                self.incidents.record(
+                    I.PILOT3_SOURCE_BOUNDARY_VIOLATION, "critical",
+                    "a source/action boundary violation was detected",
+                    related_metric="pilot3_source_boundary",
+                    suggested_debug_step="sensory sources stay read-only; "
+                    "never an action target")
+            if pilot3.get("sandbox_overfit_warning"):
+                self.incidents.record(
+                    I.PILOT3_SANDBOX_OVERFIT, "warning",
+                    "action grounding may be overfit to the sandbox",
+                    related_metric="pilot3_sandbox_overfit",
+                    suggested_debug_step="vary the sandbox or add read-only "
+                    "sensory sources")
+            actions3 = int(pilot3.get("action_count", 0) or 0)
+            vetoes3 = int(pilot3.get("veto_count", 0) or 0)
+            if actions3 >= 8 and vetoes3 >= max(6, int(0.75 * actions3)):
+                self.incidents.record(
+                    I.MOTOR_VETO_LOOP, "warning",
+                    f"repeated Pilot-3 vetoes ({vetoes3}/{actions3})",
+                    related_metric="pilot3_veto_loop",
+                    suggested_debug_step="reduce action complexity or switch "
+                    "to dry-run")
+
         budget_report = self.budget.check_budget(
             {"telemetry": snapshot.get("telemetry"),
              "substrate": snapshot.get("substrate"),
@@ -1362,6 +1406,11 @@ class OperationalSupervisor:
             snapshot["motor_membrane"] = motor
         elif motor is not None and hasattr(motor, "summary"):
             snapshot["motor_membrane"] = motor.summary()
+        pilot3 = getattr(runner, "pilot3", None)
+        if pilot3 is not None and isinstance(pilot3, dict):
+            snapshot["pilot3"] = pilot3
+        elif pilot3 is not None and hasattr(pilot3, "pilot3_status"):
+            snapshot["pilot3"] = pilot3.pilot3_status()
         return snapshot
 
     def pilot2_status(self) -> Dict[str, Any]:
@@ -1407,6 +1456,45 @@ class OperationalSupervisor:
             "ledger_write_failures": m.get("ledger_write_failures", 0),
             "action_ledger_path": m.get("action_ledger_path"),
             "pilot3_report_path": m.get("pilot3_report_path"),
+        }
+
+    def pilot3_status(self) -> Dict[str, Any]:
+        """Expose Pilot-3 simulated embodiment soak status (if any).
+
+        Pilot-3 is simulation/dry-run only; this exposes the soak phase,
+        embodiment condition, action counts, firewall-audit status, latest
+        action-grounding quality, the latest report path, and the
+        non-actuation proof status. No real-world action ever occurs.
+        """
+        snap = self._health_snapshot()
+        p = snap.get("pilot3") or {}
+        motor = snap.get("motor_membrane") or {}
+        return {
+            "pilot3_soak_enabled": p.get("enabled", p.get("pilot3_soak_enabled",
+                                                          bool(p))),
+            "pilot3_soak_phase": p.get("pilot3_soak_phase",
+                                       p.get("current_phase")),
+            "embodiment_condition": p.get("embodiment_condition",
+                                          motor.get("profile_id")),
+            "action_count": p.get("action_count",
+                                  motor.get("action_count", 0)),
+            "simulated_action_count": p.get(
+                "simulated_action_count",
+                motor.get("simulated_action_count", 0)),
+            "veto_count": p.get("veto_count", motor.get("veto_count", 0)),
+            "firewall_audit_status": p.get("firewall_audit_status"),
+            "firewall_audit_critical_findings": p.get(
+                "firewall_audit_critical_findings", 0),
+            "latest_action_grounding_quality": p.get(
+                "latest_action_grounding_quality"),
+            "sandbox_overfit_warning": p.get("sandbox_overfit_warning", False),
+            "latest_pilot3_report_path": p.get("latest_pilot3_report_path"),
+            "non_actuation_proof_status": p.get(
+                "non_actuation_proof_status",
+                "no real-world action; firewall enabled"
+                if motor.get("firewall_enabled", True) else "firewall not "
+                "enabled"),
+            "real_world_authority": False,
         }
 
     def membrane_status(self) -> Dict[str, Any]:

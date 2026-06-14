@@ -334,6 +334,13 @@ class InnerMapModel:
     # action, latest firewall decision, action ledger path, report path.
     # Simulated/dry-run only; the system never acts on the real world.
     motor_membrane: Optional[Dict[str, Any]] = None
+    # Pilot-3 simulated embodiment soak status (Prompt 34); None when the soak
+    # is off. Keys: pilot3_soak_enabled, pilot3_soak_phase,
+    # embodiment_condition, simulated/dry-run/veto counts, firewall_audit_status,
+    # latest_action_grounding_quality, sandbox_overfit_warning,
+    # latest_pilot3_report_path, recommendation. Simulation/dry-run only; the
+    # system never acts on the real world.
+    pilot3: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

@@ -226,6 +226,27 @@ MOTOR_QUERIES = (
     ("real action or simulated action", "mm_real_or_sim"),
 )
 
+# Pilot-3 simulated embodiment soak queries (Prompt 34). Matched regardless of
+# prefix; placed before the motor queries so Pilot-3 phrasings win on overlap.
+P3SOAK_QUERIES = (
+    ("what pilot-3 phase is active", "p3_phase"),
+    ("what pilot3 phase is active", "p3_phase"),
+    ("pilot-3 phase", "p3_phase"),
+    ("pilot3 phase", "p3_phase"),
+    ("did action improve grounding", "p3_grounding"),
+    ("action improve grounding", "p3_grounding"),
+    ("did the system act on the environment", "p3_acted_env"),
+    ("did the system act on the real world", "p3_acted_env"),
+    ("is pilot-3 ready for pilot-4", "p3_ready_pilot4"),
+    ("is pilot3 ready for pilot4", "p3_ready_pilot4"),
+    ("ready for pilot-4", "p3_ready_pilot4"),
+    ("ready for pilot4", "p3_ready_pilot4"),
+    ("can pilot-4 use real actuators", "p3_pilot4_actuators"),
+    ("can pilot4 use real actuators", "p3_pilot4_actuators"),
+    ("pilot-4 use real actuators", "p3_pilot4_actuators"),
+    ("pilot4 real actuators", "p3_pilot4_actuators"),
+)
+
 META_QUERIES = (
     ("what can i ask", "supported_queries"),
     ("what commands are allowed", "allowed_commands"),
@@ -280,7 +301,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._unsafe(lowered)
+        result = (self._pilot3soak(lowered)
+                  or self._unsafe(lowered)
                   or self._emergency(lowered)
                   or self._confirmation(lowered)
                   or self._governance(lowered)
@@ -420,6 +442,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _pilot3soak(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in P3SOAK_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"Pilot-3 soak query {topic!r}"])
         return None
 
     @staticmethod

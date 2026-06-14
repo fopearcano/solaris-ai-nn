@@ -1312,3 +1312,47 @@ loops route back to read-only, and even a clean, predictive, well-grounded
 simulated run routes only to a *longer simulated* embodiment. Whether the system
 should ever have real actuation remains a separate question that Pilot-3, by
 construction, does not open.
+
+## Phase 34 — Pilot-3 simulated embodiment soak
+
+**The experiment, not just the boundary.** Phase 33 built the motor membrane
+(the outbound boundary). Phase 34 builds the experiment around it: a proper soak
+protocol that asks whether *simulated* action/reaction loops ground structure
+more than perception alone. It is the deliberate mirror of Pilot-2 — where
+Pilot-2 compared nursery vs read-only sensory exposure, Pilot-3 compares
+read-only perception vs simulated action vs mixed, with the same discipline of
+cautious, single-run, observed-association language.
+
+**Action grounding is operational and simulation-scoped.** The temptation is to
+read a system that "acts" and "learns from consequences" as embodied or
+competent. The analyzer refuses that: grounding is graded from repeated
+action/reaction loops, improved prediction, symbol-action-consequence links, and
+reduced Mysterium — and a strong result confined to one sandbox context is
+flagged `overfit_to_sandbox`, not `strong`. Action-grounded proto-symbols and
+world-model edges are tagged simulation-scoped and never promoted to real-world
+structure.
+
+**Action/reaction loops.** The GridWorld body lets the system close the loop:
+form an intention, run it in simulation, observe the simulated reaction, and
+compare it to the predicted consequence. Mispredictions seed hypotheses (scoped
+`simulation_only`); the desire to act against the firewall's prohibition is kept
+as a preserved LOGOS action/inhibition tension rather than resolved by acting.
+
+**Non-actuation proof.** Every soak ends with a read-only firewall audit and a
+proof-of-non-actuation: every executed action has a ledger record, no action
+carried real-world authority, no source was modified, and real-world actions
+executed is zero. Any leakage is a critical finding that blocks advancing and
+routes the decision gate to *revise the firewall* or archive/stop.
+
+**Sandbox overfitting.** A recurring worry is mistaking sandbox fluency for
+competence. The analyzer, the weekly review, and the post-analysis all carry an
+explicit sandbox-overfit signal, and the decision gate responds to it by varying
+the sandbox or adding read-only sensory sources rather than by trusting the
+result.
+
+**Why real actuation is still postponed.** The same discipline as every prior
+phase. Pilot-3 grounds action in simulation only; whether the system should ever
+have real actuators is a separate question that Pilot-3 does not open. Pilot-4
+can be *prepared* only as a planning phase, and real-world actuation would
+require a future architecture with new governance, safety, consent, and external
+actuation controls.

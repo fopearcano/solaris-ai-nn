@@ -1050,6 +1050,58 @@ class GovernancePolicy:
                     "no_disable_firewall", "motor_membrane",
                     "the actuation firewall can never be disabled"))
 
+        # Z. Pilot-3 simulated embodiment soak (Prompt 34): plan / preflight /
+        # dry-run / post-analysis allowed by default; GridWorld short allowed if
+        # the firewall preflight passes; the simulated soak needs an explicit
+        # bounded config; mixed mode needs sensory membrane validation;
+        # real-world actuation is forbidden absolutely; and any Pilot-4
+        # recommendation is planning-only.
+        if features.get("pilot3_soak"):
+            if not self._approved(PermissionScope.ENABLE_PILOT3_SOAK, ctx):
+                need_approval(PermissionScope.ENABLE_PILOT3_SOAK,
+                              "the Pilot-3 soak is not permitted")
+            mode = str(m.get("pilot3_mode", ctx.get("pilot3_mode", "")))
+            if mode in ("gridworld_short", "gridworld_soak_simulated",
+                        "mixed_sensory_gridworld_short",
+                        "mixed_sensory_gridworld_soak") \
+                    and not ctx.get("firewall_preflight_passed", True):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "sandbox_needs_firewall_preflight", "pilot3_soak",
+                    "a GridWorld/mixed run requires a passing firewall "
+                    "preflight"))
+            if mode in ("gridworld_soak_simulated",
+                        "mixed_sensory_gridworld_soak"):
+                if not (m.get("max_steps") or m.get("max_duration_s")
+                        or ctx.get("bounded_config")):
+                    decision.allowed = False
+                    decision.violations.append(PolicyViolation(
+                        "soak_needs_bounded_config", "pilot3_soak",
+                        "a simulated soak requires an explicit bounded config"))
+                need_approval(
+                    PermissionScope.ENABLE_PILOT3_GRIDWORLD_SOAK_SIMULATED,
+                    "a simulated GridWorld soak is opt-in")
+            if mode in ("mixed_sensory_gridworld_short",
+                        "mixed_sensory_gridworld_soak") \
+                    or features.get("pilot3_mixed_sensory_gridworld"):
+                if not ctx.get("sensory_membrane_validated"):
+                    decision.allowed = False
+                    decision.violations.append(PolicyViolation(
+                        "mixed_needs_sensory_validation", "pilot3_soak",
+                        "mixed sensory+gridworld needs sensory membrane "
+                        "validation"))
+                need_approval(
+                    PermissionScope.ENABLE_PILOT3_MIXED_SENSORY_GRIDWORLD,
+                    "mixed sensory+gridworld is opt-in")
+            if ctx.get("real_world_actuation") or ctx.get("device_control") \
+                    or ctx.get("robotics") or ctx.get("network_action") \
+                    or ctx.get("pilot4_real_actuation"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_real_world_actuation", "pilot3_soak",
+                    "real-world actuation is forbidden; Pilot-4 is "
+                    "planning-only, and no approval can allow actuation"))
+
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):
             if int(m.get("checkpoint_interval_steps", 0) or 0) <= 0:

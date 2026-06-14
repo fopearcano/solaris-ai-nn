@@ -342,6 +342,14 @@ python examples/run_dry_run_motor_trace_demo.py           # records proposals; c
 python examples/run_gridworld_motor_demo.py               # simulated embodiment in a sandbox body
 python examples/run_mixed_sensory_gridworld_demo.py       # read-only input + simulated body, separated
 python examples/run_pilot3_decision_gate_demo.py          # planning-only; never enables actuation
+
+# Pilot-3 simulated embodiment soak (does simulated action ground more than perception?)
+python examples/run_pilot3_soak_plan.py                   # runbook + comparison design; starts no run
+python examples/run_pilot3_firewall_audit_demo.py         # complete ledger, blocked action, non-actuation proof
+python examples/run_pilot3_gridworld_soak_demo.py         # bounded simulated action/reaction loop
+python examples/run_pilot3_action_grounding_demo.py       # action-grounded symbol + edge, graded
+python examples/run_pilot3_comparative_analysis_demo.py   # read-only vs simulated action vs mixed (cautious)
+python examples/run_pilot3_soak_decision_gate_demo.py     # extend/reduce/revise/prepare Pilot-4 planning-only
 ```
 
 The read-only sensory membrane and Pilot-2 also run as governed conscience
@@ -362,6 +370,17 @@ mixed sensory+gridworld is opt-in):
 solaris-nn run-profile pilot3_plan_only                   # plan only; starts nothing
 solaris-nn run-profile motor_firewall_preflight           # firewall blocks real-world
 solaris-nn run-profile gridworld_motor_short              # bounded simulated motor run
+```
+
+The Pilot-3 simulated embodiment soak runs as governed conscience profiles too
+(plan, preflight, dry-run, gridworld-short, and post-analysis need no approval;
+the simulated soak and mixed mode are opt-in):
+
+```bash
+solaris-nn run-profile pilot3_soak_plan                   # soak plan; starts nothing
+solaris-nn run-profile pilot3_firewall_preflight          # prove the firewall blocks real-world
+solaris-nn run-profile pilot3_gridworld_short             # bounded simulated action run
+solaris-nn run-profile pilot3_post_analysis               # read-only forensics
 ```
 
 The post-pilot analysis also runs as a plan-only conscience profile (read-only;
@@ -492,6 +511,26 @@ not act on the real world: no actuation, no robotics, no device control, no
 browser/OS automation, no network APIs. A simulated action is not a real
 action, and no consciousness, agency, personhood, sentience, or life is
 claimed.**
+
+The **Pilot-3 simulated embodiment soak** (`pilot3/`) is the experiment around
+that boundary — the outbound mirror of the Pilot-2 read-only soak. It tests one
+question: *does simulated action/reaction produce stronger grounding than
+perception-only exposure?* It compares read-only sensory, nursery-only,
+simulated GridWorld, and mixed conditions; runs gated phases (plan → firewall
+preflight → dry-run trace → gridworld baseline → action soak → mixed soak →
+firewall audit → post-analysis → archive, with **no real-actuation phase**);
+preflights the sandbox; grades action grounding (unsupported … strong, plus an
+explicit **overfit_to_sandbox** class); audits the firewall read-only to **prove
+non-actuation**; compares arms *cautiously* (observed associations, never proven
+causes; simulation-scoped; real-world action evidence always zero); writes
+embodied daily/weekly reviews and a claim-guarded soak report; and gates the
+next step (extend simulation / reduce complexity / revise the firewall / return
+to read-only / prepare Pilot-4 **planning-only**). **Pilot-3 is sandboxed action
+grounding, not real embodiment: GridWorld is a sandbox body, a strong result is
+still simulation-scoped, simulation evidence is never real-world evidence, and
+Pilot-4 can only be prepared as a planning phase — real-world actuation would
+require a future architecture with new governance, safety, consent, and external
+actuation controls.**
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
 > explicit acknowledgement flags in the run manifest and should only be
@@ -886,6 +925,10 @@ src/solaris_ai_nn/
                 ledger, simulated actuators, affordances, consequence model,
                 sandbox runtime, embodiment profiles, protocol, report,
                 decision gate, runbook, safety
+  pilot3/       simulated embodiment soak: config, soak protocol, embodiment
+                preflight, comparative design, action grounding, firewall audit,
+                daily/weekly reviews, post-analysis, soak report, decision gate,
+                runbook, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

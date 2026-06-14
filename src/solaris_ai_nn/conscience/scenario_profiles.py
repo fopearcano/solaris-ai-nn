@@ -571,6 +571,106 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
         expected_metrics=["run_step_count", "module_success_rate"],
         max_runtime_s=90.0))
 
+    # -- Pilot-3 simulated embodiment soak profiles (Prompt 34) ---------------
+    # Plan only: starts no run; grants no actuation.
+    add(ScenarioProfile(
+        profile_id="pilot3_soak_plan",
+        description="Plan the Pilot-3 simulated embodiment soak (plan only).",
+        run_context=_ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                         max_duration_s=None),
+        enabled_modules=list(_motor_core),
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "plan only; no run is started",
+            "simulation/dry-run only; no real-world actuation"],
+        governance_requirements=["enable_pilot3_soak"],
+        expected_artifacts=["PILOT3_SOAK_REPORT.json"],
+        expected_metrics=["report_generation_success"],
+        max_runtime_s=30.0))
+
+    # Firewall preflight: confirm the firewall blocks real-world actions.
+    add(ScenarioProfile(
+        profile_id="pilot3_firewall_preflight",
+        description="Pilot-3 actuation firewall preflight (bounded).",
+        run_context=_ctx(RunMode.SHORT_DEMO, max_steps=20),
+        enabled_modules=["bridge", "ecology", "governance", "ops", "executive",
+                         "motor_membrane"],
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "firewall always enabled; real-world actions blocked"],
+        governance_requirements=["enable_pilot3_firewall_preflight"],
+        expected_artifacts=["actuation_firewall.jsonl"],
+        expected_metrics=["run_step_count"],
+        max_runtime_s=30.0))
+
+    # Dry-run motor trace: records proposed actions; no simulation change.
+    add(ScenarioProfile(
+        profile_id="pilot3_dry_run_trace",
+        description="Pilot-3 dry-run motor trace (records proposals only).",
+        run_context=_ctx(RunMode.SHORT_DEMO, max_steps=30),
+        enabled_modules=["bridge", "ecology", "governance", "ops", "executive",
+                         "motor_membrane"],
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "dry-run: no simulation state change, no real action"],
+        governance_requirements=["enable_pilot3_dry_run_trace"],
+        expected_artifacts=["motor_actions.jsonl"],
+        expected_metrics=["run_step_count"],
+        max_runtime_s=40.0))
+
+    # GridWorld short: bounded simulated movement.
+    add(ScenarioProfile(
+        profile_id="pilot3_gridworld_short",
+        description="Pilot-3 bounded GridWorld simulated motor run.",
+        run_context=_ctx(RunMode.SHORT_DEMO, max_steps=40),
+        enabled_modules=list(_motor_core),
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "simulation-only GridWorld actions; no real-world effect"],
+        governance_requirements=["enable_pilot3_gridworld_short"],
+        expected_artifacts=["motor_actions.jsonl", "conscience_bus.jsonl"],
+        expected_metrics=["run_step_count", "module_success_rate"],
+        max_runtime_s=60.0))
+
+    # GridWorld simulated soak: bounded longer simulated action/reaction.
+    add(ScenarioProfile(
+        profile_id="pilot3_gridworld_soak_simulated",
+        description="Pilot-3 bounded simulated GridWorld action soak.",
+        run_context=_ctx(RunMode.DEVELOPMENTAL_SIMULATED, max_steps=80),
+        enabled_modules=list(_motor_core),
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "bounded simulated soak; no real-world effect",
+            "action budget respected; firewall always on"],
+        governance_requirements=["enable_pilot3_gridworld_soak_simulated"],
+        expected_artifacts=["motor_actions.jsonl"],
+        expected_metrics=["run_step_count", "module_success_rate"],
+        max_runtime_s=120.0))
+
+    # Mixed sensory + gridworld short: read-only input + simulated body.
+    add(ScenarioProfile(
+        profile_id="pilot3_mixed_sensory_gridworld_short",
+        description="Pilot-3 read-only sensory input + separate simulated body.",
+        run_context=_ctx(RunMode.DEVELOPMENTAL_SIMULATED, max_steps=60),
+        enabled_modules=list(_motor_core) + ["sensory_membrane"],
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "sensory input stays read-only; body actions stay simulated",
+            "source/body boundary preserved"],
+        governance_requirements=["enable_pilot3_mixed_sensory_gridworld"],
+        expected_artifacts=["motor_actions.jsonl"],
+        expected_metrics=["run_step_count", "module_success_rate"],
+        max_runtime_s=90.0))
+
+    # Post-analysis: read-only forensics; no cognition loop, no mutation.
+    add(ScenarioProfile(
+        profile_id="pilot3_post_analysis",
+        description="Pilot-3 post-run analysis (plan only; read-only).",
+        run_context=_ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                         max_duration_s=None),
+        enabled_modules=["bridge", "governance", "ops", "evaluation",
+                         "inner_map"],
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "read-only forensics; no run is started; no actuation"],
+        governance_requirements=["enable_pilot3_post_analysis"],
+        expected_artifacts=["PILOT3_SOAK_REPORT.json"],
+        expected_metrics=["report_generation_success"],
+        max_runtime_s=30.0))
+
     return profiles
 
 

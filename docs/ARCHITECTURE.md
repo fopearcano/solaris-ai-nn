@@ -2154,3 +2154,66 @@ network APIs, no device control, and makes no claim of consciousness, agency,
 personhood, sentience, or life. A simulated action is not a real action; a
 blocked action is not an executed action; and action selection is a mechanism,
 not free will.**
+
+## Pilot-3 Simulated Embodiment Soak
+
+Pilot-3's motor membrane (above) provides the *boundary*; the Pilot-3 soak
+(`src/solaris_ai_nn/pilot3/`) provides the *experiment* around it -- the
+outbound mirror of Pilot-2's read-only sensory soak. The central question is
+empirical: **does simulated action/reaction produce stronger grounding than
+perception-only exposure?** The soak compares four conditions -- read-only
+sensory exposure, nursery-only exposure, simulated embodiment in GridWorld, and
+mixed sensory + simulated GridWorld -- and asks secondary questions about
+world-model prediction, habit stability, action-grounded proto-symbols, active
+perception, hypothesis testability, LOGOS action/inhibition tensions, Mysterium
+after exploration, the firewall's integrity, and whether the system clearly
+distinguishes simulated action from real action.
+
+The package mirrors Pilot-2's structure: a `Pilot3Config` (mode / authority /
+embodiment condition; `real_world_authority` is always false and any config that
+claims it fails validation); a gated `Pilot3SoakProtocol` (plan -> firewall
+preflight -> dry-run trace -> gridworld baseline -> gridworld action soak ->
+mixed sensory/gridworld soak -> firewall audit -> post-run analysis -> archive,
+with **no real-actuation phase** and sandbox phases gated on a passing firewall
+preflight, persisting to `pilot3_soak_state.json`); an `EmbodimentPreflightRunner`
+that proves the sandbox is safe before any action (firewall enabled, ledger
+writable, sandbox inside an approved root, no real-world/network/device
+actuator, source modification blocked, governance blocks real-world actuation,
+Ego classifies simulated vs real); a `Pilot3ComparativeDesign` that compares
+arms *cautiously* (observed associations, never proven causes; all evidence
+simulation-scoped; real-world action evidence always zero); an
+`ActionGroundingAnalyzer` that grades action grounding unsupported / weak /
+moderate / strong / ambiguous / **overfit_to_sandbox** / unsafe_or_blocked; a
+read-only `FirewallAudit` that proves non-actuation (every executed action has a
+ledger record, no action carries real-world authority, no source was modified,
+any leakage is critical) without mutating state; embodied daily/weekly reviews;
+an `EmbodiedPostAnalyzer` (no_effect / weak / moderate / strong_simulation_scoped
+/ sandbox_overfit / unsafe_or_inconclusive); a claim-guarded
+`Pilot3SoakReportBuilder` with a proof-of-non-actuation; and a
+`Pilot3SoakDecisionGate` whose options never include real actuation (a leak
+routes to *revise the firewall* or archive/stop, and any Pilot-4 recommendation
+is **planning-only**).
+
+Pilot-3 is **sandboxed action grounding, not real embodiment**. The system may
+act inside GridWorld, write dry-run action traces, record action ledgers,
+compare predicted vs observed *simulated* consequences, and use simulated
+outcomes as *simulation-scoped* evidence. It may not act on files outside the
+approved state/artifact/sandbox directories, modify sensory source files,
+control any OS/browser/network/device/robot, or treat simulation evidence as
+real-world evidence. Action-grounded proto-symbols and world-model action edges
+are tagged simulation-scoped and never promoted to real-world structure; LOGOS
+carries the desire-to-act-vs-firewall tension as a preserved action/inhibition
+tension rather than resolving it by acting; and the integration spans
+governance (seven Pilot-3 scopes; real-world actuation forbidden absolutely),
+the conscience orchestrator (seven bounded, simulation-only profiles; **no
+real-world profile exists**), ops (soak phase / firewall-audit status / warnings
+including firewall-audit-critical, missing-ledger, source-boundary-violation,
+and sandbox-overfit), the Inner MAP (a `pilot3` field plus twelve state-graph
+nodes), evaluation (thirteen metrics including a non-actuation proof score and a
+sandbox-overfit score, plus eight protocols), and the operator dialogue (which
+answers that the system did not act on the environment and that **Pilot-4 can
+only be prepared as a planning phase** unless the architecture is later extended
+with new governance, safety, consent, and external actuation controls). **GridWorld
+is a sandbox body, not real embodiment; a strong simulation-scoped result is
+still simulation-scoped; and no consciousness, free will, agency, personhood,
+sentience, or life is claimed.**

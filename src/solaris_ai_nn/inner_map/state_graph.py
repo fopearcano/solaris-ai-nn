@@ -1175,4 +1175,37 @@ def build_default_state_graph() -> StateGraph:
                "the protocol gates sandbox phases")
     g.add_edge("embodiment_sandbox_runtime", "inner_map",
                "motor membrane state feeds Inner MAP")
+
+    # Pilot-3 simulated embodiment soak (Prompt 34). The soak layer on top of
+    # the motor membrane: a bounded simulated action/reaction experiment that
+    # grades action grounding and audits non-actuation. Not real embodiment.
+    for name, role in [
+        ("Pilot3Config", "simulation-only soak config; no real authority"),
+        ("Pilot3SoakProtocol", "gated soak phases; no real-actuation phase"),
+        ("EmbodimentPreflightRunner", "proves the sandbox is safe pre-action"),
+        ("Pilot3ComparativeDesign", "perception vs simulated action grounding"),
+        ("ActionGroundingAnalyzer", "grades simulation-scoped action grounding"),
+        ("FirewallAudit", "read-only proof the firewall held"),
+        ("Pilot3DailyReviewBuilder", "one day of simulated embodiment"),
+        ("Pilot3WeeklyReviewBuilder", "simulated action grounding trends"),
+        ("EmbodiedPostAnalyzer", "classifies the soak; simulation-scoped"),
+        ("Pilot3SoakReportBuilder", "claim-guarded soak report + non-actuation"),
+        ("Pilot3SoakDecisionGate", "next step; never enables real actuation"),
+        ("Pilot3SoakSafetyValidator", "Pilot-3 hard rules; never bypassed"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("embodiment_sandbox_runtime", "Pilot3SoakProtocol",
+               "motor membrane feeds Pilot-3 observability")
+    g.add_edge("action_ledger", "FirewallAudit",
+               "the action ledger feeds the firewall audit")
+    g.add_edge("simulated_actuator", "ActionGroundingAnalyzer",
+               "action results feed the grounding analyzer")
+    g.add_edge("Pilot3ComparativeDesign", "EmbodiedPostAnalyzer",
+               "the comparison design feeds the post-analysis")
+    g.add_edge("Pilot3SoakReportBuilder", "inner_map",
+               "the Pilot-3 report feeds Inner MAP / Evaluation")
+    g.add_edge("Pilot3SoakProtocol", "Pilot3SoakDecisionGate",
+               "the soak protocol feeds the decision gate")
+    g.add_edge("FirewallAudit", "Pilot3SoakDecisionGate",
+               "firewall audit integrity gates the next step")
     return g

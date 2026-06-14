@@ -637,3 +637,20 @@ blocks every real-world effect. A simulated action is never a real action.
 | Embodiment roadmap | `EmbodimentProfileRegistry` (seven bounded profiles, **no real-world profile**) + `Pilot3Protocol` (gated phases, **no real-actuation phase**) |
 | decision to continue | `Pilot3DecisionGate` -- planning-only (leak -> revise firewall; safe improvement -> longer *simulated* embodiment) |
 | Inner MAP | motor membrane status (`motor_membrane` field + 14 state-graph nodes) |
+
+## Pilot-3 simulated embodiment soak mapping (Phase 34)
+
+The pilot3 package (`pilot3/`) operationalises Solaris_Ai's action/embodiment
+roadmap as a bounded, simulation-only soak: it asks whether *simulated*
+action/reaction grounds structure more than perception alone, while an always-on
+actuation firewall is audited to prove no real-world action occurred.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| Action spine | sandboxed `MotorAction` analysis via `Pilot3SoakProtocol` + `ActionGroundingAnalyzer` (simulation-scoped) |
+| Embodiment roadmap | GridWorld as a *simulated body* (`gridworld_body` condition); never real embodiment |
+| Inner MAP | action/firewall topology observation (`pilot3` field + 12 state-graph nodes) |
+| LOGOS | action/inhibition tension -- desire-to-act vs the actuation firewall (`ACTION_INHIBITION`, safety-dominant) |
+| ethics / off-switch | the `FirewallAudit` and action veto -- read-only proof of non-actuation; emergency stop always available |
+| comparative development | `Pilot3ComparativeDesign` (read-only sensory vs simulated action vs mixed) + `EmbodiedPostAnalyzer` |
+| decision to continue | `Pilot3SoakDecisionGate` -- extend simulation / reduce complexity / revise firewall / return to read-only / prepare Pilot-4 *planning-only* |

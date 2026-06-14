@@ -219,6 +219,16 @@ DESCRIPTIONS = {
     "simulated_consequence": "predicted vs observed simulated consequence",
     "mixed_sensory_gridworld": "read-only sensory + simulated body, separate",
     "pilot3_decision_gate": "Pilot-3 next-step gate; never enables actuation",
+    "pilot3_firewall_preflight": "Pilot-3 embodiment preflight; safe sandbox",
+    "pilot3_dry_run_trace": "Pilot-3 dry-run trace; no state change",
+    "pilot3_gridworld_short": "Pilot-3 bounded simulated GridWorld run",
+    "pilot3_action_grounding": "Pilot-3 graded action grounding (sim-scoped)",
+    "pilot3_firewall_audit": "Pilot-3 read-only firewall audit; non-actuation",
+    "pilot3_comparative_analysis":
+        "Pilot-3 read-only vs simulated-action grounding (cautious)",
+    "pilot3_soak_decision_gate":
+        "Pilot-3 soak gate; Pilot-4 planning-only, never actuation",
+    "pilot3_safety": "Pilot-3 safety blocks real action/actuators/claims",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -331,6 +341,8 @@ class ExperimentRegistry:
                 "dry_run_motor_trace", "action_veto", "non_actuation",
                 "simulated_consequence", "mixed_sensory_gridworld")
             or bool(merged.get("motor_membrane", False)))
+        features["pilot3_soak"] = (
+            name.startswith("pilot3") or bool(merged.get("pilot3_soak", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

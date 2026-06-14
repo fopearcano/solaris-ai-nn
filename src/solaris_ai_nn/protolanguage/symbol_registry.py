@@ -17,6 +17,18 @@ from typing import Any, Dict, List, Optional, Union
 from .pattern_naming import InternalPatternNamer
 from .symbols import ProtoSymbol, SymbolGrounding, SymbolType
 
+# Pilot-3 simulated-embodiment symbol categories (Prompt 34). A symbol carrying
+# one of these in its metadata is grounded by *simulated* action and is
+# simulation-scoped; it is never evidence of real-world action. Use together
+# with ``evidence_kind="simulation"`` and ``metadata["simulation_scoped"]=True``.
+PILOT3_SYMBOL_CATEGORIES = (
+    "action_grounded_simulated",
+    "action_reaction_loop_symbol",
+    "blocked_action_symbol",
+    "affordance_symbol",
+    "sandbox_only_symbol",
+)
+
 
 @dataclass
 class SymbolRegistry:

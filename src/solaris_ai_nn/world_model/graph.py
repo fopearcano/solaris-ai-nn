@@ -14,6 +14,19 @@ from typing import Any, Dict, List, Optional, Tuple
 from .edges import EdgeType, GraphEdge, edge_id_for
 from .nodes import GraphNode, NodeType, node_id_for
 
+# Pilot-3 simulated-embodiment edge/node kinds (Prompt 34). These are stored as
+# a ``pilot3_kind`` metadata tag on an ordinary edge/node (with
+# ``simulation_scoped=True``); they come from *simulated* action only and must
+# never be promoted to a real-world edge. (The edge ``type`` stays a normal
+# EdgeType such as CAUSES_CANDIDATE / PRODUCES / BLOCKED_BY.)
+PILOT3_ACTION_EDGE_KINDS = (
+    "simulated_action_edge",
+    "simulated_consequence_edge",
+    "blocked_action_edge",
+)
+PILOT3_AFFORDANCE_NODE_KIND = "affordance_node"
+PILOT3_SANDBOX_CAUSAL_CANDIDATE = "sandbox_only_causal_candidate"
+
 
 @dataclass
 class KnowledgeGraph:

@@ -169,6 +169,16 @@ class PermissionScope:
     ENABLE_SIMULATED_ACTUATORS = "enable_simulated_actuators"
     ENABLE_MIXED_SENSORY_GRIDWORLD = "enable_mixed_sensory_gridworld"
     ENABLE_PILOT3_PLAN_ONLY = "enable_pilot3_plan_only"
+    # Pilot-3 simulated embodiment soak (Prompt 34).
+    ENABLE_PILOT3_SOAK = "enable_pilot3_soak"
+    ENABLE_PILOT3_FIREWALL_PREFLIGHT = "enable_pilot3_firewall_preflight"
+    ENABLE_PILOT3_DRY_RUN_TRACE = "enable_pilot3_dry_run_trace"
+    ENABLE_PILOT3_GRIDWORLD_SHORT = "enable_pilot3_gridworld_short"
+    ENABLE_PILOT3_GRIDWORLD_SOAK_SIMULATED = \
+        "enable_pilot3_gridworld_soak_simulated"
+    ENABLE_PILOT3_MIXED_SENSORY_GRIDWORLD = \
+        "enable_pilot3_mixed_sensory_gridworld"
+    ENABLE_PILOT3_POST_ANALYSIS = "enable_pilot3_post_analysis"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -237,6 +247,10 @@ class PermissionScope:
         ENABLE_DRY_RUN_MOTOR_TRACE, ENABLE_GRIDWORLD_MOTOR_SHORT,
         ENABLE_SIMULATED_ACTUATORS, ENABLE_MIXED_SENSORY_GRIDWORLD,
         ENABLE_PILOT3_PLAN_ONLY,
+        ENABLE_PILOT3_SOAK, ENABLE_PILOT3_FIREWALL_PREFLIGHT,
+        ENABLE_PILOT3_DRY_RUN_TRACE, ENABLE_PILOT3_GRIDWORLD_SHORT,
+        ENABLE_PILOT3_GRIDWORLD_SOAK_SIMULATED,
+        ENABLE_PILOT3_MIXED_SENSORY_GRIDWORLD, ENABLE_PILOT3_POST_ANALYSIS,
     )
 
 
@@ -652,6 +666,27 @@ class PermissionSet:
             Permission(S.ENABLE_PILOT3_PLAN_ONLY, granted=True,
                        note="Pilot-3 planning only; starts no run and grants "
                             "no actuation"),
+            # Pilot-3 simulated embodiment soak (Prompt 34).
+            Permission(S.ENABLE_PILOT3_SOAK, granted=True,
+                       note="Pilot-3 soak planning/orchestration; "
+                            "simulation/dry-run only, never real actuation"),
+            Permission(S.ENABLE_PILOT3_FIREWALL_PREFLIGHT, granted=True,
+                       note="firewall preflight is always allowed"),
+            Permission(S.ENABLE_PILOT3_DRY_RUN_TRACE, granted=True,
+                       note="dry-run motor traces change no state"),
+            Permission(S.ENABLE_PILOT3_GRIDWORLD_SHORT, granted=True,
+                       note="bounded GridWorld short run; allowed if the "
+                            "firewall preflight passes"),
+            Permission(S.ENABLE_PILOT3_GRIDWORLD_SOAK_SIMULATED,
+                       requires_approval=True,
+                       note="a simulated GridWorld soak requires an explicit "
+                            "bounded config and approval"),
+            Permission(S.ENABLE_PILOT3_MIXED_SENSORY_GRIDWORLD,
+                       requires_approval=True,
+                       note="mixed sensory+gridworld needs sensory membrane "
+                            "validation"),
+            Permission(S.ENABLE_PILOT3_POST_ANALYSIS, granted=True,
+                       note="post-run analysis is read-only"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

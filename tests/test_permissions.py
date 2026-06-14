@@ -71,8 +71,9 @@ def test_all_scopes_in_default_set():
     # + 6 hypothesis engine (P25) + 9 auto-regeneration (P26)
     # + 6 LOGOS complexity (P27) + 6 conscience runtime (P28)
     # + 7 Pilot-1 soak protocol (P29) + 9 sensory membrane (P31)
-    # + 10 Pilot-2 soak protocol (P32) + 7 motor membrane (P33).
-    assert len(PermissionScope.ALL) == 125
+    # + 10 Pilot-2 soak protocol (P32) + 7 motor membrane (P33)
+    # + 7 Pilot-3 simulated embodiment soak (P34).
+    assert len(PermissionScope.ALL) == 132
 
 
 def test_motor_membrane_scope_defaults():
