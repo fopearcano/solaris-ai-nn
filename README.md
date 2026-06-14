@@ -296,7 +296,46 @@ python examples/run_logos_synthesis_demo.py
 python examples/run_complexity_regulation_demo.py
 python examples/run_esc_process_demo.py
 python examples/run_logos_safety_demo.py
+
+# Conscience: the unified runtime spine that assembles the whole organism
+python examples/run_conscience_minimal_demo.py            # smallest end-to-end spine
+python examples/run_full_developmental_short_demo.py      # every module, one bounded run
+python examples/run_month_scale_dry_plan.py               # plan a month run; start nothing
+python examples/run_conscience_health_check.py            # is the whole thing wired?
+python examples/run_conscience_snapshot_demo.py           # one consistent runtime snapshot
 ```
+
+The unified runtime also ships two console entry points (installed with the
+package): `solaris-nn` and `solaris-nn-scenario`.
+
+```bash
+solaris-nn list-profiles                                  # the 10 scenario profiles A--J
+solaris-nn dry-run-profile --profile full_developmental_short --governance-approved
+solaris-nn run-profile --profile minimal_smoke --state-dir .solaris_ai_nn_state/smoke
+solaris-nn health-check --profile nursery_short --state-dir .solaris_ai_nn_state/hc
+solaris-nn snapshot --profile nursery_short --state-dir .solaris_ai_nn_state/snap
+solaris-nn-scenario minimal_smoke --state-dir .solaris_ai_nn_state/scn   # shorthand for run-profile
+```
+
+The **conscience layer** (`conscience/`) turns the independent packages into
+**one runnable developmental process** while keeping every safety guarantee.
+Its first principle is that **no module is sovereign**: the
+`ConscienceOrchestrator` owns no action authority, and nothing bypasses
+executive inhibition, Ego boundaries, safety, governance, ClaimGuard, the
+emergency stop, or auto-regeneration safety. A `ConscienceSpine` of 18 phases
+preserves the Solaris spine (Stimulus → Push → Desire → ActionCandidate/
+ActionSuggestion → Reaction → Memory/World Model/.../Inner MAP); a missing
+module is *skipped*, never faked or crashed. Runs are pinned by a bounded
+`RunContext` (always internal/simulation/read-only — never real-world),
+validated against eleven hard safety rules, and driven by an in-process
+replayable bus, an import-probing module registry, a logged lifecycle, and a
+low-compute scheduler. Ten reproducible `ScenarioProfile`s (A `minimal_smoke`
+… J `month_scale_dry_run`) run through a `ScenarioRunner` that gates governed
+profiles and writes per-run reports; there is **no canned month/year *real*
+profile** — a real long-scale run needs an explicitly governance-approved
+context, and the default is always a short bounded simulated run. An
+`IntegrationHealthMonitor`, `SnapshotBuilder`, and claim-guarded
+`FullSystemReportBuilder` make a run inspectable and auditable.
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
 > explicit acknowledgement flags in the run manifest and should only be
@@ -670,6 +709,9 @@ src/solaris_ai_nn/
   protolanguage/ symbols, registry, emergence, naming, combinatorics,
                 syntax probe, grounding, compression, prediction utility,
                 symbol memory, utterances, translation, reports, safety
+  conscience/   unified runtime: spine, bus, module registry/lifecycle,
+                scheduler, orchestrator, scenario profiles/runner, integration
+                health, snapshots, full-system report, runtime safety, CLI
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

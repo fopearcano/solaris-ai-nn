@@ -454,6 +454,17 @@ class GovernancePolicy:
             return self.approvals.is_approved(scope, context)
         return False
 
+    def is_enabled(self, scope: str,
+                   context: Optional[Dict[str, Any]] = None) -> bool:
+        """Public check: is ``scope`` granted outright or validly approved?
+
+        The conscience runtime uses this to gate governed scenario profiles
+        (e.g. the full-developmental-short and month-scale dry-run profiles).
+        It never enables real-world actuation; it only reports whether a
+        bounded, simulation-only capability is permitted.
+        """
+        return self._approved(scope, context)
+
     def _audit_decision(self, decision: PolicyDecision) -> PolicyDecision:
         if self.audit is not None:
             self.audit.record(
@@ -812,6 +823,53 @@ class GovernancePolicy:
                 decision.violations.append(PolicyViolation(
                     "contradiction_not_permission", "logos",
                     "a contradiction can never be treated as permission"))
+
+        # U. Conscience runtime: assembling the unified spine is allowed
+        # bounded/simulation-only; the heavier profiles are gated, real
+        # long-scale runs need approval, and nothing actuates the real world.
+        if features.get("conscience_orchestrator"):
+            if not self._approved(
+                    PermissionScope.ENABLE_CONSCIENCE_ORCHESTRATOR, ctx):
+                need_approval(PermissionScope.ENABLE_CONSCIENCE_ORCHESTRATOR,
+                              "the conscience orchestrator is not permitted")
+            if (features.get("full_developmental_short")
+                    or ctx.get("full_developmental_short")):
+                need_approval(
+                    PermissionScope.ENABLE_FULL_DEVELOPMENTAL_SHORT_PROFILE,
+                    "the full-developmental-short profile requires explicit "
+                    "acknowledgement")
+            if (features.get("month_scale_dry_run")
+                    or ctx.get("month_scale_dry_run")):
+                need_approval(PermissionScope.ENABLE_MONTH_SCALE_DRY_RUN,
+                              "a simulated month-scale dry run requires "
+                              "explicit acknowledgement")
+            if (features.get("year_scale_plan")
+                    or ctx.get("year_scale_plan")):
+                need_approval(PermissionScope.ENABLE_YEAR_SCALE_PLAN,
+                              "planning a year-scale run requires explicit "
+                              "acknowledgement")
+            if (features.get("month_scale_real_run")
+                    or ctx.get("month_scale_real_run")):
+                need_approval(PermissionScope.ENABLE_MONTH_SCALE_REAL_RUN,
+                              "a real month-scale run requires explicit human "
+                              "approval")
+            if (features.get("year_scale_real_run")
+                    or ctx.get("year_scale_real_run")):
+                need_approval(PermissionScope.ENABLE_YEAR_SCALE_REAL_RUN,
+                              "a real year-scale run requires explicit human "
+                              "approval")
+            if ctx.get("module_bypass") or ctx.get("module_sovereign"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_module_sovereign", "conscience",
+                    "no module may bypass executive/safety/governance; no "
+                    "module is sovereign"))
+            if ctx.get("real_world_actuation"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "simulation_only_embodiment", "conscience",
+                    "the conscience runtime can never actuate the real "
+                    "world"))
 
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):

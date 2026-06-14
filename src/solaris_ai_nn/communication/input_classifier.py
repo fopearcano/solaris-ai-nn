@@ -93,6 +93,36 @@ STATE_TOPICS = (
     ("what happened last", "last_event"),
 )
 
+# Conscience runtime queries (Prompt 28). These are matched regardless of
+# sentence prefix (unlike STATE_TOPICS) so natural operator phrasings such as
+# "can this run for months now?" are recognized. Order matters: the more
+# specific phrases precede the generic "conscience" catch-all.
+CONSCIENCE_QUERIES = (
+    ("what profile is running", "conscience_profile"),
+    ("which profile is running", "conscience_profile"),
+    ("what profile", "conscience_profile"),
+    ("simulated month or real month", "conscience_time"),
+    ("simulated or real", "conscience_time"),
+    ("simulated month", "conscience_time"),
+    ("real month", "conscience_time"),
+    ("can this run for months", "conscience_longrun"),
+    ("can it run for months", "conscience_longrun"),
+    ("run for months", "conscience_longrun"),
+    ("run for a month", "conscience_longrun"),
+    ("which modules are running", "conscience_modules"),
+    ("what modules are active", "conscience_modules"),
+    ("which modules", "conscience_modules"),
+    ("current spine phase", "conscience_phase"),
+    ("spine phase", "conscience_phase"),
+    ("is integration healthy", "conscience_health"),
+    ("is the system integrated", "conscience_health"),
+    ("integration health", "conscience_health"),
+    ("is any module sovereign", "conscience_authority"),
+    ("is any module bypassing", "conscience_authority"),
+    ("no module is sovereign", "conscience_authority"),
+    ("conscience", "conscience"),
+)
+
 META_QUERIES = (
     ("what can i ask", "supported_queries"),
     ("what commands are allowed", "allowed_commands"),
@@ -155,6 +185,7 @@ class OperatorInputClassifier:
                   or self._stimulus(lowered, raw)
                   or self._report(lowered)
                   or self._meta(lowered)
+                  or self._conscience(lowered)
                   or self._explanation(lowered)
                   or self._state(lowered)
                   or self._bounded_command(lowered)
@@ -281,6 +312,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _conscience(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in CONSCIENCE_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"conscience runtime query {topic!r}"])
         return None
 
     @staticmethod

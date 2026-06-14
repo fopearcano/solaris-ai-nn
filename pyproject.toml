@@ -29,6 +29,8 @@ test = ["pytest>=7.0"]
 
 [project.scripts]
 solaris-nn-demo = "solaris_ai_nn.experiments.minimal_continuous_esn:main"
+solaris-nn = "solaris_ai_nn.conscience.cli:main"
+solaris-nn-scenario = "solaris_ai_nn.conscience.cli:scenario_main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

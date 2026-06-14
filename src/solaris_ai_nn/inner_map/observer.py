@@ -67,6 +67,7 @@ class InnerMapObserver:
     hypothesis: Any = None  # optional dict or HypothesisEngine
     autoregeneration: Any = None  # optional dict or AutoRegenerationEngine
     logos: Any = None  # optional dict or LogosComplexityEngine
+    conscience: Any = None  # optional dict or ConscienceOrchestrator
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -520,6 +521,16 @@ class InnerMapObserver:
                 model.logos = logos.summary()
             elif isinstance(logos, dict):
                 model.logos = dict(logos)
+        conscience = self.conscience
+        if conscience is None and self.runner is not None:
+            conscience = getattr(self.runner, "conscience", None)
+        if conscience is not None:
+            # Conscience runtime status (read-only; the orchestrator owns no
+            # action authority and no module is sovereign).
+            if hasattr(conscience, "summary"):
+                model.conscience = conscience.summary()
+            elif isinstance(conscience, dict):
+                model.conscience = dict(conscience)
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

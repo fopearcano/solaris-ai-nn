@@ -748,6 +748,70 @@ class OperationalSupervisor:
                                          "input has no attributable "
                                          "producer")
 
+        # Conscience runtime monitoring (Prompt 28): evidence only. The
+        # orchestrator owns no stop authority; these warnings surface a
+        # spine that has lost a critical module, a failing phase, an
+        # overflowing bus, a checkpoint failure, a requested emergency stop,
+        # or any attempt by a module to bypass governance/safety.
+        conscience = snapshot.get("conscience") or {}
+        if conscience:
+            summary = conscience.get("summary") or conscience
+            health = conscience.get("integration_health") or {}
+            missing = summary.get("missing_modules") or []
+            critical_missing = [m for m in missing
+                                if m in ("governance",)]
+            if critical_missing:
+                self.incidents.record(
+                    I.CONSCIENCE_CRITICAL_MODULE_UNAVAILABLE, "critical",
+                    f"critical conscience module(s) unavailable: "
+                    f"{', '.join(critical_missing)}",
+                    related_metric="critical_module_unavailable",
+                    suggested_debug_step="the runtime must not run without "
+                                         "governance; restore the module")
+            spine = (conscience.get("snapshot") or {}).get("spine") or {}
+            status_counts = spine.get("status_counts") or {}
+            degraded_phases = int(status_counts.get("degraded", 0) or 0)
+            ran_phases = int(status_counts.get("ran", 0) or 0)
+            if degraded_phases and degraded_phases >= max(5, ran_phases):
+                self.incidents.record(
+                    I.CONSCIENCE_SCHEDULER_PHASE_FAILING, "warning",
+                    f"{degraded_phases} spine phase executions degraded",
+                    related_metric="spine_phase_failure",
+                    suggested_debug_step="inspect the spine trace; a module "
+                                         "handler is raising repeatedly")
+            if int(summary.get("bus_message_count", 0) or 0) > 100000:
+                self.incidents.record(
+                    I.CONSCIENCE_BUS_OVERFLOW, "warning",
+                    "conscience bus volume is very high",
+                    related_metric="bus_message_count",
+                    suggested_debug_step="raise cadence intervals; the bus is "
+                                         "saturating")
+            if conscience.get("checkpoint_failure"):
+                self.incidents.record(
+                    I.CONSCIENCE_CHECKPOINT_FAILURE, "warning",
+                    "a conscience snapshot/checkpoint failed to persist",
+                    related_metric="checkpoint_success_rate",
+                    suggested_debug_step="check the state directory is "
+                                         "writable and within bounds")
+            if summary.get("emergency_requested") \
+                    or conscience.get("emergency_requested"):
+                self.incidents.record(
+                    I.CONSCIENCE_EMERGENCY_STOP_REQUESTED, "critical",
+                    "an emergency stop was requested for the conscience run",
+                    related_metric="emergency_stop",
+                    suggested_debug_step="confirm the run halted and review "
+                                         "the reason")
+            if health.get("overall") == "failed" \
+                    or conscience.get("module_bypass_attempt"):
+                self.incidents.record(
+                    I.CONSCIENCE_MODULE_BYPASS_ATTEMPT, "critical",
+                    "integration health failed or a module bypass was "
+                    "detected",
+                    related_metric="module_bypass",
+                    suggested_debug_step="no module may bypass executive/"
+                                         "safety/governance; inspect the "
+                                         "integration health report")
+
         budget_report = self.budget.check_budget(
             {"telemetry": snapshot.get("telemetry"),
              "substrate": snapshot.get("substrate"),
@@ -1088,6 +1152,15 @@ class OperationalSupervisor:
             logos = getattr(developmental, "logos", None)
         if logos is not None and hasattr(logos, "snapshot"):
             snapshot["logos"] = logos.snapshot()
+        conscience = getattr(runner, "conscience", None)
+        if conscience is not None and hasattr(conscience, "summary"):
+            snapshot["conscience"] = {
+                "summary": conscience.summary(),
+                "snapshot": (conscience.snapshot()
+                             if hasattr(conscience, "snapshot") else {}),
+                "emergency_requested": getattr(
+                    conscience, "emergency_requested", False),
+            }
         return snapshot
 
     def _build_status(self) -> OperationalStatus:

@@ -1781,3 +1781,76 @@ Inner MAP carries the LOGOS state (a tension engine, never authority).
 Throughout: **no LLM reasoning, no external APIs, no real-world action, and
 nothing here can bypass governance, safety, executive inhibition, ego
 boundaries, ClaimGuard, the emergency stop, or auto-regeneration safety.**
+
+## Conscience Spine and Unified Runtime Orchestrator
+
+Until now the project was a set of independent packages. The `conscience`
+package assembles them into **one runnable developmental process** while
+keeping every guarantee that made each part safe. Its first principle is that
+**no module is sovereign**: the orchestrator owns no action authority of its
+own, and no module bypasses executive inhibition, Ego boundaries, safety,
+governance, ClaimGuard, the emergency stop, or auto-regeneration safety.
+
+The `ConscienceSpine` defines the canonical order of one step and preserves
+the Solaris spine end to end: *heartbeat → stimulus ingestion → push
+generation → desire synthesis → action-candidate generation → executive
+arbitration → safety/governance validation → action suggestion → reaction
+collection → memory update → world-model update → proto-language update →
+hypothesis update → LOGOS scan → auto-regeneration scan → Inner MAP update →
+telemetry checkpoint → latent/consolidation window* (18 phases). A phase whose
+module is absent is **skipped with a clear status, never faked and never a
+crash**; a handler that raises is recorded as *degraded* and the spine
+continues. Actions are only *suggested* when the executive is present;
+without it nothing is committed.
+
+The `ConscienceOrchestrator` builds a `RunContext` (mode, authority, bounds,
+enabled modules, seed, directories), validates it through the
+`ConscienceRuntimeSafetyValidator` (eleven hard rules: no unbounded run
+without governance approval, no real-world authority, no network/OS/browser
+automation, no module bypass, no month/year *real* run without approval, no
+writing outside the state/artifact directories, no treating a simulated month
+as a real month, no source mutation, no hidden module failure, no ClaimGuard
+violations), wires the in-process `ConscienceBus` (replayable JSONL), the
+`ConscienceModuleRegistry` (import-probe detection, capability typing,
+dependency validation), the `ModuleLifecycleManager` (a small logged state
+machine), and the `ConscienceScheduler` (cheap phases every step; heavy scans
+— LOGOS, hypothesis, auto-regeneration, consolidation, reports — at slower
+cadences so the runtime stays low-compute). The emergency-stop sentinel is
+checked every step; a `RunAuthority` is always internal/simulation/read-only/
+sidecar-observe — **never real-world**.
+
+`ScenarioProfile`/`ScenarioProfileRegistry` pin ten named, reproducible,
+bounded configurations (A `minimal_smoke`, B `nursery_short`, C
+`proto_language_short`, D `active_perception_short`, E `hypothesis_short`, F
+`logos_short`, G `autoregeneration_short`, H `full_developmental_short`, I
+`month_scale_plan`, J `month_scale_dry_run`). The `ScenarioRunner` runs a
+profile to completion (or produces a plan for plan-only profiles), gates
+governed profiles behind governance scopes, and writes an append-only
+`scenario_runs.jsonl` plus per-run reports. There is **no canned month/year
+*real* profile**: a real long-scale run requires an explicitly
+governance-approved context, and the default is always a short bounded
+simulated run. The `IntegrationHealthMonitor` answers "is the whole thing
+wired correctly?" (healthy/partial/degraded/failed/unknown across spine, bus,
+registry, lifecycle, scheduler, and safety); the `SnapshotBuilder` captures
+one consistent, persisted runtime picture; and the `FullSystemReportBuilder`
+emits a claim-guarded JSON+Markdown report that is explicit the runtime is a
+bounded, simulated, low-compute process — not a person, and with no
+real-world authority.
+
+The runtime integrates everywhere the prior layers do: governance adds six
+scopes (`enable_conscience_orchestrator`,
+`enable_full_developmental_short_profile`, `enable_month_scale_dry_run`,
+`enable_month_scale_real_run`, `enable_year_scale_plan`,
+`enable_year_scale_real_run`), a manifest gate, and an `is_enabled` check; the
+ops supervisor surfaces six warnings (critical module unavailable, failing
+spine phase, bus overflow, checkpoint failure, emergency-stop requested,
+module-bypass attempt); the Inner MAP carries a `conscience` field and eleven
+new state-graph nodes; the evaluation layer adds thirteen conscience metrics
+and seven protocols; and the operator dialogue answers eight new questions
+(including *what profile is running?*, *is this a simulated month or a real
+month?*, and *can this run for months now?*). Two console entry points —
+`solaris-nn` and `solaris-nn-scenario` — list, dry-run, run, health-check,
+and snapshot profiles. **This prompt added no new cognitive theory, no LLM
+authority, no real-world autonomy, and no browser/OS/network automation; it
+made the existing organism runnable while keeping it safe, low-compute,
+auditable, and bounded.**

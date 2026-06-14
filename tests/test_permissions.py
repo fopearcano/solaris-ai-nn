@@ -69,8 +69,23 @@ def test_all_scopes_in_default_set():
     # + 6 developmental (P21) + 4 proto-language (P22)
     # + 6 ecology (P23) + 5 active perception (P24)
     # + 6 hypothesis engine (P25) + 9 auto-regeneration (P26)
-    # + 6 LOGOS complexity (P27).
-    assert len(PermissionScope.ALL) == 86
+    # + 6 LOGOS complexity (P27) + 6 conscience runtime (P28).
+    assert len(PermissionScope.ALL) == 92
+
+
+def test_conscience_scope_defaults():
+    ps = PermissionSet.default()
+    S = PermissionScope
+    # The orchestrator itself is allowed (bounded, simulation-only); the
+    # heavier profiles are opt-in; real long-scale runs are off by default.
+    assert ps.allows(S.ENABLE_CONSCIENCE_ORCHESTRATOR)
+    assert ps.requires_approval(S.ENABLE_FULL_DEVELOPMENTAL_SHORT_PROFILE)
+    assert ps.requires_approval(S.ENABLE_MONTH_SCALE_DRY_RUN)
+    assert ps.requires_approval(S.ENABLE_MONTH_SCALE_REAL_RUN)
+    assert ps.requires_approval(S.ENABLE_YEAR_SCALE_PLAN)
+    assert ps.requires_approval(S.ENABLE_YEAR_SCALE_REAL_RUN)
+    assert not ps.allows(S.ENABLE_MONTH_SCALE_REAL_RUN)
+    assert not ps.allows(S.ENABLE_YEAR_SCALE_REAL_RUN)
 
 
 def test_executive_scope_defaults():

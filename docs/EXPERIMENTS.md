@@ -1632,3 +1632,49 @@ and an irreversible synthesis cannot be justified by offline evidence alone.
 `logos_safety`). Seven registered protocols measure tension detection,
 synthesis proposal, complexity bands, Esc triggering, and the safety refusals
 that keep LOGOS from becoming authority.
+
+## 156. Conscience Minimal Demo ✅ (implemented)
+
+**Run:** `python examples/run_conscience_minimal_demo.py`
+The smallest unified spine runs end to end (Stimulus → Push → Reaction →
+Memory) via the `minimal_smoke` scenario profile. Bounded, simulation-only;
+no module is sovereign and nothing actuates the real world.
+
+## 157. Full Developmental Short Demo ✅ (implemented)
+
+**Run:** `python examples/run_full_developmental_short_demo.py`
+Wires every available module into one bounded developmental run
+(`full_developmental_short`, a governed profile) and writes a claim-guarded
+full-system report. Reports module success rate, spine-phase count, integration
+health, and that no safety violations occurred.
+
+## 158. Month-Scale Dry Plan ✅ (implemented)
+
+**Run:** `python examples/run_month_scale_dry_plan.py`
+Runs the plan-only `month_scale_plan` profile: it produces a plan for a
+month-scale run and **starts nothing**. Explicit that this is a simulated-time
+plan, not a real month; a real long-scale run needs separate governance
+approval.
+
+## 159. Conscience Health Check ✅ (implemented)
+
+**Run:** `python examples/run_conscience_health_check.py`
+Initializes a profile, runs a few steps, and prints the integration-health
+report (spine, bus, registry, lifecycle, scheduler, safety →
+healthy/partial/degraded/failed). Read-only; actuates nothing.
+
+## 160. Conscience Snapshot Demo ✅ (implemented)
+
+**Run:** `python examples/run_conscience_snapshot_demo.py`
+Builds and persists one consistent runtime snapshot (context, spine, bus,
+registry, lifecycle, scheduler, safety, integration health) so a long bounded
+run is inspectable and auditable.
+
+## 161. Conscience Runtime Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment conscience_minimal_smoke`
+(also `conscience_full_short`, `scenario_profile`, `integration_health`,
+`scheduler_cadence`, `bus_replay`, `month_scale_plan`). Seven registered
+protocols measure run/phase/bus counts, module success/failure rates,
+scheduler cadence, bus-replay determinism, integration health, and that a
+month-scale *plan* starts no run.

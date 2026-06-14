@@ -294,6 +294,13 @@ class InnerMapModel:
     # latest_synthesis_candidate, applied_synthesis_count,
     # preserved_tension_count, esc_triggered, logos_report_path, authority.
     logos: Optional[Dict[str, Any]] = None
+    # Conscience runtime status (Prompt 28); None when the orchestrator is
+    # not running. Keys mirror ConscienceOrchestrator.summary(): run_id,
+    # profile, mode, authority, current_spine_phase, step_count,
+    # enabled_modules, missing_modules, degraded_modules, bus_message_count,
+    # scheduler_skip_count, stopped, authority_note. The orchestrator owns no
+    # action authority and no module is sovereign.
+    conscience: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

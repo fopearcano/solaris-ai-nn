@@ -168,6 +168,18 @@ DESCRIPTIONS = {
                                     "with a safe candidate",
     "logos_safety": "real-world/source/destructive/contradiction-as-"
                     "permission synthesis is blocked",
+    "conscience_minimal_smoke": "the smallest unified spine runs end to end "
+                                "and stays bounded",
+    "conscience_full_short": "every module wired into one bounded "
+                             "developmental run",
+    "scenario_profile": "a named scenario profile runs via the scenario "
+                        "runner",
+    "integration_health": "the assembled runtime reports healthy "
+                          "integration",
+    "scheduler_cadence": "cheap phases every step; heavy scans at slower "
+                         "cadences",
+    "bus_replay": "the bus log replays deterministically from JSONL",
+    "month_scale_plan": "planning a month-scale run starts nothing",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -253,6 +265,11 @@ class ExperimentRegistry:
             or name in ("fracture_detection", "synthesis_candidate",
                         "complexity_regulation", "esc_process")
             or bool(merged.get("logos_complexity", False)))
+        features["conscience_orchestrator"] = (
+            name.startswith("conscience")
+            or name in ("scenario_profile", "integration_health",
+                        "scheduler_cadence", "bus_replay", "month_scale_plan")
+            or bool(merged.get("conscience_orchestrator", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

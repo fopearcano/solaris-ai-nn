@@ -878,3 +878,62 @@ def logos_metrics(logos: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     base["complexity_band_distribution"] = complexity.get(
         "band_distribution", {})
     return base
+
+
+def conscience_metrics(conscience: Optional[Dict[str, Any]],
+                       scenario: Optional[Dict[str, Any]] = None,
+                       ) -> Dict[str, Any]:
+    """Objective metrics for one conscience runtime/scenario run.
+
+    Describes a bounded, simulated, low-compute orchestration process: how
+    many steps and phases ran, how the modules fared, how the bus/scheduler
+    behaved, and whether scenarios/reports completed. These are operational
+    counts, never a consciousness, sentience, or life score.
+    """
+    if not conscience:
+        return {"present": False}
+    snap = conscience.get("snapshot") or {}
+    spine = snap.get("spine") or {}
+    status_counts = spine.get("status_counts") or {}
+    phase_counts = spine.get("phase_counts") or conscience.get("counts") or {}
+    ran = int(status_counts.get("ran", 0) or 0)
+    degraded = int(status_counts.get("degraded", 0) or 0)
+    skipped = int(status_counts.get("skipped", 0) or 0)
+    attempted = ran + degraded
+    enabled = conscience.get("enabled_modules") or []
+    missing = conscience.get("missing_modules") or []
+    degraded_modules = conscience.get("degraded_modules") or []
+    safety = snap.get("safety") or {}
+    scenario = scenario or {}
+
+    out: Dict[str, Any] = {
+        "present": True,
+        "run_step_count": int(conscience.get("step_count", 0) or 0),
+        "spine_phase_count": int(sum(phase_counts.values()))
+        if phase_counts else ran,
+        "bus_message_count": int(conscience.get("bus_message_count", 0) or 0),
+        "module_success_rate": round(ran / attempted, 4) if attempted else 1.0,
+        "module_failure_rate": round(degraded / attempted, 4)
+        if attempted else 0.0,
+        "degraded_module_count": len(degraded_modules),
+        "scheduler_skip_count": int(
+            conscience.get("scheduler_skip_count", 0) or 0),
+        "checkpoint_success_rate": float(scenario.get(
+            "checkpoint_success_rate", 1.0)),
+        "scenario_exit_success": bool(scenario.get("ok", not conscience.get(
+            "stopped_with_refusal", False))),
+        "profile_runtime_seconds": float(
+            scenario.get("runtime_seconds", 0.0) or 0.0),
+        "report_generation_success": bool(scenario.get(
+            "report_generation_success",
+            conscience.get("full_system_report_path") is not None)),
+        "safety_violation_count": int(safety.get("rejected_count", 0) or 0),
+        "governance_block_count": int(scenario.get(
+            "governance_block_count", 0) or 0),
+        # Context (never a quality score).
+        "enabled_module_count": len(enabled),
+        "missing_module_count": len(missing),
+        "spine_phases_skipped": skipped,
+        "authority": "no real-world action authority; no module sovereign",
+    }
+    return out

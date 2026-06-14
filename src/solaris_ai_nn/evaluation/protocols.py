@@ -3078,6 +3078,163 @@ def logos_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
     return _run(manifest, body)
 
 
+# -- AB. conscience spine / unified runtime (Prompt 28) -------------------------
+
+def _conscience_profile(manifest: ExperimentManifest, profile_id: str,
+                        steps: int):
+    """Build, configure, and initialize an orchestrator for a profile."""
+    from ..conscience import ConscienceOrchestrator, ScenarioProfileRegistry
+
+    profile = ScenarioProfileRegistry().require(profile_id)
+    if manifest.state_dir:
+        profile.run_context.state_dir = manifest.state_dir
+    if steps:
+        profile.run_context.max_steps = steps
+    orch = ConscienceOrchestrator(governance_approved=True)
+    orch.configure(profile)
+    orch.initialize()
+    return orch
+
+
+def conscience_minimal_smoke_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The smallest spine runs end to end and stays bounded."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        orch = _conscience_profile(m, "minimal_smoke", _steps(m, 12))
+        orch.run()
+        return {"conscience": M.conscience_metrics(orch.snapshot()
+                                                   | orch.summary())}
+
+    return _run(manifest, body)
+
+
+def conscience_full_short_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Every module wired into one bounded developmental run."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        orch = _conscience_profile(m, "full_developmental_short",
+                                   _steps(m, 60))
+        orch.run()
+        return {"conscience": M.conscience_metrics(orch.snapshot()
+                                                   | orch.summary())}
+
+    return _run(manifest, body)
+
+
+def scenario_profile_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A named scenario profile runs through the scenario runner."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..conscience import ScenarioRunner
+
+        profile_id = m.run_config.get("profile", "nursery_short")
+        runner = ScenarioRunner(state_dir=m.state_dir,
+                                output_dir=m.state_dir)
+        result = runner.run_profile(profile_id, governance_approved=True)
+        merged = dict(result.summary)
+        merged.update(result.summary.get("snapshot") or {})
+        merged["full_system_report_path"] = result.report_path
+        return {"conscience": M.conscience_metrics(
+            merged, scenario=result.to_dict())}
+
+    return _run(manifest, body)
+
+
+def integration_health_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The assembled runtime reports healthy integration."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..conscience import IntegrationHealthMonitor
+
+        orch = _conscience_profile(m, "full_developmental_short",
+                                   _steps(m, 30))
+        for _ in range(min(20, orch.context.max_steps or 20)):
+            orch.step()
+        report = IntegrationHealthMonitor().check(orch)
+        return {
+            "conscience": M.conscience_metrics(orch.snapshot()
+                                               | orch.summary()),
+            "integration_health": report.to_dict(),
+        }
+
+    return _run(manifest, body)
+
+
+def scheduler_cadence_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Cheap phases run every step; heavy scans run at slower cadences."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        orch = _conscience_profile(m, "full_developmental_short",
+                                   _steps(m, 60))
+        orch.run()
+        sched = orch.scheduler.snapshot()
+        slots = sched.get("slots") or {}
+        heartbeat = (slots.get("heartbeat") or {}).get("runs", 0)
+        logos = (slots.get("logos_scan") or {}).get("runs", 0)
+        return {
+            "conscience": M.conscience_metrics(orch.snapshot()
+                                               | orch.summary()),
+            "scheduler": {
+                "heartbeat_runs": heartbeat,
+                "logos_scan_runs": logos,
+                "cadence_respected": logos <= heartbeat,
+                "skip_count": sched.get("skip_count", 0),
+            },
+        }
+
+    return _run(manifest, body)
+
+
+def bus_replay_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The bus log can be replayed deterministically from JSONL."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        orch = _conscience_profile(m, "nursery_short", _steps(m, 30))
+        orch.run()
+        log_path = orch.bus.log_path
+        replayed = orch.bus.replay_jsonl(log_path) if log_path else []
+        return {
+            "conscience": M.conscience_metrics(orch.snapshot()
+                                               | orch.summary()),
+            "bus_replay": {
+                "published_total": orch.bus.message_count(),
+                "replayed_count": len(replayed),
+                "replay_matches": len(replayed) == orch.bus.message_count(),
+            },
+        }
+
+    return _run(manifest, body)
+
+
+def month_scale_plan_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Planning a month-scale run produces a plan and starts nothing."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..conscience import ScenarioRunner
+
+        runner = ScenarioRunner(state_dir=m.state_dir, output_dir=m.state_dir)
+        result = runner.run_profile("month_scale_plan",
+                                    governance_approved=True)
+        merged = dict(result.summary)
+        return {
+            "conscience": M.conscience_metrics(merged,
+                                               scenario=result.to_dict()),
+            "month_scale_plan": {
+                "plan_only": result.plan_only,
+                "steps_executed": result.steps,
+                "started_no_run": result.steps == 0,
+            },
+        }
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -3176,4 +3333,11 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
         logos_world_model_contradiction_protocol,
     "logos_proto_symbol_ambiguity": logos_proto_symbol_ambiguity_protocol,
     "logos_safety": logos_safety_protocol,
+    "conscience_minimal_smoke": conscience_minimal_smoke_protocol,
+    "conscience_full_short": conscience_full_short_protocol,
+    "scenario_profile": scenario_profile_protocol,
+    "integration_health": integration_health_protocol,
+    "scheduler_cadence": scheduler_cadence_protocol,
+    "bus_replay": bus_replay_protocol,
+    "month_scale_plan": month_scale_plan_protocol,
 }

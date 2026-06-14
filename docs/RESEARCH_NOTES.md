@@ -1032,3 +1032,56 @@ still decides. LOGOS gives long-run development structure — a vocabulary for
 its own fractures and a disciplined way to propose resolving them — and it
 buys exactly no new authority in doing so. That separation is the whole
 point.
+
+## Phase 28 — Conscience spine and unified runtime orchestrator
+
+**From a library of parts to a runnable organism.** Through Phase 27 the
+project was a set of independent, individually-safe packages. The risk of that
+shape is subtle: a collection of correct modules is not the same as a correct
+whole, and "we could wire it together" is not the same as "it runs." Phase 28
+makes the organism actually run — one process, one spine, one bounded loop —
+without surrendering any of the guarantees that made each part safe.
+
+**No module is sovereign.** This is the load-bearing principle. The
+orchestrator is not a brain that commands the others; it is a conductor with
+no instrument of its own. It owns no action authority. Every action is still
+*suggested*, still passes through executive inhibition, Ego boundaries,
+safety, governance, and ClaimGuard, and the emergency stop is checked every
+step. If the executive module is absent, nothing is committed at all. The
+temptation when unifying a system is to let the unifier accumulate authority;
+we designed explicitly against that.
+
+**Partial configurations must degrade, not fake.** A real organism keeps
+going when a part is missing; it does not hallucinate the missing part. So a
+spine phase whose module is unavailable is *skipped with a clear status*, a
+handler that raises is recorded as *degraded* and the loop continues, and an
+unknown module name in a profile is silently ignored — never stubbed with a
+fake that pretends to work. The registry detects availability by import probe
+and the integration-health monitor reports honestly whether the whole thing is
+healthy, partial, degraded, or failed.
+
+**Bounded by construction; simulated time is not real time.** Nothing runs
+unbounded by default. A `RunContext` always carries an authority that is
+internal/simulation/read-only/observe — never real-world — and the runtime
+safety validator refuses an unbounded run without governance approval, a real
+month/year mode without approval, and (importantly) any attempt to label a
+*simulated*-time run as a real one. The month-scale profiles are a dry plan
+and a simulated slice; there is deliberately **no canned "real month"
+profile**, because a real long-scale run should require a human to construct
+and approve a context, not click a preset.
+
+**Low compute is a scheduling property, not an afterthought.** The scheduler
+runs cheap phases (heartbeat, stimulus, push, reaction, memory) every step and
+heavy scans (LOGOS, hypothesis, auto-regeneration, consolidation, reports) at
+slower cadences. This is what lets the same spine that smoke-tests in twelve
+steps also stand in for a month-scale plan without the compute exploding — and
+every scheduling decision is inspectable, so the trade-off is auditable rather
+than hidden.
+
+**Honesty is enforced at the report boundary.** The full-system report is the
+one artifact most likely to overclaim, so it is the one most tightly guarded:
+every line of its narrative passes through ClaimGuard, and it states plainly
+that it describes a bounded, simulated, low-compute software process — not a
+person, with no real-world authority. Making the organism runnable raised the
+stakes on overclaiming, so the guard sits exactly where a run's story gets
+told.

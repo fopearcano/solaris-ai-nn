@@ -886,4 +886,49 @@ def build_default_state_graph() -> StateGraph:
                "dynamics are traced for later analysis")
     g.add_edge("opposition_memory", "inner_map",
                "LOGOS state feeds Inner MAP")
+
+    # Conscience spine / unified runtime orchestrator (Prompt 28). The
+    # orchestrator assembles the whole organism into one bounded, simulated
+    # process; no module is sovereign and nothing actuates the real world.
+    for name, role in [
+        ("conscience_orchestrator", "the one top-level runtime; no module "
+                                    "sovereign"),
+        ("conscience_spine", "the canonical Stimulus->...->Inner MAP order"),
+        ("conscience_bus", "in-process message bus (replayable JSONL)"),
+        ("module_registry", "typed inventory of available/enabled modules"),
+        ("module_lifecycle_manager", "bounded, logged module state machine"),
+        ("conscience_scheduler", "runs fast/slow phases at their cadence"),
+        ("scenario_runner", "runs named bounded scenario profiles"),
+        ("scenario_profile", "a named, bounded, reproducible run config"),
+        ("integration_health_monitor", "is the whole thing wired correctly?"),
+        ("snapshot_builder", "consistent, replayable runtime snapshots"),
+        ("full_system_report_builder", "claim-guarded full-system report"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("scenario_profile", "scenario_runner",
+               "a profile pins what the runner runs")
+    g.add_edge("scenario_runner", "conscience_orchestrator",
+               "the runner drives one orchestrator per run")
+    g.add_edge("conscience_orchestrator", "module_registry",
+               "the orchestrator detects modules via the registry")
+    g.add_edge("conscience_orchestrator", "module_lifecycle_manager",
+               "the orchestrator drives module lifecycle states")
+    g.add_edge("conscience_orchestrator", "conscience_scheduler",
+               "the scheduler decides which phases run each step")
+    g.add_edge("conscience_scheduler", "conscience_spine",
+               "due phases are run on the spine")
+    g.add_edge("conscience_spine", "conscience_bus",
+               "every phase publishes to the bus")
+    g.add_edge("conscience_orchestrator",
+               "action_arbitrator" if "action_arbitrator" in g.nodes
+               else "desire_queue",
+               "no action is suggested without the executive")
+    g.add_edge("conscience_orchestrator", "integration_health_monitor",
+               "the monitor inspects the assembled runtime (read-only)")
+    g.add_edge("conscience_orchestrator", "snapshot_builder",
+               "snapshots capture one consistent runtime picture")
+    g.add_edge("snapshot_builder", "full_system_report_builder",
+               "snapshots feed the claim-guarded full-system report")
+    g.add_edge("conscience_orchestrator", "inner_map",
+               "conscience runtime state feeds Inner MAP")
     return g

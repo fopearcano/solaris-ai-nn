@@ -124,6 +124,14 @@ class PermissionScope:
     ENABLE_SAFE_SYNTHESIS = "enable_safe_synthesis"
     ENABLE_ESC_PROCESS = "enable_esc_process"
     ENABLE_COMPLEXITY_REGULATION = "enable_complexity_regulation"
+    # Conscience spine / unified runtime orchestrator (Prompt 28).
+    ENABLE_CONSCIENCE_ORCHESTRATOR = "enable_conscience_orchestrator"
+    ENABLE_FULL_DEVELOPMENTAL_SHORT_PROFILE = (
+        "enable_full_developmental_short_profile")
+    ENABLE_MONTH_SCALE_DRY_RUN = "enable_month_scale_dry_run"
+    ENABLE_MONTH_SCALE_REAL_RUN = "enable_month_scale_real_run"
+    ENABLE_YEAR_SCALE_PLAN = "enable_year_scale_plan"
+    ENABLE_YEAR_SCALE_REAL_RUN = "enable_year_scale_real_run"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -172,6 +180,10 @@ class PermissionScope:
         ENABLE_LOGOS_COMPLEXITY, ENABLE_FRACTURE_DETECTION,
         ENABLE_SYNTHESIS_CANDIDATES, ENABLE_SAFE_SYNTHESIS,
         ENABLE_ESC_PROCESS, ENABLE_COMPLEXITY_REGULATION,
+        ENABLE_CONSCIENCE_ORCHESTRATOR,
+        ENABLE_FULL_DEVELOPMENTAL_SHORT_PROFILE,
+        ENABLE_MONTH_SCALE_DRY_RUN, ENABLE_MONTH_SCALE_REAL_RUN,
+        ENABLE_YEAR_SCALE_PLAN, ENABLE_YEAR_SCALE_REAL_RUN,
     )
 
 
@@ -466,6 +478,28 @@ class PermissionSet:
             Permission(S.ENABLE_COMPLEXITY_REGULATION, granted=True,
                        note="complexity bands are an operational signal, "
                             "never a consciousness/life score"),
+            Permission(S.ENABLE_CONSCIENCE_ORCHESTRATOR, granted=True,
+                       note="the unified runtime spine may assemble enabled "
+                            "modules; no module is sovereign and nothing "
+                            "actuates the real world"),
+            Permission(S.ENABLE_FULL_DEVELOPMENTAL_SHORT_PROFILE,
+                       requires_approval=True,
+                       note="wiring every module into one bounded run is "
+                            "opt-in and needs explicit acknowledgement"),
+            Permission(S.ENABLE_MONTH_SCALE_DRY_RUN, requires_approval=True,
+                       note="a simulated month-scale slice/plan is opt-in; it "
+                            "is never a real month"),
+            Permission(S.ENABLE_MONTH_SCALE_REAL_RUN, granted=False,
+                       requires_approval=True,
+                       note="a real month-scale run is off by default and "
+                            "requires explicit human approval"),
+            Permission(S.ENABLE_YEAR_SCALE_PLAN, requires_approval=True,
+                       note="planning a year-scale run is opt-in; planning "
+                            "never starts a run"),
+            Permission(S.ENABLE_YEAR_SCALE_REAL_RUN, granted=False,
+                       requires_approval=True,
+                       note="a real year-scale run is off by default and "
+                            "requires explicit human approval"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

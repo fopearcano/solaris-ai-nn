@@ -42,6 +42,10 @@ AVAILABLE_QUERIES = (
     "why was synthesis refused?", "what triggered esc?",
     "is contradiction being treated as truth?",
     "did logos produce structural change?",
+    "what profile is running?", "is this a simulated month or real month?",
+    "can this run for months now?", "which modules are running?",
+    "what is the current spine phase?", "is integration healthy?",
+    "is any module sovereign?", "show conscience",
 )
 
 
@@ -102,6 +106,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("conscience"):
+            return self._conscience(topic)
         component_keys = {
             "status": "ops_status", "health": "health",
             "inner_map": "inner_map", "world_model": "world_model",
@@ -246,6 +252,64 @@ class QueryRouter:
             "the previous answer was grounded in: "
             + ", ".join(self.last_evidence[:8]),
             list(self.last_evidence[:8]))
+
+    def _conscience(self, topic: str) -> CommunicationResponse:
+        """Answer conscience-runtime queries from the orchestrator summary.
+
+        Every answer is grounded in the orchestrator's own summary and is
+        explicit that the runtime is bounded and simulation-only and that no
+        module is sovereign.
+        """
+        component = self.components.get("conscience")
+        if component is None:
+            return self.builder.missing_component_response("conscience")
+        summary = (component.summary() if hasattr(component, "summary")
+                   else component if isinstance(component, dict) else {})
+        refs = ["component:conscience"]
+        if topic == "conscience_profile":
+            text = (f"profile {summary.get('profile')!r} is running in mode "
+                    f"{summary.get('mode')!r} (authority "
+                    f"{summary.get('authority')!r}); step "
+                    f"{summary.get('step_count')}")
+        elif topic == "conscience_time":
+            mode = str(summary.get("mode", ""))
+            is_real = mode in ("month_scale_real", "year_scale_real")
+            text = ("this is a simulated-time run; it is NOT a real month or "
+                    "year. " if not is_real else
+                    "this run is configured as a real long-scale run. ") + \
+                f"mode={mode!r}"
+        elif topic == "conscience_longrun":
+            text = ("not by default: a real month-scale or year-scale run "
+                    "requires explicit governance approval; the default is a "
+                    "bounded, simulated run and nothing runs unbounded")
+        elif topic == "conscience_modules":
+            text = (f"enabled={summary.get('enabled_modules')}; "
+                    f"missing={summary.get('missing_modules')}; "
+                    f"degraded={summary.get('degraded_modules')}")
+        elif topic == "conscience_phase":
+            text = (f"current spine phase: "
+                    f"{summary.get('current_spine_phase')}; "
+                    f"steps run: {summary.get('step_count')}")
+        elif topic == "conscience_health":
+            health = self.components.get("integration_health")
+            if health is not None and hasattr(health, "check"):
+                report = health.check(component).to_dict()
+                text = (f"integration health: {report.get('overall')}; "
+                        f"warnings: {report.get('warnings') or 'none'}")
+                refs.append("component:integration_health")
+            else:
+                missing = summary.get("missing_modules") or []
+                degraded = summary.get("degraded_modules") or []
+                text = ("integration looks "
+                        + ("partial" if (missing or degraded) else "healthy")
+                        + f"; missing={missing}; degraded={degraded}")
+        else:  # conscience_authority / generic conscience
+            text = (summary.get("authority_note",
+                                "no real-world action authority; no module is "
+                                "sovereign")
+                    + f"; mode={summary.get('mode')!r}, "
+                    f"stopped={summary.get('stopped')}")
+        return self.builder.status_response(text, refs)
 
     # -- views --------------------------------------------------------------------
 

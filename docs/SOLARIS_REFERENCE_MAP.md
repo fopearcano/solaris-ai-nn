@@ -528,3 +528,23 @@ never truth by fiat.
 | Inner MAP (self-observation) | `InnerMapModel.logos` + nine state-graph nodes -- complexity band, tensions, synthesis, Esc as observed self-state (never authority) |
 | Synthesis (becoming through subtraction/integration) | safe structural integration/pruning via the existing plasticity/auto-regeneration policy; contradiction evidence is preserved, never deleted |
 | Safety / boundaries | `logos_complexity/safety.py` -- nine hard rules: no real-world action, no source synthesis, no governance approval, no disabling safety/ClaimGuard/emergency stop, no contradiction-as-permission, no destructive evidence merge |
+
+## Conscience spine and unified runtime orchestrator mapping (Phase 28)
+
+The conscience layer (`conscience/`) realises Solaris_Ai's *Conscience* as the
+single runtime spine that assembles the whole organism -- preserving the
+Solaris loop while ensuring **no module is sovereign** and nothing actuates
+the real world.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| Conscience (the unifying process) | `conscience/orchestrator.py` (`ConscienceOrchestrator`) -- the one top-level runtime; owns no action authority |
+| Spine (Stimulus → … → Reaction/Memory) | `conscience/spine.py` (`ConscienceSpine`, 18 phases) -- canonical step order; missing modules skipped, never faked |
+| Bus (inter-module messaging) | `conscience/bus.py` (`ConscienceBus`) -- in-process, replayable JSONL; no network/queue |
+| Module inventory / wiring | `conscience/module_registry.py` + `module_lifecycle.py` -- import-probe detection, capability typing, dependency validation, logged lifecycle states |
+| Rhythm (fast vs slow cognition) | `conscience/scheduler.py` (`ConscienceScheduler`) -- cheap phases every step; heavy scans at slower cadences (low compute) |
+| Run identity / authority / bounds | `conscience/run_context.py` (`RunContext`/`RunMode`/`RunAuthority`) -- always internal/simulation/read-only; bounded by default |
+| Named developmental scenarios | `conscience/scenario_profiles.py` + `scenario_runner.py` -- 10 reproducible profiles A–J; governed profiles gated; no canned real month/year |
+| Self-observation of the whole | `conscience/integration_health.py` + `snapshots.py` -- is the organism wired correctly? one consistent, persisted picture |
+| Honest reporting (no overclaiming) | `conscience/full_system_report.py` (`FullSystemReportBuilder`) -- claim-guarded JSON+Markdown; "a software runtime, not a person" |
+| Safety / boundaries | `conscience/safety.py` (`ConscienceRuntimeSafetyValidator`) -- eleven hard rules: no unbounded/real-world/network/OS-browser/bypass/real-month/out-of-dir/source-mutation/hidden-failure/ClaimGuard-violation |
