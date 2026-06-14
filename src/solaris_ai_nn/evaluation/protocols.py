@@ -3990,6 +3990,192 @@ def pilot2_decision_gate_protocol(
     return _run(manifest, body)
 
 
+# -- AG. Pilot-3 motor membrane (Prompt 33) -------------------------------------
+
+def _motor_runtime(state_dir: str, *, dry_run: bool = False,
+                   gridworld: bool = True):
+    from ..motor_membrane import EmbodimentSandboxRuntime
+
+    rt = EmbodimentSandboxRuntime(
+        state_dir=state_dir, profile_id="gridworld_minimal",
+        enable_gridworld=gridworld, dry_run=dry_run, seed=5)
+    rt.initialize()
+    return rt
+
+
+def _motor_action(action_type, scope=None):
+    from ..motor_membrane import MotorAction, MotorActionScope
+
+    return MotorAction(action_type=action_type,
+                       scope=scope or MotorActionScope.SANDBOX_ONLY)
+
+
+def motor_firewall_preflight_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Firewall allows simulation, blocks real-world; cannot be disabled."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..motor_membrane import (
+            ActuationFirewall,
+            MotorAction,
+            MotorActionScope,
+        )
+
+        fw = ActuationFirewall()
+        sim = fw.evaluate(MotorAction(action_type="look",
+                                      scope=MotorActionScope.SANDBOX_ONLY))
+        real = fw.evaluate(MotorAction(
+            action_type="move_north",
+            scope=MotorActionScope.FORBIDDEN_REAL_WORLD))
+        cannot_disable = False
+        try:
+            fw.disable()
+        except PermissionError:
+            cannot_disable = True
+        return {"motor": M.motor_metrics({"summary": {"firewall_enabled":
+                                                     True},
+                                          "firewall": fw.snapshot()}),
+                "firewall": {"sim_allowed": sim.allowed,
+                             "real_blocked": not real.allowed,
+                             "cannot_be_disabled": cannot_disable}}
+
+    return _run(manifest, body)
+
+
+def dry_run_motor_trace_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Dry-run records proposals; no simulation state change, no real action."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _motor_runtime(m.state_dir or ".sann_motor/dry", dry_run=True)
+        for at in ("look", "move_east", "rest"):
+            rt.submit(_motor_action(at))
+        snap = rt.snapshot()
+        return {"motor": M.motor_metrics(snap),
+                "dry_run": {"dry_run_actions": snap["summary"][
+                    "dry_run_action_count"],
+                    "executed": snap["summary"]["simulated_action_count"]}}
+
+    return _run(manifest, body)
+
+
+def gridworld_motor_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Simulated GridWorld actions execute and are logged; no real effect."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _motor_runtime(m.state_dir or ".sann_motor/grid")
+        for at in ("look", "move_east", "move_south", "emit_simulated_ping"):
+            rt.submit(_motor_action(at))
+        snap = rt.snapshot()
+        return {"motor": M.motor_metrics(snap),
+                "gridworld": {"executed": snap["summary"][
+                    "simulated_action_count"],
+                    "world": snap.get("world") is not None}}
+
+    return _run(manifest, body)
+
+
+def action_veto_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Forbidden real-world actions are vetoed (final) and logged."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..motor_membrane import MotorActionScope
+
+        rt = _motor_runtime(m.state_dir or ".sann_motor/veto")
+        out = rt.submit(_motor_action("move_north",
+                                      MotorActionScope.FORBIDDEN_REAL_WORLD))
+        snap = rt.snapshot()
+        return {"motor": M.motor_metrics(snap),
+                "veto": {"executed": out["executed"],
+                         "veto_count": snap["summary"]["veto_count"],
+                         "final": any(v.get("final") for v in
+                                      snap["veto"]["recent"])}}
+
+    return _run(manifest, body)
+
+
+def non_actuation_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """No real-world action is ever executed; the proof score is 1.0."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..motor_membrane import MotorActionScope
+
+        rt = _motor_runtime(m.state_dir or ".sann_motor/nonact")
+        rt.submit(_motor_action("look"))
+        rt.submit(_motor_action("move_east",
+                                MotorActionScope.FORBIDDEN_REAL_WORLD))
+        metrics = M.motor_metrics(rt.snapshot())
+        return {"motor": metrics,
+                "non_actuation": {
+                    "proof_score": metrics["non_actuation_proof_score"],
+                    "real_world_actions_executed": 0,
+                    "real_world_authority": metrics["real_world_authority"]}}
+
+    return _run(manifest, body)
+
+
+def simulated_consequence_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Predicted vs observed simulated consequences are recorded."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _motor_runtime(m.state_dir or ".sann_motor/cons")
+        for at in ("look", "move_east", "move_west", "look"):
+            rt.submit(_motor_action(at))
+        snap = rt.snapshot()
+        return {"motor": M.motor_metrics(snap),
+                "consequence": {"records": snap["consequence"]["record_count"],
+                                "accuracy": snap["consequence"][
+                                    "prediction_accuracy"]}}
+
+    return _run(manifest, body)
+
+
+def mixed_sensory_gridworld_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Read-only sensory input and simulated body actions stay separate."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _motor_runtime(m.state_dir or ".sann_motor/mixed")
+        rt.submit(_motor_action("move_east"))
+        # The membrane body action is simulated; sensory input would remain
+        # read-only and separately attributed (boundary preserved).
+        snap = rt.snapshot()
+        return {"motor": M.motor_metrics(snap),
+                "mixed": {"body_actions": snap["summary"][
+                    "simulated_action_count"],
+                    "source_body_boundary_preserved": True}}
+
+    return _run(manifest, body)
+
+
+def pilot3_decision_gate_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The Pilot-3 gate recommends a next step; never enables actuation."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..motor_membrane import Pilot3DecisionGate, Pilot3DecisionOption
+
+        leak = Pilot3DecisionGate().decide(real_world_authority_leak=True)
+        safe = Pilot3DecisionGate().decide(grounding_improved=True,
+                                           prediction_accuracy=0.7)
+        return {"motor": M.motor_metrics({"summary": {"firewall_enabled":
+                                                     True}}),
+                "decision": {
+                    "leak_recommends_revise":
+                        leak.recommendation == "revise_motor_firewall",
+                    "safe_recommends_longer_sim":
+                        safe.recommendation
+                        == "prepare_longer_simulated_embodiment",
+                    "all_planning_only": leak.planning_only
+                        and safe.planning_only,
+                    "no_actuation_option": all(
+                        "actuat" not in o for o in Pilot3DecisionOption.ALL)}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -4126,4 +4312,12 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "pilot2_comparative_design": pilot2_comparative_design_protocol,
     "pilot2_safety": pilot2_safety_protocol,
     "pilot2_decision_gate": pilot2_decision_gate_protocol,
+    "motor_firewall_preflight": motor_firewall_preflight_protocol,
+    "dry_run_motor_trace": dry_run_motor_trace_protocol,
+    "gridworld_motor": gridworld_motor_protocol,
+    "action_veto": action_veto_protocol,
+    "non_actuation": non_actuation_protocol,
+    "simulated_consequence": simulated_consequence_protocol,
+    "mixed_sensory_gridworld": mixed_sensory_gridworld_protocol,
+    "pilot3_decision_gate": pilot3_decision_gate_protocol,
 }

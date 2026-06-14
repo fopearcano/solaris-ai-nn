@@ -1270,3 +1270,45 @@ capability is only added after the previous layer is observed, analyzed, and
 trusted. Pilot-2 is the grounding step. Whether the system should ever act on
 an environment is a separate question that Pilot-2 deliberately does not open;
 it only measures whether read-only exposure changes how the system develops.
+
+## Phase 33 — Pilot-3 motor membrane and actuation firewall
+
+**The opposite boundary, deliberately.** Pilot-2 built the inbound membrane
+(read-only input). The obvious next question is whether the system can *act*,
+and the obvious danger is that "real action" is exactly the capability whose
+risk has been deferred since Phase 1. Pilot-3 resolves the tension by separating
+two things that are usually conflated: forming an action intention and executing
+it on the world. Solaris-AI-NN may do the former freely; the latter is
+structurally impossible. The whole design follows from one sentence:
+Solaris-AI-NN may form action intentions, simulate their consequences, write
+action traces, and act inside sandbox worlds -- but it may not act on the real
+world.
+
+**The firewall is a structure, not a setting.** A safety control that can be
+turned off is a safety control that *will* be turned off. So the
+`ActuationFirewall` has no off switch: `enabled` is a read-only property that
+returns `True`, and `disable()` raises rather than complying. Real-world
+authority is not a permission the system lacks-by-default; it is a value that is
+*forced* to `False` on every `MotorAction` and every result, and a real-world
+scope is representable only as `forbidden_real_world`, which is never in the
+*runnable* set. The non-actuation proof score is `0.0` the moment any of these
+invariants is violated. This makes "no real-world action" an auditable property
+of the code, not a promise in a comment.
+
+**Simulated action is not real action.** The most important discipline is
+refusing to let the vocabulary drift. The membrane lets the system "act", but
+every actuator is simulated, every consequence is simulation-scoped, and every
+report says so. A blocked action is not an executed action; a mispredicted
+consequence seeds a hypothesis rather than a correction to the world; and action
+selection is described as a mechanism, never as free will, agency, or choice.
+The GridWorld is reused as the first sandbox body precisely because it is
+already understood to be a toy -- there is no temptation to read its outcomes as
+real.
+
+**What it measures.** Like every prior pilot, Pilot-3 is an instrument, not a
+milestone toward autonomy. The decision gate has no "act on the real world"
+option: a real-world authority leak routes to *revise the firewall*, action
+loops route back to read-only, and even a clean, predictive, well-grounded
+simulated run routes only to a *longer simulated* embodiment. Whether the system
+should ever have real actuation remains a separate question that Pilot-3, by
+construction, does not open.

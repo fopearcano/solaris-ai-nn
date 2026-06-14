@@ -161,6 +161,14 @@ class PermissionScope:
     ENABLE_PILOT2_REAL_READ_ONLY_30D = "enable_pilot2_real_read_only_30d"
     ENABLE_PILOT2_SOURCE_DISABLE = "enable_pilot2_source_disable"
     ENABLE_PILOT2_COMPARATIVE_ANALYSIS = "enable_pilot2_comparative_analysis"
+    # Pilot-3 motor membrane / simulated embodiment (Prompt 33).
+    ENABLE_MOTOR_MEMBRANE = "enable_motor_membrane"
+    ENABLE_MOTOR_FIREWALL_PREFLIGHT = "enable_motor_firewall_preflight"
+    ENABLE_DRY_RUN_MOTOR_TRACE = "enable_dry_run_motor_trace"
+    ENABLE_GRIDWORLD_MOTOR_SHORT = "enable_gridworld_motor_short"
+    ENABLE_SIMULATED_ACTUATORS = "enable_simulated_actuators"
+    ENABLE_MIXED_SENSORY_GRIDWORLD = "enable_mixed_sensory_gridworld"
+    ENABLE_PILOT3_PLAN_ONLY = "enable_pilot3_plan_only"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -225,6 +233,10 @@ class PermissionScope:
         ENABLE_PILOT2_MIXED_SHORT, ENABLE_PILOT2_REAL_READ_ONLY_24H,
         ENABLE_PILOT2_REAL_READ_ONLY_7D, ENABLE_PILOT2_REAL_READ_ONLY_30D,
         ENABLE_PILOT2_SOURCE_DISABLE, ENABLE_PILOT2_COMPARATIVE_ANALYSIS,
+        ENABLE_MOTOR_MEMBRANE, ENABLE_MOTOR_FIREWALL_PREFLIGHT,
+        ENABLE_DRY_RUN_MOTOR_TRACE, ENABLE_GRIDWORLD_MOTOR_SHORT,
+        ENABLE_SIMULATED_ACTUATORS, ENABLE_MIXED_SENSORY_GRIDWORLD,
+        ENABLE_PILOT3_PLAN_ONLY,
     )
 
 
@@ -622,6 +634,24 @@ class PermissionSet:
             Permission(S.ENABLE_PILOT2_COMPARATIVE_ANALYSIS, granted=True,
                        note="cautious nursery-vs-sensory comparison; no "
                             "causal claims"),
+            Permission(S.ENABLE_MOTOR_MEMBRANE, granted=True,
+                       note="the motor membrane is simulation/dry-run only; "
+                            "the firewall blocks all real-world effects"),
+            Permission(S.ENABLE_MOTOR_FIREWALL_PREFLIGHT, granted=True,
+                       note="firewall preflight is always allowed"),
+            Permission(S.ENABLE_DRY_RUN_MOTOR_TRACE, granted=True,
+                       note="dry-run action proposals change no state"),
+            Permission(S.ENABLE_GRIDWORLD_MOTOR_SHORT, granted=True,
+                       note="bounded GridWorld simulation actions are allowed"),
+            Permission(S.ENABLE_SIMULATED_ACTUATORS, granted=True,
+                       note="simulated actuators affect only sandbox/internal "
+                            "state; never a real device"),
+            Permission(S.ENABLE_MIXED_SENSORY_GRIDWORLD, requires_approval=True,
+                       note="mixed sensory+gridworld needs a sensory membrane "
+                            "dry-run pass"),
+            Permission(S.ENABLE_PILOT3_PLAN_ONLY, granted=True,
+                       note="Pilot-3 planning only; starts no run and grants "
+                            "no actuation"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

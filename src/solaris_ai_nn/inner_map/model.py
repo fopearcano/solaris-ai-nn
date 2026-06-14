@@ -328,6 +328,12 @@ class InnerMapModel:
     # report path, recommendation. Read-only; the system never acts on the
     # environment, and no consciousness is claimed.
     pilot2: Optional[Dict[str, Any]] = None
+    # Pilot-3 motor membrane status (Prompt 33); None when the membrane is
+    # off. Keys: enabled, embodiment profile, real_world_authority=false,
+    # action/simulated/dry-run/veto/blocked-real-world counts, latest motor
+    # action, latest firewall decision, action ledger path, report path.
+    # Simulated/dry-run only; the system never acts on the real world.
+    motor_membrane: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

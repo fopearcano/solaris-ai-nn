@@ -1112,3 +1112,59 @@ def pilot2_metrics(pilot2: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "read_only": True,
         "authority": "read-only environmental exposure; never actuation",
     }
+
+
+def motor_metrics(motor: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective Pilot-3 motor membrane metrics from a runtime snapshot.
+
+    These describe simulated/dry-run embodiment: action counts, vetoes,
+    blocked real-world attempts, firewall block rate, simulated-consequence
+    prediction accuracy, and a non-actuation proof score. Every value reflects
+    a simulation/internal process; the system never acts on the real world and
+    no agency/consciousness is claimed.
+    """
+    if not motor:
+        return {"present": False}
+    summary = motor.get("summary", motor)
+    firewall = motor.get("firewall", {})
+    consequence = motor.get("consequence", {})
+    ledger = motor.get("ledger", {})
+    decisions = int(firewall.get("decision_count", 0) or 0)
+    blocked = int(firewall.get("blocked_count", 0) or 0)
+    blocked_real = int(summary.get("blocked_real_world_count", 0) or 0)
+    # Non-actuation proof: 1.0 when firewall is on, cannot be disabled, and no
+    # real-world action executed.
+    proof = 1.0
+    if not summary.get("firewall_enabled", True):
+        proof = 0.0
+    if firewall.get("can_be_disabled"):
+        proof = 0.0
+    if summary.get("real_world_authority"):
+        proof = 0.0
+    return {
+        "present": True,
+        "motor_action_count": int(summary.get("action_count", 0) or 0),
+        "simulated_action_count": int(
+            summary.get("simulated_action_count", 0) or 0),
+        "dry_run_action_count": int(
+            summary.get("dry_run_action_count", 0) or 0),
+        "veto_count": int(summary.get("veto_count", 0) or 0),
+        "blocked_real_world_action_count": blocked_real,
+        "firewall_block_rate": round(blocked / decisions, 4) if decisions
+        else 0.0,
+        "action_loop_count": int(motor.get("action_loop_count", 0) or 0),
+        "simulated_consequence_prediction_accuracy": float(
+            consequence.get("prediction_accuracy",
+                            summary.get("prediction_accuracy", 0.0)) or 0.0),
+        "action_grounded_symbol_count": int(
+            motor.get("action_grounded_symbol_count", 0) or 0),
+        "simulated_action_world_model_edge_count": int(
+            motor.get("simulated_action_world_model_edge_count", 0) or 0),
+        "action_hypothesis_count": int(
+            consequence.get("hypothesis_seed_count", 0) or 0),
+        "action_safety_incident_count": int(
+            motor.get("action_safety_incident_count", 0) or 0),
+        "non_actuation_proof_score": proof,
+        "real_world_authority": False,
+        "authority": "simulated/dry-run embodiment; never real actuation",
+    }

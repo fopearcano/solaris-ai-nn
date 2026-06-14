@@ -36,12 +36,13 @@ class ModuleCapability:
     COMMUNICATION = "communication"
     LLM_ADAPTER_OPTIONAL = "llm_adapter_optional"
     SENSORY_MEMBRANE = "sensory_membrane"
+    MOTOR_MEMBRANE = "motor_membrane"
 
     ALL = (STIMULUS_SOURCE, SIGNAL_PROCESSOR, MEMORY, WORLD_MODEL,
            HOMEOSTASIS, EXECUTIVE, EGO_BOUNDARY, LATENT, DEVELOPMENTAL,
            PROTO_LANGUAGE, ECOLOGY, ACTIVE_PERCEPTION, HYPOTHESIS, LOGOS,
            AUTOREGENERATION, GOVERNANCE, OPS, EVALUATION, COMMUNICATION,
-           LLM_ADAPTER_OPTIONAL, SENSORY_MEMBRANE)
+           LLM_ADAPTER_OPTIONAL, SENSORY_MEMBRANE, MOTOR_MEMBRANE)
 
 
 class ModuleStatus:
@@ -103,6 +104,9 @@ _MODULE_SPECS = {
                     ModuleCapability.LLM_ADAPTER_OPTIONAL, [], [], False),
     "sensory_membrane": ("solaris_ai_nn.sensory_membrane.membrane_runtime",
                          ModuleCapability.SENSORY_MEMBRANE, [], [], False),
+    "motor_membrane": ("solaris_ai_nn.motor_membrane.sandbox_runtime",
+                       ModuleCapability.MOTOR_MEMBRANE, [], ["executive"],
+                       False),
 }
 
 

@@ -43,3 +43,6 @@ artifacts/
 # Pilot output (manifests, readiness/pilot reports, input summaries, registry).
 # Local research evidence; reproducible from code and sample inputs.
 .solaris_ai_nn_pilots/
+.solaris_ai_nn_pilot2/
+.solaris_ai_nn_pilot3/
+.sann_motor/

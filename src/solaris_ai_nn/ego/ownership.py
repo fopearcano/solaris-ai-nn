@@ -28,6 +28,8 @@ ATTRIBUTION_CATEGORIES = (
     "generated_by_developmental_nursery",
     "simulated_environment_input",
     "read_only_environmental_input",
+    "simulated_motor_action",
+    "blocked_real_world_action",
     "unknown_source",
 )
 
@@ -49,6 +51,10 @@ _SOURCE_RULES = (
     # Read-only sensory membrane input is environmental, never a command.
     ("read_only_environmental_input", "read_only_environmental_input"),
     ("sensory_membrane", "read_only_environmental_input"),
+    # Pilot-3 motor membrane: simulated action vs blocked real-world action.
+    ("blocked_real_world_action", "blocked_real_world_action"),
+    ("simulated_motor_action", "simulated_motor_action"),
+    ("motor_membrane", "simulated_motor_action"),
     ("simulated_environment", "simulated_environment_input"),
     ("operator", "generated_by_operator"),
     ("approval", "generated_by_operator"),

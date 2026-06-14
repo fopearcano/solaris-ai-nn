@@ -71,8 +71,23 @@ def test_all_scopes_in_default_set():
     # + 6 hypothesis engine (P25) + 9 auto-regeneration (P26)
     # + 6 LOGOS complexity (P27) + 6 conscience runtime (P28)
     # + 7 Pilot-1 soak protocol (P29) + 9 sensory membrane (P31)
-    # + 10 Pilot-2 soak protocol (P32).
-    assert len(PermissionScope.ALL) == 118
+    # + 10 Pilot-2 soak protocol (P32) + 7 motor membrane (P33).
+    assert len(PermissionScope.ALL) == 125
+
+
+def test_motor_membrane_scope_defaults():
+    ps = PermissionSet.default()
+    S = PermissionScope
+    # Motor membrane, firewall preflight, dry-run, gridworld, simulated
+    # actuators, and Pilot-3 plan are allowed; mixed sensory+gridworld needs
+    # approval; no scope ever enables real-world actuation.
+    assert ps.allows(S.ENABLE_MOTOR_MEMBRANE)
+    assert ps.allows(S.ENABLE_MOTOR_FIREWALL_PREFLIGHT)
+    assert ps.allows(S.ENABLE_DRY_RUN_MOTOR_TRACE)
+    assert ps.allows(S.ENABLE_GRIDWORLD_MOTOR_SHORT)
+    assert ps.allows(S.ENABLE_SIMULATED_ACTUATORS)
+    assert ps.allows(S.ENABLE_PILOT3_PLAN_ONLY)
+    assert ps.requires_approval(S.ENABLE_MIXED_SENSORY_GRIDWORLD)
 
 
 def test_pilot2_scope_defaults():

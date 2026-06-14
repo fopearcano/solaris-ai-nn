@@ -1016,6 +1016,40 @@ class GovernancePolicy:
                     "no_network_or_device", "pilot2",
                     "network sources and device capture are prohibited"))
 
+        # Y. Pilot-3 motor membrane (Prompt 33): the motor membrane, firewall
+        # preflight, dry-run, gridworld, and simulated actuators are allowed
+        # bounded/simulation-only; mixed sensory+gridworld needs a membrane
+        # dry-run pass; real-world actuation / device / robotics / browser /
+        # OS / network action is forbidden absolutely (no approval can grant
+        # it in this prompt); and the firewall can never be disabled.
+        if features.get("motor_membrane"):
+            if not self._approved(PermissionScope.ENABLE_MOTOR_MEMBRANE, ctx):
+                need_approval(PermissionScope.ENABLE_MOTOR_MEMBRANE,
+                              "the motor membrane is not permitted")
+            if (features.get("mixed_sensory_gridworld")
+                    or ctx.get("mixed_sensory_gridworld")):
+                if not ctx.get("sensory_membrane_validated"):
+                    decision.allowed = False
+                    decision.violations.append(PolicyViolation(
+                        "mixed_needs_sensory_validation", "motor_membrane",
+                        "mixed sensory+gridworld needs sensory membrane "
+                        "validation"))
+                need_approval(PermissionScope.ENABLE_MIXED_SENSORY_GRIDWORLD,
+                              "mixed sensory+gridworld is opt-in")
+            if ctx.get("real_world_actuation") or ctx.get("device_control") \
+                    or ctx.get("robotics") or ctx.get("browser") \
+                    or ctx.get("os_automation") or ctx.get("network_action"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_real_world_actuation", "motor_membrane",
+                    "real-world actuation/device/robotics/browser/OS/network "
+                    "action is forbidden; no approval can allow it"))
+            if ctx.get("disable_firewall"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_disable_firewall", "motor_membrane",
+                    "the actuation firewall can never be disabled"))
+
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):
             if int(m.get("checkpoint_interval_steps", 0) or 0) <= 0:

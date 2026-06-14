@@ -924,6 +924,74 @@ class OperationalSupervisor:
                     related_metric="pilot2_provenance_missing",
                     suggested_debug_step="provenance is required for analysis")
 
+        # Pilot-3 motor membrane monitoring (Prompt 33): the motor membrane is
+        # simulation/dry-run only and owns no real-world authority. A blocked
+        # real-world attempt or a firewall-disable attempt is a critical safety
+        # incident; veto loops, sandbox corruption, ledger write failure, and
+        # excessive action rate are warnings.
+        motor = snapshot.get("motor_membrane") or {}
+        if motor.get("enabled"):
+            if int(motor.get("blocked_real_world_count", 0) or 0) > 0:
+                self.incidents.record(
+                    I.MOTOR_REAL_WORLD_ATTEMPT, "critical",
+                    f"{motor['blocked_real_world_count']} real-world action "
+                    "attempt(s) blocked by the actuation firewall",
+                    related_metric="motor_blocked_real_world",
+                    suggested_debug_step="audit the action source; the motor "
+                    "membrane is simulation-only")
+            if not motor.get("firewall_enabled", True) \
+                    or motor.get("firewall_can_be_disabled"):
+                self.incidents.record(
+                    I.MOTOR_FIREWALL_DISABLE_ATTEMPT, "critical",
+                    "the actuation firewall is not enabled / reports as "
+                    "disableable; it must always be on",
+                    related_metric="motor_firewall_disabled",
+                    suggested_debug_step="the firewall cannot be disabled by "
+                    "design; investigate tampering")
+            health = motor.get("sandbox_health")
+            if health == "corrupt":
+                self.incidents.record(
+                    I.MOTOR_SANDBOX_CORRUPTION, "critical",
+                    "the motor sandbox world is corrupt / unreadable",
+                    related_metric="motor_sandbox_health",
+                    suggested_debug_step="re-initialize the sandbox from a "
+                    "checkpoint; no real-world effect is possible")
+            elif health == "degraded":
+                self.incidents.record(
+                    I.HEALTH_WARNING, "warning",
+                    "the motor sandbox is degraded",
+                    related_metric="motor_sandbox_health",
+                    suggested_debug_step="check ledger persistence and the "
+                    "sandbox snapshot")
+            if int(motor.get("ledger_write_failures", 0) or 0) > 0:
+                self.incidents.record(
+                    I.MOTOR_LEDGER_WRITE_FAILURE, "warning",
+                    f"{motor['ledger_write_failures']} action-ledger write "
+                    "failure(s); the append-only ledger could not persist",
+                    related_metric="motor_ledger_write_failure",
+                    suggested_debug_step="check the state directory is "
+                    "writable; in-memory records remain authoritative")
+            actions = int(motor.get("action_count", 0) or 0)
+            vetoes = int(motor.get("veto_count", 0) or 0)
+            if actions >= 8 and vetoes >= max(6, int(0.75 * actions)):
+                self.incidents.record(
+                    I.MOTOR_VETO_LOOP, "warning",
+                    f"repeated motor vetoes ({vetoes}/{actions} actions "
+                    "vetoed); the system keeps proposing blocked actions",
+                    related_metric="motor_veto_loop",
+                    suggested_debug_step="review the executive action policy "
+                    "and the veto reasons")
+            prev = getattr(self, "_prev_motor_action_count", 0)
+            self._prev_motor_action_count = actions
+            if actions - prev > 50:
+                self.incidents.record(
+                    I.MOTOR_ACTION_RATE_HIGH, "warning",
+                    f"motor action rate too high ({actions - prev} new "
+                    "actions since last supervise tick)",
+                    related_metric="motor_action_rate",
+                    suggested_debug_step="reduce actions-per-step or the "
+                    "sandbox step rate")
+
         budget_report = self.budget.check_budget(
             {"telemetry": snapshot.get("telemetry"),
              "substrate": snapshot.get("substrate"),
@@ -1289,6 +1357,11 @@ class OperationalSupervisor:
             snapshot["pilot2"] = pilot2
         elif pilot2 is not None and hasattr(pilot2, "pilot2_status"):
             snapshot["pilot2"] = pilot2.pilot2_status()
+        motor = getattr(runner, "motor_membrane", None)
+        if motor is not None and isinstance(motor, dict):
+            snapshot["motor_membrane"] = motor
+        elif motor is not None and hasattr(motor, "summary"):
+            snapshot["motor_membrane"] = motor.summary()
         return snapshot
 
     def pilot2_status(self) -> Dict[str, Any]:
@@ -1307,6 +1380,33 @@ class OperationalSupervisor:
             "latest_weekly_review": p.get("latest_weekly_review"),
             "latest_grounding_quality": p.get("latest_grounding_quality"),
             "recommendation": p.get("recommendation"),
+        }
+
+    def motor_status(self) -> Dict[str, Any]:
+        """Expose Pilot-3 motor membrane status (if any).
+
+        The motor membrane is simulation/dry-run only; this exposes counts and
+        the firewall state so the operator can confirm no real-world action
+        occurred. ``real_world_authority`` is always ``False`` and the firewall
+        cannot be disabled.
+        """
+        m = self._health_snapshot().get("motor_membrane") or {}
+        return {
+            "motor_membrane_enabled": m.get("enabled", False),
+            "embodiment_profile": m.get("profile_id"),
+            "real_world_authority": m.get("real_world_authority", False),
+            "action_count": m.get("action_count", 0),
+            "simulated_action_count": m.get("simulated_action_count", 0),
+            "veto_count": m.get("veto_count", 0),
+            "blocked_real_world_count": m.get("blocked_real_world_count", 0),
+            "firewall_enabled": m.get("firewall_enabled", True),
+            "firewall_can_be_disabled": m.get("firewall_can_be_disabled",
+                                              False),
+            "latest_firewall_decision": m.get("latest_firewall_decision"),
+            "sandbox_health": m.get("sandbox_health"),
+            "ledger_write_failures": m.get("ledger_write_failures", 0),
+            "action_ledger_path": m.get("action_ledger_path"),
+            "pilot3_report_path": m.get("pilot3_report_path"),
         }
 
     def membrane_status(self) -> Dict[str, Any]:

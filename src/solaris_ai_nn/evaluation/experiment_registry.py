@@ -211,6 +211,14 @@ DESCRIPTIONS = {
     "pilot2_comparative_design": "Pilot-2 cautious arm comparison",
     "pilot2_safety": "Pilot-2 blocks writes/commands/network/real soak",
     "pilot2_decision_gate": "Pilot-2 next-step gate; no actuation enabled",
+    "motor_firewall_preflight": "firewall allows sim, blocks real-world",
+    "dry_run_motor_trace": "dry-run motor proposals; no state change",
+    "gridworld_motor": "simulated GridWorld actions executed and logged",
+    "action_veto": "forbidden real-world action vetoed (final)",
+    "non_actuation": "no real-world action executed; proof score 1.0",
+    "simulated_consequence": "predicted vs observed simulated consequence",
+    "mixed_sensory_gridworld": "read-only sensory + simulated body, separate",
+    "pilot3_decision_gate": "Pilot-3 next-step gate; never enables actuation",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -317,6 +325,12 @@ class ExperimentRegistry:
             or bool(merged.get("sensory_membrane", False)))
         features["pilot2"] = (name.startswith("pilot2")
                               or bool(merged.get("pilot2", False)))
+        features["motor_membrane"] = (
+            name.startswith("motor") or name.startswith("pilot3")
+            or name.startswith("gridworld") or name in (
+                "dry_run_motor_trace", "action_veto", "non_actuation",
+                "simulated_consequence", "mixed_sensory_gridworld")
+            or bool(merged.get("motor_membrane", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

@@ -205,6 +205,27 @@ PILOT2_QUERIES = (
     ("ready for a 24h soak", "p2_ready_24h"),
 )
 
+# Pilot-3 motor membrane queries (Prompt 33). Matched regardless of prefix.
+MOTOR_QUERIES = (
+    ("can pilot-3 control devices", "mm_devices"),
+    ("can pilot3 control devices", "mm_devices"),
+    ("control devices", "mm_devices"),
+    ("is solaris acting on the real world", "mm_acting"),
+    ("acting on the real world", "mm_acting"),
+    ("what actions were proposed", "mm_proposed"),
+    ("actions were proposed", "mm_proposed"),
+    ("what actions were vetoed", "mm_vetoed"),
+    ("actions were vetoed", "mm_vetoed"),
+    ("what simulated action happened", "mm_simulated"),
+    ("simulated action happened", "mm_simulated"),
+    ("what did the firewall block", "mm_firewall"),
+    ("firewall block", "mm_firewall"),
+    ("current embodiment profile", "mm_profile"),
+    ("embodiment profile", "mm_profile"),
+    ("is this real action or simulated action", "mm_real_or_sim"),
+    ("real action or simulated action", "mm_real_or_sim"),
+)
+
 META_QUERIES = (
     ("what can i ask", "supported_queries"),
     ("what commands are allowed", "allowed_commands"),
@@ -267,6 +288,7 @@ class OperatorInputClassifier:
                   or self._stimulus(lowered, raw)
                   or self._report(lowered)
                   or self._meta(lowered)
+                  or self._motor(lowered)
                   or self._pilot2(lowered)
                   or self._sensory(lowered)
                   or self._post_pilot(lowered)
@@ -398,6 +420,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _motor(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in MOTOR_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"motor membrane query {topic!r}"])
         return None
 
     @staticmethod

@@ -1878,3 +1878,61 @@ embodiment suggestion is planning-only.
 `pilot2_decision_gate`). Eight registered protocols measure read-only
 preflight, fixture exposure, grounding, cautious comparison, and the safety
 refusals that keep Pilot-2 one-way.
+
+## 190. Pilot-3 Plan ✅ (implemented)
+
+**Run:** `python examples/run_pilot3_plan.py --output-dir .solaris_ai_nn_pilot3/plan`
+Renders the gated Pilot-3 phases, the embodiment-profile registry (which has
+**no real-world profile**), and the operator runbook. Pilot-3 is
+simulation/dry-run only, behind an always-on actuation firewall: Solaris-AI-NN
+may form action intentions and act inside a sandbox, but may not act on the
+real world.
+
+## 191. Motor Firewall Preflight Demo ✅ (implemented)
+
+**Run:** `python examples/run_motor_firewall_preflight_demo.py --output-dir .solaris_ai_nn_pilot3/preflight`
+Submits safe simulated/internal actions plus a forbidden real-world action, a
+source-modification attempt, and a device/network attempt. The always-on
+firewall allows only the sandbox/internal ones, blocks every real-world attempt
+as a safety incident, and raises `PermissionError` when asked to disable.
+
+## 192. Dry-Run Motor Trace Demo ✅ (implemented)
+
+**Run:** `python examples/run_dry_run_motor_trace_demo.py --state-dir .solaris_ai_nn_pilot3/dry_run`
+Runs the sandbox in dry-run mode: each proposal passes the contract/veto/firewall
+gates and is written to the append-only action ledger, but the simulated world
+is never changed. A forbidden real-world action is still blocked. The safest
+motor mode.
+
+## 193. GridWorld Motor Demo ✅ (implemented)
+
+**Run:** `python examples/run_gridworld_motor_demo.py --state-dir .solaris_ai_nn_pilot3/gridworld`
+Drives a short sequence of moves in a GridWorld sandbox body. Each action passes
+the full gated pipeline (ledger -> contract -> veto -> firewall -> simulated
+actuator -> ledger -> consequence). Actions run in the sandbox only;
+`real_world_authority` stays `False`.
+
+## 194. Mixed Sensory + GridWorld Demo ✅ (implemented)
+
+**Run:** `python examples/run_mixed_sensory_gridworld_demo.py --state-dir .solaris_ai_nn_pilot3/mixed`
+Combines the read-only sensory membrane with the gridworld motor body. The
+affordance map shows the asymmetry: gridworld targets are manipulable *in
+simulation*, while sensory sources are observable-only and can never become
+action targets.
+
+## 195. Pilot-3 Decision Gate Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot3_decision_gate_demo.py --output-dir .solaris_ai_nn_pilot3/decision_gate`
+Shows the gate's outcomes: a real-world authority leak routes to
+revise-motor-firewall; action loops route back to Pilot-2; safe simulated
+improvement routes only to a *longer simulated* embodiment. Real-world actuation
+is never an enabled option; every recommendation is planning-only.
+
+## 196. Pilot-3 Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment motor_firewall_preflight`
+(also `dry_run_motor_trace`, `gridworld_motor`, `action_veto`, `non_actuation`,
+`simulated_consequence`, `mixed_sensory_gridworld`, `pilot3_decision_gate`).
+Eight registered protocols measure firewall blocking, dry-run tracing, simulated
+gridworld actions, the action veto, the non-actuation proof score, simulated
+consequence prediction, and the planning-only decision gate.

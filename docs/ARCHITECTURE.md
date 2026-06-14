@@ -2095,3 +2095,62 @@ answer that *Solaris-AI-NN is not acting on the environment; Pilot-2 is
 read-only*. **Pilot-2 still has no actuation, no robotics, no browser/OS
 automation, no external APIs, no network sources, and makes no consciousness
 claim.**
+
+## Pilot-3 Motor Membrane and Actuation Firewall
+
+Pilot-2 added the *inbound* boundary (read-only sensory input). Pilot-3 adds the
+opposite, *outbound* boundary: a **motor membrane** that represents what
+Solaris-AI-NN *would* do if it were embodied, while remaining simulation-only,
+dry-run-capable, sandbox-only, inspectable, auditable, reversible, and blocked
+from real-world effects. The core principle is explicit and load-bearing:
+**Solaris-AI-NN may form action intentions, simulate their consequences, write
+action traces, and act inside sandbox worlds -- but it may not act on the real
+world.**
+
+The membrane is a small package (`src/solaris_ai_nn/motor_membrane/`). A
+`MotorAction` is an *intention*, never permission to act: every action is forced
+to `real_world_authority=False` and `simulated_only=True`, and a real-world
+scope is representable only as `forbidden_real_world` (never *runnable*). Each
+proposed action crosses a single gated pipeline inside the
+`EmbodimentSandboxRuntime`: a mandatory pre-execution `ActionLedger` record
+(append-only JSONL) -> the `MotorContractValidator` (13 hard rules) -> the
+`ActionVetoLayer` (real-world and source-modification vetoes are *final*) -> the
+always-on `ActuationFirewall` -> only then a `SimulatedActuator` (the
+`GridWorldActuator` reuses the existing embodiment GridWorld as the first
+sandbox body; the `InternalActuator` issues replay/consolidation requests) ->
+the `ConsequenceModel` (predicted vs observed, simulation-scoped; mispredictions
+seed hypotheses). The `ActuationFirewall` is structurally always enabled
+(`enabled` is a read-only property; `disable()` raises `PermissionError`), and
+any blocked real-world attempt becomes a safety incident. `AffordanceDetector`
+keeps the inbound/outbound asymmetry visible: gridworld targets are manipulable
+*in simulation*, while sensory sources are observable-only and can never be
+action targets. `EmbodimentProfileRegistry` exposes seven bounded profiles and
+**no real-world profile**; the `Pilot3Protocol` runs gated phases with **no
+real-actuation phase** (sandbox phases require a passing firewall preflight);
+the `Pilot3ReportBuilder` writes a ClaimGuard-scanned report with a
+proof-of-non-actuation; and the `Pilot3DecisionGate` is planning-only (a
+real-world authority leak routes to *revise the motor firewall*; safe simulated
+improvement routes only to a *longer simulated* embodiment).
+
+Pilot-3 integrates across the stack the same way prior layers do: governance
+adds seven motor scopes (membrane / preflight / dry-run / gridworld-short /
+simulated-actuators granted by default, mixed-sensory-gridworld gated) plus a
+manifest gate that forbids real-world actuation / device / robotics / browser /
+OS / network action *absolutely* (no approval can grant it) and forbids
+disabling the firewall; the conscience spine gains a `motor_action_firewall`
+phase between safety/governance validation and action suggestion, and the
+orchestrator routes a candidate action through the membrane (the executive never
+executes a motor action directly); ego attribution adds
+`simulated_motor_action` and `blocked_real_world_action` categories; the Inner
+MAP carries a `motor_membrane` field and fourteen new state-graph nodes;
+evaluation adds thirteen motor metrics (including a non-actuation proof score)
+and eight protocols; ops exposes motor status and warnings (blocked real-world
+attempt, firewall-disable attempt, sandbox corruption, ledger write failure,
+veto loop, action rate too high); and the operator dialogue answers eight motor
+questions -- including the deliberately safe answers that *Pilot-3 cannot
+control devices* and *Solaris-AI-NN is not acting on the real world*. **Pilot-3
+still adds no real-world actuation, no robotics, no browser/OS automation, no
+network APIs, no device control, and makes no claim of consciousness, agency,
+personhood, sentience, or life. A simulated action is not a real action; a
+blocked action is not an executed action; and action selection is a mechanism,
+not free will.**

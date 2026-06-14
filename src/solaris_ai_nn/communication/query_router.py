@@ -67,6 +67,11 @@ AVAILABLE_QUERIES = (
     "is this real, simulated, fixture, or nursery input?",
     "is Pilot-2 ready for a 24h read-only soak?",
     "is Solaris acting on the environment?",
+    "is Solaris acting on the real world?", "what actions were proposed?",
+    "what actions were vetoed?", "what simulated action happened?",
+    "what did the firewall block?", "what is the current embodiment profile?",
+    "is this real action or simulated action?",
+    "can Pilot-3 control devices?",
 )
 
 
@@ -127,6 +132,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("mm_"):
+            return self._motor(topic)
         if topic.startswith("p2_"):
             return self._pilot2(topic)
         if topic.startswith("sm_"):
@@ -454,6 +461,53 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _motor(self, topic: str) -> CommunicationResponse:
+        """Answer Pilot-3 motor membrane queries from the attached status.
+
+        The real-world-action and device-control questions are answered safely
+        even with no component; Pilot-3 is simulation/dry-run only.
+        """
+        if topic == "mm_devices":
+            return self.builder.status_response(
+                "No. Pilot-3 is simulation-only/dry-run. Device control, "
+                "robotics, browser control, OS automation, network action, "
+                "and real-world actuation are prohibited.",
+                ["policy:no_device_control"])
+        if topic == "mm_acting":
+            return self.builder.status_response(
+                "No. Solaris-AI-NN forms action intentions and runs them only "
+                "inside a sandbox. An always-on actuation firewall blocks all "
+                "real-world effects; no real-world action occurs.",
+                ["policy:no_real_world_action"])
+        component = self.components.get("motor_membrane")
+        if component is None:
+            return self.builder.missing_component_response("motor_membrane")
+        status = (component.summary() if hasattr(component, "summary")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:motor_membrane"]
+        if topic == "mm_proposed":
+            text = f"actions proposed: {status.get('action_count', 0)}"
+        elif topic == "mm_vetoed":
+            text = f"actions vetoed: {status.get('veto_count', 0)}"
+        elif topic == "mm_simulated":
+            text = (f"simulated actions executed: "
+                    f"{status.get('simulated_action_count', 0)} "
+                    "(simulation-only; not real action)")
+        elif topic == "mm_firewall":
+            text = (f"firewall blocked real-world attempts: "
+                    f"{status.get('blocked_real_world_count', 0)} "
+                    f"(firewall enabled: {status.get('firewall_enabled', True)})")
+        elif topic == "mm_profile":
+            text = f"current embodiment profile: {status.get('profile_id')}"
+        elif topic == "mm_real_or_sim":
+            text = ("simulated action only -- the motor membrane never "
+                    "executes a real-world action; real_world_authority="
+                    f"{status.get('real_world_authority', False)}")
+        else:
+            text = (f"motor membrane profile: {status.get('profile_id')}, "
+                    f"real_world_authority=False")
         return self.builder.status_response(text, refs)
 
     def _pilot2(self, topic: str) -> CommunicationResponse:

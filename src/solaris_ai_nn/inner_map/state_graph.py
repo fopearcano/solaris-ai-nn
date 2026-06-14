@@ -1123,4 +1123,56 @@ def build_default_state_graph() -> StateGraph:
                "safety gates every Pilot-2 phase")
     g.add_edge("pilot2_protocol", "inner_map",
                "Pilot-2 state feeds Inner MAP")
+
+    # Pilot-3 motor membrane (Prompt 33). The outbound boundary: action
+    # intentions run only inside a sandbox, behind an always-on firewall. The
+    # system forms intentions but never acts on the real world.
+    for name, role in [
+        ("motor_action", "an action intention; never permission to act"),
+        ("motor_contract_validator", "hard contract: no real-world effect"),
+        ("actuation_firewall", "always-on outbound boundary; cannot disable"),
+        ("simulated_actuator", "effects only simulation/internal state"),
+        ("gridworld_actuator", "the first sandbox body"),
+        ("internal_actuator", "internal requests only (replay/consolidate)"),
+        ("affordance_detector", "scoped affordances; sources observable only"),
+        ("consequence_model", "predicted vs observed simulated consequence"),
+        ("action_ledger", "append-only audit of proposals and vetoes"),
+        ("action_veto_layer", "final refusal for forbidden actions"),
+        ("embodiment_sandbox_runtime", "bounded simulation-only motor runtime"),
+        ("pilot3_protocol", "gated phases; no real-actuation phase"),
+        ("pilot3_decision_gate", "next step; never enables actuation"),
+        ("motor_membrane_safety_validator", "motor hard rules; never bypassed"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("action_arbitrator" if "action_arbitrator" in g.nodes
+               else "inner_map", "motor_action",
+               "executive feeds the motor membrane (never executes directly)")
+    g.add_edge("motor_action", "motor_contract_validator",
+               "every action is validated against the motor contract")
+    g.add_edge("motor_contract_validator", "actuation_firewall",
+               "the contract feeds the always-on firewall")
+    g.add_edge("action_veto_layer", "actuation_firewall",
+               "vetoes are applied before the firewall verdict")
+    g.add_edge("actuation_firewall", "simulated_actuator",
+               "only allowed actions reach a simulated actuator")
+    g.add_edge("simulated_actuator", "gridworld_actuator", "gridworld body")
+    g.add_edge("simulated_actuator", "internal_actuator", "internal requests")
+    g.add_edge("simulated_actuator", "action_ledger",
+               "actuator results are recorded in the ledger")
+    g.add_edge("affordance_detector", "motor_action",
+               "affordances scope candidate actions")
+    g.add_edge("consequence_model",
+               "hypothesis_source_scanner" if "hypothesis_source_scanner"
+               in g.nodes else "inner_map",
+               "mispredicted consequences seed hypotheses")
+    g.add_edge("action_ledger",
+               "world_model_builder" if "world_model_builder" in g.nodes
+               else "inner_map",
+               "action evidence feeds world model / proto-language / LOGOS")
+    g.add_edge("motor_membrane_safety_validator",
+               "embodiment_sandbox_runtime", "safety gates the sandbox")
+    g.add_edge("pilot3_protocol", "embodiment_sandbox_runtime",
+               "the protocol gates sandbox phases")
+    g.add_edge("embodiment_sandbox_runtime", "inner_map",
+               "motor membrane state feeds Inner MAP")
     return g

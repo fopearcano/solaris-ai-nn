@@ -131,6 +131,7 @@ class ConscienceOrchestrator:
         safe("logos", self._build_logos)
         safe("governance", self._build_governance)
         safe("sensory_membrane", self._build_sensory_membrane)
+        safe("motor_membrane", self._build_motor_membrane)
         safe("inner_map", lambda: self._import(
             "solaris_ai_nn.inner_map.observer", "InnerMapObserver")())
 
@@ -233,6 +234,21 @@ class ConscienceOrchestrator:
         runtime.initialize()
         return runtime
 
+    def _build_motor_membrane(self) -> Any:
+        from ..motor_membrane.sandbox_runtime import EmbodimentSandboxRuntime
+
+        meta = self.context.metadata or {}
+        runtime = EmbodimentSandboxRuntime(
+            state_dir=self.context.state_dir,
+            profile_id=meta.get("motor_profile_id", "gridworld_minimal"),
+            enable_gridworld=bool(meta.get("motor_gridworld", True)),
+            enable_internal_actions=bool(
+                meta.get("motor_internal_actions", True)),
+            dry_run=bool(meta.get("motor_dry_run", False)),
+            seed=self.context.seed, bus=self.bus)
+        runtime.initialize()
+        return runtime
+
     # -- the loop -----------------------------------------------------------------
 
     def step(self) -> Dict[str, Any]:
@@ -282,6 +298,8 @@ class ConscienceOrchestrator:
         }
         if "sensory_membrane" in self.components:
             h[SpinePhase.READ_ONLY_SENSORY_POLL] = self._phase_sensory_poll
+        if "motor_membrane" in self.components:
+            h[SpinePhase.MOTOR_ACTION_FIREWALL] = self._phase_motor_firewall
         if "ecology" in self.components or "signals" in self.components:
             h[SpinePhase.STIMULUS_INGESTION] = self._phase_stimulus
         elif self.context.enabled_modules:
@@ -318,6 +336,35 @@ class ConscienceOrchestrator:
 
     def _phase_heartbeat(self, step: int) -> str:
         self._count("heartbeat")
+        return PhaseStatus.RAN
+
+    def _phase_motor_firewall(self, step: int) -> str:
+        """Route a candidate action through the motor membrane (sim/dry-run).
+
+        Executive never executes a motor action directly: a candidate becomes
+        a MotorAction, passes the contract/veto/firewall, and only a
+        simulated/internal action may run. Nothing actuates the real world.
+        """
+        membrane = self.components.get("motor_membrane")
+        if membrane is None:
+            return PhaseStatus.SKIPPED
+        push = getattr(self, "_push", None)
+        from ..motor_membrane.actions import MotorAction, MotorActionScope
+
+        suggested = (push.get("suggested_action") if push else None) or "look"
+        type_map = {"look": "look", "rest": "rest",
+                    "explore_safely": "move_east"}
+        action = MotorAction(
+            action_type=type_map.get(suggested, "look"),
+            scope=MotorActionScope.SANDBOX_ONLY,
+            source_candidate_ref=f"step{step}")
+        out = membrane.submit(action, context={"executive_validated": True,
+                                               "proposal_source": "executive"})
+        self._count("motor_action")
+        if self.bus:
+            self.bus.publish(BusTopic.SAFETY_EVENT, "motor_membrane",
+                             {"motor_status": out.get("status"),
+                              "real_world_authority": False}, step=step)
         return PhaseStatus.RAN
 
     def _phase_sensory_poll(self, step: int) -> str:

@@ -617,3 +617,23 @@ the environment.
 | Inner MAP | Pilot-2 source topology and grounding state (`pilot2` field + 14 state-graph nodes) |
 | long-run testing | `Pilot2Protocol` soak phases + `ComparativeRunDesign` nursery-vs-sensory comparison |
 | plasticity / development | `GroundingAnalysis` (graded grounding) + post-pilot sensory-exposure classification |
+
+## Pilot-3 motor membrane and actuation firewall mapping (Phase 33)
+
+The motor_membrane package (`motor_membrane/`) operationalises Solaris_Ai's
+action/embodiment roadmap as the *outbound* boundary: Solaris-AI-NN may form
+action intentions and run them inside a sandbox, but an always-on firewall
+blocks every real-world effect. A simulated action is never a real action.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| Action / will | `motor_membrane/actions.py` (`MotorAction`) -- an intention, always `real_world_authority=False`, never permission to act |
+| Embodiment / motor system | `EmbodimentSandboxRuntime` gated pipeline (ledger -> contract -> veto -> firewall -> simulated actuator -> consequence) |
+| Body / actuators | `GridWorldActuator` (reuses the embodiment GridWorld as the first sandbox body) + `InternalActuator` (replay/consolidation requests) |
+| Safety boundary | `ActuationFirewall` -- always on, cannot be disabled, blocks real-world/device/network/source attempts as safety incidents |
+| Affordances | `AffordanceDetector` -- gridworld manipulable *in simulation*; sensory sources observable-only; never real-world targets |
+| Consequence / learning | `ConsequenceModel` -- predicted vs observed (simulation-scoped); mispredictions seed hypotheses |
+| Audit / memory | `ActionLedger` (append-only JSONL: proposals, results, firewall decisions) |
+| Embodiment roadmap | `EmbodimentProfileRegistry` (seven bounded profiles, **no real-world profile**) + `Pilot3Protocol` (gated phases, **no real-actuation phase**) |
+| decision to continue | `Pilot3DecisionGate` -- planning-only (leak -> revise firewall; safe improvement -> longer *simulated* embodiment) |
+| Inner MAP | motor membrane status (`motor_membrane` field + 14 state-graph nodes) |

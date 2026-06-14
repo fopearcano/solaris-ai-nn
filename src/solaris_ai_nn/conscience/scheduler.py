@@ -89,6 +89,7 @@ _DEFAULT_SLOTS = {
     "action_candidate_generation": (ScheduleCadence.EVERY_STEP, 1),
     "executive_arbitration": (ScheduleCadence.EVERY_STEP, 1),
     "safety_governance_validation": (ScheduleCadence.EVERY_STEP, 1),
+    "motor_action_firewall": (ScheduleCadence.EVERY_STEP, 1),
     "action_suggestion": (ScheduleCadence.EVERY_STEP, 1),
     "reaction_collection": (ScheduleCadence.EVERY_STEP, 1),
     "memory_update": (ScheduleCadence.EVERY_STEP, 1),

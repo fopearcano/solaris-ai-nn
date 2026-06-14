@@ -334,6 +334,14 @@ python examples/run_pilot2_fixture_short_demo.py          # bounded fixture expo
 python examples/run_pilot2_comparative_demo.py            # nursery vs sensory vs mixed (cautious)
 python examples/run_pilot2_grounding_analysis_demo.py     # graded grounding quality
 python examples/run_pilot2_decision_gate_demo.py          # repeat/reduce/extend/revise
+
+# Pilot-3 motor membrane (the system may act in a sandbox, never on the real world)
+python examples/run_pilot3_plan.py                        # gated phases + profiles (no real-world profile)
+python examples/run_motor_firewall_preflight_demo.py      # firewall allows sim, blocks real-world
+python examples/run_dry_run_motor_trace_demo.py           # records proposals; changes nothing
+python examples/run_gridworld_motor_demo.py               # simulated embodiment in a sandbox body
+python examples/run_mixed_sensory_gridworld_demo.py       # read-only input + simulated body, separated
+python examples/run_pilot3_decision_gate_demo.py          # planning-only; never enables actuation
 ```
 
 The read-only sensory membrane and Pilot-2 also run as governed conscience
@@ -344,6 +352,16 @@ mixed-short and real soaks do):
 solaris-nn run-profile sensory_membrane_dry_run           # validate sources, publish nothing
 solaris-nn run-profile pilot2_plan_only                   # Pilot-2 plan; starts nothing
 solaris-nn run-profile pilot2_fixture_short               # bounded fixture exposure
+```
+
+The Pilot-3 motor membrane also runs as governed conscience profiles
+(plan-only, firewall preflight, dry-run, and gridworld-short need no approval;
+mixed sensory+gridworld is opt-in):
+
+```bash
+solaris-nn run-profile pilot3_plan_only                   # plan only; starts nothing
+solaris-nn run-profile motor_firewall_preflight           # firewall blocks real-world
+solaris-nn run-profile gridworld_motor_short              # bounded simulated motor run
 ```
 
 The post-pilot analysis also runs as a plan-only conscience profile (read-only;
@@ -454,6 +472,26 @@ require governance approval; an unsafe source must be disabled (which never
 deletes it); sensory input is never an operator command; and **actuation is
 never an enabled action** — a Pilot-3 limited embodiment, if ever suggested,
 is planning-only.
+
+The **Pilot-3 motor membrane** (`motor_membrane/`) is the *outbound* boundary,
+the mirror of the read-only sensory membrane. It lets Solaris-AI-NN form action
+intentions and run them inside a sandbox, while remaining simulation-only,
+dry-run-capable, inspectable, auditable, reversible, and blocked from real-world
+effects. Every `MotorAction` is forced to `real_world_authority=False`; each
+action crosses a single gated pipeline (append-only ledger → motor contract →
+veto layer → always-on actuation firewall → simulated actuator → consequence
+model); the firewall is structurally always on and cannot be disabled (any
+real-world attempt becomes a safety incident); the GridWorld is reused as the
+first sandbox body; the embodiment-profile registry has **no real-world
+profile** and the Pilot-3 protocol has **no real-actuation phase**; and the
+decision gate is planning-only (a real-world authority leak routes to *revise
+the firewall*; safe simulated improvement routes only to a *longer simulated*
+embodiment). **Solaris-AI-NN may form action intentions, simulate their
+consequences, write action traces, and act inside sandbox worlds — but it may
+not act on the real world: no actuation, no robotics, no device control, no
+browser/OS automation, no network APIs. A simulated action is not a real
+action, and no consciousness, agency, personhood, sentience, or life is
+claimed.**
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
 > explicit acknowledgement flags in the run manifest and should only be
@@ -843,6 +881,11 @@ src/solaris_ai_nn/
                 preflight/curation, exposure schedule, comparative design,
                 grounding analysis, source reliability, daily/weekly reviews,
                 report, decision gate, runbook, safety
+  motor_membrane/ Pilot-3 outbound boundary (simulation-only): actions, motor
+                contract, always-on actuation firewall, veto layer, action
+                ledger, simulated actuators, affordances, consequence model,
+                sandbox runtime, embodiment profiles, protocol, report,
+                decision gate, runbook, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

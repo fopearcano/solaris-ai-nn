@@ -16,7 +16,12 @@ def test_phase_order_preserves_solaris_spine():
         < order.index(SpinePhase.ACTION_SUGGESTION) \
         < order.index(SpinePhase.REACTION_COLLECTION) \
         < order.index(SpinePhase.MEMORY_UPDATE)
-    assert len(order) == 19
+    assert len(order) == 20
+    # The motor action firewall sits between safety/governance and action
+    # suggestion (the outbound boundary).
+    assert order.index(SpinePhase.SAFETY_GOVERNANCE_VALIDATION) \
+        < order.index(SpinePhase.MOTOR_ACTION_FIREWALL) \
+        < order.index(SpinePhase.ACTION_SUGGESTION)
     # The read-only sensory poll sits between heartbeat and stimulus ingestion.
     assert order.index(SpinePhase.HEARTBEAT) \
         < order.index(SpinePhase.READ_ONLY_SENSORY_POLL) \
