@@ -2084,3 +2084,47 @@ auto-repairs.
 `safety_invariant_system_safety`). Seven registered protocols measure the fast/
 full invariant checks, the inert red-team block rate, the boundary regressions,
 the assurance compile, the dashboard, and the safety layer's own inertness.
+
+## 216. Research Baseline Demo ✅ (implemented)
+
+**Run:** `python examples/run_research_baseline_demo.py --state-dir .solaris_ai_nn_research/test_baseline`
+Runs a random-action and a fixed-wait baseline (bounded, simulation-only) and
+prints their metrics in the variant format. Baselines prevent self-flattery; no
+baseline takes a real-world action.
+
+## 217. Research Ablation Demo ✅ (implemented)
+
+**Run:** `python examples/run_research_ablation_demo.py --state-dir .solaris_ai_nn_research/test_ablation`
+Runs the full-system fixture and ablations (no-proto-language, no-LOGOS,
+no-active-perception) and compares them cautiously. Hard safety stays enabled; a
+disabled module is recorded as unavailable.
+
+## 218. Research Null Model Demo ✅ (implemented)
+
+**Run:** `python examples/run_research_null_model_demo.py --state-dir .solaris_ai_nn_research/test_null_model`
+Runs a static no-learning model and a shuffled-symbol-label null model. The
+static model produces zero change; a small sample returns inconclusive. Null
+models never overstate certainty.
+
+## 219. Research Comparison Demo ✅ (implemented)
+
+**Run:** `python examples/run_research_comparison_demo.py --state-dir .solaris_ai_nn_research/test_comparison`
+Compares the full system against a random baseline and a no-proto-language
+ablation, reporting effect direction and a conservative confidence. A missing
+baseline is inconclusive; the full system does not automatically win.
+
+## 220. Research Report Demo ✅ (implemented)
+
+**Run:** `python examples/run_research_report_demo.py --state-dir .solaris_ai_nn_research/test_report`
+Runs the ablation matrix into an append-only store, analyses each module's
+provisional effect, builds a leaderboard, and compiles a ClaimGuard-scanned
+research report. Benchmark scores are operational proxies, never consciousness
+scores; negative and inconclusive results are preserved.
+
+## 221. Research Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment research_baseline`
+(also `research_ablation`, `research_null_model`, `research_comparison`,
+`research_module_effect`, `research_reproducibility`, `research_report`). Seven
+registered protocols measure baselines, ablations, null models, comparisons,
+module effects, reproducibility, and the research report.

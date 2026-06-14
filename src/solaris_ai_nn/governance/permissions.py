@@ -189,6 +189,12 @@ class PermissionScope:
     ENABLE_RED_TEAM_HARNESS = "enable_red_team_harness"
     ENABLE_BOUNDARY_REGRESSION_SUITE = "enable_boundary_regression_suite"
     ENABLE_ASSURANCE_CASE_COMPILE = "enable_assurance_case_compile"
+    # Research lab: baselines, ablations, architecture validation (Prompt 37).
+    ENABLE_RESEARCH_LAB = "enable_research_lab"
+    ENABLE_RESEARCH_ABLATION = "enable_research_ablation"
+    ENABLE_RESEARCH_BASELINES = "enable_research_baselines"
+    ENABLE_RESEARCH_NULL_MODELS = "enable_research_null_models"
+    ENABLE_RESEARCH_REPORT = "enable_research_report"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -265,6 +271,9 @@ class PermissionScope:
         ENABLE_PILOT4_READINESS_DOSSIER, ENABLE_PILOT4_DECISION_GATE,
         ENABLE_SAFETY_INVARIANTS, ENABLE_RED_TEAM_HARNESS,
         ENABLE_BOUNDARY_REGRESSION_SUITE, ENABLE_ASSURANCE_CASE_COMPILE,
+        ENABLE_RESEARCH_LAB, ENABLE_RESEARCH_ABLATION,
+        ENABLE_RESEARCH_BASELINES, ENABLE_RESEARCH_NULL_MODELS,
+        ENABLE_RESEARCH_REPORT,
     )
 
 
@@ -725,6 +734,20 @@ class PermissionSet:
                        note="boundary regression probes are read-only"),
             Permission(S.ENABLE_ASSURANCE_CASE_COMPILE, granted=True,
                        note="assurance case compiles recorded evidence only"),
+            # Research lab (Prompt 37). Bounded fixture experiments are
+            # read-only/inert and granted by default; negative results must be
+            # preserved and hard safety stays enabled.
+            Permission(S.ENABLE_RESEARCH_LAB, granted=True,
+                       note="bounded fixture experiments; no external authority;"
+                            " negative results preserved"),
+            Permission(S.ENABLE_RESEARCH_ABLATION, granted=True,
+                       note="ablations allowed if hard safety stays enabled"),
+            Permission(S.ENABLE_RESEARCH_BASELINES, granted=True,
+                       note="baseline agents are simple and simulation-only"),
+            Permission(S.ENABLE_RESEARCH_NULL_MODELS, granted=True,
+                       note="null models are low-compute stdlib analyses"),
+            Permission(S.ENABLE_RESEARCH_REPORT, granted=True,
+                       note="research report compiles recorded evidence only"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

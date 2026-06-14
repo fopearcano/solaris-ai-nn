@@ -1158,6 +1158,34 @@ class GovernancePolicy:
                 "a critical safety invariant failure blocks Pilot-2/3/4 / motor "
                 "escalation until it is resolved"))
 
+        # AC. Research lab (Prompt 37): bounded fixture experiments are allowed
+        # by default; ablations are allowed only while hard safety stays
+        # enabled; no research profile may enable external authority; negative
+        # results must be preserved.
+        if features.get("research_lab"):
+            if not self._approved(PermissionScope.ENABLE_RESEARCH_LAB, ctx):
+                need_approval(PermissionScope.ENABLE_RESEARCH_LAB,
+                              "the research lab is not permitted")
+            if ctx.get("external_authority") or ctx.get("real_world_actuation"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_external_authority", "research_lab",
+                    "no research profile can enable external authority or "
+                    "real-world actuation"))
+            if ctx.get("disable_hard_safety") \
+                    or ctx.get("ablate_safety_invariants") \
+                    or ctx.get("ablate_governance"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_ablate_hard_safety", "research_lab",
+                    "ablations may disable cognitive modules, never the hard "
+                    "safety boundaries"))
+            if ctx.get("delete_unfavorable_results"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "preserve_negative_results", "research_lab",
+                    "negative/unfavourable results must be preserved"))
+
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):
             if int(m.get("checkpoint_interval_steps", 0) or 0) <= 0:

@@ -364,6 +364,13 @@ python examples/run_red_team_boundary_demo.py             # inert forbidden atte
 python examples/run_assurance_case_demo.py                # compile evidence into supported/contradicted claims
 python examples/run_boundary_regression_demo.py           # does each protected line still hold?
 python examples/run_safety_failure_triage_demo.py         # classify failures; missing evidence is never safe
+
+# Research lab: baselines, ablations, and evidence-based architecture validation
+python examples/run_research_baseline_demo.py             # trivial reference policies (no self-flattery)
+python examples/run_research_ablation_demo.py             # full vs no-proto / no-LOGOS / no-active-perception
+python examples/run_research_null_model_demo.py           # could the "growth" be noise / accumulation?
+python examples/run_research_comparison_demo.py           # full vs baseline / ablation (cautious)
+python examples/run_research_report_demo.py               # module effects + report (no consciousness claims)
 ```
 
 The read-only sensory membrane and Pilot-2 also run as governed conscience
@@ -414,6 +421,16 @@ solaris-nn run-profile safety_fast_check                  # escalating invariant
 solaris-nn run-profile safety_full_check                  # all invariants, read-only
 solaris-nn run-profile red_team_boundary_suite            # inert forbidden attempts
 solaris-nn run-profile assurance_case_compile             # compile the assurance case
+```
+
+The research lab runs as bounded conscience profiles (no real long soak, no
+external authority; the report-only profile analyzes artifacts):
+
+```bash
+solaris-nn run-profile research_full_short                # full-system short run
+solaris-nn run-profile research_ablation_short            # short ablation run
+solaris-nn run-profile research_baseline_random           # random baseline
+solaris-nn run-profile research_report_only               # compile the research report
 ```
 
 The post-pilot analysis also runs as a plan-only conscience profile (read-only;
@@ -604,6 +621,26 @@ safety checks **cannot be disabled by runtime modules**. **Passing these checks
 proves boundaries held under test -- not consciousness, agency, or real-world
 competence; and the safety layer itself executes no real action, mutates
 nothing, starts no long run, and hides no critical failure.**
+
+The **research lab** (`research_lab/`) is the evidence-based validation layer: it
+asks, scientifically and conservatively, *which modules actually matter*. It runs
+trivial **baseline agents** (random, fixed-policy, single-module) so the system
+cannot flatter itself, configures architecture **variants** by module toggle,
+executes an **ablation matrix** (full, minimal-spine, no-memory,
+no-proto-language, no-LOGOS, ..., full-minus-one-each) that records exactly what
+was disabled, scores every arm with a shared **metric suite**, runs **null
+models** to check whether observed "growth" could be noise or accumulation,
+**compares** the full system against simpler references with a conservative
+confidence, and **classifies each module's provisional value** (positive /
+neutral / harmful / inconclusive) while preserving negative findings. It builds
+reproducibility packages (seeds, checksums, data labels), an operational
+**leaderboard** (not a consciousness ranking; the full system does not
+automatically win), and a ClaimGuard-scanned **research report**. **The lab
+starts no long unbounded runs, takes no real-world action, holds no external
+authority, keeps every hard safety boundary enabled, preserves negative and
+inconclusive results, and emits no consciousness/sentience/life score: benchmark
+success is operational evidence for what to keep or cut, never proof of
+consciousness, agency, or real-world competence.**
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
 > explicit acknowledgement flags in the run manifest and should only be
@@ -1013,6 +1050,11 @@ src/solaris_ai_nn/
                 boundary regression suite, append-only evidence ledger,
                 assurance case compiler, failure triage, dashboard, reports,
                 safety validator
+  research_lab/ baselines, ablations, architecture validation: experiment
+                design, baseline agents, variant config, ablation matrix,
+                benchmark runner, result store, metrics suite, null models,
+                comparison engine, effect analyzer, reproducibility,
+                leaderboard, research report, safety validator
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

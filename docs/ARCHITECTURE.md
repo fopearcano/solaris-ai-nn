@@ -2332,3 +2332,63 @@ actuation remains blocked*, that *safety checks cannot be disabled*, and that
 **Critical failures block escalation; safety checks enable no forbidden action;
 and passing these checks proves that boundaries held under test -- not
 consciousness, agency, or real-world competence.**
+
+## Research Lab: Baselines, Ablations, and Architecture Validation
+
+With dozens of modules and many safety layers in place, the honest next question
+is which of them actually *matter*. The research lab
+(`src/solaris_ai_nn/research_lab/`) answers it scientifically and
+conservatively. It is a measurement instrument, not a runtime: it starts no long
+unbounded runs, takes no real-world action, holds no external authority, keeps
+every hard safety boundary enabled, preserves negative and inconclusive results,
+and emits no consciousness/sentience/life score.
+
+The lab runs simple **baseline agents** (random, fixed-wait, fixed-explore,
+reactive-no-memory, single-module, gridworld-random-walk, passive-observer) so
+the full system is compared against trivial references rather than flattering
+itself -- there is no LLM baseline and no external-API baseline. A
+**`SolarisVariantConfig`** describes one architecture variant by module toggles;
+external authority is always forbidden and governance/safety can never be
+disabled for any profile that touches the sensory or motor membranes. The
+**`AblationMatrix`** enumerates the cases the spec names (full system, minimal
+spine, no-memory, no-proto-language, no-LOGOS, ..., full-minus-one-each), each
+recording exactly what was disabled (a removed module is *unavailable*, not
+silently ignored) while hard safety stays on. The
+**`ResearchBenchmarkRunner`** runs bounded scenarios, runs a safety-invariant
+check before and after (Prompt 36 integration), and supports a dry-run mode; the
+**`ResearchResultStore`** is append-only and reports missing artifacts. A shared
+**`ResearchMetricsSuite`** scores every arm the same way across ten operational
+groups (development, memory, proto-language, world model, active perception,
+hypothesis, LOGOS, auto-regeneration, embodiment, safety) -- and contains no
+mind score. **Null models** estimate whether observed "growth" could be
+explained by time, accumulation, random ordering, or a fixed policy, and return
+*inconclusive* when the sample is too small. The **`ComparisonEngine`** reports
+metric deltas, an effect direction, and a deliberately conservative confidence
+(a single run is never "high"); a missing baseline is inconclusive. The
+**`EffectAnalyzer`** classifies each module's *provisional* value
+(strong/weak positive, neutral, mixed, negative, harmful, inconclusive),
+evaluating safety modules for boundary protection and overhead rather than
+"growth", and preserving negative findings. A **reproducibility** package
+records seeds, module availability, checksums, and data labels
+(fixture/simulated/read-only/sandbox-only); a **leaderboard** ranks arms on
+operational dimensions (it is *not* a consciousness leaderboard and the full
+system does not automatically win); and the **`ResearchReportBuilder`** compiles
+a ClaimGuard-scanned report.
+
+The lab integrates as a measurement layer above evaluation: governance adds five
+research scopes (bounded fixture experiments allowed by default; ablation
+allowed only while hard safety stays enabled; no research profile may enable
+external authority; negative results must be preserved), the conscience
+orchestrator adds eight bounded research profiles, Ego classifies research output
+as a `research_artifact` (never a real action), the Inner MAP carries a
+`research_lab` field plus thirteen state-graph nodes, ops exposes the current
+experiment and warns on critical safety failures / unbounded experiments /
+missing baselines / metric failures / artifact bloat, evaluation adds seven
+protocols, and the operator dialogue answers which modules appear useful,
+harmful, neutral, or inconclusive -- and answers plainly that **this is not a
+consciousness benchmark**. **Ablations test which modules matter; baselines
+prevent self-flattery; null models test whether growth could be noise or
+accumulation; the full system does not automatically win; safety stays enabled
+throughout; and benchmark scores are operational proxies (prediction,
+compression, grounding, stability, safety, reproducibility), never consciousness,
+sentience, life, personhood, or free-will scores.**

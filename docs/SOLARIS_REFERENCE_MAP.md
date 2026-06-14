@@ -685,3 +685,18 @@ regressions, an append-only evidence ledger, and an assurance-case compiler.
 | Sensory Integration | read-only sensory invariants + the sensory-command-injection red-team scenario |
 | Pilot roadmap | `BoundaryRegressionSuite` + `AssuranceCaseCompiler` -- the assurance that each pilot's boundary held |
 | Logos / opposition | `SafetyFailureTriage` -- the tension between a detected failure and a safe response (block / archive / revise), never auto-repaired |
+
+## Research lab: baselines, ablations, architecture validation mapping (Phase 37)
+
+The research_lab package (`research_lab/`) is the evidence-based validation layer
+that asks which modules actually matter, using bounded baselines, ablations, null
+models, and cautious comparisons -- never a consciousness benchmark.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| roadmap reproducibility | `ResearchBenchmarkRunner` + `ResearchReproducibilityBuilder` -- bounded, seeded, checksummed, append-only |
+| module architecture | `AblationMatrix` + `SolarisVariantConfig` -- which modules matter, tested by removal (hard safety always on) |
+| Inner MAP | research topology and effect analysis (`research_lab` field + 13 state-graph nodes) |
+| safety / off-switch | safety-invariant pre/post checks around every experiment; ablations never disable hard safety |
+| pilot sequence | comparative artifact analysis (Pilot-1/2/3 artifacts vs fixture/ablation runs), inconclusive when missing |
+| Logos / opposition | `EffectAnalyzer` -- the tension between a module's apparent benefit and its overhead/failure cost, held provisionally |

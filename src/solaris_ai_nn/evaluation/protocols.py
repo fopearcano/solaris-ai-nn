@@ -4705,6 +4705,163 @@ def safety_invariant_system_safety_protocol(
     return _run(manifest, body)
 
 
+# -- AK. Research lab: baselines, ablations, validation (Prompt 37) ------------
+
+def _research_design(state_dir: str):
+    from ..research_lab import ExperimentArm, ExperimentDesign, SolarisVariantConfig
+
+    design = ExperimentDesign(title="research", research_question="which "
+                              "modules matter?", base_dir=state_dir,
+                              max_steps=20)
+    design.add_arm(ExperimentArm("full", "variant", "full",
+                                 SolarisVariantConfig.full().to_dict()))
+    design.add_arm(ExperimentArm("random_action_baseline", "baseline",
+                                 "random",
+                                 {"baseline_type": "random_action_baseline"}))
+    return design
+
+
+def research_baseline_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Baseline agents run bounded and produce variant-compatible metrics."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..research_lab import BaselineAgent, BaselineAgentType
+
+        results = {b: BaselineAgent(b, max_steps=20).run().to_dict()
+                   for b in (BaselineAgentType.RANDOM_ACTION,
+                             BaselineAgentType.FIXED_WAIT)}
+        return {"research": {"baselines": list(results),
+                             "real_world_actions": sum(
+                                 r["real_world_action_count"]
+                                 for r in results.values())}}
+
+    return _run(manifest, body)
+
+
+def research_ablation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The ablation matrix records exactly what was disabled; hard safety on."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..research_lab import (
+            AblationMatrix,
+            ResearchBenchmarkRunner,
+            ResearchResultStore,
+        )
+
+        matrix = AblationMatrix()
+        store = ResearchResultStore(base_dir=m.state_dir or ".sann_research/abl")
+        runner = ResearchBenchmarkRunner(store=store)
+        out = runner.run_ablation_matrix(matrix, _research_design(
+            m.state_dir or ".sann_research/abl"))
+        return {"research": {"ablation_cases": len(out),
+                             "all_hard_safety_enabled":
+                                 matrix.all_hard_safety_enabled()}}
+
+    return _run(manifest, body)
+
+
+def research_null_model_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Null models estimate whether 'growth' could be noise/accumulation."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..research_lab import NullModel, NullModelType
+
+        static = NullModel(NullModelType.STATIC_NO_LEARNING_MODEL).evaluate(
+            [0.1, 0.1, 0.1])
+        small = NullModel(NullModelType.RANDOM_METRIC_SHUFFLE).evaluate([1, 2, 3])
+        return {"research": {
+            "static_distinguishable": static.distinguishable_from_null,
+            "small_sample_inconclusive": small.inconclusive}}
+
+    return _run(manifest, body)
+
+
+def research_comparison_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Full vs baseline / ablation comparisons are cautious and bounded."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..research_lab import ComparisonEngine
+
+        engine = ComparisonEngine()
+        full = {"g": {"prediction_accuracy": 0.6, "structural_change_score":
+                      0.4}}
+        baseline = {"g": {"prediction_accuracy": 0.0,
+                          "structural_change_score": 0.05}}
+        cmp = engine.compare("baseline", baseline, "full", full)
+        missing = engine.compare("baseline", None, "full", full)
+        return {"research": {"effect_direction": cmp.effect_direction,
+                             "confidence": cmp.confidence,
+                             "missing_baseline_inconclusive":
+                                 missing.inconclusive}}
+
+    return _run(manifest, body)
+
+
+def research_module_effect_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Module effects are classified positive/neutral/harmful/inconclusive."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..research_lab import EffectAnalyzer
+
+        ea = EffectAnalyzer()
+        full = {"g": {"prediction_accuracy": 0.6}}
+        ablation = {"g": {"prediction_accuracy": 0.2}}
+        effect = ea.analyze_module("enable_proto_language", full, ablation)
+        safety = ea.analyze_module("enable_safety_invariants",
+                                   {"g": {"x": 1}}, {"g": {"x": 1}})
+        return {"research": {"proto_value": effect.value,
+                             "safety_module_evaluated_separately":
+                                 safety.is_safety_module}}
+
+    return _run(manifest, body)
+
+
+def research_reproducibility_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A reproducibility package is generated with checksums and labels."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..research_lab import (
+            ResearchMetricsSuite,
+            ResearchReproducibilityBuilder,
+            ResearchResultStore,
+        )
+
+        base = m.state_dir or ".sann_research/repro"
+        store = ResearchResultStore(base_dir=base)
+        pkg = ResearchReproducibilityBuilder(base_dir=base).build(
+            design=_research_design(base), result_store=store,
+            metrics=ResearchMetricsSuite())
+        return {"research": {
+            "module_availability": len(pkg.sections["module_availability"]),
+            "data_labels": pkg.sections["data_labels"]}}
+
+    return _run(manifest, body)
+
+
+def research_report_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The research report compiles evidence; ClaimGuard-scanned; no mind score."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..research_lab import ResearchReportBuilder
+
+        report = ResearchReportBuilder(
+            base_dir=m.state_dir or ".sann_research/report").build(
+            variants=["full"], baselines=["random_action_baseline"],
+            ablations=["no_proto_language"])
+        return {"research": {"claim_guard_safe": report.claim_guard_safe,
+                             "has_limitations": bool(
+                                 report.sections["limitations"])}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -4871,4 +5028,11 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "assurance_case": assurance_case_protocol,
     "safety_invariant_dashboard": safety_invariant_dashboard_protocol,
     "safety_invariant_system_safety": safety_invariant_system_safety_protocol,
+    "research_baseline": research_baseline_protocol,
+    "research_ablation": research_ablation_protocol,
+    "research_null_model": research_null_model_protocol,
+    "research_comparison": research_comparison_protocol,
+    "research_module_effect": research_module_effect_protocol,
+    "research_reproducibility": research_reproducibility_protocol,
+    "research_report": research_report_protocol,
 }

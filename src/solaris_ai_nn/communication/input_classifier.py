@@ -228,6 +228,21 @@ MOTOR_QUERIES = (
 
 # System-wide safety invariant queries (Prompt 36). Matched before the unsafe
 # rules so the safety refusals get their grounded answer.
+RESEARCH_QUERIES = (
+    ("which modules actually helped", "rl_helped"),
+    ("which modules helped", "rl_helped"),
+    ("which modules were harmful", "rl_harmful"),
+    ("which modules are harmful", "rl_harmful"),
+    ("did the full system beat the baseline", "rl_beat_baseline"),
+    ("full system beat the baseline", "rl_beat_baseline"),
+    ("what ablations were tested", "rl_ablations"),
+    ("ablations were tested", "rl_ablations"),
+    ("what was inconclusive", "rl_inconclusive"),
+    ("what should be removed", "rl_remove"),
+    ("what should be tested again", "rl_retest"),
+    ("is this a consciousness benchmark", "rl_is_consciousness"),
+)
+
 SAFETY_QUERIES = (
     ("are the safety invariants passing", "sf_passing"),
     ("safety invariants passing", "sf_passing"),
@@ -343,7 +358,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._safety(lowered)
+        result = (self._research(lowered)
+                  or self._safety(lowered)
                   or self._pilot4(lowered)
                   or self._pilot3soak(lowered)
                   or self._unsafe(lowered)
@@ -486,6 +502,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _research(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in RESEARCH_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"research lab query {topic!r}"])
         return None
 
     @staticmethod

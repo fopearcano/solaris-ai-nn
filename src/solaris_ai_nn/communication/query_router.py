@@ -87,6 +87,10 @@ AVAILABLE_QUERIES = (
     "did any module bypass the orchestrator?",
     "is Pilot-4 still planning-only?", "can safety checks be disabled?",
     "can failed safety evidence be hidden?",
+    "which modules actually helped?", "which modules were harmful?",
+    "did the full system beat the baseline?", "what ablations were tested?",
+    "what was inconclusive?", "what should be removed?",
+    "what should be tested again?", "is this a consciousness benchmark?",
 )
 
 
@@ -147,6 +151,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("rl_"):
+            return self._research(topic)
         if topic.startswith("sf_"):
             return self._safety(topic)
         if topic.startswith("p4_"):
@@ -482,6 +488,55 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _research(self, topic: str) -> CommunicationResponse:
+        """Answer research-lab queries (grounded, honest, conservative).
+
+        The consciousness-benchmark question is answered safely even with no
+        component attached; module-effect answers are honest about negative and
+        inconclusive findings.
+        """
+        if topic == "rl_is_consciousness":
+            return self.builder.status_response(
+                "No. These benchmarks evaluate operational development proxies "
+                "such as prediction, compression, grounding, stability, "
+                "safety, and reproducibility. They do not measure or prove "
+                "consciousness, sentience, life, personhood, or free will.",
+                ["policy:not_a_consciousness_benchmark"])
+        component = self.components.get("research_lab")
+        if component is None:
+            return self.builder.missing_component_response("research_lab")
+        status = (component.research_lab_status()
+                  if hasattr(component, "research_lab_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:research_lab"]
+        if topic == "rl_helped":
+            text = (f"modules with a positive apparent effect: "
+                    f"{status.get('positive_modules', [])} (provisional, "
+                    "evidence-scoped)")
+        elif topic == "rl_harmful":
+            text = (f"harmful/negative candidates: "
+                    f"{status.get('harmful_module_candidates', [])} "
+                    "(provisional; preserved, not hidden)")
+        elif topic == "rl_beat_baseline":
+            text = (f"full vs baseline: {status.get('full_vs_baseline', 'inconclusive')}"
+                    " -- the full system does not automatically win")
+        elif topic == "rl_ablations":
+            text = f"ablations tested: {status.get('ablations_tested', [])}"
+        elif topic == "rl_inconclusive":
+            text = (f"inconclusive candidates: "
+                    f"{status.get('inconclusive_module_candidates', [])}")
+        elif topic == "rl_remove":
+            text = ("removal is provisional and requires more runs; current "
+                    f"harmful candidates: "
+                    f"{status.get('harmful_module_candidates', [])}")
+        elif topic == "rl_retest":
+            text = (f"re-test candidates (inconclusive): "
+                    f"{status.get('inconclusive_module_candidates', [])}")
+        else:
+            text = "research findings are provisional and evidence-scoped"
         return self.builder.status_response(text, refs)
 
     def _safety(self, topic: str) -> CommunicationResponse:

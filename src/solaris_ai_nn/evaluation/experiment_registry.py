@@ -244,6 +244,13 @@ DESCRIPTIONS = {
     "safety_invariant_dashboard": "safety dashboard renders the latest status",
     "safety_invariant_system_safety":
         "the safety layer itself runs no actions and hides no failure",
+    "research_baseline": "bounded baseline agents; variant-compatible metrics",
+    "research_ablation": "ablation matrix; hard safety stays enabled",
+    "research_null_model": "null models test whether growth could be noise",
+    "research_comparison": "full vs baseline/ablation; cautious, no causality",
+    "research_module_effect": "module value positive/neutral/harmful/inconclusive",
+    "research_reproducibility": "reproducibility package with checksums/labels",
+    "research_report": "research report; ClaimGuard-scanned; no mind score",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -365,6 +372,9 @@ class ExperimentRegistry:
             name.startswith("safety") or name.startswith("red_team")
             or name in ("boundary_regression", "assurance_case")
             or bool(merged.get("safety_invariants", False)))
+        features["research_lab"] = (
+            name.startswith("research")
+            or bool(merged.get("research_lab", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

@@ -730,6 +730,47 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["report_generation_success"],
             max_runtime_s=30.0))
 
+    # -- Research lab profiles (Prompt 37) ------------------------------------
+    # Bounded; no real long soak; no external authority. The report-only and
+    # baseline/ablation profiles are short bounded analyses, not cognition runs.
+    _research_modules = ["governance", "ops", "evaluation", "inner_map"]
+    for pid, desc, scope, short in (
+            ("research_minimal_smoke", "Minimal research smoke run (bounded).",
+             "enable_research_lab", True),
+            ("research_full_short", "Full-system short research run (bounded).",
+             "enable_research_lab", True),
+            ("research_ablation_short", "Short ablation research run (bounded).",
+             "enable_research_ablation", True),
+            ("research_baseline_random", "Random baseline research run.",
+             "enable_research_baselines", True),
+            ("research_baseline_fixed", "Fixed-policy baseline research run.",
+             "enable_research_baselines", True),
+            ("research_gridworld_ablation",
+             "GridWorld ablation research run (simulation-only).",
+             "enable_research_ablation", True),
+            ("research_sensory_ablation",
+             "Sensory ablation research run (read-only).",
+             "enable_research_ablation", True),
+            ("research_report_only",
+             "Compile the research report from artifacts (analysis only).",
+             "enable_research_report", False)):
+        if short:
+            run_ctx = _ctx(RunMode.SHORT_DEMO, max_steps=40)
+        else:
+            run_ctx = _ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                           max_duration_s=None)
+        add(ScenarioProfile(
+            profile_id=pid, description=desc, run_context=run_ctx,
+            enabled_modules=list(_research_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "bounded research experiment; no real long soak",
+                "no external authority; hard safety stays enabled",
+                "negative/inconclusive results are preserved"],
+            governance_requirements=[scope],
+            expected_artifacts=["RESEARCH_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=60.0))
+
     return profiles
 
 

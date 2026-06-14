@@ -1444,3 +1444,41 @@ the system understands anything, that simulated competence transfers to the real
 world, or that there is any experience behind the process. The safety layer is
 deliberately scoped to what it can actually check: that the lines the project
 drew are still uncrossed.
+
+## Phase 37 — Research lab: baselines, ablations, architecture validation
+
+**Why ablations matter.** A system that only ever runs in its full configuration
+cannot tell which of its parts earn their keep. Ablations remove one module at a
+time and measure what changes; a module whose removal changes nothing is, on
+that evidence, dead weight in that profile. The matrix records exactly what was
+disabled, and hard safety boundaries are never among the things removed.
+
+**Architecture validation.** The point is to make architecture decisions from
+evidence rather than affection. The lab compares the full system against
+minimal, random, fixed-policy, single-module, and ablated variants with a shared
+metric suite, so "the full system is better" is a claim that has to survive a
+comparison rather than an assumption.
+
+**Null models.** Apparent growth is cheap: counts go up with time, symbols
+stabilize by chance, metrics drift. Null models (shuffles and a static
+no-learning model) estimate whether an observed trend could be produced by time,
+accumulation, or noise alone. They are weak, cautious estimates -- explicitly
+not significance tests -- and they return inconclusive when the sample is small.
+
+**Evidence-based module pruning.** A module is only ever a *provisional* harmful
+or dead-weight candidate, never condemned from one bounded run. The effect
+analyzer preserves negative findings and flags inconclusive ones for re-testing;
+safety modules are judged on boundary protection and overhead, not "growth", and
+are never pruned for failing to add development.
+
+**Avoiding benchmark self-flattery.** Baselines exist so the system cannot grade
+itself on a curve. The leaderboard ranks operational dimensions, the full system
+does not automatically win, and every entry shows its evidence count and
+limitations.
+
+**Why benchmark success is not consciousness proof.** This is the load-bearing
+caveat of the whole phase. Higher prediction, better compression, stronger
+grounding, and cleaner safety are operational properties of a bounded software
+process. They are useful for deciding what to keep and what to cut. They do not
+measure or prove consciousness, sentience, life, personhood, or free will, and
+no metric in the suite is allowed to be named as if it did.

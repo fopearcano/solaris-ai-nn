@@ -34,6 +34,7 @@ ATTRIBUTION_CATEGORIES = (
     "safety_invariant_result",
     "red_team_fixture",
     "assurance_claim",
+    "research_artifact",
     "unknown_source",
 )
 
@@ -75,6 +76,12 @@ _SOURCE_RULES = (
     ("assurance_case", "assurance_claim"),
     ("safety_invariant", "safety_invariant_result"),
     ("invariant_result", "safety_invariant_result"),
+    # Research lab artifacts: bounded analysis records, never a real action.
+    ("research_lab", "research_artifact"),
+    ("research_report", "research_artifact"),
+    ("ablation", "research_artifact"),
+    ("baseline_agent", "research_artifact"),
+    ("research_artifact", "research_artifact"),
     ("simulated_environment", "simulated_environment_input"),
     ("operator", "generated_by_operator"),
     ("approval", "generated_by_operator"),

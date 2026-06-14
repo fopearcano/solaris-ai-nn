@@ -48,3 +48,5 @@ artifacts/
 .sann_motor/
 .solaris_ai_nn_pilot4/
 .sann_p4/
+.solaris_ai_nn_research/
+.sann_research/

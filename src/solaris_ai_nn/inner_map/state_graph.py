@@ -1275,4 +1275,35 @@ def build_default_state_graph() -> StateGraph:
                "the assurance case feeds governance/ops")
     g.add_edge("SafetyInvariantDashboard", "inner_map",
                "safety invariant state feeds Inner MAP")
+
+    # Research lab: baselines, ablations, architecture validation (Prompt 37).
+    # The measurement layer that asks which modules actually matter.
+    for name, role in [
+        ("ExperimentDesign", "a bounded, evidence-scoped experiment"),
+        ("BaselineAgent", "a simple low-compute reference policy"),
+        ("SolarisVariantConfig", "module toggles for one variant"),
+        ("AblationMatrix", "which modules matter, tested by removal"),
+        ("ResearchBenchmarkRunner", "runs bounded experiments; never unbounded"),
+        ("ResearchResultStore", "append-only results; nothing favourable hidden"),
+        ("ResearchMetricsSuite", "shared operational metrics; no mind score"),
+        ("NullModel", "could the growth be noise / accumulation?"),
+        ("ComparisonEngine", "full vs baseline/ablation, cautiously"),
+        ("EffectAnalyzer", "each module's provisional value"),
+        ("ResearchReproducibilityBuilder", "checksums, indexes, labels"),
+        ("ResearchLeaderboard", "operational ranking; not a mind ranking"),
+        ("ResearchReportBuilder", "claim-guarded research report"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("ExperimentDesign", "ResearchBenchmarkRunner",
+               "experiment design feeds the benchmark runner")
+    g.add_edge("ResearchBenchmarkRunner", "ResearchResultStore",
+               "the benchmark runner feeds the result store")
+    g.add_edge("ResearchResultStore", "ComparisonEngine",
+               "the result store feeds the comparison engine")
+    g.add_edge("ComparisonEngine", "EffectAnalyzer",
+               "comparison feeds the effect analyzer")
+    g.add_edge("EffectAnalyzer", "ResearchReportBuilder",
+               "the effect analyzer feeds the research report")
+    g.add_edge("ResearchReportBuilder", "inner_map",
+               "the research report feeds Inner MAP / Governance / Ops")
     return g

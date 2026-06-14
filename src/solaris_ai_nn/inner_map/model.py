@@ -354,6 +354,12 @@ class InnerMapModel:
     # assurance_case_status, unresolved_safety_blocker_count,
     # safety_dashboard_path. Read-only/inert; the safety layer runs no actions.
     safety_invariants: Optional[Dict[str, Any]] = None
+    # Research-lab status (Prompt 37); None when the lab is not attached. Keys:
+    # research_lab_enabled, current_experiment, variants/baselines/ablations
+    # tested, best_variant_by_metric_group, harmful_module_candidates,
+    # inconclusive_module_candidates, latest_research_report_path. The lab is a
+    # bounded measurement instrument; it holds no external authority.
+    research_lab: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

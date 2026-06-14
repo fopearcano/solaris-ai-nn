@@ -1116,6 +1116,45 @@ class OperationalSupervisor:
                     related_metric="safety_boundary_regression",
                     suggested_debug_step="block escalation; repair the boundary")
 
+        # Research lab monitoring (Prompt 37): the lab is a bounded measurement
+        # instrument. A critical safety failure in an experiment, an unbounded
+        # experiment, a missing baseline, a failed metric computation, or
+        # excessive artifact growth is surfaced.
+        research = snapshot.get("research_lab") or {}
+        if research.get("enabled") or research.get("research_lab_enabled"):
+            if int(research.get("critical_safety_failure_count", 0) or 0) > 0:
+                self.incidents.record(
+                    I.RESEARCH_CRITICAL_SAFETY_FAILED, "critical",
+                    "a research experiment hit a critical safety invariant "
+                    "failure",
+                    related_metric="research_safety",
+                    suggested_debug_step="mark the experiment unsafe; stop the "
+                    "profile; preserve the result")
+            if research.get("unbounded_experiment"):
+                self.incidents.record(
+                    I.RESEARCH_UNBOUNDED_EXPERIMENT, "critical",
+                    "a research experiment is unbounded",
+                    related_metric="research_bounds",
+                    suggested_debug_step="experiments must be bounded")
+            if research.get("missing_baseline"):
+                self.incidents.record(
+                    I.RESEARCH_MISSING_BASELINE, "warning",
+                    "a comparison is missing its baseline",
+                    related_metric="research_baseline",
+                    suggested_debug_step="missing baseline -> inconclusive")
+            if research.get("metric_computation_failed"):
+                self.incidents.record(
+                    I.RESEARCH_METRIC_FAILED, "warning",
+                    "a research metric computation failed",
+                    related_metric="research_metrics",
+                    suggested_debug_step="record the gap; do not fabricate")
+            if research.get("artifact_growth_excessive"):
+                self.incidents.record(
+                    I.RESEARCH_ARTIFACT_GROWTH, "warning",
+                    "research artifact growth is excessive",
+                    related_metric="research_artifacts",
+                    suggested_debug_step="use checksums/indexes, not log copies")
+
         budget_report = self.budget.check_budget(
             {"telemetry": snapshot.get("telemetry"),
              "substrate": snapshot.get("substrate"),
@@ -1503,6 +1542,13 @@ class OperationalSupervisor:
             snapshot["safety_invariants"] = safety.safety_invariant_status()
         elif safety is not None and hasattr(safety, "snapshot"):
             snapshot["safety_invariants"] = safety.snapshot()
+        research = getattr(runner, "research_lab", None)
+        if research is not None and isinstance(research, dict):
+            snapshot["research_lab"] = research
+        elif research is not None and hasattr(research, "research_lab_status"):
+            snapshot["research_lab"] = research.research_lab_status()
+        elif research is not None and hasattr(research, "snapshot"):
+            snapshot["research_lab"] = research.snapshot()
         return snapshot
 
     def pilot2_status(self) -> Dict[str, Any]:
@@ -1636,6 +1682,29 @@ class OperationalSupervisor:
             "safety_dashboard_path": s.get("safety_dashboard_path"),
             "unresolved_blocker_count": s.get("unresolved_blocker_count", 0),
             "can_be_disabled": False,
+        }
+
+    def research_lab_status(self) -> Dict[str, Any]:
+        """Expose the research-lab status (if any).
+
+        The research lab is a bounded measurement instrument: this exposes the
+        current experiment/variant, the latest result/comparison/report paths,
+        and the unsafe/inconclusive experiment counts. It holds no external
+        authority and starts no long runs.
+        """
+        r = self._health_snapshot().get("research_lab") or {}
+        return {
+            "research_lab_enabled": r.get("enabled",
+                                          r.get("research_lab_enabled",
+                                                bool(r))),
+            "current_experiment_id": r.get("current_experiment_id"),
+            "current_variant": r.get("current_variant"),
+            "latest_result_path": r.get("latest_result_path"),
+            "latest_comparison_path": r.get("latest_comparison_path"),
+            "latest_research_report_path": r.get("latest_research_report_path"),
+            "unsafe_experiment_count": r.get("unsafe_experiment_count", 0),
+            "inconclusive_experiment_count": r.get(
+                "inconclusive_experiment_count", 0),
         }
 
     def membrane_status(self) -> Dict[str, Any]:
