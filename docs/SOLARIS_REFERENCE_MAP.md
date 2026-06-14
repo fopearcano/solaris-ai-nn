@@ -585,3 +585,19 @@ any consciousness claim.
 | ethics / off-switch | `post_pilot/safety.py` (`PostPilotSafetyValidator`) -- safety/governance postmortem; no consciousness claims, no destructive ops |
 | reproducibility / provenance | `post_pilot/reproducibility.py` -- index + checksum manifest; simulated vs real clearly marked |
 | decision to continue | `post_pilot/decision_gate.py` (`Phase2DecisionGate`) -- repeat / revise / extend / ready-for-Pilot-2 |
+
+## Read-only sensory membrane mapping (Phase 31)
+
+The sensory_membrane package (`sensory_membrane/`) realises Solaris_Ai's
+sensory-integration ambition as a strictly read-only membrane: the world may
+enter the system as environmental input, but the system never acts on the
+world, and input text is never an operator command.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| Sensory integration | `sensory_membrane/membrane_runtime.py` (`SensoryMembraneRuntime`) -- polls read-only sources into canonical stimuli |
+| Memory / senses | `sensory_membrane/sensory_buffer.py` + `provenance.py` -- ordered, deduplicated events with mandatory origin |
+| Ego boundary | source attribution (`read_only_environmental_input`) + command separation -- sensory input is never an operator command |
+| Inner MAP | `inner_map` sensory topology observation -- membrane field + 12 state-graph nodes |
+| Pilot deployment | Pilot-2 read-only sensory plan (`pilot2_plan_only` / `pilot2_read_only_short` profiles) -- read-only grounding, not autonomy |
+| Logos (tension) | real read-only source vs simulated source boundary -- a candidate LOGOS tension, made explicit on every event |

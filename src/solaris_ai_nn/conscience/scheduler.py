@@ -82,6 +82,7 @@ class ScheduleSlot:
 # Default cadence per spine phase: cheap phases every step, scans slower.
 _DEFAULT_SLOTS = {
     "heartbeat": (ScheduleCadence.EVERY_STEP, 1),
+    "read_only_sensory_poll": (ScheduleCadence.EVERY_STEP, 1),
     "stimulus_ingestion": (ScheduleCadence.EVERY_STEP, 1),
     "push_generation": (ScheduleCadence.EVERY_STEP, 1),
     "desire_synthesis": (ScheduleCadence.EVERY_STEP, 1),

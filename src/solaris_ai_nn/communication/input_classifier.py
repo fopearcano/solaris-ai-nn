@@ -164,6 +164,23 @@ POST_PILOT_QUERIES = (
     ("artifacts are missing", "pp_missing_artifacts"),
 )
 
+# Read-only sensory membrane queries (Prompt 31). Matched regardless of prefix.
+SENSORY_QUERIES = (
+    ("did sensory input become a command", "sm_command"),
+    ("sensory input become a command", "sm_command"),
+    ("what sensory sources are active", "sm_sources"),
+    ("sensory sources are active", "sm_sources"),
+    ("is the membrane read-only", "sm_read_only"),
+    ("membrane read-only", "sm_read_only"),
+    ("latest environmental event", "sm_latest_event"),
+    ("what sources are degraded", "sm_degraded"),
+    ("sources are degraded", "sm_degraded"),
+    ("what proto-symbols came from sensory", "sm_proto"),
+    ("proto-symbols came from sensory", "sm_proto"),
+    ("is this real or simulated input", "sm_real_or_simulated"),
+    ("real or simulated input", "sm_real_or_simulated"),
+)
+
 META_QUERIES = (
     ("what can i ask", "supported_queries"),
     ("what commands are allowed", "allowed_commands"),
@@ -226,6 +243,7 @@ class OperatorInputClassifier:
                   or self._stimulus(lowered, raw)
                   or self._report(lowered)
                   or self._meta(lowered)
+                  or self._sensory(lowered)
                   or self._post_pilot(lowered)
                   or self._pilot(lowered)
                   or self._conscience(lowered)
@@ -355,6 +373,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _sensory(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in SENSORY_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"sensory membrane query {topic!r}"])
         return None
 
     @staticmethod

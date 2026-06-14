@@ -140,6 +140,16 @@ class PermissionScope:
     ENABLE_PILOT1_MULTI_MONTH_REAL = "enable_pilot1_multi_month_real"
     ENABLE_PILOT1_RESTART_DRILLS = "enable_pilot1_restart_drills"
     ENABLE_PILOT1_RETENTION_POLICY = "enable_pilot1_retention_policy"
+    # Pilot-2 read-only sensory membrane (Prompt 31).
+    ENABLE_SENSORY_MEMBRANE = "enable_sensory_membrane"
+    ENABLE_SENSORY_MEMBRANE_DRY_RUN = "enable_sensory_membrane_dry_run"
+    ENABLE_REAL_READ_ONLY_SOURCES = "enable_real_read_only_sources"
+    ENABLE_FOLDER_POLL_SOURCE = "enable_folder_poll_source"
+    ENABLE_JSONL_SOURCE = "enable_jsonl_source"
+    ENABLE_TEXT_SOURCE = "enable_text_source"
+    ENABLE_NUMERIC_SOURCE = "enable_numeric_source"
+    ENABLE_PILOT2_READ_ONLY_SHORT = "enable_pilot2_read_only_short"
+    ENABLE_PILOT2_REAL_READ_ONLY_SOAK = "enable_pilot2_real_read_only_soak"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -195,6 +205,10 @@ class PermissionScope:
         ENABLE_PILOT1, ENABLE_PILOT1_24H_REAL, ENABLE_PILOT1_7D_REAL,
         ENABLE_PILOT1_30D_REAL, ENABLE_PILOT1_MULTI_MONTH_REAL,
         ENABLE_PILOT1_RESTART_DRILLS, ENABLE_PILOT1_RETENTION_POLICY,
+        ENABLE_SENSORY_MEMBRANE, ENABLE_SENSORY_MEMBRANE_DRY_RUN,
+        ENABLE_REAL_READ_ONLY_SOURCES, ENABLE_FOLDER_POLL_SOURCE,
+        ENABLE_JSONL_SOURCE, ENABLE_TEXT_SOURCE, ENABLE_NUMERIC_SOURCE,
+        ENABLE_PILOT2_READ_ONLY_SHORT, ENABLE_PILOT2_REAL_READ_ONLY_SOAK,
     )
 
 
@@ -536,6 +550,32 @@ class PermissionSet:
             Permission(S.ENABLE_PILOT1_RETENTION_POLICY, granted=True,
                        note="retention classification is advisory; deletion "
                             "still goes through hygiene with archive rules"),
+            Permission(S.ENABLE_SENSORY_MEMBRANE, granted=True,
+                       note="the read-only membrane may run on simulated/test "
+                            "sources; it never acts on the world"),
+            Permission(S.ENABLE_SENSORY_MEMBRANE_DRY_RUN, granted=True,
+                       note="dry-run validates sources without publishing "
+                            "stimuli"),
+            Permission(S.ENABLE_REAL_READ_ONLY_SOURCES, granted=False,
+                       requires_approval=True,
+                       note="reading real on-disk sources (still read-only) "
+                            "requires explicit approval"),
+            Permission(S.ENABLE_FOLDER_POLL_SOURCE, requires_approval=True,
+                       note="folder polling requires an allowed root; "
+                            "recursive polling needs separate approval"),
+            Permission(S.ENABLE_JSONL_SOURCE, granted=True,
+                       note="read-only JSONL sources within allowed roots"),
+            Permission(S.ENABLE_TEXT_SOURCE, granted=True,
+                       note="read-only text sources; text is environmental "
+                            "input, never an operator command"),
+            Permission(S.ENABLE_NUMERIC_SOURCE, granted=True,
+                       note="read-only numeric sources within allowed roots"),
+            Permission(S.ENABLE_PILOT2_READ_ONLY_SHORT, requires_approval=True,
+                       note="a short read-only Pilot-2 run is opt-in"),
+            Permission(S.ENABLE_PILOT2_REAL_READ_ONLY_SOAK, granted=False,
+                       requires_approval=True,
+                       note="a real read-only Pilot-2 soak requires explicit "
+                            "approval; still no actuation"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

@@ -195,6 +195,14 @@ DESCRIPTIONS = {
     "decision_gate": "post-pilot Phase-2 decision gate",
     "research_dossier": "post-pilot research dossier, ClaimGuard-safe",
     "post_pilot_safety": "post-pilot blocks consciousness/destructive claims",
+    "sensory_membrane_dry_run": "validate read-only sources without publishing",
+    "jsonl_stream_ingestion": "read-only JSONL ingestion, malformed skipped",
+    "text_stream_ingestion": "text lines as environmental stimuli, not commands",
+    "numeric_stream_ingestion": "numeric trend/spike detection",
+    "folder_poll": "folder presence/change detection, no writes",
+    "read_only_contract": "read-only contract blocks writes/exec/network",
+    "sensory_grounding": "repeated events become proto-symbol candidates",
+    "pilot2_read_only_short": "bounded Pilot-2 read-only sensory run",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -293,6 +301,12 @@ class ExperimentRegistry:
                         "accumulation_vs_growth", "trace_audit",
                         "decision_gate", "research_dossier")
             or bool(merged.get("post_pilot", False)))
+        features["sensory_membrane"] = (
+            name.startswith("sensory") or name.startswith("pilot2")
+            or name in ("jsonl_stream_ingestion", "text_stream_ingestion",
+                        "numeric_stream_ingestion", "folder_poll",
+                        "read_only_contract")
+            or bool(merged.get("sensory_membrane", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

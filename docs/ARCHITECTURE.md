@@ -1974,3 +1974,62 @@ sentience, or life.** Every output is ClaimGuard-scanned and uses research
 language. Success here is operational and analyzability success -- never proof
 of consciousness, and structural change is never treated as meaningful unless
 the evidence supports it.
+
+## Read-Only Sensory Membrane
+
+After Pilot-1 (run, observe, analyze) the project needs a Pilot-2 preparation
+layer: a **read-only sensory membrane**. The `sensory_membrane` package lets
+Solaris-AI-NN receive real or semi-real environmental input from controlled,
+read-only sources -- JSONL/text/numeric streams, watched folders, event logs,
+manual dumps, and simulated camera/audio *metadata* -- and convert it into
+canonical stimuli **without ever acting on the source**. Its core principle is
+exact: *the world may enter the system; the system may not act on the world.*
+
+Every source is read-only, and the invariant is enforced in depth. The
+`ReadOnlyContractValidator` blocks writes, deletes, renames, chmod, file
+creation, command/shell execution, network calls, and device capture, and
+confines sources to explicitly allowed input roots; the
+`SensoryMembraneSafetyValidator` repeats the same hard rules at runtime. The
+adapters (`JSONLStreamAdapter`, `TextStreamAdapter`, `NumericStreamAdapter`,
+`FolderPollAdapter`) only read -- they remember offsets, skip malformed
+rows/lines with warnings, detect rotation, bound events-per-poll and file
+sizes, and never modify a file. Camera and audio are **metadata-only** in this
+prompt: there is no OCR, no speech recognition, and no image analysis, and
+there are no network sources or external APIs.
+
+Text is the sharpest boundary: a text line is a *textual environmental
+stimulus*, never an operator command. A line that reads like a command (e.g.
+`rm -rf /`) is just environmental text; it is never executed. The
+`SensoryEventNormalizer` turns each raw read into a canonical Stimulus-like
+dict (origin `read_only_environmental_input`, `executable_scope: none`),
+optionally a MeaningEvent-like dict, and -- only when a source supplies an
+*external* valence hint -- a Reaction-like dict explicitly marked a hint, not a
+system outcome. The `SensoryBuffer` deduplicates, rate-limits, and batches
+events to the ConscienceBus; the `ProvenanceLedger` attaches mandatory origin
+(source/path/line hashes, read-only-validated, simulated vs real, trust level)
+to every event; and the `SensoryGroundingEngine` forms *operational
+associations* (world-model node candidates, internally-generated proto-symbol
+candidates, Mysterium events, hypothesis seeds) -- association, never human
+understanding, and input words are never the internal symbols.
+
+The membrane wires into the runtime without granting authority. The conscience
+spine gains a `read_only_sensory_poll` phase between `heartbeat` and
+`stimulus_ingestion`; the orchestrator builds the membrane as an optional
+module and publishes its events as ordinary stimuli. Governance adds nine
+scopes (membrane, dry-run, real read-only sources, folder/jsonl/text/numeric
+sources, and the two Pilot-2 runs): the membrane and dry-run and the
+file-stream sources are allowed by default, while reading real on-disk
+sources, folder polling, and Pilot-2 runs require explicit approval, and
+network sources and device capture are prohibited outright. Ego attributes
+sensory events as `read_only_environmental_input` (never operator); the Inner
+MAP carries a `sensory_membrane` field and twelve new state-graph nodes; ops
+exposes membrane status and read-failure / malformed-flood / buffer-overflow /
+attempted-write / missing-provenance warnings; evaluation adds twelve metrics
+and eight protocols; and the operator dialogue answers seven sensory questions
+-- including the deliberately safe answer that *sensory input is environmental
+input and cannot become an operator command*. Four scenario profiles
+(`sensory_membrane_dry_run`, `sensory_membrane_short`, `pilot2_plan_only`,
+`pilot2_read_only_short`) make the membrane runnable in bounded, governed
+ways. **Pilot-2 begins with read-only environmental grounding, not autonomy:
+there is no real-world actuation, no robotics, no browser/OS automation, no
+external APIs, and no LLM authority.**

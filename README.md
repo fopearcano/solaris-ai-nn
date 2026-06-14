@@ -318,6 +318,22 @@ python examples/run_baseline_comparison_demo.py           # count increase != gr
 python examples/run_accumulation_vs_growth_demo.py        # accumulation/weak-growth/regression
 python examples/run_phase2_decision_gate_demo.py          # repeat/revise/extend/ready
 python examples/run_reproducibility_package_demo.py       # index + checksums, no secrets
+
+# Pilot-2 read-only sensory membrane (the world enters; the system never acts)
+python examples/run_sensory_membrane_dry_run.py           # validate sources; publish nothing
+python examples/run_jsonl_sensory_stream_demo.py          # JSONL -> canonical stimuli on the bus
+python examples/run_text_sensory_stream_demo.py           # text is environmental input, not a command
+python examples/run_numeric_sensory_stream_demo.py        # numeric trend/spike detection
+python examples/run_folder_poll_demo.py                   # file presence/change; no writes
+python examples/run_pilot2_read_only_plan.py              # Pilot-2 read-only plan; no long run
+```
+
+The read-only sensory membrane also runs as governed conscience profiles
+(dry-run and file-stream sources need no approval; real on-disk sources do):
+
+```bash
+solaris-nn run-profile sensory_membrane_dry_run           # validate sources, publish nothing
+solaris-nn run-profile pilot2_plan_only                   # Pilot-2 plan; starts nothing
 ```
 
 The post-pilot analysis also runs as a plan-only conscience profile (read-only;
@@ -397,6 +413,22 @@ runs no cognition loop and mutates no runtime state. Every output —
 uses research language: it evaluates operational continuity, traceability, and
 structural-change proxies, and **cannot, and does not, claim consciousness,
 sentience, understanding, or life.**
+
+The **read-only sensory membrane** (`sensory_membrane/`) is the Pilot-2
+preparation layer. It receives controlled environmental input from read-only
+sources (JSONL / text / numeric streams, watched folders, event logs, and
+simulated camera/audio *metadata*) and converts it into canonical stimuli
+**without ever acting on the source** -- its principle is *the world may enter
+the system; the system may not act on the world.* All sources are read-only
+(enforced by a read-only contract and a safety validator); text is an
+environmental stimulus, never an operator command; camera/audio are
+metadata-only (no OCR/ASR/image analysis); there are no network sources or
+external APIs; and every event carries mandatory provenance. Source boundaries
+are visible to Ego (events are attributed `read_only_environmental_input`,
+never operator) and to the Inner MAP. The membrane is disabled by default;
+real on-disk sources, folder polling, and Pilot-2 runs require governance
+approval. **Pilot-2 begins with read-only grounding, not autonomy: no
+real-world actuation, no robotics, no browser/OS automation.**
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
 > explicit acknowledgement flags in the run manifest and should only be
@@ -779,6 +811,9 @@ src/solaris_ai_nn/
   post_pilot/   forensic analysis: artifact loader, baseline, structural
                 change, accumulation-vs-growth, trace audit, evidence ledger,
                 regression, reproducibility, decision gate, dossier, safety
+  sensory_membrane/ read-only Pilot-2 membrane: sources, read-only contract,
+                jsonl/text/numeric/folder adapters, normalizer, buffer,
+                grounding, provenance, runtime, reports, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

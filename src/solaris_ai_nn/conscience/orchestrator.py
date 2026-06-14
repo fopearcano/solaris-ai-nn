@@ -130,6 +130,7 @@ class ConscienceOrchestrator:
         safe("autoregeneration", self._build_autoregeneration)
         safe("logos", self._build_logos)
         safe("governance", self._build_governance)
+        safe("sensory_membrane", self._build_sensory_membrane)
         safe("inner_map", lambda: self._import(
             "solaris_ai_nn.inner_map.observer", "InnerMapObserver")())
 
@@ -206,6 +207,32 @@ class ConscienceOrchestrator:
 
         return GovernancePolicy()
 
+    def _build_sensory_membrane(self) -> Any:
+        from ..sensory_membrane.membrane_runtime import SensoryMembraneRuntime
+
+        meta = self.context.metadata or {}
+        runtime = SensoryMembraneRuntime(
+            state_dir=self.context.state_dir,
+            allowed_input_roots=list(meta.get("sensory_allowed_roots", [])),
+            enabled=bool(meta.get("sensory_enabled", True)),
+            dry_run=bool(meta.get("sensory_dry_run", False)),
+            simulated_sources_only=bool(
+                meta.get("sensory_simulated_only", True)),
+            real_read_only_sources_enabled=bool(
+                meta.get("sensory_real_sources", False)),
+            bus=self.bus)
+        # Any source configs handed in via metadata are registered now.
+        for cfg in meta.get("sensory_sources", []) or []:
+            try:
+                from ..sensory_membrane.sources import SensorySourceConfig
+
+                runtime.add_source(SensorySourceConfig.from_dict(cfg)
+                                   if isinstance(cfg, dict) else cfg)
+            except Exception:
+                continue
+        runtime.initialize()
+        return runtime
+
     # -- the loop -----------------------------------------------------------------
 
     def step(self) -> Dict[str, Any]:
@@ -253,6 +280,8 @@ class ConscienceOrchestrator:
             SpinePhase.SAFETY_GOVERNANCE_VALIDATION: self._phase_safety,
             SpinePhase.LATENT_OR_CONSOLIDATION_WINDOW: self._phase_latent,
         }
+        if "sensory_membrane" in self.components:
+            h[SpinePhase.READ_ONLY_SENSORY_POLL] = self._phase_sensory_poll
         if "ecology" in self.components or "signals" in self.components:
             h[SpinePhase.STIMULUS_INGESTION] = self._phase_stimulus
         elif self.context.enabled_modules:
@@ -289,6 +318,17 @@ class ConscienceOrchestrator:
 
     def _phase_heartbeat(self, step: int) -> str:
         self._count("heartbeat")
+        return PhaseStatus.RAN
+
+    def _phase_sensory_poll(self, step: int) -> str:
+        """Poll the read-only sensory membrane once (bounded, never actuates)."""
+        membrane = self.components.get("sensory_membrane")
+        if membrane is None:
+            return PhaseStatus.SKIPPED
+        out = membrane.poll_once()
+        self._count("sensory_poll")
+        if not out.get("polled"):
+            return PhaseStatus.SKIPPED
         return PhaseStatus.RAN
 
     def _phase_stimulus(self, step: int) -> str:

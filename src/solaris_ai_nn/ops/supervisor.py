@@ -830,6 +830,56 @@ class OperationalSupervisor:
                                      "review; recommendation: "
                                      f"{mode.get('recommendation', 'watch')}")
 
+        # Sensory membrane monitoring (Prompt 31): evidence only. The membrane
+        # is read-only and owns no authority; these warnings surface read
+        # failures, malformed floods, buffer overflow, attempted writes, an
+        # excessive event rate, or missing provenance.
+        membrane = snapshot.get("sensory_membrane") or {}
+        if membrane.get("enabled"):
+            if int(membrane.get("read_only_violation_count", 0) or 0) > 0:
+                self.incidents.record(
+                    I.HEALTH_CRITICAL, "critical",
+                    "a read-only contract violation was attempted on a "
+                    "sensory source",
+                    related_metric="read_only_violation",
+                    suggested_debug_step="inspect the source config; the "
+                                         "membrane never writes to sources")
+            if int(membrane.get("degraded_source_count", 0) or 0) > 0:
+                self.incidents.record(
+                    I.HEALTH_WARNING, "warning",
+                    f"{membrane['degraded_source_count']} sensory source(s) "
+                    "degraded (read failure)",
+                    related_metric="sensory_source_health",
+                    suggested_debug_step="check source paths and read errors")
+            total = int(membrane.get("total_events", 0) or 0)
+            malformed = int(membrane.get("malformed_events", 0) or 0)
+            if total >= 20 and malformed / max(1, total) > 0.5:
+                self.incidents.record(
+                    I.HEALTH_WARNING, "warning",
+                    f"malformed sensory event flood: {malformed}/{total}",
+                    related_metric="malformed_event_rate",
+                    suggested_debug_step="quarantine the malformed stream")
+            if int(membrane.get("dropped_events", 0) or 0) > 0:
+                self.incidents.record(
+                    I.HEALTH_WARNING, "warning",
+                    f"{membrane['dropped_events']} sensory event(s) dropped "
+                    "(buffer overflow)",
+                    related_metric="sensory_buffer_overflow",
+                    suggested_debug_step="reduce poll rate or archive logs")
+            if float(membrane.get("events_per_minute", 0.0) or 0.0) > 100000:
+                self.incidents.record(
+                    I.HEALTH_WARNING, "warning",
+                    "sensory event rate very high",
+                    related_metric="sensory_event_rate",
+                    suggested_debug_step="reduce poll rate within config")
+            if total > 0 and float(
+                    membrane.get("provenance_completeness", 1.0) or 1.0) < 1.0:
+                self.incidents.record(
+                    I.HEALTH_WARNING, "warning",
+                    "some sensory events are missing provenance",
+                    related_metric="sensory_provenance_missing",
+                    suggested_debug_step="every event must carry provenance")
+
         budget_report = self.budget.check_budget(
             {"telemetry": snapshot.get("telemetry"),
              "substrate": snapshot.get("substrate"),
@@ -1185,7 +1235,27 @@ class OperationalSupervisor:
             snapshot["pilot1"] = pilot
         elif pilot is not None and hasattr(pilot, "pilot_status"):
             snapshot["pilot1"] = pilot.pilot_status()
+        membrane = getattr(runner, "sensory_membrane", None)
+        if membrane is not None and isinstance(membrane, dict):
+            snapshot["sensory_membrane"] = membrane
+        elif membrane is not None and hasattr(membrane, "summary"):
+            snapshot["sensory_membrane"] = membrane.summary()
         return snapshot
+
+    def membrane_status(self) -> Dict[str, Any]:
+        """Expose read-only sensory membrane status (if any)."""
+        m = self._health_snapshot().get("sensory_membrane") or {}
+        return {
+            "sensory_membrane_enabled": m.get("enabled", False),
+            "source_count": m.get("source_count", 0),
+            "healthy_source_count": m.get("healthy_source_count", 0),
+            "degraded_source_count": m.get("degraded_source_count", 0),
+            "events_per_minute": m.get("events_per_minute", 0.0),
+            "dropped_events": m.get("dropped_events", 0),
+            "malformed_events": m.get("malformed_events", 0),
+            "membrane_report_path": m.get("membrane_report_path"),
+            "read_only_violation_count": m.get("read_only_violation_count", 0),
+        }
 
     def pilot_status(self) -> Dict[str, Any]:
         """Expose Pilot-1 status from the latest health snapshot (if any)."""

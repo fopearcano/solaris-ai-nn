@@ -1180,3 +1180,49 @@ built so that no artifact it produces can support that leap. It evaluates
 operational continuity, traceability, and structural-change proxies — and says,
 plainly and everywhere, that it cannot evaluate consciousness, sentience,
 understanding, or life.
+
+## Phase 31 — Read-only sensory membrane
+
+**The world may enter the system; the system may not act on the world.** This
+single sentence is the whole design. Pilot-2 asks whether Solaris-AI-NN
+develops differently when exposed to a less artificial, more variable
+environment than the nursery. The danger of "real input" is that it tempts
+"real output" -- so the membrane is built so that input can flow in while
+actuation remains impossible by construction, not by policy alone.
+
+**Read-only is enforced in depth, not declared once.** Source configs are
+read-only invariants (you cannot even configure write access), the
+read-only contract validator and the membrane safety validator both reject
+writes/deletes/renames/exec/network/device-capture, adapters only open files
+for reading and never modify them, and sources must live inside explicitly
+allowed roots. Defence in depth matters here because a single leak would turn
+a sensor into an effector.
+
+**Environmental text is not an operator command.** This is the most subtle
+boundary. A text stream can contain anything -- including strings that look
+like shell commands or instructions. The membrane classifies every text line
+as a *textual environmental stimulus* with an explicit `is_operator_command:
+False` tag, and Ego attributes it as `read_only_environmental_input`, never as
+the operator channel. The system may later form proto-symbols around recurring
+text, but the input words are never the internal symbols, and the text is
+never executed.
+
+**Provenance is mandatory.** Every event carries where it came from (source,
+path hash, raw-line hash, adapter, read-only-validated, simulated vs real,
+trust level). An event without provenance is not admissible. This is what lets
+the post-pilot forensic layer later distinguish a nursery-only run from a
+read-only-membrane run, and a simulated source from a real one.
+
+**Why actuation is postponed (again).** It would be easy to add a tiny
+"respond to the environment" hook. We do not, because the project's safety
+posture is that capability is added only after the previous layer is observed,
+analyzed, and trusted. Pilot-2 is the grounding step: expose the developmental
+process to a richer, read-only world and measure whether that changes its
+development -- before any question of acting on that world is even raised.
+
+**Nursery vs real read-only exposure.** The nursery is a generated, artificial
+world; the membrane is read-only environmental input. Mixed mode keeps the two
+strictly separated by attribution, so any developmental difference can be
+traced to the source. Camera and audio remain metadata-only here -- no OCR, no
+ASR, no image analysis -- because adding heavy multimodal processing would
+both break the low-compute principle and invite overclaiming.

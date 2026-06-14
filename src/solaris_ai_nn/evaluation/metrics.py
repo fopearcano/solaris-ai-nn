@@ -1026,3 +1026,45 @@ def post_pilot_metrics(analysis: Optional[Dict[str, Any]]) -> Dict[str, Any]:
                                             "inconclusive"),
         "authority": "operational/analyzability metrics; not cognitive proof",
     }
+
+
+def sensory_metrics(membrane: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective read-only sensory membrane metrics from a runtime snapshot.
+
+    These describe read-only environmental ingestion: source counts, events
+    by modality, malformed/dropped rates, provenance completeness, grounding,
+    and read-only violations. They are operational counts; the membrane never
+    acts on the world and input is never an operator command.
+    """
+    if not membrane:
+        return {"present": False}
+    summary = membrane.get("summary", membrane)
+    grounding = membrane.get("grounding", {})
+    total = int(summary.get("total_events", 0) or 0)
+    malformed = int(summary.get("malformed_events", 0) or 0)
+    dropped = int(summary.get("dropped_events", 0) or 0)
+    return {
+        "present": True,
+        "sensory_source_count": int(summary.get("source_count", 0) or 0),
+        "active_source_count": int(
+            summary.get("active_source_count", 0) or 0),
+        "event_count_by_modality": membrane.get("event_count_by_modality", {}),
+        "malformed_event_rate": round(malformed / total, 4) if total else 0.0,
+        "dropped_event_rate": round(dropped / total, 4) if total else 0.0,
+        "provenance_completeness_score": float(
+            summary.get("provenance_completeness", 0.0) or 0.0),
+        "read_only_violation_count": int(
+            summary.get("read_only_violation_count", 0) or 0),
+        "sensory_grounding_count": int(
+            grounding.get("grounding_count", 0) or 0),
+        "sensory_proto_symbol_count": int(
+            grounding.get("proto_symbol_candidate_count", 0) or 0),
+        "sensory_world_model_node_count": int(
+            grounding.get("world_model_node_count", 0) or 0),
+        "sensory_absence_event_count": int(
+            summary.get("absence_events", 0) or 0),
+        "source_degradation_count": int(
+            summary.get("degraded_source_count", 0) or 0),
+        "read_only": bool(summary.get("read_only", True)),
+        "authority": "read-only environmental input; never actuation",
+    }

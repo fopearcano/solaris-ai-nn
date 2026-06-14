@@ -16,7 +16,11 @@ def test_phase_order_preserves_solaris_spine():
         < order.index(SpinePhase.ACTION_SUGGESTION) \
         < order.index(SpinePhase.REACTION_COLLECTION) \
         < order.index(SpinePhase.MEMORY_UPDATE)
-    assert len(order) == 18
+    assert len(order) == 19
+    # The read-only sensory poll sits between heartbeat and stimulus ingestion.
+    assert order.index(SpinePhase.HEARTBEAT) \
+        < order.index(SpinePhase.READ_ONLY_SENSORY_POLL) \
+        < order.index(SpinePhase.STIMULUS_INGESTION)
 
 
 def test_missing_handler_is_skipped_not_crashed():

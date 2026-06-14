@@ -70,8 +70,24 @@ def test_all_scopes_in_default_set():
     # + 6 ecology (P23) + 5 active perception (P24)
     # + 6 hypothesis engine (P25) + 9 auto-regeneration (P26)
     # + 6 LOGOS complexity (P27) + 6 conscience runtime (P28)
-    # + 7 Pilot-1 soak protocol (P29).
-    assert len(PermissionScope.ALL) == 99
+    # + 7 Pilot-1 soak protocol (P29) + 9 sensory membrane (P31).
+    assert len(PermissionScope.ALL) == 108
+
+
+def test_sensory_membrane_scope_defaults():
+    ps = PermissionSet.default()
+    S = PermissionScope
+    # Membrane, dry-run, and JSONL/text/numeric sources are allowed; real
+    # on-disk sources, folder polling, and Pilot-2 runs need approval.
+    assert ps.allows(S.ENABLE_SENSORY_MEMBRANE)
+    assert ps.allows(S.ENABLE_SENSORY_MEMBRANE_DRY_RUN)
+    assert ps.allows(S.ENABLE_JSONL_SOURCE)
+    assert ps.allows(S.ENABLE_TEXT_SOURCE)
+    assert ps.allows(S.ENABLE_NUMERIC_SOURCE)
+    assert ps.requires_approval(S.ENABLE_REAL_READ_ONLY_SOURCES)
+    assert ps.requires_approval(S.ENABLE_FOLDER_POLL_SOURCE)
+    assert ps.requires_approval(S.ENABLE_PILOT2_READ_ONLY_SHORT)
+    assert not ps.allows(S.ENABLE_PILOT2_REAL_READ_ONLY_SOAK)
 
 
 def test_pilot1_scope_defaults():

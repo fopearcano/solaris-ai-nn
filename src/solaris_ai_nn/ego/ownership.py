@@ -27,6 +27,7 @@ ATTRIBUTION_CATEGORIES = (
     "generated_by_llm_adapter",
     "generated_by_developmental_nursery",
     "simulated_environment_input",
+    "read_only_environmental_input",
     "unknown_source",
 )
 
@@ -45,6 +46,9 @@ _SOURCE_RULES = (
     ("developmental_nursery", "generated_by_developmental_nursery"),
     ("nursery", "generated_by_developmental_nursery"),
     ("ecology", "generated_by_developmental_nursery"),
+    # Read-only sensory membrane input is environmental, never a command.
+    ("read_only_environmental_input", "read_only_environmental_input"),
+    ("sensory_membrane", "read_only_environmental_input"),
     ("simulated_environment", "simulated_environment_input"),
     ("operator", "generated_by_operator"),
     ("approval", "generated_by_operator"),
@@ -73,6 +77,7 @@ EXTERNAL_CATEGORIES = frozenset({
     "observed_from_environment", "observed_from_stream",
     "observed_from_solaris_sidecar", "generated_by_operator",
     "generated_by_developmental_nursery", "simulated_environment_input",
+    "read_only_environmental_input",
 })
 
 OFFLINE_CATEGORIES = frozenset({

@@ -56,6 +56,11 @@ AVAILABLE_QUERIES = (
     "what evidence contradicts growth?", "what should happen next?",
     "is it ready for Pilot-2?", "what artifacts are missing?",
     "can we claim consciousness?",
+    "what sensory sources are active?", "is the membrane read-only?",
+    "what was the latest environmental event?", "what sources are degraded?",
+    "did sensory input become a command?",
+    "what proto-symbols came from sensory input?",
+    "is this real or simulated input?",
 )
 
 
@@ -116,6 +121,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("sm_"):
+            return self._sensory(topic)
         if topic.startswith("pp_"):
             return self._post_pilot(topic)
         if topic.startswith("pilot"):
@@ -439,6 +446,59 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _sensory(self, topic: str) -> CommunicationResponse:
+        """Answer read-only sensory membrane queries from membrane status.
+
+        The command question is answered safely even with no component; every
+        answer is explicit that sensory input is environmental, not a command.
+        """
+        if topic == "sm_command":
+            return self.builder.status_response(
+                "No. Sensory input is classified as environmental input and "
+                "cannot become an operator command.",
+                ["policy:input_not_command"])
+        component = self.components.get("sensory_membrane")
+        if component is None:
+            return self.builder.missing_component_response("sensory_membrane")
+        status = (component.summary() if hasattr(component, "summary")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:sensory_membrane"]
+        if topic == "sm_sources":
+            text = (f"active sensory sources: "
+                    f"{status.get('active_source_count', 0)} of "
+                    f"{status.get('source_count', 0)} registered")
+        elif topic == "sm_read_only":
+            text = ("yes -- the membrane is read-only; the system never acts "
+                    "on the world. read_only="
+                    f"{status.get('read_only', True)}")
+        elif topic == "sm_latest_event":
+            grounding = (component.snapshot().get("grounding", {})
+                         if hasattr(component, "snapshot") else {})
+            recent = grounding.get("recent") or []
+            last = recent[-1] if recent else None
+            text = ("latest environmental event: "
+                    + (f"{last.get('modality')} from {last.get('source_id')}"
+                       if last else "none yet"))
+        elif topic == "sm_degraded":
+            text = (f"degraded sources: "
+                    f"{status.get('degraded_source_count', 0)}")
+        elif topic == "sm_proto":
+            grounding = (component.snapshot().get("grounding", {})
+                         if hasattr(component, "snapshot") else {})
+            text = ("sensory proto-symbol candidates: "
+                    f"{grounding.get('proto_symbol_candidate_count', 0)} "
+                    "(internally generated; input text is not the symbol)")
+        elif topic == "sm_real_or_simulated":
+            sim_only = status.get("simulated_sources_only", True)
+            text = ("sources are simulated-only"
+                    if sim_only else
+                    "some real read-only sources are enabled (still "
+                    "read-only; never actuation)")
+        else:
+            text = (f"sensory membrane enabled={status.get('enabled')}, "
+                    f"sources={status.get('source_count', 0)}")
         return self.builder.status_response(text, refs)
 
     # -- views --------------------------------------------------------------------

@@ -315,6 +315,12 @@ class InnerMapModel:
     # post_pilot_report_path, research_dossier_path. Analyzability/operational
     # findings only; never a consciousness claim.
     post_pilot: Optional[Dict[str, Any]] = None
+    # Read-only sensory membrane status (Prompt 31); None when the membrane is
+    # off. Keys: enabled, source_count, active_source_count,
+    # event_count_by_modality, latest_event_timestamp, dropped_events,
+    # malformed_events, provenance_completeness, read_only, report_path. The
+    # membrane is read-only; environmental input is never an operator command.
+    sensory_membrane: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

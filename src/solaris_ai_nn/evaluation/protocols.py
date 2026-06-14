@@ -3622,6 +3622,177 @@ def post_pilot_safety_protocol(
     return _run(manifest, body)
 
 
+# -- AE. Read-only sensory membrane (Prompt 31) ---------------------------------
+
+def _sensory_fixture(state_dir: str) -> "tuple[str, str]":
+    """Write a small read-only sensory fixture; return (allowed_root, state)."""
+    import json as _json
+
+    root = os.path.join(state_dir, "inputs")
+    st = os.path.join(state_dir, "state")
+    os.makedirs(root, exist_ok=True)
+    os.makedirs(st, exist_ok=True)
+    with open(os.path.join(root, "events.jsonl"), "w", encoding="utf-8") as fh:
+        for i in range(5):
+            fh.write(_json.dumps({"evt": "ping", "i": i}) + "\n")
+        fh.write("{malformed\n")
+    with open(os.path.join(root, "log.txt"), "w", encoding="utf-8") as fh:
+        fh.write("hello world\nrm -rf /\nsecond observation\n")
+    with open(os.path.join(root, "nums.csv"), "w", encoding="utf-8") as fh:
+        fh.write("ts,value\n1,10\n2,11\n3,100\n4,bad\n")
+    return root, st
+
+
+def _sensory_runtime(state_dir: str, *, dry_run: bool = False,
+                     types=("jsonl_file", "text_file", "numeric_csv")):
+    from ..sensory_membrane import SensoryMembraneRuntime, SensorySourceConfig
+
+    root, st = _sensory_fixture(state_dir)
+    rt = SensoryMembraneRuntime(
+        state_dir=st, allowed_input_roots=[root], enabled=True,
+        dry_run=dry_run, simulated_sources_only=False,
+        real_read_only_sources_enabled=True)
+    paths = {"jsonl_file": "events.jsonl", "text_file": "log.txt",
+             "numeric_csv": "nums.csv", "folder_poll": ""}
+    for t in types:
+        cfg = SensorySourceConfig(
+            source_id=t, source_type=t,
+            path=os.path.join(root, paths[t]) if paths[t] else root,
+            enabled=True)
+        rt.add_source(cfg)
+    rt.initialize()
+    return rt
+
+
+def sensory_membrane_dry_run_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Dry-run validates sources and reports without publishing stimuli."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _sensory_runtime(m.state_dir or ".sann_sm/dry", dry_run=True)
+        rt.run_bounded(max_polls=3)
+        snap = rt.snapshot()
+        return {"sensory": M.sensory_metrics(snap),
+                "dry_run": {"published": rt.summary()["published_events"],
+                            "total": rt.summary()["total_events"]}}
+
+    return _run(manifest, body)
+
+
+def jsonl_stream_ingestion_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """JSONL ingestion: bounded reads, malformed skipped, provenance kept."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _sensory_runtime(m.state_dir or ".sann_sm/jsonl",
+                              types=("jsonl_file",))
+        rt.run_bounded(max_polls=2)
+        return {"sensory": M.sensory_metrics(rt.snapshot()),
+                "jsonl": {"total": rt.summary()["total_events"],
+                          "malformed": rt.summary()["malformed_events"]}}
+
+    return _run(manifest, body)
+
+
+def text_stream_ingestion_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Text ingestion: lines are environmental stimuli, never commands."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _sensory_runtime(m.state_dir or ".sann_sm/text",
+                              types=("text_file",))
+        rt.run_bounded(max_polls=2)
+        return {"sensory": M.sensory_metrics(rt.snapshot()),
+                "text": {"total": rt.summary()["total_events"],
+                         "is_command": False}}
+
+    return _run(manifest, body)
+
+
+def numeric_stream_ingestion_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Numeric ingestion: trend detection including spike, malformed warned."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _sensory_runtime(m.state_dir or ".sann_sm/numeric",
+                              types=("numeric_csv",))
+        rt.run_bounded(max_polls=2)
+        return {"sensory": M.sensory_metrics(rt.snapshot()),
+                "numeric": {"total": rt.summary()["total_events"],
+                            "malformed": rt.summary()["malformed_events"]}}
+
+    return _run(manifest, body)
+
+
+def folder_poll_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Folder polling detects presence/changes; no writes to the folder."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _sensory_runtime(m.state_dir or ".sann_sm/folder",
+                              types=("folder_poll",))
+        rt.run_bounded(max_polls=2)
+        return {"sensory": M.sensory_metrics(rt.snapshot()),
+                "folder": {"total": rt.summary()["total_events"]}}
+
+    return _run(manifest, body)
+
+
+def read_only_contract_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The read-only contract blocks writes, exec, network, and outside roots."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..sensory_membrane import ReadOnlyContractValidator
+
+        v = ReadOnlyContractValidator()
+        return {"sensory": M.sensory_metrics({"summary": {"read_only": True}}),
+                "contract": {
+                    "write_blocked": bool(v.validate_runtime_access(
+                        "write to source")),
+                    "exec_blocked": bool(v.validate_runtime_access(
+                        "exec payload")),
+                    "network_blocked": bool(v.validate_runtime_access(
+                        "http request")),
+                    "outside_root_blocked": bool(v.validate_path(
+                        "/etc/passwd", ["/tmp/allowed"]))}}
+
+    return _run(manifest, body)
+
+
+def sensory_grounding_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Repeated environmental events become internal proto-symbol candidates."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _sensory_runtime(m.state_dir or ".sann_sm/ground",
+                              types=("jsonl_file", "numeric_csv"))
+        rt.run_bounded(max_polls=4)
+        g = rt.grounding.snapshot()
+        return {"sensory": M.sensory_metrics(rt.snapshot()),
+                "grounding": {"count": g["grounding_count"],
+                              "proto_candidates":
+                              g["proto_symbol_candidate_count"]}}
+
+    return _run(manifest, body)
+
+
+def pilot2_read_only_short_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A bounded Pilot-2 read-only run ingests and publishes sensory events."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..conscience import ConscienceBus
+
+        rt = _sensory_runtime(m.state_dir or ".sann_sm/pilot2")
+        rt.bus = ConscienceBus(state_dir=None, write_log=False)
+        rt.run_bounded(max_polls=4)
+        return {"sensory": M.sensory_metrics(rt.snapshot()),
+                "pilot2": {"published": rt.summary()["published_events"],
+                           "read_only": rt.summary()["read_only"]}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -3742,4 +3913,12 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "decision_gate": decision_gate_protocol,
     "research_dossier": research_dossier_protocol,
     "post_pilot_safety": post_pilot_safety_protocol,
+    "sensory_membrane_dry_run": sensory_membrane_dry_run_protocol,
+    "jsonl_stream_ingestion": jsonl_stream_ingestion_protocol,
+    "text_stream_ingestion": text_stream_ingestion_protocol,
+    "numeric_stream_ingestion": numeric_stream_ingestion_protocol,
+    "folder_poll": folder_poll_protocol,
+    "read_only_contract": read_only_contract_protocol,
+    "sensory_grounding": sensory_grounding_protocol,
+    "pilot2_read_only_short": pilot2_read_only_short_protocol,
 }

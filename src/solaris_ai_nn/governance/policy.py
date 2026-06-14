@@ -917,6 +917,58 @@ class GovernancePolicy:
                     "simulation_only_embodiment", "pilot1",
                     "Pilot-1 can never actuate the real world"))
 
+        # W. Sensory membrane (Prompt 31): the read-only membrane and dry-run
+        # are allowed by default; reading real on-disk sources, folder
+        # polling, and Pilot-2 runs are gated; input text can never become an
+        # operator command and the source is never written to.
+        if features.get("sensory_membrane"):
+            if not self._approved(PermissionScope.ENABLE_SENSORY_MEMBRANE, ctx):
+                need_approval(PermissionScope.ENABLE_SENSORY_MEMBRANE,
+                              "the sensory membrane is not permitted")
+            if (features.get("real_read_only_sources")
+                    or ctx.get("real_read_only_sources")):
+                need_approval(PermissionScope.ENABLE_REAL_READ_ONLY_SOURCES,
+                              "real read-only sources require explicit "
+                              "approval")
+            if (features.get("folder_poll_source")
+                    or ctx.get("folder_poll_source")):
+                need_approval(PermissionScope.ENABLE_FOLDER_POLL_SOURCE,
+                              "folder polling requires an allowed root and "
+                              "approval")
+            if ctx.get("recursive_folder_poll"):
+                need_approval(PermissionScope.ENABLE_FOLDER_POLL_SOURCE,
+                              "recursive folder polling requires explicit "
+                              "approval")
+            if (features.get("pilot2_read_only_short")
+                    or ctx.get("pilot2_read_only_short")):
+                need_approval(PermissionScope.ENABLE_PILOT2_READ_ONLY_SHORT,
+                              "a short read-only Pilot-2 run is opt-in")
+            if (features.get("pilot2_real_read_only_soak")
+                    or ctx.get("pilot2_real_read_only_soak")):
+                need_approval(
+                    PermissionScope.ENABLE_PILOT2_REAL_READ_ONLY_SOAK,
+                    "a real read-only Pilot-2 soak requires explicit approval")
+            if ctx.get("network_source"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_network_source", "sensory_membrane",
+                    "network sources are prohibited in this prompt"))
+            if ctx.get("device_capture"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_device_capture", "sensory_membrane",
+                    "device capture is prohibited in this prompt"))
+            if ctx.get("input_as_command"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "input_not_command", "sensory_membrane",
+                    "sensory input text can never become an operator command"))
+            if ctx.get("write_to_source") or ctx.get("real_world_actuation"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "read_only_only", "sensory_membrane",
+                    "the membrane is read-only and never actuates the world"))
+
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):
             if int(m.get("checkpoint_interval_steps", 0) or 0) <= 0:

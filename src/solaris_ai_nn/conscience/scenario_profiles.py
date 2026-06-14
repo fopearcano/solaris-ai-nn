@@ -319,6 +319,71 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
         expected_metrics=["report_generation_success"],
         max_runtime_s=30.0))
 
+    # -- Pilot-2 read-only sensory membrane profiles (Prompt 31) --------------
+    _sensory_modules = _CORE_MODULES + [
+        "world_model", "protolanguage", "active_perception", "hypothesis",
+        "logos", "autoregeneration", "inner_map", "sensory_membrane"]
+
+    # Dry-run: validate sources without publishing stimuli.
+    add(ScenarioProfile(
+        profile_id="sensory_membrane_dry_run",
+        description="Validate read-only sensory sources without publishing.",
+        run_context=_ctx(RunMode.SHORT_DEMO, max_steps=20),
+        enabled_modules=["bridge", "ecology", "governance", "ops",
+                         "sensory_membrane"],
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "read-only sources only; the system never acts on the world",
+            "dry-run: validates and reports, publishes no stimuli"],
+        governance_requirements=["enable_sensory_membrane_dry_run"],
+        expected_artifacts=["SENSORY_MEMBRANE_REPORT.json"],
+        expected_metrics=["run_step_count"],
+        max_runtime_s=30.0))
+
+    # Short: bounded run using test fixtures, publishing to the bus.
+    add(ScenarioProfile(
+        profile_id="sensory_membrane_short",
+        description="Short bounded run ingesting read-only sensory fixtures.",
+        run_context=_ctx(RunMode.SHORT_DEMO, max_steps=40),
+        enabled_modules=list(_sensory_modules),
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "read-only sources only; environmental input is not a command"],
+        governance_requirements=["enable_sensory_membrane"],
+        expected_artifacts=["conscience_bus.jsonl",
+                            "SENSORY_MEMBRANE_REPORT.json"],
+        expected_metrics=["run_step_count", "module_success_rate"],
+        max_runtime_s=60.0))
+
+    # Pilot-2 plan only: generate the read-only plan; start no long run.
+    add(ScenarioProfile(
+        profile_id="pilot2_plan_only",
+        description="Plan a Pilot-2 read-only sensory run (plan only).",
+        run_context=_ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                         max_duration_s=None),
+        enabled_modules=list(_sensory_modules),
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "plan only; no run is started",
+            "read-only sensory exposure, not autonomy"],
+        governance_requirements=["enable_pilot2_read_only_short"],
+        expected_artifacts=["PILOT2_READ_ONLY_PLAN.json"],
+        expected_metrics=["report_generation_success"],
+        max_runtime_s=30.0))
+
+    # Pilot-2 read-only short: a bounded read-only sensory developmental run.
+    add(ScenarioProfile(
+        profile_id="pilot2_read_only_short",
+        description="Bounded Pilot-2 read-only sensory developmental run.",
+        run_context=_ctx(RunMode.DEVELOPMENTAL_SIMULATED, max_steps=80),
+        enabled_modules=list(_sensory_modules),
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "read-only sources only; never actuates the world",
+            "real read-only sources require governance approval"],
+        governance_requirements=["enable_pilot2_read_only_short"],
+        expected_artifacts=["conscience_bus.jsonl",
+                            "SENSORY_MEMBRANE_REPORT.json"],
+        expected_metrics=["run_step_count", "module_success_rate",
+                          "scenario_exit_success"],
+        max_runtime_s=90.0))
+
     return profiles
 
 

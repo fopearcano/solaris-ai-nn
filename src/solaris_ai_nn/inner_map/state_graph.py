@@ -1026,4 +1026,58 @@ def build_default_state_graph() -> StateGraph:
                "safety gates every post-pilot claim")
     g.add_edge("post_pilot_report_builder", "inner_map",
                "post-pilot state feeds Inner MAP")
+
+    # Read-only sensory membrane (Prompt 31). The world may enter the system
+    # as read-only environmental input; the system never acts on the world,
+    # and input text is never an operator command.
+    for name, role in [
+        ("sensory_membrane_runtime", "polls read-only sources into stimuli"),
+        ("sensory_source_registry", "registers/validates read-only sources"),
+        ("read_only_contract_validator", "enforces no-write/no-act contract"),
+        ("jsonl_stream_adapter", "reads append-only JSONL, read-only"),
+        ("text_stream_adapter", "reads text as environmental stimulus"),
+        ("numeric_stream_adapter", "parses CSV numeric trends (stdlib)"),
+        ("folder_poll_adapter", "detects file presence/change, no writes"),
+        ("sensory_event_normalizer", "raw reads -> canonical stimuli"),
+        ("sensory_buffer", "ordered, deduplicated, rate-limited events"),
+        ("sensory_grounding_engine", "operational association, not meaning"),
+        ("sensory_provenance_ledger", "mandatory origin for every event"),
+        ("sensory_membrane_safety_validator", "gates the membrane runtime"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("sensory_source_registry", "jsonl_stream_adapter",
+               "sources feed adapters")
+    g.add_edge("sensory_source_registry", "text_stream_adapter",
+               "sources feed adapters")
+    g.add_edge("sensory_source_registry", "numeric_stream_adapter",
+               "sources feed adapters")
+    g.add_edge("sensory_source_registry", "folder_poll_adapter",
+               "sources feed adapters")
+    g.add_edge("jsonl_stream_adapter", "sensory_event_normalizer",
+               "adapters feed the normalizer")
+    g.add_edge("text_stream_adapter", "sensory_event_normalizer",
+               "adapters feed the normalizer")
+    g.add_edge("numeric_stream_adapter", "sensory_event_normalizer",
+               "adapters feed the normalizer")
+    g.add_edge("folder_poll_adapter", "sensory_event_normalizer",
+               "adapters feed the normalizer")
+    g.add_edge("sensory_event_normalizer", "sensory_buffer",
+               "normalizer feeds the sensory buffer")
+    g.add_edge("sensory_buffer",
+               "conscience_bus" if "conscience_bus" in g.nodes else "inner_map",
+               "buffer feeds the ConscienceBus")
+    g.add_edge("sensory_event_normalizer", "sensory_grounding_engine",
+               "events are grounded to internal candidates")
+    g.add_edge("sensory_grounding_engine",
+               "world_model_builder" if "world_model_builder" in g.nodes
+               else "inner_map",
+               "grounding feeds world model / proto-language / Mysterium")
+    g.add_edge("sensory_provenance_ledger", "sensory_membrane_runtime",
+               "provenance feeds reports and Inner MAP")
+    g.add_edge("read_only_contract_validator", "sensory_source_registry",
+               "the read-only contract validates every source")
+    g.add_edge("sensory_membrane_safety_validator", "sensory_membrane_runtime",
+               "safety gates the membrane runtime")
+    g.add_edge("sensory_membrane_runtime", "inner_map",
+               "sensory membrane state feeds Inner MAP")
     return g

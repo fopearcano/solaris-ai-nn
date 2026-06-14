@@ -35,12 +35,13 @@ class ModuleCapability:
     EVALUATION = "evaluation"
     COMMUNICATION = "communication"
     LLM_ADAPTER_OPTIONAL = "llm_adapter_optional"
+    SENSORY_MEMBRANE = "sensory_membrane"
 
     ALL = (STIMULUS_SOURCE, SIGNAL_PROCESSOR, MEMORY, WORLD_MODEL,
            HOMEOSTASIS, EXECUTIVE, EGO_BOUNDARY, LATENT, DEVELOPMENTAL,
            PROTO_LANGUAGE, ECOLOGY, ACTIVE_PERCEPTION, HYPOTHESIS, LOGOS,
            AUTOREGENERATION, GOVERNANCE, OPS, EVALUATION, COMMUNICATION,
-           LLM_ADAPTER_OPTIONAL)
+           LLM_ADAPTER_OPTIONAL, SENSORY_MEMBRANE)
 
 
 class ModuleStatus:
@@ -100,6 +101,8 @@ _MODULE_SPECS = {
                   ModuleCapability.EGO_BOUNDARY, [], [], False),
     "llm_adapter": ("solaris_ai_nn.llm_adapter.mock_client",
                     ModuleCapability.LLM_ADAPTER_OPTIONAL, [], [], False),
+    "sensory_membrane": ("solaris_ai_nn.sensory_membrane.membrane_runtime",
+                         ModuleCapability.SENSORY_MEMBRANE, [], [], False),
 }
 
 

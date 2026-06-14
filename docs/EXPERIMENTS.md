@@ -1780,3 +1780,52 @@ no secrets included.
 baseline comparison, structural-change evidence, accumulation/growth
 discrimination, traceability, the Phase-2 gate, the dossier, and the safety
 refusals.
+
+## 176. Sensory Membrane Dry Run ✅ (implemented)
+
+**Run:** `python examples/run_sensory_membrane_dry_run.py --state-dir .solaris_ai_nn_state/test_sensory_dry_run`
+Creates test-fixture read-only sources, validates their read-only contracts,
+runs a bounded dry-run (ingests/normalizes but publishes no stimuli), and
+writes the membrane report. The system never acts on the sources.
+
+## 177. JSONL Sensory Stream Demo ✅ (implemented)
+
+**Run:** `python examples/run_jsonl_sensory_stream_demo.py --state-dir .solaris_ai_nn_state/test_jsonl_sensory`
+Reads an append-only JSONL source as read-only environmental input, normalizes
+events with provenance, and publishes them to a bounded ConscienceBus.
+Malformed lines are skipped with a warning.
+
+## 178. Text Sensory Stream Demo ✅ (implemented)
+
+**Run:** `python examples/run_text_sensory_stream_demo.py --state-dir .solaris_ai_nn_state/test_text_sensory`
+Reads text lines as environmental stimuli (never operator commands); a line
+like `rm -rf /` is treated as text and never executed. Repeated patterns may
+become internally-generated proto-symbol candidates.
+
+## 179. Numeric Sensory Stream Demo ✅ (implemented)
+
+**Run:** `python examples/run_numeric_sensory_stream_demo.py --state-dir .solaris_ai_nn_state/test_numeric_sensory`
+Reads CSV-like numeric rows (stdlib only) and labels per-row trends
+(rising/falling/stable/spike); malformed rows become warning events.
+
+## 180. Folder Poll Demo ✅ (implemented)
+
+**Run:** `python examples/run_folder_poll_demo.py --state-dir .solaris_ai_nn_state/test_folder_poll`
+Polls an allowed folder and emits file_presence/file_change events by stdlib
+metadata polling. It never writes to or modifies the watched folder.
+
+## 181. Pilot-2 Read-Only Plan ✅ (implemented)
+
+**Run:** `python examples/run_pilot2_read_only_plan.py --output-dir .solaris_ai_nn_pilot2/test_plan`
+Generates a Pilot-2 read-only sensory plan (source checklist, governance
+checklist, resource budget). It starts no long run and grants no real-world
+authority: Pilot-2 begins with read-only grounding, not autonomy.
+
+## 182. Sensory Membrane Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment sensory_membrane_dry_run`
+(also `jsonl_stream_ingestion`, `text_stream_ingestion`,
+`numeric_stream_ingestion`, `folder_poll`, `read_only_contract`,
+`sensory_grounding`, `pilot2_read_only_short`). Eight registered protocols
+measure read-only ingestion, trend detection, the read-only contract, and
+environmental grounding.
