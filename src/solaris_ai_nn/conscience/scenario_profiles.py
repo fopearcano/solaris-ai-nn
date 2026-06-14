@@ -229,6 +229,77 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
                           "profile_runtime_seconds", "scenario_exit_success"],
         max_runtime_s=120.0))
 
+    # -- Pilot-1 month-scale soak profiles (Prompt 29) ------------------------
+    _pilot_modules = _CORE_MODULES + [
+        "world_model", "protolanguage", "active_perception", "hypothesis",
+        "logos", "autoregeneration", "inner_map", "developmental",
+        "evaluation", "communication"]
+
+    # pilot1_plan_only: generate plan/runbook/budget; no long run.
+    add(ScenarioProfile(
+        profile_id="pilot1_plan_only",
+        description="Pilot-1 plan only: runbook/budget/config, no run started.",
+        run_context=_ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                         target_days=30.0, max_duration_s=None),
+        enabled_modules=list(_pilot_modules),
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "plan only; no run is started",
+            "simulated-time plan; not a real month"],
+        governance_requirements=["enable_pilot1"],
+        expected_artifacts=["OPERATOR_RUNBOOK.md", "pilot_config.json"],
+        expected_metrics=["report_generation_success"],
+        max_runtime_s=30.0))
+
+    # pilot1_preflight: bounded health/dry checks before any soak.
+    add(ScenarioProfile(
+        profile_id="pilot1_preflight",
+        description="Pilot-1 preflight: bounded health and readiness checks.",
+        run_context=_ctx(RunMode.SHORT_DEMO, max_steps=60),
+        enabled_modules=list(_pilot_modules),
+        safety_constraints=list(_BASE_CONSTRAINTS),
+        governance_requirements=["enable_pilot1"],
+        expected_artifacts=["preflight_report.json"],
+        expected_metrics=["run_step_count", "module_success_rate"],
+        max_runtime_s=60.0))
+
+    # pilot1_simulated_month_dry_run: bounded simulated slice, clearly labelled.
+    add(ScenarioProfile(
+        profile_id="pilot1_simulated_month_dry_run",
+        description="Pilot-1 SIMULATED month dry-run (not a real month).",
+        run_context=_ctx(RunMode.DEVELOPMENTAL_SIMULATED, max_steps=200,
+                         target_days=30.0),
+        enabled_modules=list(_pilot_modules),
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "simulated-time slice; explicitly NOT a real month"],
+        governance_requirements=["enable_pilot1"],
+        expected_artifacts=["conscience_bus.jsonl"],
+        expected_metrics=["run_step_count", "module_success_rate",
+                          "profile_runtime_seconds"],
+        max_runtime_s=120.0))
+
+    # Real soak profiles: governance-gated; the conscience side stays bounded,
+    # the actual long run is operator-driven per the runbook.
+    for pid, scope, days in (
+            ("pilot1_24h_soak", "enable_pilot1_24h_real", 1.0),
+            ("pilot1_7d_soak", "enable_pilot1_7d_real", 7.0),
+            ("pilot1_30d_soak", "enable_pilot1_30d_real", 30.0)):
+        add(ScenarioProfile(
+            profile_id=pid,
+            description=f"Pilot-1 {pid} real soak (governance-gated; "
+                        "operator-driven long run).",
+            run_context=_ctx(RunMode.DEVELOPMENTAL_SIMULATED, max_steps=200,
+                             target_days=days),
+            enabled_modules=list(_pilot_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "real long-scale run requires governance approval",
+                "operator-driven; not started automatically"],
+            governance_requirements=[scope],
+            expected_artifacts=["conscience_bus.jsonl",
+                                "full_system_report.json"],
+            expected_metrics=["run_step_count", "module_success_rate",
+                              "scenario_exit_success"],
+            max_runtime_s=120.0))
+
     return profiles
 
 

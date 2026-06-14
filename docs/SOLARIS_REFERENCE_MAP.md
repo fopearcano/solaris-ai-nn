@@ -548,3 +548,21 @@ the real world.
 | Self-observation of the whole | `conscience/integration_health.py` + `snapshots.py` -- is the organism wired correctly? one consistent, persisted picture |
 | Honest reporting (no overclaiming) | `conscience/full_system_report.py` (`FullSystemReportBuilder`) -- claim-guarded JSON+Markdown; "a software runtime, not a person" |
 | Safety / boundaries | `conscience/safety.py` (`ConscienceRuntimeSafetyValidator`) -- eleven hard rules: no unbounded/real-world/network/OS-browser/bypass/real-month/out-of-dir/source-mutation/hidden-failure/ClaimGuard-violation |
+
+## Pilot-1 month-scale soak protocol mapping (Phase 29)
+
+The pilot1 package (`pilot1/`) realises Solaris_Ai's long-horizon ambitions as
+an *operational test frame*: it prepares, observes, restarts, audits, and
+reports on a month-scale run -- without starting one automatically, confusing
+simulated time with real time, or treating completion as proof of mind.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| 30-day soak / long-horizon roadmap | `pilot1/pilot_protocol.py` (`PilotProtocol`) -- gated phases; the 30-day run needs preflight + governance approval |
+| Inner MAP (self-observation over time) | `pilot1/observability.py` (`PilotObservabilityCollector`) + daily/weekly reviews -- a restart-safe metric stream and trends |
+| death / restart / continuity | `pilot1/restart_drills.py` (`RestartDrillRunner`) -- simulated restart drills (metadata only) that check identity continuity |
+| plasticity / development over time | `pilot1/pilot_report.py` structural-change analysis -- distinguishes structural change from mere accumulation |
+| ethics / off-switch | `pilot1/safety.py` (`PilotSafetyValidator`) + the emergency-stop runbook -- hard rules, always-available stop, never disabled |
+| long-run telemetry / monitoring | `pilot1/observability.py` + `pilot1/health_dashboard.py` + daily/weekly reviews -- low-overhead observation and text dashboards |
+| resource discipline | `pilot1/resource_budget.py` + `retention_policy.py` -- stdlib disk projection and keep/compress/fossilize/archive decisions |
+| operational completion (not consciousness) | `pilot1/exit_criteria.py` (`PilotExitCriteria`) -- success means an analyzable trace; the disclaimer is explicit |

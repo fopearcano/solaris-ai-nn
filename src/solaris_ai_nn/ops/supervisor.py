@@ -812,6 +812,24 @@ class OperationalSupervisor:
                                          "safety/governance; inspect the "
                                          "integration health report")
 
+        # Pilot-1 monitoring (Prompt 29): evidence only. Pilot failure modes
+        # surface as ops health warnings/critical incidents; the pilot owns no
+        # stop authority -- the watchdog and governance still decide.
+        pilot = snapshot.get("pilot1") or {}
+        for mode in (pilot.get("active_failure_modes") or []):
+            severity = "critical" if mode.get("severity") == "critical" \
+                else "warning"
+            itype = I.HEALTH_CRITICAL if severity == "critical" \
+                else I.HEALTH_WARNING
+            self.incidents.record(
+                itype, severity,
+                f"pilot-1 failure mode: {mode.get('type')}: "
+                f"{mode.get('detail', '')}",
+                related_metric="pilot_failure_mode",
+                suggested_debug_step="see the Pilot-1 dashboard and daily "
+                                     "review; recommendation: "
+                                     f"{mode.get('recommendation', 'watch')}")
+
         budget_report = self.budget.check_budget(
             {"telemetry": snapshot.get("telemetry"),
              "substrate": snapshot.get("substrate"),
@@ -1161,7 +1179,30 @@ class OperationalSupervisor:
                 "emergency_requested": getattr(
                     conscience, "emergency_requested", False),
             }
+        pilot = getattr(runner, "pilot1", None) or getattr(runner, "pilot",
+                                                           None)
+        if pilot is not None and isinstance(pilot, dict):
+            snapshot["pilot1"] = pilot
+        elif pilot is not None and hasattr(pilot, "pilot_status"):
+            snapshot["pilot1"] = pilot.pilot_status()
         return snapshot
+
+    def pilot_status(self) -> Dict[str, Any]:
+        """Expose Pilot-1 status from the latest health snapshot (if any)."""
+        pilot = self._health_snapshot().get("pilot1") or {}
+        return {
+            "pilot_mode": pilot.get("pilot_mode", pilot.get("mode")),
+            "pilot_phase": pilot.get("pilot_phase",
+                                     pilot.get("current_phase")),
+            "elapsed_seconds": pilot.get("elapsed_seconds"),
+            "uptime_ratio": pilot.get("uptime_ratio"),
+            "dashboard_path": pilot.get("dashboard_path"),
+            "daily_review_path": pilot.get("daily_review_path"),
+            "weekly_review_path": pilot.get("weekly_review_path"),
+            "latest_incident": pilot.get("latest_incident"),
+            "exit_recommendation": pilot.get("exit_recommendation"),
+            "active_failure_modes": pilot.get("active_failure_modes", []),
+        }
 
     def _build_status(self) -> OperationalStatus:
         snapshot = self._health_snapshot()

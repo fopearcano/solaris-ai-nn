@@ -1085,3 +1085,50 @@ that it describes a bounded, simulated, low-compute software process — not a
 person, with no real-world authority. Making the organism runnable raised the
 stakes on overclaiming, so the guard sits exactly where a run's story gets
 told.
+
+## Phase 29 — Pilot-1 month-scale soak protocol
+
+**From "it runs" to "it can be run for a month".** Phase 28 made the organism
+runnable in one process; Phase 29 makes it *operable over a long horizon*. The
+gap between those two is almost entirely operational: a system that works for a
+hundred steps in a test is not the same as one a human can start, observe,
+restart, audit, and stop over thirty days. Pilot-1 is that operational frame,
+deliberately built as plumbing rather than new cognition.
+
+**The central question is structure vs accumulation.** It is easy to run a
+process for a month and point at a pile of logs as evidence of "development."
+That is the failure mode the pilot report is designed to resist: its core
+section separates *structural change* (new epochs, milestones, phase
+transitions, a non-zero structural-change score) from *mere accumulation*
+(memory and counts growing with no structural signal). Asking the question
+this way keeps a long run honest, because the default human bias is to read
+growth as progress.
+
+**Observability has to be cheap and restart-safe, or it will not survive a
+month.** The collector appends to JSONL, derives only a handful of signals,
+and recomputes nothing expensive each tick; state lives on disk so a restart
+resumes rather than restarts. The same discipline drives the stdlib-only
+resource budget (no `psutil`): a month-scale run that cannot project its own
+disk use will eventually fill a disk, so projection and retention are
+first-class, with auto-regeneration consuming the hygiene requests.
+
+**Restart continuity is rehearsed, not assumed.** Long runs *will* be
+interrupted. The restart drills simulate graceful restarts, crash gaps, and
+checkpoint restores by manipulating metadata — never by killing a process from
+a test — and every drill checks identity continuity. The operator runbook
+documents the manual equivalents, because the real safety property is that a
+human knows exactly how to stop and resume the run.
+
+**Operational safety is layered, never bypassed.** A real month/year run
+requires explicit governance approval; the emergency stop is always available
+and can never be disabled; simulated-time output can never be relabelled as
+real evidence; and evidence is never deleted without an archive. None of these
+are new ideas in the project — Phase 29's contribution is to make them hold
+across a *long* run, where the temptation to cut corners is highest.
+
+**Why pilot success is not consciousness proof.** This is stated in the exit
+criteria, the dashboard, every review, and the pilot report, on purpose.
+Operational success means the run completed and left an analyzable
+developmental trace. It says nothing about sentience, understanding, or
+personhood, and the framework is written so that no artifact it produces can
+be mistaken for such a claim.

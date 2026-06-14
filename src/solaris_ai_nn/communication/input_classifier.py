@@ -123,6 +123,27 @@ CONSCIENCE_QUERIES = (
     ("conscience", "conscience"),
 )
 
+# Pilot-1 month-scale soak queries (Prompt 29). Matched regardless of prefix.
+# Order matters: specific phrases precede the generic catch-alls.
+PILOT_QUERIES = (
+    ("what pilot phase is active", "pilot_phase"),
+    ("pilot phase", "pilot_phase"),
+    ("is the pilot healthy", "pilot_health"),
+    ("show pilot dashboard", "pilot_dashboard"),
+    ("pilot dashboard", "pilot_dashboard"),
+    ("what happened today", "pilot_today"),
+    ("latest weekly review", "pilot_weekly"),
+    ("weekly review", "pilot_weekly"),
+    ("what failure modes are active", "pilot_failures"),
+    ("failure modes", "pilot_failures"),
+    ("should the pilot continue", "pilot_continue"),
+    ("is this simulated or real month", "pilot_sim_or_real"),
+    ("simulated or real month-scale", "pilot_sim_or_real"),
+    ("can i start the 30-day run", "pilot_start_30d"),
+    ("start the 30-day run", "pilot_start_30d"),
+    ("start the 30 day run", "pilot_start_30d"),
+)
+
 META_QUERIES = (
     ("what can i ask", "supported_queries"),
     ("what commands are allowed", "allowed_commands"),
@@ -185,6 +206,7 @@ class OperatorInputClassifier:
                   or self._stimulus(lowered, raw)
                   or self._report(lowered)
                   or self._meta(lowered)
+                  or self._pilot(lowered)
                   or self._conscience(lowered)
                   or self._explanation(lowered)
                   or self._state(lowered)
@@ -312,6 +334,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _pilot(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in PILOT_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"pilot-1 query {topic!r}"])
         return None
 
     @staticmethod

@@ -132,6 +132,14 @@ class PermissionScope:
     ENABLE_MONTH_SCALE_REAL_RUN = "enable_month_scale_real_run"
     ENABLE_YEAR_SCALE_PLAN = "enable_year_scale_plan"
     ENABLE_YEAR_SCALE_REAL_RUN = "enable_year_scale_real_run"
+    # Pilot-1 month-scale soak protocol (Prompt 29).
+    ENABLE_PILOT1 = "enable_pilot1"
+    ENABLE_PILOT1_24H_REAL = "enable_pilot1_24h_real"
+    ENABLE_PILOT1_7D_REAL = "enable_pilot1_7d_real"
+    ENABLE_PILOT1_30D_REAL = "enable_pilot1_30d_real"
+    ENABLE_PILOT1_MULTI_MONTH_REAL = "enable_pilot1_multi_month_real"
+    ENABLE_PILOT1_RESTART_DRILLS = "enable_pilot1_restart_drills"
+    ENABLE_PILOT1_RETENTION_POLICY = "enable_pilot1_retention_policy"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -184,6 +192,9 @@ class PermissionScope:
         ENABLE_FULL_DEVELOPMENTAL_SHORT_PROFILE,
         ENABLE_MONTH_SCALE_DRY_RUN, ENABLE_MONTH_SCALE_REAL_RUN,
         ENABLE_YEAR_SCALE_PLAN, ENABLE_YEAR_SCALE_REAL_RUN,
+        ENABLE_PILOT1, ENABLE_PILOT1_24H_REAL, ENABLE_PILOT1_7D_REAL,
+        ENABLE_PILOT1_30D_REAL, ENABLE_PILOT1_MULTI_MONTH_REAL,
+        ENABLE_PILOT1_RESTART_DRILLS, ENABLE_PILOT1_RETENTION_POLICY,
     )
 
 
@@ -500,6 +511,31 @@ class PermissionSet:
                        requires_approval=True,
                        note="a real year-scale run is off by default and "
                             "requires explicit human approval"),
+            Permission(S.ENABLE_PILOT1, granted=True,
+                       note="planning/preflight/dashboards for Pilot-1 are "
+                            "allowed; they start no real run"),
+            Permission(S.ENABLE_PILOT1_24H_REAL, granted=False,
+                       requires_approval=True,
+                       note="a real 24h soak requires explicit human "
+                            "approval"),
+            Permission(S.ENABLE_PILOT1_7D_REAL, granted=False,
+                       requires_approval=True,
+                       note="a real 7-day soak requires explicit human "
+                            "approval"),
+            Permission(S.ENABLE_PILOT1_30D_REAL, granted=False,
+                       requires_approval=True,
+                       note="a real 30-day soak requires explicit human "
+                            "approval"),
+            Permission(S.ENABLE_PILOT1_MULTI_MONTH_REAL, granted=False,
+                       requires_approval=True,
+                       note="a real multi-month run requires explicit human "
+                            "approval"),
+            Permission(S.ENABLE_PILOT1_RESTART_DRILLS, granted=True,
+                       note="simulated restart drills are bounded and safe; "
+                            "they kill no real process"),
+            Permission(S.ENABLE_PILOT1_RETENTION_POLICY, granted=True,
+                       note="retention classification is advisory; deletion "
+                            "still goes through hygiene with archive rules"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

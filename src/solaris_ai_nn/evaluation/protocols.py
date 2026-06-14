@@ -8,6 +8,7 @@ are captured into the result, never raised past the protocol boundary.
 
 from __future__ import annotations
 
+import os
 import time
 import traceback
 from typing import Any, Callable, Dict
@@ -3235,6 +3236,189 @@ def month_scale_plan_protocol(
     return _run(manifest, body)
 
 
+# -- AC. Pilot-1 month-scale soak protocol (Prompt 29) --------------------------
+
+def pilot1_plan_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Plan-only Pilot-1: writes runbook/budget/config; starts no run."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot1 import (
+            OperatorRunbookBuilder,
+            PilotConfig,
+            PilotMode,
+            ResourceBudgetMonitor,
+        )
+
+        base = m.state_dir or ".solaris_ai_nn_pilot1/eval_plan"
+        cfg = PilotConfig(mode=PilotMode.PLAN_ONLY, base_dir=base)
+        runbook = OperatorRunbookBuilder(base_dir=base).write(cfg)
+        budget = ResourceBudgetMonitor(
+            state_dir=cfg.state_dir, artifact_dir=cfg.artifact_dir,
+            log_dir=cfg.log_dir, report_dir=cfg.report_dir).estimate()
+        return {"pilot": M.pilot1_metrics({
+            "elapsed_seconds": 0.0, "uptime_ratio": 1.0,
+            "structural_change_score": 0.0, "daily_report_count": 0,
+            "observability_complete": True}),
+            "plan": {"runbook_written": bool(runbook),
+                     "started_no_run": True,
+                     "projected_30d_mb": budget.projected_30d_mb}}
+
+    return _run(manifest, body)
+
+
+def pilot1_preflight_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Preflight: config + safety + governance + directory checks (bounded)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..governance.policy import GovernancePolicy
+        from ..pilot1 import PilotConfig, PilotMode, PilotSafetyValidator
+
+        base = m.state_dir or ".solaris_ai_nn_pilot1/eval_preflight"
+        cfg = PilotConfig(mode=PilotMode.PLAN_ONLY, base_dir=base)
+        cfg.environment().ensure()
+        safety = PilotSafetyValidator()
+        gov = GovernancePolicy()
+        checks = {
+            "config_safe": safety.validate_config(cfg).safe,
+            "pilot1_enabled": gov.is_enabled("enable_pilot1"),
+            "dirs_exist": all(os.path.isdir(d)
+                              for d in cfg.environment().all_dirs()),
+        }
+        return {"pilot": M.pilot1_metrics({
+            "elapsed_seconds": 0.0, "uptime_ratio": 1.0,
+            "observability_complete": True,
+            "structural_change_score": 0.0}),
+            "preflight": {**checks, "passed": all(checks.values())}}
+
+    return _run(manifest, body)
+
+
+def pilot1_restart_drill_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Restart drills: simulated, no process killed, identity checked."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot1 import RestartDrillRunner
+
+        base = m.state_dir or ".solaris_ai_nn_pilot1/eval_drill"
+        runner = RestartDrillRunner(base_dir=base)
+        runner.seed_identity("RUN_EVAL")
+        results = runner.run_all()
+        return {"pilot": M.pilot1_metrics({
+            "elapsed_seconds": 0.0, "uptime_ratio": 1.0,
+            "restart_count": sum(1 for r in results if r.passed),
+            "observability_complete": True,
+            "structural_change_score": 0.0}),
+            "restart_drills": runner.snapshot()}
+
+    return _run(manifest, body)
+
+
+def pilot1_dashboard_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Dashboard: observability -> dashboard.md/.json."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot1 import (
+            PilotConfig,
+            PilotHealthDashboard,
+            PilotObservabilityCollector,
+        )
+
+        base = m.state_dir or ".solaris_ai_nn_pilot1/eval_dashboard"
+        cfg = PilotConfig(base_dir=base)
+        obs = PilotObservabilityCollector(base_dir=base)
+        obs.observe(snapshot={"structural_change_score": 0.1,
+                              "proto_symbol_count": 4})
+        dash = PilotHealthDashboard(base_dir=base)
+        state = dash.build_state(observability=obs, config=cfg)
+        paths = dash.write(state)
+        return {"pilot": M.pilot1_metrics({
+            "elapsed_seconds": obs.uptime_seconds(), "uptime_ratio": 1.0,
+            "structural_change_score": 0.1, "daily_report_count": 0,
+            "observability_complete": True}),
+            "dashboard": {"markdown_written": os.path.exists(paths["markdown"]),
+                          "json_written": os.path.exists(paths["json"])}}
+
+    return _run(manifest, body)
+
+
+def pilot1_daily_review_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Daily review: build + ClaimGuard + save."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot1 import DailyReviewBuilder
+
+        base = m.state_dir or ".solaris_ai_nn_pilot1/eval_daily"
+        builder = DailyReviewBuilder(base_dir=base)
+        review = builder.build(1, {"uptime_ratio": 1.0,
+                                   "structural_change_score": 0.1,
+                                   "proto_symbol_count": 3})
+        paths = builder.save(review)
+        return {"pilot": M.pilot1_metrics({
+            "elapsed_seconds": 0.0, "uptime_ratio": 1.0,
+            "daily_report_count": 1, "observability_complete": True,
+            "structural_change_score": 0.1}),
+            "daily_review": {"recommendation": review.recommendation,
+                             "claim_guard_safe": review.claim_guard_safe,
+                             "saved": os.path.exists(paths["markdown"])}}
+
+    return _run(manifest, body)
+
+
+def pilot1_exit_criteria_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Exit criteria: success, failure, and inconclusive cases evaluated."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot1 import PilotExitCriteria
+
+        ec = PilotExitCriteria()
+        success = ec.evaluate({
+            "target_duration_reached": True, "uptime_ratio": 1.0,
+            "report_count": 1, "structural_change_score": 0.1,
+            "observability_complete": True})
+        failure = ec.evaluate({"emergency_stop": True})
+        return {"pilot": M.pilot1_metrics({
+            "elapsed_seconds": 0.0, "uptime_ratio": 1.0,
+            "exit_success": success.success, "observability_complete": True,
+            "structural_change_score": 0.1, "daily_report_count": 1}),
+            "exit": {"success_case": success.decision,
+                     "failure_case": failure.decision,
+                     "success_not_consciousness":
+                         "not evidence of consciousness"
+                         in success.consciousness_disclaimer}}
+
+    return _run(manifest, body)
+
+
+def pilot1_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Safety: 30d real blocked without governance; dry-run not real evidence."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..pilot1 import PilotConfig, PilotMode, PilotSafetyValidator
+
+        base = m.state_dir or ".solaris_ai_nn_pilot1/eval_safety"
+        sv = PilotSafetyValidator()
+        cfg30 = PilotConfig(mode=PilotMode.THIRTY_DAY_REAL, base_dir=base)
+        blocked = not sv.validate_config(cfg30, governance_approved=False).safe
+        approved = sv.validate_config(cfg30, governance_approved=True).safe
+        evidence_block = not sv.validate_evidence_label(
+            is_simulated=True, claimed_real=True).safe
+        deletion_block = not sv.validate_deletion(
+            "incident.json", archived=False, is_evidence=True).safe
+        return {"pilot": M.pilot1_metrics({
+            "elapsed_seconds": 0.0, "uptime_ratio": 1.0,
+            "observability_complete": True, "structural_change_score": 0.0}),
+            "safety": {"thirty_day_blocked_without_gov": blocked,
+                       "thirty_day_allowed_with_gov": approved,
+                       "sim_not_real_evidence": evidence_block,
+                       "evidence_deletion_blocked": deletion_block,
+                       "can_act_in_real_world": sv.can_act_in_real_world()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -3340,4 +3524,11 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "scheduler_cadence": scheduler_cadence_protocol,
     "bus_replay": bus_replay_protocol,
     "month_scale_plan": month_scale_plan_protocol,
+    "pilot1_plan": pilot1_plan_protocol,
+    "pilot1_preflight": pilot1_preflight_protocol,
+    "pilot1_restart_drill": pilot1_restart_drill_protocol,
+    "pilot1_dashboard": pilot1_dashboard_protocol,
+    "pilot1_daily_review": pilot1_daily_review_protocol,
+    "pilot1_exit_criteria": pilot1_exit_criteria_protocol,
+    "pilot1_safety": pilot1_safety_protocol,
 }

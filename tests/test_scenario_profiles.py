@@ -15,10 +15,17 @@ EXPECTED = {
     "month_scale_plan", "month_scale_dry_run",
 }
 
+# Pilot-1 month-scale soak profiles (Prompt 29).
+EXPECTED_PILOT = {
+    "pilot1_plan_only", "pilot1_preflight", "pilot1_24h_soak",
+    "pilot1_7d_soak", "pilot1_30d_soak", "pilot1_simulated_month_dry_run",
+}
 
-def test_all_ten_profiles_present():
+
+def test_all_base_profiles_present():
     reg = ScenarioProfileRegistry()
-    assert set(reg.ids()) == EXPECTED
+    assert EXPECTED <= set(reg.ids())
+    assert EXPECTED_PILOT <= set(reg.ids())
 
 
 def test_every_profile_is_simulation_only_and_bounded():

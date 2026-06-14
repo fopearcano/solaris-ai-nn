@@ -46,6 +46,11 @@ AVAILABLE_QUERIES = (
     "can this run for months now?", "which modules are running?",
     "what is the current spine phase?", "is integration healthy?",
     "is any module sovereign?", "show conscience",
+    "what pilot phase is active?", "is the pilot healthy?",
+    "show pilot dashboard", "what happened today?",
+    "what is the latest weekly review?", "what failure modes are active?",
+    "should the pilot continue?", "is this simulated or real month-scale?",
+    "can I start the 30-day run?",
 )
 
 
@@ -106,6 +111,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("pilot"):
+            return self._pilot(topic)
         if topic.startswith("conscience"):
             return self._conscience(topic)
         component_keys = {
@@ -309,6 +316,68 @@ class QueryRouter:
                                 "sovereign")
                     + f"; mode={summary.get('mode')!r}, "
                     f"stopped={summary.get('stopped')}")
+        return self.builder.status_response(text, refs)
+
+    def _pilot(self, topic: str) -> CommunicationResponse:
+        """Answer Pilot-1 queries from the attached pilot status (grounded).
+
+        Every answer is explicit that a pilot is a bounded software test, and
+        the 30-day start query never starts a run -- it states the gate.
+        """
+        # The 30-day start question is answered safely even with no component.
+        if topic == "pilot_start_30d":
+            return self.builder.status_response(
+                "A 30-day real-time pilot requires explicit governance "
+                "approval, successful preflight, and an operator decision. "
+                "This interface can generate the plan and checks but must not "
+                "start it automatically without approval.",
+                ["policy:pilot1_30d_gate"])
+        component = self.components.get("pilot")
+        if component is None:
+            return self.builder.missing_component_response("pilot")
+        status = (component.pilot_status()
+                  if hasattr(component, "pilot_status")
+                  else component if isinstance(component, dict)
+                  else {})
+        refs = ["component:pilot"]
+        if topic == "pilot_phase":
+            text = (f"active pilot phase: {status.get('pilot_phase')}; "
+                    f"mode: {status.get('pilot_mode')}")
+        elif topic == "pilot_health":
+            rec = status.get("exit_recommendation", "continue")
+            modes = status.get("active_failure_modes") or []
+            text = (f"pilot health: recommendation={rec}; "
+                    f"active failure modes={len(modes)}; "
+                    f"uptime_ratio={status.get('uptime_ratio')}")
+        elif topic == "pilot_dashboard":
+            text = "dashboard: " + str(
+                status.get("dashboard_path") or "not yet generated")
+        elif topic == "pilot_today":
+            text = (f"latest daily review: "
+                    f"{status.get('daily_review_path') or 'none yet'}")
+        elif topic == "pilot_weekly":
+            text = (f"latest weekly review: "
+                    f"{status.get('weekly_review_path') or 'none yet'}")
+        elif topic == "pilot_failures":
+            modes = status.get("active_failure_modes") or []
+            names = [m.get("type") if isinstance(m, dict) else str(m)
+                     for m in modes]
+            text = (f"active failure modes: {', '.join(names) or 'none'}")
+        elif topic == "pilot_continue":
+            text = (f"recommended action: "
+                    f"{status.get('exit_recommendation', 'continue')} "
+                    "(the watchdog and governance hold final authority)")
+        elif topic == "pilot_sim_or_real":
+            mode = str(status.get("pilot_mode", ""))
+            is_sim = mode in ("plan_only", "dry_run_simulated") \
+                or status.get("is_simulated")
+            text = ("this is a SIMULATED-time pilot; it is NOT a real month. "
+                    if is_sim else
+                    "this is a REAL-time pilot (wall-clock). ") + \
+                f"mode={mode!r}"
+        else:
+            text = (f"pilot phase: {status.get('pilot_phase')}; "
+                    f"mode: {status.get('pilot_mode')}")
         return self.builder.status_response(text, refs)
 
     # -- views --------------------------------------------------------------------

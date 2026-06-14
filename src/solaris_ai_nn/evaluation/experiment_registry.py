@@ -180,6 +180,13 @@ DESCRIPTIONS = {
                          "cadences",
     "bus_replay": "the bus log replays deterministically from JSONL",
     "month_scale_plan": "planning a month-scale run starts nothing",
+    "pilot1_plan": "Pilot-1 plan only: runbook/budget written, no run started",
+    "pilot1_preflight": "Pilot-1 preflight health/safety/governance checks",
+    "pilot1_restart_drill": "Pilot-1 simulated restart drills (no kills)",
+    "pilot1_dashboard": "Pilot-1 observability renders a health dashboard",
+    "pilot1_daily_review": "Pilot-1 daily review built and ClaimGuard-scanned",
+    "pilot1_exit_criteria": "Pilot-1 exit criteria evaluate success/stop",
+    "pilot1_safety": "Pilot-1 30d real blocked without governance",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -270,6 +277,8 @@ class ExperimentRegistry:
             or name in ("scenario_profile", "integration_health",
                         "scheduler_cadence", "bus_replay", "month_scale_plan")
             or bool(merged.get("conscience_orchestrator", False)))
+        features["pilot1"] = (name.startswith("pilot1")
+                              or bool(merged.get("pilot1", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

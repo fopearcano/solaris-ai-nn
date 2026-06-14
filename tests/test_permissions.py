@@ -69,8 +69,22 @@ def test_all_scopes_in_default_set():
     # + 6 developmental (P21) + 4 proto-language (P22)
     # + 6 ecology (P23) + 5 active perception (P24)
     # + 6 hypothesis engine (P25) + 9 auto-regeneration (P26)
-    # + 6 LOGOS complexity (P27) + 6 conscience runtime (P28).
-    assert len(PermissionScope.ALL) == 92
+    # + 6 LOGOS complexity (P27) + 6 conscience runtime (P28)
+    # + 7 Pilot-1 soak protocol (P29).
+    assert len(PermissionScope.ALL) == 99
+
+
+def test_pilot1_scope_defaults():
+    ps = PermissionSet.default()
+    S = PermissionScope
+    # Planning/preflight/drills/retention are allowed; real soaks are off.
+    assert ps.allows(S.ENABLE_PILOT1)
+    assert ps.allows(S.ENABLE_PILOT1_RESTART_DRILLS)
+    assert ps.allows(S.ENABLE_PILOT1_RETENTION_POLICY)
+    for scope in (S.ENABLE_PILOT1_24H_REAL, S.ENABLE_PILOT1_7D_REAL,
+                  S.ENABLE_PILOT1_30D_REAL, S.ENABLE_PILOT1_MULTI_MONTH_REAL):
+        assert ps.requires_approval(scope)
+        assert not ps.allows(scope)
 
 
 def test_conscience_scope_defaults():

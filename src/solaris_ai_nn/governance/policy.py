@@ -871,6 +871,52 @@ class GovernancePolicy:
                     "the conscience runtime can never actuate the real "
                     "world"))
 
+        # V. Pilot-1 month-scale soak: planning/preflight are allowed by
+        # default; simulated dry-run is allowed only when clearly labelled
+        # simulated; real 24h/7d/30d/multi-month soaks each need approval; a
+        # simulated dry-run can never be claimed as real evidence.
+        if features.get("pilot1"):
+            if not self._approved(PermissionScope.ENABLE_PILOT1, ctx):
+                need_approval(PermissionScope.ENABLE_PILOT1,
+                              "Pilot-1 is not permitted")
+            if (features.get("pilot1_simulated_dry_run")
+                    or ctx.get("pilot1_simulated_dry_run")):
+                if not ctx.get("simulated_label", True):
+                    decision.allowed = False
+                    decision.violations.append(PolicyViolation(
+                        "pilot1_dry_run_must_be_labelled", "pilot1",
+                        "a simulated month dry-run must be clearly labelled "
+                        "simulated"))
+                if ctx.get("claimed_real_evidence"):
+                    decision.allowed = False
+                    decision.violations.append(PolicyViolation(
+                        "pilot1_dry_run_not_real_evidence", "pilot1",
+                        "a simulated dry-run can never be treated as real "
+                        "pilot evidence"))
+            for feat, scope, why in (
+                    ("pilot1_24h_real", PermissionScope.ENABLE_PILOT1_24H_REAL,
+                     "a real 24h soak"),
+                    ("pilot1_7d_real", PermissionScope.ENABLE_PILOT1_7D_REAL,
+                     "a real 7-day soak"),
+                    ("pilot1_30d_real", PermissionScope.ENABLE_PILOT1_30D_REAL,
+                     "a real 30-day soak"),
+                    ("pilot1_multi_month_real",
+                     PermissionScope.ENABLE_PILOT1_MULTI_MONTH_REAL,
+                     "a real multi-month run")):
+                if features.get(feat) or ctx.get(feat):
+                    need_approval(scope,
+                                  f"{why} requires explicit approval")
+            if ctx.get("disable_emergency_stop"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "pilot1_no_disable_emergency_stop", "pilot1",
+                    "the emergency stop can never be disabled"))
+            if ctx.get("real_world_actuation"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "simulation_only_embodiment", "pilot1",
+                    "Pilot-1 can never actuate the real world"))
+
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):
             if int(m.get("checkpoint_interval_steps", 0) or 0) <= 0:

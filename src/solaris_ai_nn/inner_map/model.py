@@ -301,6 +301,13 @@ class InnerMapModel:
     # scheduler_skip_count, stopped, authority_note. The orchestrator owns no
     # action authority and no module is sovereign.
     conscience: Optional[Dict[str, Any]] = None
+    # Pilot-1 month-scale soak status (Prompt 29); None when no pilot is
+    # active. Keys: pilot1_enabled, pilot_mode, pilot_phase,
+    # elapsed_pilot_seconds, uptime_ratio, daily_report_count,
+    # weekly_report_count, latest_failure_mode, exit_recommendation,
+    # dashboard_path, pilot_report_path. Operational status only; a pilot is
+    # a bounded software test, never evidence of consciousness.
+    pilot1: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

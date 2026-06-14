@@ -931,4 +931,51 @@ def build_default_state_graph() -> StateGraph:
                "snapshots feed the claim-guarded full-system report")
     g.add_edge("conscience_orchestrator", "inner_map",
                "conscience runtime state feeds Inner MAP")
+
+    # Pilot-1 month-scale soak protocol (Prompt 29). The operational frame for
+    # the first long-horizon test: it observes, reports, and gates -- it owns
+    # no action authority and starts no real run automatically.
+    for name, role in [
+        ("pilot_protocol", "gated phases of a long-horizon test"),
+        ("pilot_config", "bounded, authority-scoped pilot setup"),
+        ("pilot_observability_collector", "low-overhead metric stream"),
+        ("pilot_health_dashboard", "text/Markdown/JSON health snapshot"),
+        ("resource_budget_monitor", "stdlib disk/usage tracking + projection"),
+        ("retention_policy", "keep/compress/fossilize/archive decisions"),
+        ("daily_review_builder", "one day's developmental trace + judgement"),
+        ("weekly_review_builder", "weekly trends + honest limitations"),
+        ("restart_drill_runner", "simulated restart survival drills"),
+        ("failure_mode_detector", "long-run pathology detection"),
+        ("pilot_exit_criteria", "operational success/stop criteria"),
+        ("operator_runbook_builder", "human-facing how-to and warnings"),
+        ("pilot_report_builder", "claim-guarded month-scale report"),
+        ("pilot_safety_validator", "Pilot-1 hard rules; never bypassed"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("conscience_orchestrator", "pilot_observability_collector",
+               "the runtime feeds pilot observability")
+    g.add_edge("pilot_config", "pilot_protocol",
+               "config pins the gated phases")
+    g.add_edge("pilot_observability_collector", "pilot_health_dashboard",
+               "observability feeds the dashboard")
+    g.add_edge("pilot_observability_collector", "daily_review_builder",
+               "observability feeds daily reviews")
+    g.add_edge("pilot_observability_collector", "weekly_review_builder",
+               "observability feeds weekly reviews")
+    g.add_edge("failure_mode_detector",
+               "conscience_orchestrator" if "conscience_orchestrator"
+               in g.nodes else "inner_map",
+               "failure modes feed Ops/Governance")
+    g.add_edge("resource_budget_monitor", "retention_policy",
+               "budget pressure drives retention decisions")
+    g.add_edge("retention_policy",
+               "autoregeneration_diagnostics" if "autoregeneration_diagnostics"
+               in g.nodes else "inner_map",
+               "retention is applied through auto-regeneration")
+    g.add_edge("pilot_safety_validator", "pilot_protocol",
+               "safety gates every pilot phase")
+    g.add_edge("pilot_report_builder", "inner_map",
+               "pilot reports feed Inner MAP / Evaluation")
+    g.add_edge("restart_drill_runner", "pilot_protocol",
+               "restart drills must pass before a real soak")
     return g

@@ -937,3 +937,52 @@ def conscience_metrics(conscience: Optional[Dict[str, Any]],
         "authority": "no real-world action authority; no module sovereign",
     }
     return out
+
+
+def pilot1_metrics(pilot: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective Pilot-1 operational metrics from a pilot status snapshot.
+
+    These describe a bounded, long-running software test: how long it ran, how
+    stable it stayed, how much was observed, and whether it completed and is
+    analyzable. They are operational counts, never a consciousness or life
+    score.
+    """
+    if not pilot:
+        return {"present": False}
+    elapsed_s = float(pilot.get("elapsed_seconds", 0.0) or 0.0)
+    checkpoint_ok = int(pilot.get("checkpoint_success", 0) or 0)
+    checkpoint_fail = int(pilot.get("checkpoint_failure", 0) or 0)
+    checkpoint_total = checkpoint_ok + checkpoint_fail
+    incidents = int(pilot.get("incident_count", 0) or 0)
+    elapsed_h = elapsed_s / 3600.0
+    budget_ratio = 0.0
+    disk = float(pilot.get("disk_mb", 0.0) or 0.0)
+    disk_budget = float(pilot.get("disk_budget_mb", 0.0) or 0.0)
+    if disk_budget > 0:
+        budget_ratio = round(disk / disk_budget, 4)
+    # Analyzability: do we have the artefacts needed to analyse the run?
+    has = [bool(pilot.get("daily_report_count")),
+           bool(pilot.get("observability_complete", True)),
+           pilot.get("structural_change_score") is not None,
+           bool(pilot.get("pilot_report_generated"))]
+    analyzability = round(sum(1 for h in has if h) / len(has), 4)
+    return {
+        "present": True,
+        "pilot_elapsed_hours": round(elapsed_h, 4),
+        "pilot_uptime_ratio": float(pilot.get("uptime_ratio", 1.0) or 1.0),
+        "pilot_restart_count": int(pilot.get("restart_count", 0) or 0),
+        "checkpoint_success_rate": (round(checkpoint_ok / checkpoint_total, 4)
+                                    if checkpoint_total else 1.0),
+        "daily_report_count": int(pilot.get("daily_report_count", 0) or 0),
+        "weekly_report_count": int(pilot.get("weekly_report_count", 0) or 0),
+        "incident_rate": round(incidents / max(elapsed_h, 1.0 / 60.0), 4),
+        "failure_mode_count": int(pilot.get("failure_mode_count", 0) or 0),
+        "resource_budget_usage_ratio": budget_ratio,
+        "structural_change_delta_month": float(
+            pilot.get("structural_change_score", 0.0) or 0.0),
+        "stagnation_hours": round(
+            float(pilot.get("stagnation_seconds", 0.0) or 0.0) / 3600.0, 4),
+        "pilot_exit_success": bool(pilot.get("exit_success", False)),
+        "pilot_analyzability_score": analyzability,
+        "authority": "bounded software test; not consciousness evidence",
+    }

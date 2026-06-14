@@ -1854,3 +1854,67 @@ and snapshot profiles. **This prompt added no new cognitive theory, no LLM
 authority, no real-world autonomy, and no browser/OS/network automation; it
 made the existing organism runnable while keeping it safe, low-compute,
 auditable, and bounded.**
+
+## Pilot-1 Month-Scale Soak Protocol
+
+Pilot-1 is the first serious long-horizon test frame for Solaris-AI-NN. The
+`pilot1` package is its **operational framework** — not a new cognitive layer.
+Its purpose is to answer one question after a month of continuous bounded
+runtime: *is the system structurally different for traceable reasons derived
+from its own runtime, or has it merely accumulated logs?* Crucially, **30 days
+is an operational and analyzability target, not proof of consciousness**;
+operational success means a complete, analyzable developmental trace and
+nothing more.
+
+The protocol separates phases so risk is staged, never skipped:
+`preflight → baseline_short_run → restart_drill → simulated_month_dry_run →
+real_time_24h_soak → real_time_7d_soak → real_time_30d_soak →
+post_run_consolidation → post_run_analysis → archive`. The 30-day run cannot
+start until preflight passes **and** governance approves; each phase has
+explicit entry/exit criteria; a failed phase writes a failure report; and the
+`PilotProtocolState` persists to JSON/JSONL so a multi-week run survives
+restarts and stays auditable. `PilotConfig` defaults to `plan_only`, pins an
+authority that is always internal/simulation/read-only/observe (never
+real-world), and never labels a simulated month as real (or vice versa).
+
+Observability is mandatory and low-overhead: the `PilotObservabilityCollector`
+appends heartbeat, uptime, restart, checkpoint, spine/bus, module-health,
+growth, and safety/governance counts to a restart-safe JSONL stream and
+derives a structural-change score, stagnation duration, and drift velocity.
+The `PilotHealthDashboard` renders these to `dashboard.md`/`dashboard.json`
+(text only, no web server); the `DailyReviewBuilder` and `WeeklyReviewBuilder`
+write ClaimGuard-scanned reviews with a recommended action and honest
+limitations; the `ResourceBudgetMonitor` projects 30/90/365-day disk use with
+the standard library only (no `psutil`) and can request auto-regeneration
+rotation/compaction; the `RetentionPolicy` decides what to keep hot, compress,
+fossilize, or archive while always retaining safety/identity/first-milestone
+evidence; the `RestartDrillRunner` rehearses restart survival by manipulating
+test-state metadata (never killing a real process) and checks identity
+continuity; the `FailureModeDetector` flags long-run pathologies and
+recommends continue→emergency_stop; the `PilotExitCriteria` decides
+success/stop/inconclusive; the `OperatorRunbookBuilder` writes the human
+runbook; and the `PilotReportBuilder` produces a claim-guarded report whose
+central section **distinguishes structural change from mere accumulation**.
+
+Pilot-1 wires into every control plane without bypassing any of them.
+Governance adds seven scopes (`enable_pilot1`, `enable_pilot1_24h_real`,
+`enable_pilot1_7d_real`, `enable_pilot1_30d_real`,
+`enable_pilot1_multi_month_real`, `enable_pilot1_restart_drills`,
+`enable_pilot1_retention_policy`): planning/preflight/drills/retention are
+allowed by default, a simulated dry-run is allowed only when clearly labelled
+simulated, and every real soak requires explicit approval. The conscience
+orchestrator gains six scenario profiles (`pilot1_plan_only`,
+`pilot1_preflight`, `pilot1_simulated_month_dry_run`, `pilot1_24h_soak`,
+`pilot1_7d_soak`, `pilot1_30d_soak`); ops exposes pilot status and surfaces
+pilot failure modes as health warnings; auto-regeneration consumes the
+resource/retention hygiene requests; the developmental runtime feeds the
+structural-change analysis; the Inner MAP carries a `pilot1` field and
+fourteen new state-graph nodes; evaluation adds thirteen pilot metrics and
+seven protocols; and the operator dialogue answers nine pilot questions —
+including the deliberately safe answer that *a 30-day real run requires
+explicit governance approval, successful preflight, and an operator decision,
+and cannot be started automatically*. The emergency stop and safe shutdown
+remain available throughout. **This prompt added no new cognitive theory, no
+human-feedback loop, no real-world actuation, no browser/OS/network
+automation, and no LLM runtime authority; it prepares Solaris-AI-NN to be run,
+observed, restarted, and audited over a month — safely.**

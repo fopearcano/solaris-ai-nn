@@ -1678,3 +1678,62 @@ run is inspectable and auditable.
 protocols measure run/phase/bus counts, module success/failure rates,
 scheduler cadence, bus-replay determinism, integration health, and that a
 month-scale *plan* starts no run.
+
+## 162. Pilot-1 Plan ✅ (implemented)
+
+**Run:** `python examples/run_pilot1_plan.py --output-dir .solaris_ai_nn_pilot1/test_plan`
+Plan-only Pilot-1: writes the operator runbook, a resource-budget estimate, and
+a pilot config template. It starts no run and never confuses simulated time
+with real time.
+
+## 163. Pilot-1 Preflight ✅ (implemented)
+
+**Run:** `python examples/run_pilot1_preflight.py --state-dir .solaris_ai_nn_pilot1/test_preflight`
+Runs the bounded preflight checks (pilot safety, governance scope, emergency
+stop intact, directories, module availability) and writes a preflight report.
+
+## 164. Pilot-1 Dashboard Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot1_dashboard_demo.py --state-dir .solaris_ai_nn_pilot1/test_dashboard`
+Feeds mock observability events through the collector and renders the
+text/Markdown/JSON health dashboard (no web server).
+
+## 165. Pilot-1 Restart Drill Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot1_restart_drill_demo.py --state-dir .solaris_ai_nn_pilot1/test_restart_drill`
+Simulates a graceful restart, a crash gap (metadata only), and a
+checkpoint-restore check, confirming identity continuity. No process is killed.
+
+## 166. Pilot-1 Daily Review Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot1_daily_review_demo.py --state-dir .solaris_ai_nn_pilot1/test_daily_review`
+Builds a daily review from a mock observation rollup, scans it with ClaimGuard,
+and writes day_001.md/.json with a recommended action.
+
+## 167. Pilot-1 Exit Criteria Demo ✅ (implemented)
+
+**Run:** `python examples/run_pilot1_exit_criteria_demo.py --state-dir .solaris_ai_nn_pilot1/test_exit_criteria`
+Evaluates success, failure, and inconclusive observation snapshots and prints
+the decision for each. Pilot success is operational completion, not
+consciousness.
+
+## 168. Pilot-1 Soak Procedures (operator-driven)
+
+The 24h, 7d, and 30d soaks are **operator-driven** and governance-gated; they
+are never started from tests or examples. Follow `OPERATOR_RUNBOOK.md`:
+
+- **24h soak:** requires `enable_pilot1_24h_real`; run `solaris-nn run-profile
+  pilot1_24h_soak --governance-approved` after a passing preflight.
+- **7d soak:** requires `enable_pilot1_7d_real`; `solaris-nn run-profile
+  pilot1_7d_soak --governance-approved`.
+- **30d soak:** requires `enable_pilot1_30d_real`, a passing preflight, a passed
+  restart drill, and an explicit operator decision; `solaris-nn run-profile
+  pilot1_30d_soak --governance-approved`.
+
+## 169. Pilot-1 Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment pilot1_plan`
+(also `pilot1_preflight`, `pilot1_restart_drill`, `pilot1_dashboard`,
+`pilot1_daily_review`, `pilot1_exit_criteria`, `pilot1_safety`). Seven
+registered protocols measure planning, preflight, restart drills, dashboards,
+daily reviews, exit criteria, and the safety refusals that gate real soaks.

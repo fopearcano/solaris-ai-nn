@@ -303,6 +303,24 @@ python examples/run_full_developmental_short_demo.py      # every module, one bo
 python examples/run_month_scale_dry_plan.py               # plan a month run; start nothing
 python examples/run_conscience_health_check.py            # is the whole thing wired?
 python examples/run_conscience_snapshot_demo.py           # one consistent runtime snapshot
+
+# Pilot-1: the month-scale soak operational framework (starts no real run)
+python examples/run_pilot1_plan.py                        # runbook + budget; plan only
+python examples/run_pilot1_preflight.py                   # preflight health/safety checks
+python examples/run_pilot1_dashboard_demo.py              # observability -> dashboard.md/json
+python examples/run_pilot1_restart_drill_demo.py          # simulated restart drills (no kills)
+python examples/run_pilot1_daily_review_demo.py           # daily review + recommendation
+python examples/run_pilot1_exit_criteria_demo.py          # success/failure/inconclusive
+```
+
+Pilot-1 also has governance-gated conscience profiles (plan-only and preflight
+need no approval; real soaks do):
+
+```bash
+solaris-nn run-profile pilot1_plan_only                   # plan only; starts nothing
+solaris-nn run-profile pilot1_preflight                   # bounded preflight checks
+# real soaks are operator-driven and require governance approval:
+solaris-nn run-profile pilot1_30d_soak --governance-approved
 ```
 
 The unified runtime also ships two console entry points (installed with the
@@ -336,6 +354,20 @@ profile** — a real long-scale run needs an explicitly governance-approved
 context, and the default is always a short bounded simulated run. An
 `IntegrationHealthMonitor`, `SnapshotBuilder`, and claim-guarded
 `FullSystemReportBuilder` make a run inspectable and auditable.
+
+The **Pilot-1 layer** (`pilot1/`) is the *operational framework* for the first
+month-scale developmental test. It can plan a pilot, run preflight checks,
+budget and project resources (stdlib only — no `psutil`), collect a
+restart-safe observability stream, render a text/Markdown health dashboard,
+write ClaimGuard-scanned daily/weekly reviews, rehearse restart drills (no
+process is ever killed), detect long-run failure modes, evaluate exit
+criteria, generate the operator runbook, and build a claim-guarded pilot
+report whose central section **distinguishes structural change from mere
+accumulation**. It deliberately does **not** start a real month-long run
+automatically; real 24h/7d/30d soaks are governance-gated and operator-driven,
+simulated time is never presented as real time, and operational success is
+never treated as proof of consciousness. `PilotConfig` defaults to `plan_only`
+and the emergency stop is always available and never disabled.
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
 > explicit acknowledgement flags in the run manifest and should only be
@@ -712,6 +744,9 @@ src/solaris_ai_nn/
   conscience/   unified runtime: spine, bus, module registry/lifecycle,
                 scheduler, orchestrator, scenario profiles/runner, integration
                 health, snapshots, full-system report, runtime safety, CLI
+  pilot1/       month-scale soak: protocol, config, observability, dashboard,
+                resource budget, retention, daily/weekly reviews, restart
+                drills, failure modes, exit criteria, runbook, report, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging
