@@ -83,6 +83,7 @@ class InnerMapObserver:
     organismic_demo: Any = None  # optional dict/object of organismic-demo status
     live_field: Any = None  # optional dict/object of live-field status
     sensorium_lab: Any = None  # optional dict/object of sensorium-lab status
+    feeder_sdk: Any = None  # optional dict/object of feeder-SDK status
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -713,6 +714,17 @@ class InnerMapObserver:
                 model.sensorium_lab = lab.sensorium_lab_status()
             elif hasattr(lab, "snapshot"):
                 model.sensorium_lab = lab.snapshot()
+        feeder = self.feeder_sdk
+        if feeder is None and self.runner is not None:
+            feeder = getattr(self.runner, "feeder_sdk", None)
+        if feeder is not None:
+            # Feeder-SDK status (read-only sensory-organ boundary view).
+            if isinstance(feeder, dict):
+                model.feeder_sdk = dict(feeder)
+            elif hasattr(feeder, "feeder_sdk_status"):
+                model.feeder_sdk = feeder.feeder_sdk_status()
+            elif hasattr(feeder, "snapshot"):
+                model.feeder_sdk = feeder.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

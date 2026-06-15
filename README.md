@@ -413,6 +413,17 @@ python examples/run_human_label_contamination_demo.py     # feature-only vs huma
 python examples/run_modality_fingerprint_demo.py          # which modality actually shaped the system
 python examples/run_world_signature_demo.py               # build + compare two world signatures (not qualia)
 python examples/run_live_vs_fixture_sensorium_demo.py     # fixture vs live arm (inconclusive without governance)
+
+# External feeder SDK: artificial sensory organs OUTSIDE Solaris (Solaris reads only)
+python examples/run_feeder_sdk_contract_demo.py           # valid/invalid envelope + validation report
+python examples/run_feeder_pack_manifest_demo.py          # feeder manifest: modalities, safety/privacy notes
+python examples/run_feeder_monitor_demo.py                # active / silent feeder + invalid event detection
+python examples/run_feeder_replay_demo.py                 # replay a stream (original unmodified, replay marked)
+python examples/run_simulated_multimodal_feeder_demo.py   # simulated RF/echo/vibration/thermal/magnetic stream
+
+# Standalone feeder scripts (run OUTSIDE Solaris; Solaris does not start them):
+python feeders_sdk/manual_log_feeder.py --out out/manual.jsonl --text "rain started"
+python feeders_sdk/simulated_rf_feeder.py --out out/rf.jsonl --count 20
 ```
 
 The read-only sensory membrane and Pilot-2 also run as governed conscience
@@ -804,6 +815,26 @@ structures under different perceptual conditions; it does not test consciousness
 A world signature is an observable fingerprint, never subjective experience or
 qualia; no sensorium is ranked as "more conscious" or "more alive"; and no claim
 of consciousness, sentience, life, personhood, agency, or free will is made.
+
+The **external feeder SDK** (`src/solaris_ai_nn/feeder_sdk/` + standalone scripts
+in `feeders_sdk/`) is the safe outside layer that turns real environmental
+phenomena into Sensory Event Envelopes. A feeder is an **artificial sensory organ
+outside Solaris**: it writes local event envelopes; Solaris reads them read-only.
+The SDK provides the envelope contract (features primary, human labels never
+ground truth, provenance mandatory), modality schemas with units and privacy
+notes, validators (reject missing provenance, command payloads, decoded private
+content), append-only writers, a replay tool, seedable noise/clock helpers, a
+privacy filter, documentation-only hardware **blueprints** (RF, mmWave/echo,
+ultrasound, thermal, vibration, magnetic, human-like, machine-rhythm), a feeder
+**pack manifest**, and an output **monitor**. Standalone feeders (`feeders_sdk/`)
+include a template, manual-log, folder-rhythm, system-rhythm, feature-file, and
+simulated RF/echo/vibration/magnetic/thermal/multimodal scripts -- all stdlib-only.
+
+> **Note:** **Solaris does not start or control feeders.** Feeders write local
+> event envelopes; Solaris reads them. Solaris controls no sensor, hardware,
+> feeder process, source file, network, or real-world actuator. Hardware-specific
+> collectors are external/manual (see `feeders_sdk/blueprints/`); they must export
+> **feature summaries, not raw private content**.
 
 > **Warning:** the live field controls **no hardware**. Hardware-specific
 > collectors (SDR, mmWave, ultrasound, thermal, magnetic) are out of scope here:
@@ -1257,6 +1288,9 @@ src/solaris_ai_nn/
                 profiles, world signatures, ontology drift, structure metrics,
                 differentiation runner, comparative analysis, label
                 contamination, modality fingerprints, study report, safety
+  feeder_sdk/   external feeder SDK (artificial sensory organs OUTSIDE Solaris):
+                envelope contract, writers, schemas, validators, replay, clock,
+                noise, privacy filter, blueprints, packager, monitor, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging
@@ -1264,6 +1298,9 @@ tests/          pytest suite
 examples/       runnable scripts
 feeders/        external read-only feeder scripts (run by the operator, outside
                 Solaris): manual log, watched folder, system rhythm, dropbox
+feeders_sdk/    external feeder SDK scripts + hardware blueprints (outside
+                Solaris): template, manual/folder/system/feature feeders,
+                simulated RF/echo/vibration/magnetic/thermal/multimodal feeders
 docs/           ARCHITECTURE, SOLARIS_REFERENCE_MAP, ROADMAP, EXPERIMENTS, RESEARCH_NOTES
 ```
 

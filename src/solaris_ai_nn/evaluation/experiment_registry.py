@@ -314,6 +314,12 @@ DESCRIPTIONS = {
         "observable structural fingerprint, not subjective experience",
     "sensorium_ontology_drift": "which ontology the categories drifted toward",
     "modality_fingerprint_study": "what each modality actually contributed",
+    "feeder_sdk_contract": "feeder envelope serializes + maps to sensory event",
+    "feeder_sdk_validation": "valid events pass; invalid events rejected",
+    "feeder_sdk_privacy": "raw private content blocked; metadata-only accepted",
+    "feeder_sdk_monitor": "feeder output health (active/silent/invalid)",
+    "feeder_sdk_replay": "bounded replay; provenance marked; source unmodified",
+    "feeder_sdk_safety": "no feeder control/hardware/decoding/source mutation",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -468,6 +474,9 @@ class ExperimentRegistry:
                         "mixed_sensorium_study", "label_contamination",
                         "modality_fingerprint_study")
             or bool(merged.get("sensorium_lab", False)))
+        features["feeder_sdk"] = (
+            name.startswith("feeder_sdk")
+            or bool(merged.get("feeder_sdk", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

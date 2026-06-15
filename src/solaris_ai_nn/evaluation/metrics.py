@@ -1574,3 +1574,39 @@ def sensorium_lab_metrics(lab: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "note": "structural differentiation study; no consciousness/sentience/"
                 "life score and no sensorium ranking",
     }
+
+
+def feeder_sdk_metrics(feeder: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective external-feeder-SDK metrics (sensory-organ boundary layer).
+
+    These describe the feeder SDK: envelope counts, valid/invalid events, active
+    and silent outputs, privacy and safety warnings, schema coverage, and replay
+    events. The feeder is outside Solaris; Solaris reads its output read-only and
+    controls no feeder or hardware.
+    """
+    if not feeder:
+        return {"present": False}
+    return {
+        "present": True,
+        "feeder_sdk_envelope_count": int(
+            feeder.get("feeder_sdk_envelope_count", 0) or 0),
+        "feeder_sdk_valid_event_count": int(
+            feeder.get("feeder_sdk_valid_event_count", 0) or 0),
+        "feeder_sdk_invalid_event_count": int(
+            feeder.get("feeder_sdk_invalid_event_count", 0) or 0),
+        "feeder_sdk_active_output_count": int(
+            feeder.get("feeder_sdk_active_output_count", 0) or 0),
+        "feeder_sdk_silent_output_count": int(
+            feeder.get("feeder_sdk_silent_output_count", 0) or 0),
+        "feeder_sdk_privacy_warning_count": int(
+            feeder.get("feeder_sdk_privacy_warning_count", 0) or 0),
+        "feeder_sdk_safety_warning_count": int(
+            feeder.get("feeder_sdk_safety_warning_count", 0) or 0),
+        "feeder_sdk_schema_coverage": float(
+            feeder.get("feeder_sdk_schema_coverage", 0.0) or 0.0),
+        "feeder_sdk_replay_event_count": int(
+            feeder.get("feeder_sdk_replay_event_count", 0) or 0),
+        "solaris_controls_feeders": False,
+        "note": "feeders are outside Solaris; Solaris reads their output "
+                "read-only and controls no feeder or hardware",
+    }

@@ -1495,4 +1495,28 @@ def build_default_state_graph() -> StateGraph:
                "signatures are compared structurally")
     g.add_edge("SensoriumDifferentiationRunner", "inner_map",
                "sensorium-lab state feeds Inner MAP")
+
+    # External feeder SDK (Prompt 45): artificial sensory organs OUTSIDE Solaris
+    # that write event envelopes Solaris reads read-only. Solaris controls no
+    # feeder and no hardware.
+    for name, role in [
+        ("FeederSDKEnvelope", "the data shape an external sensory organ emits"),
+        ("EnvelopeWriter", "append-only feeder output (outside Solaris)"),
+        ("EnvelopeValidator", "rejects/quarantines invalid feeder events"),
+        ("FeederReplay", "replays a recorded stream; marks replayed provenance"),
+        ("PrivacyFilter", "no raw private content; metadata-only by default"),
+        ("FeederBlueprint", "documentation; never executes hardware"),
+        ("FeederPackManifest", "what Solaris can read; starts no feeder"),
+        ("FeederMonitor", "reads feeder output health; never starts a feeder"),
+        ("FeederSDKSafetyValidator", "Solaris reads only; controls nothing"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("FeederSDKEnvelope", "EnvelopeValidator",
+               "feeder envelopes are validated before ingestion")
+    g.add_edge("EnvelopeValidator", "LiveFieldRuntime",
+               "valid feeder envelopes feed the read-only live field")
+    g.add_edge("PrivacyFilter", "FeederSDKEnvelope",
+               "privacy flags are assigned to feeder envelopes")
+    g.add_edge("FeederMonitor", "inner_map",
+               "feeder output health feeds Inner MAP")
     return g

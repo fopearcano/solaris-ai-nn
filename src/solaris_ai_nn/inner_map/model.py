@@ -402,6 +402,13 @@ class InnerMapModel:
     # latest_differentiation_report_path. The lab compares observable internal
     # structures only; it makes no claim of subjective experience.
     sensorium_lab: Optional[Dict[str, Any]] = None
+    # Feeder-SDK status (Prompt 45); None when not attached. Keys:
+    # feeder_sdk_enabled, feeder_pack_manifest_path, available_feeder_count,
+    # active_feeder_output_count, invalid_feeder_event_count,
+    # feeder_privacy_warning_count, feeder_safety_warning_count,
+    # latest_feeder_monitor_snapshot_path. Feeders are outside Solaris; Solaris
+    # reads their output read-only and controls nothing.
+    feeder_sdk: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

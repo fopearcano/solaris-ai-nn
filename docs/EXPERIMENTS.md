@@ -2396,3 +2396,46 @@ honestly rather than failing.
 `sensorium_ontology_drift`, `sensorium_lab_safety`, `sensorium_differentiation`,
 `human_vs_nonhuman_sensorium`, `label_contamination`). Structural-differentiation
 protocols; no consciousness score and no sensorium ranking.
+
+## 258. Feeder SDK Contract Demo ✅ (implemented)
+
+**Run:** `python examples/run_feeder_sdk_contract_demo.py --state-dir .solaris_ai_nn_feeders/test_contract`
+Builds a valid feeder envelope (and shows it maps to a plural-sensorium envelope),
+then validates an invalid record (missing provenance) and one with a command
+payload. Features are primary; human labels are never ground truth.
+
+## 259. Feeder Pack Manifest Demo ✅ (implemented)
+
+**Run:** `python examples/run_feeder_pack_manifest_demo.py --state-dir .solaris_ai_nn_feeders/test_manifest`
+Builds the feeder pack manifest + README: supported modalities, schema coverage,
+blueprints, and safety/privacy notes. The packager starts no feeder, installs no
+hardware dependency, and calls no network.
+
+## 260. Feeder Monitor Demo ✅ (implemented)
+
+**Run:** `python examples/run_feeder_monitor_demo.py --state-dir .solaris_ai_nn_feeders/test_monitor`
+Writes an active feeder, a stale (silent) one, and one with an invalid line, then
+monitors all three read-only -- reporting active/silent counts and invalid events.
+The monitor never starts or modifies a feeder.
+
+## 261. Feeder Replay Demo ✅ (implemented)
+
+**Run:** `python examples/run_feeder_replay_demo.py --state-dir .solaris_ai_nn_feeders/test_replay`
+Replays a JSONL envelope stream into a new stream with a speed factor and a bounded
+event cap, confirming the original is unmodified and each replayed event is marked
+replayed in its provenance.
+
+## 262. Simulated Multimodal Feeder Demo ✅ (implemented)
+
+**Run:** `python examples/run_simulated_multimodal_feeder_demo.py --state-dir .solaris_ai_nn_feeders/test_multimodal`
+Generates simulated RF / echo / vibration / thermal / magnetic envelopes (with
+jitter, silence, drift, and noise), validates the output, and shows it is
+consumable by the Live Field. Simulated fixtures, NOT real sensors.
+
+## 263. Feeder SDK Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment feeder_sdk_contract`
+(also `feeder_sdk_validation`, `feeder_sdk_privacy`, `feeder_sdk_monitor`,
+`feeder_sdk_replay`, `feeder_sdk_safety`). Six protocols measure the external
+feeder SDK; Solaris reads feeder output read-only and controls no feeder or
+hardware.

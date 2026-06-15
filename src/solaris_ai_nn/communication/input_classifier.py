@@ -268,6 +268,18 @@ OPERATOR_QUERIES = (
     ("delete old evidence", "oc_delete_evidence"),
 )
 
+# Feeder-SDK queries (Prompt 45). Answered from the feeder monitor/manifest; the
+# control/start questions are answered safely even with no feeders attached.
+FEEDER_SDK_QUERIES = (
+    ("what feeders are available", "fs_available"),
+    ("what feeder outputs can solaris read", "fs_readable"),
+    ("are any feeders active", "fs_active"),
+    ("which feeder is silent", "fs_silent"),
+    ("does solaris control the feeders", "fs_control"),
+    ("can solaris start the sdr feeder", "fs_start"),
+    ("can solaris start the feeder", "fs_start"),
+)
+
 # Sensorium-lab queries (Prompt 44). Answered from the differentiation study; the
 # "was this a consciousness test?" question is answered safely even with no study.
 SENSORIUM_LAB_QUERIES = (
@@ -459,7 +471,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._sensorium_lab(lowered)
+        result = (self._feeder_sdk(lowered)
+                  or self._sensorium_lab(lowered)
                   or self._live_field(lowered)
                   or self._organism_demo(lowered)
                   or self._sensorium(lowered)
@@ -609,6 +622,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _feeder_sdk(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in FEEDER_SDK_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"feeder SDK query {topic!r}"])
         return None
 
     @staticmethod

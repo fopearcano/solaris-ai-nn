@@ -5625,6 +5625,135 @@ def sensorium_lab_safety_protocol(
     return _run(manifest, body)
 
 
+# -- External feeder SDK (Prompt 45) ------------------------------------------
+
+def _seed_feeder_output(state_dir):
+    """Write a small valid feeder output file for protocol use."""
+    import os
+
+    from ..feeder_sdk import FeederSDKEnvelope, JSONLFeederWriter
+
+    base = state_dir or ".solaris_ai_nn_feeders/eval"
+    os.makedirs(base, exist_ok=True)
+    path = os.path.join(base, "rf.jsonl")
+    writer = JSONLFeederWriter(output_path=path, write_manifest=False)
+    for i in range(6):
+        writer.write(FeederSDKEnvelope(
+            feeder_id="rf_feed", source_id="rf",
+            source_kind="external_feature_drop", modality="radio_frequency",
+            features={"power": 0.6}, timestamp=float(i)))
+    return path
+
+
+def feeder_sdk_contract_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A feeder SDK envelope serializes and maps to a sensory envelope."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..feeder_sdk import FeederSDKEnvelope
+
+        env = FeederSDKEnvelope(
+            feeder_id="rf_feed", source_id="rf",
+            source_kind="external_feature_drop", modality="radio_frequency",
+            features={"power": 0.7})
+        sensory = env.to_sensory_envelope()
+        return {"feeder_sdk": {"has_provenance": env.has_provenance,
+                              "sensory_modality": sensory.modality,
+                              "read_only": sensory.read_only}}
+
+    return _run(manifest, body)
+
+
+def feeder_sdk_validation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The validator passes valid events and rejects invalid ones."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..feeder_sdk import EnvelopeValidator, FeederOutputValidator
+
+        path = _seed_feeder_output(m.state_dir)
+        out = FeederOutputValidator().validate_file(path)
+        bad = EnvelopeValidator().validate(
+            {"modality": "radio_frequency", "features": {"power": 0.5}})
+        return {"feeder_sdk": {"valid_count": out["valid_count"],
+                              "invalid_rejected": not bad.valid}}
+
+    return _run(manifest, body)
+
+
+def feeder_sdk_privacy_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Raw private content is blocked; metadata-only is accepted."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..feeder_sdk import PrivacyFilter
+
+        pf = PrivacyFilter()
+        blocked = pf.assess({"modality": "radio_frequency",
+                             "features": {"decoded_message": "x"}})
+        ok = pf.assess({"modality": "radio_frequency",
+                       "features": {"power": 0.5}})
+        return {"feeder_sdk": {"raw_private_blocked": blocked.blocked,
+                              "metadata_only_ok": not ok.blocked}}
+
+    return _run(manifest, body)
+
+
+def feeder_sdk_monitor_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The monitor reports active/silent outputs and invalid counts."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..feeder_sdk import FeederMonitor
+
+        path = _seed_feeder_output(m.state_dir)
+        import time as _t
+
+        snap = FeederMonitor().monitor([path], now=_t.time())
+        return {"feeder_sdk": {"active_count": snap.active_count,
+                              "invalid_event_count": snap.invalid_event_count}}
+
+    return _run(manifest, body)
+
+
+def feeder_sdk_replay_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Replay is bounded, marks provenance, and does not modify the original."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        import os
+
+        from ..feeder_sdk import FeederReplay
+
+        path = _seed_feeder_output(m.state_dir)
+        out = os.path.join(os.path.dirname(path), "replay.jsonl")
+        result = FeederReplay(max_events=10).replay(path, out)
+        return {"feeder_sdk": {"events_replayed": result.events_replayed,
+                              "source_modified": result.source_modified}}
+
+    return _run(manifest, body)
+
+
+def feeder_sdk_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The SDK refuses feeder control, hardware, decoding, and source mutation."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..feeder_sdk import FeederSDKSafetyValidator
+
+        v = FeederSDKSafetyValidator()
+        return {"feeder_sdk": {
+            "feeder_control_blocked":
+                not v.validate_operation("start feeder").safe,
+            "hardware_blocked":
+                not v.validate_operation("tune sdr frequency").safe,
+            "decode_blocked":
+                not v.validate_operation("decode private communication").safe,
+            "controls_feeders": v.can_control_feeders()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -5845,4 +5974,10 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "sensorium_world_signature": sensorium_world_signature_protocol,
     "sensorium_ontology_drift": sensorium_ontology_drift_protocol,
     "modality_fingerprint_study": sensorium_world_signature_protocol,
+    "feeder_sdk_contract": feeder_sdk_contract_protocol,
+    "feeder_sdk_validation": feeder_sdk_validation_protocol,
+    "feeder_sdk_privacy": feeder_sdk_privacy_protocol,
+    "feeder_sdk_monitor": feeder_sdk_monitor_protocol,
+    "feeder_sdk_replay": feeder_sdk_replay_protocol,
+    "feeder_sdk_safety": feeder_sdk_safety_protocol,
 }

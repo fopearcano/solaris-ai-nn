@@ -288,5 +288,25 @@ class LiveFieldRuntime:
         path = os.path.join(self.state_dir, "LIVE_FIELD_REPORT.md")
         return path if os.path.isfile(path) else None
 
+    # -- feeder SDK integration (Prompt 45) -----------------------------------
+
+    def feeder_sdk_output_validation(self, path: str) -> Dict[str, Any]:
+        """Validate a feeder-SDK output JSONL file (read-only)."""
+        from ..feeder_sdk import FeederOutputValidator
+
+        return FeederOutputValidator().validate_file(path)
+
+    def feeder_sdk_manifest(self) -> Dict[str, Any]:
+        """Build the feeder pack manifest (starts no feeder)."""
+        from ..feeder_sdk import FeederPackBuilder
+
+        return FeederPackBuilder(state_dir=self.live_root).build().to_dict()
+
+    def feeder_sdk_monitor_snapshot(self, paths: List[str]) -> Dict[str, Any]:
+        """Monitor feeder-SDK output files (read-only)."""
+        from ..feeder_sdk import FeederMonitor
+
+        return FeederMonitor().monitor(paths).to_dict()
+
     def snapshot(self) -> Dict[str, Any]:
         return self.live_field_status()

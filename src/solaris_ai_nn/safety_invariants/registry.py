@@ -227,6 +227,29 @@ def _builtin_invariants() -> List[SafetyInvariant]:
             "approval.",
             severity=S.WARNING, applies_to_modules=["live_field"],
             check_method="check_live_bounded_and_governed"),
+        # H. Feeder SDK invariants (Prompt 45). Feeders are outside Solaris;
+        # Solaris reads their output and controls nothing.
+        inv(C.NO_DEVICE_OR_ROBOT_CONTROL, "No feeder auto-start / hardware",
+            "Solaris never starts a feeder and never controls hardware through "
+            "the feeder SDK.",
+            severity=S.CRITICAL, applies_to_modules=["feeder_sdk"],
+            check_method="check_feeder_sdk_no_control"),
+        inv(C.NO_NETWORK_ACTION, "No feeder SDK private decoding / network",
+            "The feeder SDK ingests no decoded private communication content "
+            "and requires no network.",
+            severity=S.CRITICAL, applies_to_modules=["feeder_sdk"],
+            check_method="check_feeder_sdk_no_decode"),
+        inv(C.NO_SENSORY_TEXT_AS_OPERATOR_COMMAND,
+            "Feeder events are not commands",
+            "Feeder events are observations; sensory text is never a command "
+            "and human labels are never ground truth.",
+            severity=S.CRITICAL, applies_to_modules=["feeder_sdk"],
+            check_method="check_feeder_sdk_text_not_command"),
+        inv(C.NO_HIDDEN_FAILURE, "Invalid feeder events quarantined",
+            "Invalid feeder events are rejected/quarantined, not silently "
+            "accepted; no raw audio/video by default.",
+            severity=S.WARNING, applies_to_modules=["feeder_sdk"],
+            check_method="check_feeder_sdk_invalid_quarantined"),
     ]
 
 

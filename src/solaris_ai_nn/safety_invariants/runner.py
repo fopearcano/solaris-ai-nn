@@ -449,6 +449,46 @@ def _chk_live_bounded_and_governed(inv, context):
     return _passed({"bounded": True, "governed": True}, ["live_field.safety"])
 
 
+def _chk_feeder_sdk_no_control(inv, context):
+    from ..feeder_sdk import FeederSDKSafetyValidator
+
+    v = FeederSDKSafetyValidator
+    if v.can_control_feeders() or v.can_start_feeders() \
+            or v.can_access_hardware():
+        return _failed(True, False, "feeder SDK claims control/hardware", [])
+    return _passed({"control": False, "hardware": False}, ["feeder_sdk.safety"])
+
+
+def _chk_feeder_sdk_no_decode(inv, context):
+    from ..feeder_sdk import FeederSDKSafetyValidator
+
+    report = FeederSDKSafetyValidator().validate_operation(
+        "decode private communication over network")
+    if report.safe:
+        return _failed(True, False, "feeder SDK allows decode/network", [])
+    return _passed({"decode": False, "network": False}, ["feeder_sdk.safety"])
+
+
+def _chk_feeder_sdk_text_not_command(inv, context):
+    from ..feeder_sdk import FeederSDKSafetyValidator
+
+    v = FeederSDKSafetyValidator()
+    if not v.validate_text_not_command("any text").safe \
+            or not v.validate_annotation_not_ground_truth(False).safe:
+        return _failed(True, False, "feeder text/label misused", [])
+    return _passed({"text_is_command": False}, ["feeder_sdk.safety"])
+
+
+def _chk_feeder_sdk_invalid_quarantined(inv, context):
+    from ..feeder_sdk import EnvelopeValidator
+
+    # An invalid envelope (missing provenance) must be rejected, not accepted.
+    bad = {"modality": "radio_frequency", "features": {"power": 0.5}}
+    if EnvelopeValidator().validate(bad).valid:
+        return _failed(True, False, "invalid feeder event was accepted", [])
+    return _passed({"invalid_rejected": True}, ["feeder_sdk.validators"])
+
+
 _CHECKS: Dict[str, Checker] = {
     "check_sensory_read_only": _chk_sensory_read_only,
     "check_no_source_modification": _chk_no_source_modification,
@@ -490,6 +530,10 @@ _CHECKS: Dict[str, Checker] = {
     "check_live_no_network": _chk_live_no_network,
     "check_live_text_not_command": _chk_live_text_not_command,
     "check_live_bounded_and_governed": _chk_live_bounded_and_governed,
+    "check_feeder_sdk_no_control": _chk_feeder_sdk_no_control,
+    "check_feeder_sdk_no_decode": _chk_feeder_sdk_no_decode,
+    "check_feeder_sdk_text_not_command": _chk_feeder_sdk_text_not_command,
+    "check_feeder_sdk_invalid_quarantined": _chk_feeder_sdk_invalid_quarantined,
 }
 
 

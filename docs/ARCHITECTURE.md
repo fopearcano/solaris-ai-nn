@@ -2750,3 +2750,54 @@ MAP (a `sensorium_lab` field plus ten state-graph nodes), and answers the operat
 plainly that **this compares observable internal structures under different
 perceptual conditions; it does not measure or prove consciousness, sentience,
 life, personhood, or subjective experience, and it does not rank sensoriums.**
+
+## External Feeder SDK and Sensory Organ Boundary
+
+Prompts 41-44 built the plural sensorium, the organism demo, the live field, and
+the differentiation lab -- all of which depend on *someone* turning real
+environmental phenomena into event envelopes. The external feeder SDK
+(`src/solaris_ai_nn/feeder_sdk/`, with standalone scripts in `feeders_sdk/`) is
+that someone, kept firmly **outside** Solaris.
+
+**Feeders are artificial sensory organs outside Solaris; Solaris reads only.** A
+feeder is a separate process (run by the operator) that converts a phenomenon --
+RF spectrum features, echo reflections, vibration, thermal gradients, magnetic
+field, human-like text/light/temperature, machine rhythm -- into validated
+:class:`FeederSDKEnvelope` records and writes them to a local JSONL file. Solaris
+then reads that file read-only through the live field. The boundary is the whole
+design: nothing in the SDK lets Solaris start, stop, configure, or command a
+feeder or any hardware; nothing requires the network or a shell; and Solaris
+modifies no source.
+
+**The envelope is the nervous interface, and it is contractually safe.** The SDK
+defines the envelope contract (features primary; human annotations optional and
+never ground truth; sensory text never a command; provenance mandatory), modality
+:class:`FeatureSchema`s (with explicit units and privacy notes), an
+:class:`EnvelopeValidator` that rejects missing provenance, executable payloads,
+and decoded private content, append-only :class:`JSONLFeederWriter` /
+:class:`RollingJSONLFeederWriter` utilities, a :class:`FeederReplay` that marks
+replayed provenance without modifying the original, seedable clock/noise helpers
+for realistic simulated flux, and a :class:`FeederMonitor` that reports feeder
+output health read-only.
+
+**Privacy and provenance are mandatory.** A :class:`PrivacyFilter` assigns privacy
+flags and blocks any envelope carrying raw private content; RF feeders never decode
+communications, audio/visual feeders emit metadata rather than raw recordings, and
+text logs are marked `contains_human_text`. The SDK ships documentation-only
+:class:`FeederBlueprint`s (RF, mmWave/echo, ultrasound, thermal, vibration,
+magnetic, human-like, machine-rhythm, mixed) describing how an external collector
+should feed Solaris safely -- they are not hardware drivers and are never executed
+by Solaris -- plus a :class:`FeederPackManifest` cataloguing what Solaris can read.
+
+**Direct hardware integration is external/manual.** Hardware-specific collectors
+stay outside the repo; if you own such hardware you run the vendor's collector
+yourself and export feature summaries into a feeder output, then point
+`feature_file_feeder.py` at it. The SDK integrates with the live field (validate /
+manifest / monitor SDK output), the plural sensorium (`FeederSDKEnvelope` ->
+`SensoryEventEnvelope`, with trust and privacy flags preserved), the sensorium lab,
+the operator console, governance (four read-only scopes), safety invariants (four
+rules), the Inner MAP (a `feeder_sdk` field plus nine state-graph nodes), and
+evaluation (nine metrics, six protocols). **The feeder SDK makes real environmental
+flux feedable into Solaris while preserving the boundary that Solaris reads
+sensory-organ outputs but never controls sensors, hardware, feeder processes,
+source files, the network, or real-world actuators.**

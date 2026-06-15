@@ -223,6 +223,13 @@ class PermissionScope:
     ENABLE_LIVE_FIELD_REPORT = "enable_live_field_report"
     ENABLE_LIVE_FIELD_COMPARISON = "enable_live_field_comparison"
 
+    # External feeder SDK (Prompt 45). Validation / manifest / monitor / replay
+    # are local read-only utilities; Solaris never starts external feeders.
+    ENABLE_FEEDER_SDK_VALIDATION = "enable_feeder_sdk_validation"
+    ENABLE_FEEDER_PACK_MANIFEST = "enable_feeder_pack_manifest"
+    ENABLE_FEEDER_OUTPUT_MONITOR = "enable_feeder_output_monitor"
+    ENABLE_FEEDER_REPLAY = "enable_feeder_replay"
+
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
         ENABLE_PLASTICITY, ENABLE_PLASTICITY_APPLY, ENABLE_PLASTICITY_DRY_RUN,
@@ -313,6 +320,8 @@ class PermissionScope:
         ENABLE_PLURAL_SENSORIUM_REAL_READ_ONLY,
         ENABLE_LIVE_FIELD_PREFLIGHT, ENABLE_LIVE_FIELD_READ_ONLY_PILOT,
         ENABLE_LIVE_FIELD_REPORT, ENABLE_LIVE_FIELD_COMPARISON,
+        ENABLE_FEEDER_SDK_VALIDATION, ENABLE_FEEDER_PACK_MANIFEST,
+        ENABLE_FEEDER_OUTPUT_MONITOR, ENABLE_FEEDER_REPLAY,
     )
 
 
@@ -854,6 +863,19 @@ class PermissionSet:
                        note="a live read-only field pilot requires explicit "
                             "governance approval; still no hardware/network/"
                             "actuation and no source mutation"),
+            # Feeder SDK (Prompt 45). Validation, manifest, monitoring, and
+            # replay of existing local envelope streams are granted by default;
+            # live hardware feeder operation stays external/manual and Solaris
+            # cannot start external feeders.
+            Permission(S.ENABLE_FEEDER_SDK_VALIDATION, granted=True,
+                       note="validates feeder output envelopes; read-only"),
+            Permission(S.ENABLE_FEEDER_PACK_MANIFEST, granted=True,
+                       note="builds a local feeder manifest; starts no feeder"),
+            Permission(S.ENABLE_FEEDER_OUTPUT_MONITOR, granted=True,
+                       note="monitors feeder output files; read-only"),
+            Permission(S.ENABLE_FEEDER_REPLAY, granted=True,
+                       note="replays existing local envelope streams; does not "
+                            "modify the original or start a feeder"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

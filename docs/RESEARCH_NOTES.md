@@ -1729,3 +1729,44 @@ report "they differ" would be useless. The comparison preserves no-difference
 (negative) results and marks missing data inconclusive, so a finding that two
 sensoriums built *the same* structure, or that the data was insufficient to tell,
 is reported as honestly as a strong difference.
+
+## Phase 45 — External feeder SDK and sensory organ boundary
+
+**Feeders as artificial sensory organs.** An eye is not the brain; it is a
+transducer that turns light into signals the brain reads. The feeder SDK makes
+that split literal: a feeder is an artificial sensory organ that turns a
+phenomenon into event envelopes, and Solaris is the organism that reads them.
+Keeping the organ outside the organism is what lets Solaris perceive the real
+world without acquiring any power over it.
+
+**Why external feeders preserve safety.** The safety argument is structural and
+one-directional: feeders write files, Solaris reads files, and there is no return
+path. Solaris cannot start, stop, configure, or command a feeder; it touches no
+hardware, no network, no shell. The contract, validators, privacy filter, safety
+validator, and four safety invariants all exist to keep that one-directional flow
+intact even as more exotic modalities are added.
+
+**Why raw hardware control is excluded.** Granting a perceiving system control over
+its own sensors is exactly the capability that turns observation into action.
+Hardware-specific collectors therefore stay outside the repo as
+documentation-only blueprints; if real hardware is used, a separate operator
+process runs it and exports *feature summaries*. Solaris never holds the device.
+
+**Why feature envelopes are the nervous interface.** Features, not raw recordings,
+are what cross the boundary. This is both a privacy decision (no raw audio/video,
+no decoded RF) and a cognitive one: feature envelopes are the modality-native
+"nerve signals" the plural sensorium is built to consume, and they keep human
+ontology from sneaking in as raw labels.
+
+**Privacy risks in RF/audio/visual/text streams.** Each modality carries a
+distinct risk: RF can expose communication content, audio can expose speech,
+visual can expose imagery, text can expose human language. The SDK's rule is
+uniform -- emit feature summaries, mark privacy flags, never decode private
+content -- and the privacy filter blocks any envelope that appears to violate it.
+
+**How feeder quality shapes Solaris intelligence.** The differentiation lab
+already showed that the sensorium shapes the internal structure that emerges.
+The feeder SDK is where that sensorium is actually built: a noisy, biased, or
+label-contaminated feeder will produce a correspondingly shaped internal world.
+Feeder quality is therefore an experimental variable, made visible through
+provenance, privacy flags, validation, and monitoring -- not a hidden assumption.

@@ -110,6 +110,8 @@ AVAILABLE_QUERIES = (
     "did human-like and non-human senses produce different structures?",
     "did labels contaminate the result?", "which modality actually mattered?",
     "was this a consciousness test?",
+    "what feeders are available?", "are any feeders active?",
+    "does Solaris control the feeders?", "can Solaris start the SDR feeder?",
 )
 
 
@@ -170,6 +172,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("fs_"):
+            return self._feeder_sdk(topic)
         if topic.startswith("sl_"):
             return self._sensorium_lab(topic)
         if topic.startswith("lf_"):
@@ -519,6 +523,43 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _feeder_sdk(self, topic: str) -> CommunicationResponse:
+        """Answer feeder-SDK queries (Solaris reads only; controls nothing).
+
+        The control/start questions are answered safely even with no feeders
+        attached.
+        """
+        if topic in ("fs_control", "fs_start"):
+            return self.builder.status_response(
+                "No. Solaris only reads feeder-produced event envelopes. It "
+                "does not control feeders or hardware.",
+                ["policy:solaris_does_not_control_feeders"])
+        component = self.components.get("feeder_sdk")
+        if component is None:
+            return self.builder.missing_component_response("feeder_sdk")
+        status = (component.feeder_sdk_status()
+                  if hasattr(component, "feeder_sdk_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:feeder_sdk"]
+        if topic == "fs_available":
+            text = (f"available feeders: "
+                    f"{status.get('available_feeder_count', 0)}; see the feeder "
+                    "pack manifest")
+        elif topic == "fs_readable":
+            text = ("Solaris can read validated event-envelope JSONL files at "
+                    "the feeder output paths; nothing else")
+        elif topic == "fs_active":
+            text = (f"active feeder outputs: "
+                    f"{status.get('active_feeder_output_count', 0)}")
+        elif topic == "fs_silent":
+            text = ("silent feeder outputs are reported in the feeder monitor "
+                    "snapshot; silence is a perceptual signal, not hidden")
+        else:
+            text = ("the feeder SDK is the read-only sensory-organ boundary; "
+                    "Solaris reads feeder output and controls nothing")
         return self.builder.status_response(text, refs)
 
     def _sensorium_lab(self, topic: str) -> CommunicationResponse:

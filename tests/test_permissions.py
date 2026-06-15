@@ -79,8 +79,9 @@ def test_all_scopes_in_default_set():
     # + 5 architecture evolution (P38)
     # + 6 operator console (P39)
     # + 3 plural sensorium (P41)
-    # + 4 live field (P43).
-    assert len(PermissionScope.ALL) == 163
+    # + 4 live field (P43)
+    # + 4 feeder SDK (P45).
+    assert len(PermissionScope.ALL) == 167
 
 
 def test_motor_membrane_scope_defaults():

@@ -60,3 +60,5 @@ artifacts/
 .sann_live_ref/
 .solaris_ai_nn_sensorium_lab/
 .sann_sensorium_lab/
+.solaris_ai_nn_feeders/
+.sann_feeders/
