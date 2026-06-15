@@ -1658,3 +1658,58 @@ def perceptual_metabolism_metrics(met: Optional[Dict[str, Any]],
         "note": "operational sensory regulation; needs are not feelings and "
                 "metabolism is not biological life",
     }
+
+
+def perceptual_ontogenesis_metrics(ont: Optional[Dict[str, Any]],
+                                   ) -> Dict[str, Any]:
+    """Objective perceptual-ontogenesis metrics (world-formation layer).
+
+    These describe how an internal world forms from continuous perception:
+    perceptual atoms, proto-concept candidates/stability/decay, concept families
+    and relations, modality-native vs cross-modal vs absence-based vs contaminated
+    ratios, prediction/compression/attention utility, decay rate, and world
+    formation density. Proto-concepts are operational structures, not words;
+    world formation is structural, not subjective experience or understanding.
+    """
+    if not ont:
+        return {"present": False}
+    concepts = int(ont.get("proto_concept_count", 0) or 0)
+    decaying = int(ont.get("decaying_concept_count", 0) or 0)
+    return {
+        "present": True,
+        "perceptual_atom_count": int(ont.get("perceptual_atom_count", 0) or 0),
+        "proto_concept_candidate_count": concepts,
+        "stable_proto_concept_count": int(
+            ont.get("stable_concept_count", 0) or 0),
+        "decaying_concept_count": decaying,
+        "rejected_concept_count": int(ont.get("rejected_concept_count", 0) or 0),
+        "concept_family_count": int(ont.get("concept_family_count", 0) or 0),
+        "concept_relation_count": int(
+            ont.get("concept_relation_count", 0) or 0),
+        "modality_native_concept_ratio": float(
+            ont.get("modality_native_concept_ratio", 0.0) or 0.0),
+        "cross_modal_concept_ratio": float(
+            ont.get("cross_modal_concept_ratio", 0.0) or 0.0),
+        "absence_based_concept_ratio": float(
+            ont.get("absence_based_concept_ratio", 0.0) or 0.0),
+        "contaminated_concept_ratio": float(
+            ont.get("contaminated_concept_ratio", 0.0) or 0.0),
+        "concept_prediction_utility_mean": float(
+            ont.get("concept_prediction_utility_mean", 0.0) or 0.0),
+        "concept_compression_utility_mean": float(
+            ont.get("concept_compression_utility_mean", 0.0) or 0.0),
+        "concept_attention_utility_mean": float(
+            ont.get("concept_attention_utility_mean", 0.0) or 0.0),
+        "concept_decay_rate": round(decaying / concepts, 4) if concepts else 0.0,
+        "concept_explosion_warning_count": int(
+            ont.get("concept_explosion_warning_count", 0) or 0),
+        "world_formation_density": float(
+            ont.get("world_formation_density", 0.0) or 0.0),
+        "human_label_contamination_score": float(
+            ont.get("human_label_contamination_score", 0.0) or 0.0),
+        "proto_concepts_are_words": False,
+        "world_formation_is_subjective": False,
+        "note": "sensorium-native world formation; proto-concepts are not words "
+                "and world formation is not subjective experience or "
+                "understanding",
+    }

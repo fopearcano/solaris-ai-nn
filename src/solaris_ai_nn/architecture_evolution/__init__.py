@@ -42,6 +42,7 @@ from .evidence_mapper import (
     ArchitectureEvidenceMap,
     EvidenceLink,
     EvidenceStrength,
+    ontogenesis_revision_proposals,
 )
 from .impact_analysis import (
     ArchitectureImpactAnalysis,
@@ -102,6 +103,7 @@ __all__ = [
     "ModuleLifecycleClassifier", "ArchitectureDecisionRecord", "DecisionType",
     "DecisionStatus", "DecisionRationale", "ADRStore",
     "ArchitectureEvidenceMap", "EvidenceLink", "EvidenceStrength",
+    "ontogenesis_revision_proposals",
     # pruning / promotion / impact / migration
     "PruningProposal", "PruningProposalBuilder", "PruningPlan", "PruningRisk",
     "PruningImplementationStatus", "PromotionProposal", "DemotionProposal",

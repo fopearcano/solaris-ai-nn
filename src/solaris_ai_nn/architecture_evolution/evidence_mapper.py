@@ -30,8 +30,52 @@ EVIDENCE_SOURCES = (
     "null_model_result", "post_pilot_analysis", "pilot1_report",
     "pilot2_report", "pilot3_report", "safety_invariant_report",
     "assurance_case", "ops_incident", "auto_regeneration_repair",
-    "inner_map_snapshot",
+    "inner_map_snapshot", "perceptual_ontogenesis_report",
 )
+
+
+def ontogenesis_revision_proposals(ont_status: Dict[str, Any],
+                                   ) -> List[Dict[str, Any]]:
+    """Turn a perceptual-ontogenesis status into architecture *proposals* only.
+
+    Proposals are advisory: nothing here rewrites code, edits imports, or
+    actuates anything. They suggest sensorium/receptor/metabolism/proto-language/
+    world-model schema revisions, contamination mitigation, or concept-explosion
+    controls based on the observed ontogenesis.
+    """
+    proposals: List[Dict[str, Any]] = []
+    contamination = float(ont_status.get(
+        "human_label_contamination_score", 0.0) or 0.0)
+    if contamination >= 0.5:
+        proposals.append({
+            "target": "sensorium_profile",
+            "proposal": "reduce human-label dominance in the source diet",
+            "reason": f"human-label contamination {contamination}",
+            "advisory_only": True})
+        proposals.append({
+            "target": "contamination_mitigation",
+            "proposal": "mark/down-weight label-grounded concepts",
+            "reason": "feature-grounded concepts under-represented",
+            "advisory_only": True})
+    if int(ont_status.get("concept_explosion_warning_count", 0) or 0) > 0:
+        proposals.append({
+            "target": "concept_explosion_controls",
+            "proposal": "tighten max_concepts_per_tick / birth thresholds",
+            "reason": "concept-explosion warnings observed",
+            "advisory_only": True})
+    if float(ont_status.get("modality_native_concept_ratio", 0.0) or 0.0) < 0.3:
+        proposals.append({
+            "target": "receptor_profile",
+            "proposal": "strengthen non-human modality receptors",
+            "reason": "few modality-native concepts formed",
+            "advisory_only": True})
+    if float(ont_status.get("world_formation_density", 0.0) or 0.0) < 0.2:
+        proposals.append({
+            "target": "world_model_schema",
+            "proposal": "review concept-relation growth thresholds",
+            "reason": "sparse world formation",
+            "advisory_only": True})
+    return proposals
 
 
 @dataclass

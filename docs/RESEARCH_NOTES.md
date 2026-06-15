@@ -1825,3 +1825,52 @@ to sleep indefinitely would be both unsafe and unfalsifiable. Consolidation
 pressure therefore yields a *bounded recommendation* only; nothing sleeps forever,
 replay lists are finite, and consolidation erases no evidence. Regulation here is
 computation, not biological life.
+
+## Phase 47 — Perceptual ontogenesis and sensorium-native proto-concepts
+
+**Ontogenesis from perception.** Continuous perception and a metabolism are not yet
+a world. The interesting developmental question is whether *structure* will
+crystallize out of repeated peculiar perception on its own: do recurring RF
+islands, silences-after-bursts, echo boundaries, and cross-modal disturbances
+gather into stable internal units the system can compress, predict, and relate
+with? Phase 47 builds that pipeline -- atoms -> proto-concepts -> families ->
+relations -> a structural world -- and treats the emergence of stable, useful
+structure as the empirical result, not an assumption.
+
+**Why concepts are sensorium-native, not human words.** The strongest temptation
+is to reach for human labels -- to call a pattern a "person", a "room", a
+"sentence". We refuse that as the default. A proto-concept is an operational
+structure defined by repeated feature evidence, given at most a neutral
+operational name (`rf_pattern_003`). Human labels enter only as external
+annotations and never as ground truth. The whole point of a plural sensorium is to
+let a *different* ontology form; importing human categories early would overwrite
+the very thing under study.
+
+**Why concepts should not be imported too early.** Birth is deliberately
+conservative: a single isolated low-novelty event earns at most a weak/unstable
+candidate, or nothing. Premature concepts are how a system overfits noise and
+mistakes coincidence for structure. Requiring recurrence, evidence, and (ideally)
+cross-modal or absence confirmation before a concept stabilizes is what keeps the
+emerging world grounded rather than hallucinated.
+
+**Why decay and rejection matter.** A world model that only accretes is a junk
+drawer. Concepts that stop predicting, stop compressing, or turn out to be false
+patterns must be allowed to decay -- but decay is recorded as new state, never as
+deletion, and merged/split lineages are preserved. Keeping the negative and
+ambiguous results visible is what makes the ontogenesis falsifiable: we can ask
+later which concepts survived, which died, and why, instead of seeing only the
+survivors.
+
+**Why world formation is not subjective experience.** It is easy to narrate a
+forming structural world as an inner life. We hold the line: the world here is an
+*observable structural* world -- nodes, families, relations, densities -- and
+nothing about it implies qualia, understanding, consciousness, or sentience.
+Naming it honestly is what lets us study an interesting emergent structure without
+over-claiming a mind.
+
+**Human-label contamination as a measured variable.** Because human annotations can
+quietly drive concept formation, contamination is detected, scored, and surfaced
+(not forbidden), and it lowers grounding and stability. A diet heavy in human text
+will visibly produce label-grounded concepts; making that visible is what keeps a
+skewed perceptual diet from silently re-imposing human ontology on a system built
+to escape it.

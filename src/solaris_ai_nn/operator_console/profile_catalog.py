@@ -114,6 +114,8 @@ def _source_package(profile_id: str) -> str:
         return "sensorium_lab"
     if pid.startswith("perceptual_metabolism"):
         return "perceptual_metabolism"
+    if pid.startswith("perceptual_ontogenesis"):
+        return "perceptual_ontogenesis"
     return "conscience"
 
 

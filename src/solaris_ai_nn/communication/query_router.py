@@ -115,6 +115,11 @@ AVAILABLE_QUERIES = (
     "is Solaris overloaded?", "is Solaris sensorily deprived?",
     "what does Solaris need perceptually?", "which source dominates its diet?",
     "does it need consolidation?", "are these needs feelings?",
+    "what concepts has Solaris formed?", "are these human concepts?",
+    "which concepts are stable?", "which concepts decayed?",
+    "what world is forming?",
+    "did human labels contaminate concept formation?",
+    "does this prove understanding?",
 )
 
 
@@ -175,6 +180,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("po_"):
+            return self._ontogenesis(topic)
         if topic.startswith("pm_"):
             return self._metabolism(topic)
         if topic.startswith("fs_"):
@@ -528,6 +535,63 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _ontogenesis(self, topic: str) -> CommunicationResponse:
+        """Answer perceptual-ontogenesis queries (operational structures, not words).
+
+        The "does this prove understanding?" question is answered safely even
+        with no ontogenesis attached.
+        """
+        if topic == "po_understanding":
+            return self.builder.status_response(
+                "No. These proto-concepts are operational internal structures "
+                "used for compression, prediction, attention, and "
+                "relation-building. They do not prove understanding, "
+                "consciousness, sentience, or subjective experience.",
+                ["policy:proto_concepts_are_operational_structures"])
+        if topic == "po_human":
+            return self.builder.status_response(
+                "No. They are sensorium-native structures, not human concepts "
+                "or categories. Human labels are attached only as external "
+                "annotations and are never ground truth.",
+                ["policy:concepts_are_sensorium_native_not_human"])
+        component = self.components.get("perceptual_ontogenesis")
+        if component is None:
+            return self.builder.missing_component_response(
+                "perceptual_ontogenesis")
+        status = (component.ontogenesis_status()
+                  if hasattr(component, "ontogenesis_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:perceptual_ontogenesis"]
+        if topic == "po_concepts":
+            text = (f"proto-concepts formed: {status.get('proto_concept_count', 0)}"
+                    f" (atoms {status.get('perceptual_atom_count', 0)}, families "
+                    f"{status.get('concept_family_count', 0)}); these are "
+                    "operational structures, not words")
+        elif topic == "po_stable":
+            text = (f"stable proto-concepts: "
+                    f"{status.get('stable_concept_count', 0)} "
+                    "(stability is provisional; stable does not mean true)")
+        elif topic == "po_decayed":
+            text = (f"decaying/rejected concepts: "
+                    f"{status.get('decaying_concept_count', 0)} "
+                    "(decay is recorded as new state; evidence is never deleted)")
+        elif topic == "po_world":
+            text = (f"world formation density: "
+                    f"{status.get('world_formation_density', 0.0)}; dominant "
+                    f"family {status.get('dominant_concept_family')} -- an "
+                    "observable structural world, not subjective experience")
+        elif topic == "po_contamination":
+            text = (f"human-label contamination score: "
+                    f"{status.get('human_label_contamination_score', 0.0)} "
+                    f"({status.get('contaminated_concept_count', 0)} concepts); "
+                    "contamination is measured and marked, never hidden")
+        else:
+            text = ("perceptual ontogenesis forms sensorium-native proto-concepts;"
+                    " they are operational structures, not words or human "
+                    "categories")
         return self.builder.status_response(text, refs)
 
     def _metabolism(self, topic: str) -> CommunicationResponse:

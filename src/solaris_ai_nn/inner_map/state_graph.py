@@ -1544,4 +1544,33 @@ def build_default_state_graph() -> StateGraph:
                "metabolism allocates the attention economy (internal only)")
     g.add_edge("PerceptualMetabolismRuntime", "inner_map",
                "perceptual metabolism state feeds Inner MAP")
+
+    # Perceptual ontogenesis (Prompt 47): an internal world forms from perception.
+    # Proto-concepts are operational structures (not words); world formation is
+    # structural, not subjective experience.
+    for name, role in [
+        ("PerceptualAtom", "proto-material extracted from recurring perception"),
+        ("ProtoConcept", "stabilized internal structure, not a word/category"),
+        ("ConceptBirthEngine", "conservative birth of concepts from atoms"),
+        ("ConceptMemoryStore", "append-only atoms/concepts/relations; no deletion"),
+        ("ConceptFamilyBuilder", "evidence-backed structural clusters"),
+        ("WorldFormationBuilder", "observable structural world, not qualia"),
+        ("ConceptRelationGrowthEngine", "evidence-backed links; not causation"),
+        ("ConceptStabilizationEngine", "provisional stability; stable != true"),
+        ("ConceptDecayEngine", "decay/reject as new state; evidence preserved"),
+        ("ConceptContaminationAnalyzer", "human-label influence made visible"),
+        ("PerceptualOntogenesisRuntime", "bounded internal ontogenesis loop"),
+        ("PerceptualOntogenesisSafetyValidator", "internal-only; no actuation"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("PerceptualMetabolismRuntime", "PerceptualOntogenesisRuntime",
+               "metabolism state modulates concept birth/decay (internal only)")
+    g.add_edge("SensoryField", "PerceptualAtom",
+               "recurring perceptual structures become atoms")
+    g.add_edge("PerceptualAtom", "ProtoConcept",
+               "atoms aggregate into conservative proto-concepts")
+    g.add_edge("ProtoConcept", "WorldFormationBuilder",
+               "concepts/families/relations form a structural world")
+    g.add_edge("PerceptualOntogenesisRuntime", "inner_map",
+               "perceptual ontogenesis state feeds Inner MAP")
     return g

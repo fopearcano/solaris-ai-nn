@@ -65,3 +65,5 @@ artifacts/
 .solaris_ai_nn_metabolism/
 .sann_metabolism/
 .sann_dep/
+.solaris_ai_nn_ontogenesis/
+.sann_ontogenesis/

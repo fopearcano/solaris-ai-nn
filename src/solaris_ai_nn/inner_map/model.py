@@ -416,6 +416,14 @@ class InnerMapModel:
     # consolidation_pressure_score, latest_metabolism_report_path. Needs are
     # operational pressures, not feelings; regulation is internal and bounded.
     perceptual_metabolism: Optional[Dict[str, Any]] = None
+    # Perceptual-ontogenesis status (Prompt 47); None when not attached. Keys:
+    # perceptual_ontogenesis_enabled, perceptual_atom_count, proto_concept_count,
+    # stable_concept_count, decaying_concept_count, concept_family_count,
+    # concept_relation_count, human_label_contamination_score,
+    # world_formation_density, latest_ontogenesis_report_path. Proto-concepts are
+    # operational structures, not words; world formation is structural, not
+    # subjective experience.
+    perceptual_ontogenesis: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

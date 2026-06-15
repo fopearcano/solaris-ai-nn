@@ -38,6 +38,13 @@ class SensoriumWorldSignature:
     modality_native_grounding_score: float = 0.0
     human_label_contamination_score: float = 0.0
     uncertainty_profile: float = 0.0
+    # Perceptual-ontogenesis profile (Prompt 47); empty when not attached.
+    concept_family_distribution: Dict[str, int] = field(default_factory=dict)
+    concept_stability_profile: Dict[str, int] = field(default_factory=dict)
+    concept_decay_profile: Dict[str, int] = field(default_factory=dict)
+    concept_relation_profile: Dict[str, Any] = field(default_factory=dict)
+    human_label_concept_contamination: float = 0.0
+    modality_native_concept_ratio: float = 0.0
     limitations: List[str] = field(default_factory=lambda: [
         "An observable structural fingerprint, not subjective experience.",
         "Not qualia; this does not describe what Solaris feels.",
@@ -68,6 +75,14 @@ class SensoriumWorldSignature:
             "human_label_contamination_score":
                 self.human_label_contamination_score,
             "uncertainty_profile": self.uncertainty_profile,
+            "concept_family_distribution":
+                dict(self.concept_family_distribution),
+            "concept_stability_profile": dict(self.concept_stability_profile),
+            "concept_decay_profile": dict(self.concept_decay_profile),
+            "concept_relation_profile": dict(self.concept_relation_profile),
+            "human_label_concept_contamination":
+                self.human_label_concept_contamination,
+            "modality_native_concept_ratio": self.modality_native_concept_ratio,
             "limitations": list(self.limitations),
             "note": "observable structural fingerprint; not subjective "
                     "experience, not qualia",
@@ -79,7 +94,8 @@ class WorldSignatureBuilder:
     """Builds a world signature from a completed runtime."""
 
     def build(self, arm_id: str, condition: str, runtime: Any, *,
-              probe_result: Any = None) -> SensoriumWorldSignature:
+              probe_result: Any = None,
+              ontogenesis: Any = None) -> SensoriumWorldSignature:
         rt = runtime
         if rt is None:
             return SensoriumWorldSignature(arm_id=arm_id, condition=condition)
@@ -120,6 +136,41 @@ class WorldSignatureBuilder:
         score = (probe_result.changed_perception_score
                  if probe_result is not None else 0.0)
 
+        # Perceptual-ontogenesis profile (optional).
+        concept_families: Dict[str, int] = {}
+        stability_profile: Dict[str, int] = {}
+        decay_profile: Dict[str, int] = {}
+        relation_profile: Dict[str, Any] = {}
+        ont_contamination = 0.0
+        ont_native_ratio = 0.0
+        if ontogenesis is not None:
+            ont_status = (ontogenesis.ontogenesis_status()
+                          if hasattr(ontogenesis, "ontogenesis_status")
+                          else ontogenesis if isinstance(ontogenesis, dict)
+                          else {})
+            if hasattr(ontogenesis, "family_builder"):
+                concept_families = ontogenesis.family_builder.distribution()
+            else:
+                concept_families = ont_status.get(
+                    "concept_family_distribution", {})
+            stability_profile = {
+                "stable": ont_status.get("stable_concept_count", 0),
+                "candidate": max(
+                    0, ont_status.get("proto_concept_count", 0)
+                    - ont_status.get("stable_concept_count", 0)
+                    - ont_status.get("decaying_concept_count", 0))}
+            decay_profile = {
+                "decaying": ont_status.get("decaying_concept_count", 0),
+                "rejected": ont_status.get("rejected_concept_count", 0)}
+            relation_profile = {
+                "relation_count": ont_status.get("concept_relation_count", 0),
+                "world_formation_density": ont_status.get(
+                    "world_formation_density", 0.0)}
+            ont_contamination = ont_status.get(
+                "human_label_contamination_score", 0.0)
+            ont_native_ratio = ont_status.get(
+                "modality_native_concept_ratio", 0.0)
+
         return SensoriumWorldSignature(
             arm_id=arm_id, condition=condition,
             modality_distribution=modality_dist,
@@ -139,7 +190,13 @@ class WorldSignatureBuilder:
             changed_perception_score=score,
             modality_native_grounding_score=rt.modality_native_grounding_score(),
             human_label_contamination_score=rt.human_label_contamination_score(),
-            uncertainty_profile=round(pressures.get("uncertainty", 0.0), 4))
+            uncertainty_profile=round(pressures.get("uncertainty", 0.0), 4),
+            concept_family_distribution=concept_families,
+            concept_stability_profile=stability_profile,
+            concept_decay_profile=decay_profile,
+            concept_relation_profile=relation_profile,
+            human_label_concept_contamination=ont_contamination,
+            modality_native_concept_ratio=ont_native_ratio)
 
 
 @dataclass

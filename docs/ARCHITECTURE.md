@@ -2869,3 +2869,78 @@ recommendations, and hygiene warnings that never delete raw evidence). **Percept
 metabolism makes Solaris regulate continuous sensory exposure like a sensory
 metabolism -- finite, homeostatic, and honest -- while keeping needs as operational
 pressures rather than feelings and regulation as computation rather than life.**
+
+## Perceptual Ontogenesis and Sensorium-Native Proto-Concepts
+
+Prompts 41-46 gave Solaris continuous perception and a perceptual metabolism. The
+next question is developmental: *how does an internal world begin to form from
+continuous peculiar perception?* Prompt 47 adds an ontogenesis layer --
+`src/solaris_ai_nn/perceptual_ontogenesis/` -- that turns repeated perceptual
+structure into stabilized internal structure:
+
+    continuous sensory field -> recurrent patterns -> perceptual atoms ->
+    proto-concepts -> concept families -> world-forming relations ->
+    memory stabilization -> future perception changes
+
+**Proto-concepts are not words and not human categories.** A `ProtoConcept` is a
+stabilized internal structure that helps Solaris compress, predict, relate to, or
+respond to its sensorium (a recurring RF island, a silence-after-burst, an echo
+boundary, a cross-modal disturbance, an unreliable source, a field deformation).
+It needs no name; when a display name is useful, a neutral operational one is
+generated (`rf_pattern_003`), never a human semantic label. Human ontology is
+never the default, and human labels attach only as external annotations that are
+never ground truth -- grounding depends on repeated feature evidence, not labels.
+
+**Birth is conservative and evidence-preserving.** `PerceptualAtom`s are extracted
+from sensorium invariants, rhythms, absences, cross-modal relations, receptor/
+source-health states, baseline/attention shifts, and metabolic overload/
+deprivation; each carries provenance and is marked external if human-annotated.
+The `ConceptBirthEngine` aggregates recurring atoms into concepts -- a single
+isolated low-novelty event yields at most a weak/unstable candidate (or nothing) --
+and records fixture-vs-live grounding. Perceptual metabolism modulates birth:
+overload throttles concept birth (it never deletes evidence).
+
+**Concepts stabilize provisionally, decay honestly, and are never deleted.** The
+`ConceptStabilizationEngine` scores concepts against evidence (recurrence over
+time/sources, prediction/compression/attention usefulness, cross-modal/absence
+confirmation, low label-dependence, noise survival, fixture->live survival);
+*stable is provisional* -- it does not mean true and never means conscious, and
+fixture-only stability is marked. The `ConceptDecayEngine` records decay,
+rejection, merge, and split as new state; negative, failed, and ambiguous concepts
+are preserved as historical evidence in the append-only `ConceptMemoryStore`
+(`atoms.jsonl` / `concepts.jsonl` / `relations.jsonl` / `concept_index.json`). The
+`ConceptContaminationAnalyzer` makes human-label influence visible (it is marked,
+not forbidden, and lowers grounding/stability).
+
+**World formation is structural, not subjective.** The `ConceptFamilyBuilder`
+clusters concepts into evidence-backed structural families (a concept may belong to
+several; families are not human taxonomies), the `ConceptRelationGrowthEngine`
+grows weak/moderate/strong evidence-backed relations while tracking false-relation
+risk and never overstating correlation as causation, and the
+`WorldFormationBuilder` summarizes the observable structural world (active/stable/
+decaying counts, family distribution, relation density, cross-modal/absence
+integration, modality dominance, contamination, prediction/compression support).
+This is an observable internal *structural* world -- NOT a subjective world, NOT
+qualia, and NOT proof of experience.
+
+**It stays internal and bounded.** The `PerceptualOntogenesisRuntime` reads the
+plural-sensorium traces (and optionally metabolism state, live-field source
+health, and feeder-SDK metadata), runs bounded ticks under per-tick and total
+concept caps (raising explosion warnings rather than exploding), and produces a
+ClaimGuard-scanned report. It polls no hardware, controls no feeder, modifies no
+source, actuates nothing, and treats no human label as ground truth. The layer
+integrates with proto-language (optional internal *signs* for stable concepts --
+not human words), the world model (proto-concepts as proto-symbol/boundary nodes,
+relations as edges, preserving modality-native ontology), the hypothesis engine
+(concepts seed prediction/anomaly/relation hypotheses), LOGOS (ontogenesis
+tensions expressed as valid LOGOS tensions), memory/latent replay (history
+preserved; bounded consolidation recommendations), the research lab and evaluation
+(metrics plus protocols for ontogenesis, birth, stabilization, decay,
+contamination, world formation, and safety), the sensorium differentiation lab
+(world signatures gain a concept-family/stability/decay/relation profile), the
+architecture evolution layer (advisory revision proposals only), the operator
+console / Inner MAP. **Perceptual ontogenesis lets a peculiar internal world begin
+to form from peculiar perception -- evidence-backed, decay-aware, contamination-
+honest -- while keeping proto-concepts as operational structures rather than words
+and world formation as structure rather than subjective experience or
+understanding.**

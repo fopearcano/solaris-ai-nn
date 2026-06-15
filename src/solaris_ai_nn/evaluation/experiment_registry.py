@@ -334,6 +334,21 @@ DESCRIPTIONS = {
     "consolidation_pressure_evaluation": "consolidation pressure check",
     "perceptual_metabolism_safety":
         "no hardware/feeder/mutation; no feeling/life claims",
+    "perceptual_ontogenesis": "an internal world forms from peculiar perception",
+    "perceptual_ontogenesis_evaluation":
+        "sensorium-native proto-concepts from continuous perception",
+    "proto_concept_birth": "repeated structures birth conservative concepts",
+    "concept_birth_evaluation": "proto-concept birth check",
+    "concept_stabilization": "concepts stabilize provisionally with evidence",
+    "concept_stability_evaluation": "concept stability check",
+    "concept_decay": "useless concepts decay; evidence preserved",
+    "concept_decay_evaluation": "concept decay check",
+    "concept_contamination": "human-label contamination made visible",
+    "concept_contamination_evaluation": "concept contamination check",
+    "world_formation": "structural internal world (families + relations)",
+    "world_formation_evaluation": "world formation check",
+    "perceptual_ontogenesis_safety":
+        "no hardware/feeder/mutation; no understanding/subjective claims",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -500,6 +515,12 @@ class ExperimentRegistry:
                         "consolidation_pressure",
                         "consolidation_pressure_evaluation")
             or bool(merged.get("perceptual_metabolism", False)))
+        features["perceptual_ontogenesis"] = (
+            name.startswith("perceptual_ontogenesis")
+            or name.startswith("concept_")
+            or name in ("proto_concept_birth", "world_formation",
+                        "world_formation_evaluation")
+            or bool(merged.get("perceptual_ontogenesis", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

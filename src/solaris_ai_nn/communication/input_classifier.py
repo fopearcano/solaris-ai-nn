@@ -280,6 +280,19 @@ METABOLISM_QUERIES = (
     ("are these needs feelings", "pm_feelings"),
 )
 
+# Perceptual-ontogenesis queries (Prompt 47). Answered from the ontogenesis
+# status; the "does this prove understanding?" question is answered safely even
+# with no ontogenesis run.
+ONTOGENESIS_QUERIES = (
+    ("what concepts has solaris formed", "po_concepts"),
+    ("are these human concepts", "po_human"),
+    ("which concepts are stable", "po_stable"),
+    ("which concepts decayed", "po_decayed"),
+    ("what world is forming", "po_world"),
+    ("did human labels contaminate concept formation", "po_contamination"),
+    ("does this prove understanding", "po_understanding"),
+)
+
 # Feeder-SDK queries (Prompt 45). Answered from the feeder monitor/manifest; the
 # control/start questions are answered safely even with no feeders attached.
 FEEDER_SDK_QUERIES = (
@@ -483,7 +496,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._metabolism(lowered)
+        result = (self._ontogenesis(lowered)
+                  or self._metabolism(lowered)
                   or self._feeder_sdk(lowered)
                   or self._sensorium_lab(lowered)
                   or self._live_field(lowered)
@@ -635,6 +649,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _ontogenesis(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in ONTOGENESIS_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"perceptual ontogenesis query {topic!r}"])
         return None
 
     @staticmethod

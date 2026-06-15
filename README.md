@@ -431,7 +431,22 @@ python examples/run_sensory_overload_demo.py             # throttle on overload 
 python examples/run_sensory_deprivation_demo.py          # silence treated as stimulus
 python examples/run_source_diet_demo.py                  # diet diversity + dominance (measured, not hidden)
 python examples/run_consolidation_pressure_demo.py       # ingest-vs-digest; bounded replay recommendation
+
+# Perceptual ontogenesis: an internal world forms from peculiar perception
+python examples/run_perceptual_ontogenesis_demo.py       # atoms -> proto-concepts -> families/relations -> report
+python examples/run_proto_concept_birth_demo.py          # repeated invariant births a concept; isolated event does not
+python examples/run_concept_stabilization_decay_demo.py  # stable (provisional), decaying, rejected (evidence kept)
+python examples/run_world_formation_demo.py              # families, relations, structural world summary
+python examples/run_concept_contamination_demo.py        # feature-grounded vs human-label contaminated (marked)
 ```
+
+Proto-concepts are operational structures for compression, prediction, attention,
+and relation-building. They are not proof of understanding or subjective
+experience. They are sensorium-native structures, not human words or categories;
+human labels are external annotations only, never ground truth. World formation is
+structural, not subjective; the ontogenesis layer is internal-only (it starts no
+feeder, touches no hardware, modifies no source, never deletes concepts, and
+refuses to run unbounded).
 
 Perceptual needs are operational regulatory pressures, not emotions or subjective
 feelings; perceptual metabolism is computational regulation, not biological life.
@@ -1314,6 +1329,10 @@ src/solaris_ai_nn/
                 operational needs, energy budget, sensory homeostasis, attention
                 economy, overload, deprivation, novelty appetite, source diet,
                 consolidation pressure, runtime, reports, safety
+  perceptual_ontogenesis/ an internal world forms from peculiar perception:
+                perceptual atoms, proto-concepts, concept birth, concept memory,
+                concept families, world formation, relation growth, stabilization,
+                decay, contamination, runtime, reports, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

@@ -2476,3 +2476,40 @@ Dominance is measured, never hidden, and human labels are never ground truth.
 Estimates ingest-vs-digest consolidation pressure and emits a bounded latent-replay
 *recommendation* only -- nothing sleeps forever and consolidation erases no
 evidence.
+
+## 269. Perceptual Ontogenesis Demo ✅ (implemented)
+
+**Run:** `python examples/run_perceptual_ontogenesis_demo.py --state-dir .solaris_ai_nn_ontogenesis/test_ontogenesis`
+Feeds a mixed fixture sensorium (plus metabolism state) into the ontogenesis
+runtime, which extracts perceptual atoms, conservatively births proto-concepts,
+stabilizes/decays them, forms families and relations, and writes the report.
+Proto-concepts are operational structures, NOT words or human categories.
+
+## 270. Proto-Concept Birth Demo ✅ (implemented)
+
+**Run:** `python examples/run_proto_concept_birth_demo.py --state-dir .solaris_ai_nn_ontogenesis/test_concept_birth`
+Shows a repeated invariant producing a real (non-weak) concept candidate while a
+single isolated low-novelty event produces none. Concept birth is conservative and
+preserves evidence refs.
+
+## 271. Concept Stabilization/Decay Demo ✅ (implemented)
+
+**Run:** `python examples/run_concept_stabilization_decay_demo.py --state-dir .solaris_ai_nn_ontogenesis/test_stabilization_decay`
+Builds a well-grounded concept (stabilizes), a no-longer-useful concept (decays),
+and a false pattern (rejected). Stability is provisional (stable does not mean
+true); decayed/rejected concepts remain historically visible -- evidence is never
+deleted.
+
+## 272. World Formation Demo ✅ (implemented)
+
+**Run:** `python examples/run_world_formation_demo.py --state-dir .solaris_ai_nn_ontogenesis/test_world_formation`
+Runs ontogenesis over a multi-modal fixture sensorium and shows the concept
+families, the relation graph, and the observable structural world summary. The
+world formed is structural, NOT subjective experience or qualia.
+
+## 273. Concept Contamination Demo ✅ (implemented)
+
+**Run:** `python examples/run_concept_contamination_demo.py --state-dir .solaris_ai_nn_ontogenesis/test_contamination`
+Contrasts a feature-grounded concept with a human-label contaminated one and runs
+the contamination analyzer. Human-labelled concepts are allowed but marked, and
+contamination lowers grounding/stability; human labels are never ground truth.
