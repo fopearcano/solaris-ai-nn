@@ -2307,3 +2307,47 @@ non-ground-truth, and confirms the debug-truth file is excluded from perception.
 `organismic_demo_safety`). Four registered protocols measure the bounded
 organismic-perception demo; it controls no hardware and changed response structure
 is not consciousness or understanding.
+
+## 246. Live Field Preflight Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_field_preflight_demo.py --state-dir .solaris_ai_nn_live/test_preflight`
+Registers fixture-style feeders, runs the live-field preflight (validates
+feeders/sources, starts nothing), and shows that live mode is blocked without
+governance while a fixture fallback remains available. Solaris reads only.
+
+## 247. Live Field Fixture Fallback Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_field_fixture_fallback_demo.py --state-dir .solaris_ai_nn_live/test_fixture_fallback`
+Runs the bounded live-field runtime on fixture-style feeder files (no governance
+needed for fixtures), shows source health and structure detected, and writes the
+live field report. No hardware, no source modification, no actuation.
+
+## 248. Live Field Report Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_field_report_demo.py --state-dir .solaris_ai_nn_live/test_report`
+Registers present, missing, and corrupt feeders, runs a bounded read-only
+ingestion, and writes the live field report -- showing that corrupt and missing
+sources are recorded, not hidden.
+
+## 249. Live Field Comparison Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_field_comparison_demo.py --state-dir .solaris_ai_nn_live/test_comparison`
+Compares a live-like feeder stream against a fixture field and a passive
+event-list parser, reporting the changed-perception score for each.
+Negative/inconclusive results are reported honestly.
+
+## 250. Feeder Contract Demo ✅ (implemented)
+
+**Run:** `python examples/run_feeder_contract_demo.py --state-dir .solaris_ai_nn_live/test_feeder_contract`
+Shows the live feeder contract validating records: a valid feature record builds a
+read-only envelope with provenance; a record carrying an executable/command
+payload is rejected; and sensory text is treated as observation, never a command.
+
+## 251. Live Field Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment live_field_pilot`
+(also `live_field_preflight`, `live_field_vs_fixture`,
+`live_field_vs_passive_parser`, `live_field_changed_perception`,
+`live_field_source_uncertainty`, `live_field_comparison`, `live_field_safety`).
+Eight registered protocols measure the real read-only feeder pilot; Solaris
+controls no hardware and modifies no source.

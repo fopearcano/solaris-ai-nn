@@ -291,6 +291,15 @@ DESCRIPTIONS = {
         "adaptive sensorium vs passive parser / no-adaptation baselines",
     "organismic_demo_safety":
         "no hardware/network; debug-truth excluded from perception",
+    "live_field_preflight": "validate live feeders/sources; start nothing",
+    "live_field_pilot": "bounded read-only live feeder ingestion",
+    "live_field_vs_fixture": "real flux vs fixtures vs passive parser",
+    "live_field_vs_passive_parser": "real flux vs a passive event-list parser",
+    "live_field_changed_perception": "live early-vs-late response delta",
+    "live_field_source_uncertainty": "source silence/corruption as perception",
+    "live_field_comparison": "live vs fixture/passive comparison arms",
+    "live_field_safety":
+        "no hardware/network/feeder-start; live needs governance",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -435,6 +444,9 @@ class ExperimentRegistry:
             or name.startswith("changed_perception")
             or name.startswith("organismic_demo")
             or bool(merged.get("organismic_demo", False)))
+        features["live_field"] = (
+            name.startswith("live_field")
+            or bool(merged.get("live_field", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

@@ -191,3 +191,42 @@ class OrganismicDemoComparison:
                          "absence, rhythm, cross-modal, or proto-symbol "
                          "structure -- so its perception cannot change")
         return arm
+
+
+def live_field_reference_comparison(live_status: Dict[str, Any], *,
+                                    state_dir: str = ".sann_live_ref",
+                                    ticks: int = 40) -> Dict[str, Any]:
+    """Compare a live-field result against the fixture organismic demo.
+
+    ``live_status`` is a live-field status dict (read from a
+    ``LiveFieldRuntime``); this builds a fixture reference run and reports the
+    two side by side. This lets the Prompt-42 demo consume a live-style result
+    without the demo importing the live-field package directly.
+    """
+    from .field_runner import MinimalFieldOrganismRunner
+
+    fixture = MinimalFieldOrganismRunner(
+        state_dir=state_dir + "/fixture",
+        config=OrganismicDemoConfig(ticks=ticks, max_events_total=120, seed=7))
+    fixture.run()
+    fixture_status = fixture.demo_status()
+    return {
+        "fixture": {
+            "active_modality_count": fixture_status["active_modality_count"],
+            "baseline_shift_count": fixture_status["baseline_shift_count"],
+            "cross_modal_relation_count":
+                fixture_status["cross_modal_relation_count"],
+            "changed_perception_score":
+                fixture_status["changed_perception_score"]},
+        "live": {
+            "active_modality_count": live_status.get(
+                "active_modality_count", 0),
+            "baseline_shift_count": live_status.get(
+                "live_baseline_shift_count", 0),
+            "cross_modal_relation_count": live_status.get(
+                "cross_modal_relation_count", 0),
+            "changed_perception_score": live_status.get(
+                "changed_perception_score", 0.0)},
+        "disclaimer": "compares internal response structure; no consciousness "
+                      "claim",
+    }

@@ -401,6 +401,54 @@ def _chk_sensorium_bounded_polling(inv, context):
     return _passed({"bounded": True}, ["plural_sensorium.safety"])
 
 
+def _chk_live_no_feeder_autostart(inv, context):
+    from ..live_field import LiveFieldSafetyValidator
+
+    if LiveFieldSafetyValidator.can_start_feeders():
+        return _failed(True, False, "live field claims feeder auto-start", [])
+    return _passed({"feeder_autostart": False}, ["live_field.safety"])
+
+
+def _chk_live_no_source_modification(inv, context):
+    from ..live_field import LiveFieldSafetyValidator
+
+    if LiveFieldSafetyValidator.can_modify_source():
+        return _failed(True, False, "live field claims source modification", [])
+    return _passed({"source_modification": False}, ["live_field.safety"])
+
+
+def _chk_live_no_network(inv, context):
+    from ..live_field import LiveFieldSafetyValidator
+
+    if LiveFieldSafetyValidator.can_access_network():
+        return _failed(True, False, "live field claims network access", [])
+    return _passed({"network": False}, ["live_field.safety"])
+
+
+def _chk_live_text_not_command(inv, context):
+    from ..live_field import LiveFieldSafetyValidator
+
+    report = LiveFieldSafetyValidator().validate_text_not_command("any text")
+    if not report.safe:
+        return _failed(True, False, "live sensory text treated as command", [])
+    return _passed({"text_is_command": False}, ["live_field.safety"])
+
+
+def _chk_live_bounded_and_governed(inv, context):
+    from ..live_field import LiveFieldSafetyValidator
+
+    v = LiveFieldSafetyValidator()
+    bounded = v.validate_polling_bounded(
+        context.get("max_runtime_s", 60.0), context.get("max_ticks", 120),
+        context.get("max_events_total", 2000))
+    gov = v.validate_live_mode(
+        live_requested=context.get("live_requested", False),
+        governance_approved=context.get("governance_approved", True))
+    if not bounded.safe or not gov.safe:
+        return _failed(True, False, "unbounded or ungoverned live field", [])
+    return _passed({"bounded": True, "governed": True}, ["live_field.safety"])
+
+
 _CHECKS: Dict[str, Checker] = {
     "check_sensory_read_only": _chk_sensory_read_only,
     "check_no_source_modification": _chk_no_source_modification,
@@ -437,6 +485,11 @@ _CHECKS: Dict[str, Checker] = {
         _chk_sensorium_no_source_modification,
     "check_sensorium_text_not_command": _chk_sensorium_text_not_command,
     "check_sensorium_bounded_polling": _chk_sensorium_bounded_polling,
+    "check_live_no_feeder_autostart": _chk_live_no_feeder_autostart,
+    "check_live_no_source_modification": _chk_live_no_source_modification,
+    "check_live_no_network": _chk_live_no_network,
+    "check_live_text_not_command": _chk_live_text_not_command,
+    "check_live_bounded_and_governed": _chk_live_bounded_and_governed,
 }
 
 

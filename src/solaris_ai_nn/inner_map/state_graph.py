@@ -1438,4 +1438,31 @@ def build_default_state_graph() -> StateGraph:
                "the runner runs the changed-perception probe")
     g.add_edge("MinimalFieldOrganismRunner", "inner_map",
                "demo state feeds Inner MAP")
+
+    # Live field: real read-only environmental feeders (Prompt 43). External
+    # feeders write event envelopes; Solaris reads them through the plural
+    # sensorium. Solaris reads; it does not control.
+    for name, role in [
+        ("LiveFeederContract", "the data shape real feeders must produce"),
+        ("LiveFeederRegistry", "local catalogue of feeders; starts nothing"),
+        ("FeatureDropbox", "read-only inbox folders external tools drop into"),
+        ("SourceHealthMonitor", "silence becomes absence; corruption is flagged"),
+        ("LiveFieldRuntime", "bounded read-only feeder ingestion"),
+        ("LiveFieldPilot", "governed, phased live read-only pilot"),
+        ("LiveFieldTrace", "auditable record of the live run"),
+        ("LiveFieldComparison", "live vs fixture/passive baselines"),
+        ("LiveFieldReportBuilder", "what was perceived; what was not proven"),
+        ("LiveFieldSafetyValidator", "no hardware/network/feeder-start/mutation"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("LiveFeederRegistry", "LiveFieldRuntime",
+               "the registry feeds the live runtime (read-only)")
+    g.add_edge("FeatureDropbox", "LiveFieldRuntime",
+               "dropbox feature files feed the live runtime (read-only)")
+    g.add_edge("LiveFieldRuntime", "PluralSensoriumRuntime",
+               "live envelopes are read into the plural sensorium")
+    g.add_edge("SourceHealthMonitor", "LiveFieldRuntime",
+               "source silence becomes perceptual absence")
+    g.add_edge("LiveFieldRuntime", "inner_map",
+               "live field state feeds Inner MAP")
     return g

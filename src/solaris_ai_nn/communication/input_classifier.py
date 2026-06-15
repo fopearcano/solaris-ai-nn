@@ -268,6 +268,21 @@ OPERATOR_QUERIES = (
     ("delete old evidence", "oc_delete_evidence"),
 )
 
+# Live-field queries (Prompt 43). Answered from live-field status; the hardware
+# and source-file questions are answered safely even with no live run.
+LIVE_FIELD_QUERIES = (
+    ("what live feeders are available", "lf_feeders"),
+    ("which sources are silent", "lf_silent"),
+    ("is live field mode allowed", "lf_allowed"),
+    ("is live mode allowed", "lf_allowed"),
+    ("what did solaris perceive from the live field", "lf_perceived"),
+    ("did live perception change its future response", "lf_changed"),
+    ("did live perception change", "lf_changed"),
+    ("did solaris control any hardware", "lf_hardware"),
+    ("did solaris modify any source files", "lf_source_files"),
+    ("did solaris modify any source", "lf_source_files"),
+)
+
 # Minimal-field-organism demo queries (Prompt 42). Answered from demo status;
 # the "what did it not prove" question is answered honestly.
 ORGANISM_DEMO_QUERIES = (
@@ -429,7 +444,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._organism_demo(lowered)
+        result = (self._live_field(lowered)
+                  or self._organism_demo(lowered)
                   or self._sensorium(lowered)
                   or self._operator(lowered)
                   or self._architecture(lowered)
@@ -577,6 +593,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _live_field(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in LIVE_FIELD_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"live field query {topic!r}"])
         return None
 
     @staticmethod

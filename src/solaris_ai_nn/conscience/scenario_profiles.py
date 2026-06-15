@@ -889,6 +889,49 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
         expected_metrics=["report_generation_success"],
         max_runtime_s=30.0))
 
+    # -- Live field profiles (Prompt 43) --------------------------------------
+    # Real read-only environmental feeders. Preflight / report-only / fixture
+    # fallback / comparison are bounded and safe by default; the governed short
+    # pilot requires governance approval. No profile starts feeders or controls
+    # hardware, and there is no unbounded live profile.
+    _live_modules = ["bridge", "ecology", "governance", "ops", "inner_map",
+                    "plural_sensorium"]
+    for pid, desc, scope, plan_only in (
+            ("live_field_preflight",
+             "Validate live feeders/sources (no run).",
+             "enable_live_field_preflight", True),
+            ("live_field_report_only",
+             "Compile the live field report (analysis only).",
+             "enable_live_field_report", True),
+            ("live_field_fixture_fallback",
+             "Run the live field runtime on fixture-style feeders (bounded).",
+             "enable_live_field_preflight", False),
+            ("live_field_changed_perception_probe",
+             "Run the live field changed-perception probe (bounded).",
+             "enable_live_field_comparison", False),
+            ("live_field_comparison",
+             "Compare live field vs fixture/passive baselines (bounded).",
+             "enable_live_field_comparison", False),
+            ("live_field_short_governed",
+             "Bounded GOVERNED live read-only field pilot.",
+             "enable_live_field_read_only_pilot", False)):
+        if plan_only:
+            run_ctx = _ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                           max_duration_s=None)
+        else:
+            run_ctx = _ctx(RunMode.SHORT_DEMO, max_steps=120)
+        add(ScenarioProfile(
+            profile_id=pid, description=desc, run_context=run_ctx,
+            enabled_modules=list(_live_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "external feeders only; Solaris reads, never controls",
+                "no feeder auto-start; no source modification; no hardware",
+                "live mode requires governance approval"],
+            governance_requirements=[scope],
+            expected_artifacts=["LIVE_FIELD_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=60.0))
+
     return profiles
 
 

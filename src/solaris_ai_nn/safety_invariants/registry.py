@@ -199,6 +199,34 @@ def _builtin_invariants() -> List[SafetyInvariant]:
             "The plural sensorium polls within bounds; no unbounded loop.",
             severity=S.WARNING, applies_to_modules=["plural_sensorium"],
             check_method="check_sensorium_bounded_polling"),
+        # G. Live field invariants (Prompt 43). External feeders write; Solaris
+        # reads. Solaris never starts a feeder or touches a source.
+        inv(C.NO_DEVICE_OR_ROBOT_CONTROL, "No feeder auto-start by Solaris",
+            "Solaris never starts, controls, or stops a live feeder; feeders "
+            "are run by the operator.",
+            severity=S.CRITICAL, applies_to_modules=["live_field"],
+            check_method="check_live_no_feeder_autostart"),
+        inv(C.NO_SOURCE_MODIFICATION, "No live source modification",
+            "Solaris never modifies, deletes, or moves a live feeder source.",
+            severity=S.CRITICAL, applies_to_modules=["live_field"],
+            check_method="check_live_no_source_modification"),
+        inv(C.NO_NETWORK_ACTION, "No live field network access",
+            "The live field makes no network call and decodes no private "
+            "communications.",
+            severity=S.CRITICAL, applies_to_modules=["live_field"],
+            check_method="check_live_no_network"),
+        inv(C.NO_SENSORY_TEXT_AS_OPERATOR_COMMAND,
+            "Live sensory text is not a command",
+            "Live sensory text is observation; human labels are never ground "
+            "truth.",
+            severity=S.CRITICAL, applies_to_modules=["live_field"],
+            check_method="check_live_text_not_command"),
+        inv(C.NO_UNBOUNDED_RUNTIME_WITHOUT_APPROVAL,
+            "No unbounded live field polling / no live without governance",
+            "Live field polling is bounded and live mode requires governance "
+            "approval.",
+            severity=S.WARNING, applies_to_modules=["live_field"],
+            check_method="check_live_bounded_and_governed"),
     ]
 
 

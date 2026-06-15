@@ -54,3 +54,7 @@ artifacts/
 .sann_arch/
 .solaris_ai_nn_operator/
 .sann_operator/
+.solaris_ai_nn_live/
+.sann_live/
+.sann_live_cmp/
+.sann_live_ref/

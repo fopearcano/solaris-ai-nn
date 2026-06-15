@@ -399,6 +399,13 @@ python examples/run_minimal_field_organism_demo.py        # continuous flux -> c
 python examples/run_changed_perception_probe_demo.py      # early vs late response delta (honest about nulls)
 python examples/run_organismic_comparison_demo.py         # full adaptive sensorium vs passive parser baselines
 python examples/run_external_feeder_contract_demo.py      # read-only feeder envelopes + provenance (no hardware)
+
+# Live field: real read-only environmental feeders (Solaris reads; it does not control)
+python examples/run_live_field_preflight_demo.py          # validate feeders/sources; live mode needs governance
+python examples/run_live_field_fixture_fallback_demo.py   # run the live runtime on fixture feeders (no hardware)
+python examples/run_live_field_report_demo.py             # report incl. corrupt/missing sources (never hidden)
+python examples/run_live_field_comparison_demo.py         # live-like stream vs fixture vs passive parser
+python examples/run_feeder_contract_demo.py               # valid envelope accepted; command payload rejected
 ```
 
 The read-only sensory membrane and Pilot-2 also run as governed conscience
@@ -758,6 +765,29 @@ no-adaptation/fixed-attention baselines, and reports negative results honestly. 
 positive changed-perception score is **evidence of changed internal response
 structure only -- not consciousness, sentience, life, or understanding**, and the
 cross-modal debug-truth file is kept out of perception entirely.
+
+The **live field** (`live_field/`) is the first real read-only environmental
+field pilot. External **feeders** -- separate operator-run scripts in `feeders/`
+(a manual log, a watched folder, a local system-rhythm reader, a feature dropbox)
+-- write Sensory Event Envelopes into local files; Solaris reads them read-only
+through the plural sensorium. A feeder contract enforces the envelope shape
+(features primary, human labels never ground truth, provenance mandatory), a
+registry catalogues feeders without starting any, a source-health monitor turns
+silence into perceptual absence and flags corruption, and a bounded, phased
+**pilot** compares live flux against fixtures and a passive parser. **Solaris
+reads; it does not control:** the live field adds no hardware drivers, never
+accesses an SDR/microphone/camera/device/network/shell, never starts a feeder,
+never modifies/deletes/moves a source, decodes nothing private, and performs no
+real-world actuation. Live mode requires governance approval; preflight,
+report-only, fixture-fallback, and comparison run by default. The data contract
+and the rule that **hardware collectors must export feature summaries, not raw
+private content,** are documented in `feeders/README.md`.
+
+> **Warning:** the live field controls **no hardware**. Hardware-specific
+> collectors (SDR, mmWave, ultrasound, thermal, magnetic) are out of scope here:
+> run them separately and have them export feature summaries into a dropbox.
+> Solaris only ever reads the resulting feeder files, and a real live pilot
+> requires governance approval.
 
 > **Warning:** the plural sensorium adds **no hardware drivers**. It never accesses
 > an SDR, microphone, camera, or any device; makes no network call; decodes no
@@ -1197,11 +1227,17 @@ src/solaris_ai_nn/
   organismic_demo/ first observable organismic-perception demo: scenario,
                 fixture feeders, field runner, observation trace, changed-
                 perception probe, comparison arms, demo report, safety validator
+  live_field/   real read-only environmental feeder pilot: feeder contract,
+                feeder registry, local feeder validators, feature dropbox,
+                source health, live field runtime/pilot/trace/report,
+                comparison, safety validator (Solaris reads, never controls)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging
 tests/          pytest suite
 examples/       runnable scripts
+feeders/        external read-only feeder scripts (run by the operator, outside
+                Solaris): manual log, watched folder, system rhythm, dropbox
 docs/           ARCHITECTURE, SOLARIS_REFERENCE_MAP, ROADMAP, EXPERIMENTS, RESEARCH_NOTES
 ```
 

@@ -106,6 +106,10 @@ def _source_package(profile_id: str) -> str:
         return "architecture_evolution"
     if pid.startswith("plural_sensorium"):
         return "plural_sensorium"
+    if pid.startswith("minimal_field_organism"):
+        return "organismic_demo"
+    if pid.startswith("live_field"):
+        return "live_field"
     return "conscience"
 
 

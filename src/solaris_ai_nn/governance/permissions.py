@@ -217,6 +217,12 @@ class PermissionScope:
     ENABLE_PLURAL_SENSORIUM_REAL_READ_ONLY = \
         "enable_plural_sensorium_real_read_only"
 
+    # Live field: real read-only environmental feeder pilot (Prompt 43).
+    ENABLE_LIVE_FIELD_PREFLIGHT = "enable_live_field_preflight"
+    ENABLE_LIVE_FIELD_READ_ONLY_PILOT = "enable_live_field_read_only_pilot"
+    ENABLE_LIVE_FIELD_REPORT = "enable_live_field_report"
+    ENABLE_LIVE_FIELD_COMPARISON = "enable_live_field_comparison"
+
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
         ENABLE_PLASTICITY, ENABLE_PLASTICITY_APPLY, ENABLE_PLASTICITY_DRY_RUN,
@@ -305,6 +311,8 @@ class PermissionScope:
         ENABLE_OPERATOR_APPROVAL_LEDGER,
         ENABLE_PLURAL_SENSORIUM_FIXTURE, ENABLE_PLURAL_SENSORIUM_REPORT,
         ENABLE_PLURAL_SENSORIUM_REAL_READ_ONLY,
+        ENABLE_LIVE_FIELD_PREFLIGHT, ENABLE_LIVE_FIELD_READ_ONLY_PILOT,
+        ENABLE_LIVE_FIELD_REPORT, ENABLE_LIVE_FIELD_COMPARISON,
     )
 
 
@@ -831,6 +839,21 @@ class PermissionSet:
                        note="reading a real outside-world read-only feeder "
                             "requires explicit governance approval; still no "
                             "hardware control or capture"),
+            # Live field (Prompt 43). Preflight, report compilation, and
+            # comparison are bounded/read-only and granted by default; the live
+            # read-only pilot requires explicit approval. No profile starts a
+            # feeder or controls hardware.
+            Permission(S.ENABLE_LIVE_FIELD_PREFLIGHT, granted=True,
+                       note="validates feeders/sources only; starts nothing"),
+            Permission(S.ENABLE_LIVE_FIELD_REPORT, granted=True,
+                       note="live field report compiles recorded artifacts"),
+            Permission(S.ENABLE_LIVE_FIELD_COMPARISON, granted=True,
+                       note="compares live vs fixture/passive; read-only"),
+            Permission(S.ENABLE_LIVE_FIELD_READ_ONLY_PILOT, granted=False,
+                       requires_approval=True,
+                       note="a live read-only field pilot requires explicit "
+                            "governance approval; still no hardware/network/"
+                            "actuation and no source mutation"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

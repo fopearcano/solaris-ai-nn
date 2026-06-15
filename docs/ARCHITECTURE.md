@@ -2636,3 +2636,65 @@ perception, debug-truth leakage into perception, and unbounded runtime, and the
 report states plainly that a positive changed-perception score is **evidence of
 changed internal response structure only -- not consciousness, sentience, life,
 or understanding.**
+
+## Live Field: Real Read-Only Environmental Flux
+
+Prompt 42 exposed Solaris-AI-NN to *fixture* feeders, which are perfect for
+testing code paths but cannot test the system hypothesis -- because a fixture is a
+world Solaris helped author. The live field (`src/solaris_ai_nn/live_field/`) is
+the first **real read-only environmental field pilot**: it exposes Solaris to
+genuine environmental uncertainty while keeping the safety boundary absolute. The
+flow is strictly one-directional:
+
+```
+outside world -> external feeder -> local event envelope files ->
+read-only sensory membrane -> plural sensorium receptors ->
+continuous sensory field -> Stimulus / Push / Desire -> internal adaptation
+```
+
+**External feeders write event envelopes; Solaris reads only.** A feeder is a
+*separate* process the operator runs (see `feeders/`): a manual log, a watched
+folder, a local system-rhythm script, or a feature dropbox that external tools
+(an SDR/mmWave/thermal/magnetic collector run separately) drop feature summaries
+into. The :class:`LiveFeederContract` defines the envelope shape -- compatible
+with the Prompt-41 Sensory Event Envelope, features primary, human annotations
+non-ground-truth, provenance mandatory -- and the :class:`LiveFeederRegistry`
+catalogues feeders without ever starting one. The :class:`FeatureDropboxIngestor`
+reads `.jsonl`/`.json`/`.csv` inbox files read-only, recording corrupt files
+rather than hiding them.
+
+**Solaris does not control hardware.** This prompt adds no hardware drivers. The
+hardware-specific collectors (SDR, mmWave, ultrasound, thermal, magnetic) are
+documentation-only placeholders; if you own such hardware you run the vendor's
+collector yourself and have it export feature summaries (never raw private
+content) into a dropbox. The :class:`LiveFieldRuntime` validates feeder output,
+ingests envelopes through the plural sensorium tick by tick, and tracks source
+health.
+
+**Source silence and corruption become perception and evidence.** The
+:class:`SourceHealthMonitor` turns a source that goes quiet into a perceptual
+*absence* (which the plural sensorium already treats as first-class), and turns a
+corrupt record into a flagged evidence issue. Source failure is never hidden; the
+report lists corrupt and missing sources explicitly.
+
+**Live mode requires governance approval; no real-world actuation ever occurs.**
+Preflight, report-only, fixture-fallback, and comparison run by default; the live
+read-only pilot (`live_field_short_governed`) requires the
+`enable_live_field_read_only_pilot` scope. The :class:`LiveFieldSafetyValidator`
+refuses hardware access, network, shell, feeder auto-start, source modification /
+deletion / moving, real-world actuation, treating sensory text as a command,
+human labels as ground truth, decoding private communications, unbounded polling,
+and live mode without governance. The :class:`LiveFieldPilot` runs a bounded,
+phased pilot (preflight -> feeder validation -> baseline -> continuous exposure ->
+absence monitoring -> cross-modal -> changed-perception probe -> comparison ->
+report); the :class:`LiveFieldComparison` weighs live flux against fixtures and a
+passive parser; and the report states plainly that **no hardware was controlled,
+no source was modified, no real-world actuation occurred, and the result does not
+prove consciousness, sentience, life, or understanding** -- it only tests whether
+real read-only environmental flux changes Solaris's internal response structure.
+The live field integrates with governance (four scopes), the conscience spine (six
+profiles, no hardware profile, no unbounded live profile), safety invariants (five
+rules), the Inner MAP (a `live_field` field plus ten state-graph nodes), the
+research lab and evaluation (eight protocols and fourteen metrics), and the
+operator dialogue (which answers plainly that **Solaris only read feeder-produced
+event envelopes; it did not control hardware and did not modify source files**).

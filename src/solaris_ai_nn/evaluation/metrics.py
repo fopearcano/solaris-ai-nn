@@ -1491,3 +1491,47 @@ def organismic_demo_metrics(demo: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "note": "bounded read-only organismic-perception demo; changed response "
                 "structure is not consciousness or understanding",
     }
+
+
+def live_field_metrics(live: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective live-field metrics (real read-only feeder pilot layer).
+
+    These describe the live field: feeder/source counts and health, active
+    modalities, source unpredictability, the structure detected (baseline
+    shifts, absences, rhythms, invariants, cross-modal relations), the
+    changed-perception score, human-label contamination, and safety blocks.
+    Solaris reads external feeders only; it controls no hardware and mutates no
+    source, and changed response structure is not consciousness.
+    """
+    if not live:
+        return {"present": False}
+    return {
+        "present": True,
+        "live_feeder_count": int(live.get("feeder_count", 0) or 0),
+        "live_active_source_count": int(live.get("active_source_count", 0) or 0),
+        "live_silent_source_count": int(live.get("silent_source_count", 0) or 0),
+        "live_corrupt_source_count": int(
+            live.get("corrupt_source_count", 0) or 0),
+        "live_active_modality_count": int(
+            live.get("active_modality_count", 0) or 0),
+        "live_source_unpredictability_score": float(
+            live.get("source_unpredictability_score", 0.0) or 0.0),
+        "live_baseline_shift_count": int(
+            live.get("live_baseline_shift_count",
+                     live.get("baseline_shift_count", 0)) or 0),
+        "live_absence_event_count": int(live.get("absence_event_count", 0) or 0),
+        "live_rhythm_signature_count": int(
+            live.get("rhythm_signature_count", 0) or 0),
+        "live_invariant_candidate_count": int(
+            live.get("invariant_candidate_count", 0) or 0),
+        "live_cross_modal_relation_count": int(
+            live.get("cross_modal_relation_count", 0) or 0),
+        "live_changed_perception_score": float(
+            live.get("changed_perception_score", 0.0) or 0.0),
+        "live_human_label_contamination_score": float(
+            live.get("human_label_contamination_score", 0.0) or 0.0),
+        "live_safety_block_count": int(live.get("safety_block_count", 0) or 0),
+        "controls_hardware": False,
+        "note": "real read-only feeder pilot; no hardware control, no source "
+                "mutation; changed response structure is not consciousness",
+    }

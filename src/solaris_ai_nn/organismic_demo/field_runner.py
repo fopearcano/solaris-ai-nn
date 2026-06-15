@@ -34,6 +34,7 @@ class MinimalFieldOrganismRunner:
     config: OrganismicDemoConfig = field(default_factory=OrganismicDemoConfig)
     enabled_modalities: Optional[List[str]] = None
     governance: Any = None
+    use_live_registry: bool = False  # use live feeders instead of fixtures
 
     run_id: str = field(
         default_factory=lambda: f"OFD_{uuid.uuid4().hex[:10]}")
@@ -59,6 +60,16 @@ class MinimalFieldOrganismRunner:
             self.config.max_events_total)
         if not bounded.safe:
             self.refusal_reasons.extend(bounded.violations)
+            return False
+
+        # Using the live feeder registry instead of fixtures requires governance
+        # approval for the live read-only pilot (Prompt 43 integration).
+        if self.use_live_registry and not self._live_governance_ok():
+            self.refusal_reasons.append(
+                "using the live feeder registry requires governance approval "
+                "for the live read-only pilot")
+            self.trace.record(TraceEventType.SAFETY_BLOCK,
+                              detail="live registry blocked without governance")
             return False
 
         scenario = OrganismicDemoScenario(config=self.config)
@@ -175,6 +186,15 @@ class MinimalFieldOrganismRunner:
                               modality=data.get("modality"),
                               source_id=data.get("source_id"),
                               provenance=data.get("provenance", {}))
+
+    def _live_governance_ok(self) -> bool:
+        if self.governance is None:
+            return False
+        try:
+            return bool(self.governance.is_enabled(
+                "enable_live_field_read_only_pilot"))
+        except Exception:
+            return False
 
     def _receptor_snapshot(self, env: Any) -> Optional[Dict[str, Any]]:
         receptor = self.runtime.receptors.get(f"{env.source_id}:{env.modality}")

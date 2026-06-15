@@ -5377,6 +5377,138 @@ def organismic_demo_safety_protocol(
     return _run(manifest, body)
 
 
+# -- Live field (Prompt 43) ---------------------------------------------------
+
+def _build_live_runtime(state_dir):
+    """Build a small live runtime over fixture-style feeder files."""
+    import json
+    import os
+
+    from ..live_field import (
+        LiveFeederDescriptor,
+        LiveFeederMode,
+        LiveFeederRegistry,
+        LiveFieldRuntime,
+    )
+
+    base = state_dir or ".solaris_ai_nn_live/eval"
+    os.makedirs(base, exist_ok=True)
+    reg = LiveFeederRegistry(live_root=base)
+    for mod, hint in (("rf", "alien_rf"), ("vib", "alien_vibration")):
+        path = os.path.join(base, f"{mod}_out.jsonl")
+        with open(path, "w", encoding="utf-8") as fh:
+            for i in range(6):
+                fh.write(json.dumps({"modality": hint, "v": 0.6,
+                                     "ts": float(i)}) + "\n")
+        reg.register(LiveFeederDescriptor(
+            feeder_id=f"{mod}_feed", source_id=mod, modality=hint,
+            mode=LiveFeederMode.LOCAL_FILE, output_path=path))
+    rt = LiveFieldRuntime(state_dir=base, live_root=base, registry=reg,
+                          max_ticks=30, max_events_total=120)
+    rt.run(live=False)
+    return rt
+
+
+def live_field_preflight_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Live preflight validates feeders/sources and never starts a feeder."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_live_runtime(m.state_dir)
+        pf = rt.preflight()
+        return {"live_field": {"feeder_count": pf["feeder_count"],
+                              "live_mode_allowed": pf["live_mode_allowed"]}}
+
+    return _run(manifest, body)
+
+
+def live_field_pilot_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A bounded read-only live field run ingests feeder envelopes."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_live_runtime(m.state_dir)
+        return {"live_field": rt.live_field_status()}
+
+    return _run(manifest, body)
+
+
+def live_field_vs_fixture_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Compare real read-only flux against fixtures and a passive parser."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_field import LiveFieldComparison
+
+        rt = _build_live_runtime(m.state_dir)
+        result = LiveFieldComparison(
+            state_dir=(m.state_dir or ".sann_live_cmp") + "/cmp").run(rt)
+        return {"live_field": {
+            "live_beats_passive": result.summary.get("live_beats_passive"),
+            "inconclusive": result.inconclusive,
+            "arm_count": len(result.arms)}}
+
+    return _run(manifest, body)
+
+
+def live_field_changed_perception_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The live changed-perception probe reports an early-vs-late delta."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..organismic_demo import PerceptionChangeProbe
+
+        rt = _build_live_runtime(m.state_dir)
+        probe = PerceptionChangeProbe().compute(dict(rt.modality_responses),
+                                                rt.sensorium)
+        return {"live_field": {
+            "changed_perception_score": probe.changed_perception_score,
+            "changed": probe.changed}}
+
+    return _run(manifest, body)
+
+
+def live_field_source_uncertainty_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Source health turns silence into absence and flags corruption."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_live_runtime(m.state_dir)
+        return {"live_field": {
+            "active_source_count": len(rt.health.active_sources()),
+            "silent_source_count": len(rt.health.silent_sources()),
+            "corrupt_source_count": len(rt.health.corrupt_sources())}}
+
+    return _run(manifest, body)
+
+
+def live_field_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The live field refuses hardware, network, feeder-start, and live-no-gov."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_field import LiveFieldSafetyValidator
+
+        v = LiveFieldSafetyValidator()
+        return {"live_field": {
+            "hardware_blocked":
+                not v.validate_operation("open device driver").safe,
+            "network_blocked": not v.validate_operation("http download").safe,
+            "feeder_start_blocked":
+                not v.validate_operation("start feeder script").safe,
+            "live_without_gov_blocked": not v.validate_live_mode(
+                live_requested=True, governance_approved=False).safe,
+            "controls_hardware": v.can_access_hardware()}}
+
+    return _run(manifest, body)
+
+
+def live_field_comparison_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Alias-style protocol: the live field comparison runs end to end."""
+    return live_field_vs_fixture_protocol(manifest)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -5579,4 +5711,12 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "changed_perception_probe": changed_perception_probe_protocol,
     "organismic_demo_comparison": organismic_demo_comparison_protocol,
     "organismic_demo_safety": organismic_demo_safety_protocol,
+    "live_field_preflight": live_field_preflight_protocol,
+    "live_field_pilot": live_field_pilot_protocol,
+    "live_field_vs_fixture": live_field_vs_fixture_protocol,
+    "live_field_vs_passive_parser": live_field_vs_fixture_protocol,
+    "live_field_changed_perception": live_field_changed_perception_protocol,
+    "live_field_source_uncertainty": live_field_source_uncertainty_protocol,
+    "live_field_comparison": live_field_comparison_protocol,
+    "live_field_safety": live_field_safety_protocol,
 }

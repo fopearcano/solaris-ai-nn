@@ -388,6 +388,13 @@ class InnerMapModel:
     # proto_symbol_candidate_count, latest_report_path,
     # latest_negative_result_count. The demo is a bounded, read-only observation.
     organismic_demo: Optional[Dict[str, Any]] = None
+    # Live-field status (Prompt 43); None when not attached. Keys:
+    # live_field_enabled, live_mode_allowed, feeder_count, active_source_count,
+    # silent_source_count, corrupt_source_count, active_modality_count,
+    # live_field_pressure, live_absence_pressure, live_baseline_shift_count,
+    # changed_perception_score, latest_live_field_report_path. The live field
+    # reads external feeders only; it controls no hardware and mutates no source.
+    live_field: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

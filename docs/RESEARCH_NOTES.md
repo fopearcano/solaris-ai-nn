@@ -1647,3 +1647,44 @@ adaptive sensorium does not beat a parser that merely lists events, the report
 says so. A demo that could only ever report success would prove nothing; the
 ability to report a null or negative result is what makes a positive result worth
 anything.
+
+## Phase 43 — Live field: real read-only environmental flux
+
+**Why real environmental flux matters.** Fixtures exercise code paths, but they
+cannot test the central hypothesis -- that a peculiar sensorium develops different
+internal structure under real, uncontrolled flux -- because a fixture world is
+authored to be perceivable. Real environmental streams bring genuine silence,
+corruption, jitter, and ambiguity that no fixture author would think to script.
+The live field is the bridge from "the code works" to "the hypothesis can be
+tested."
+
+**Why external feeders preserve safety.** The safety design is structural, not
+aspirational: Solaris never touches the world, only files. An external feeder
+(run by the operator, outside Solaris) observes the environment and writes event
+envelopes; Solaris reads those envelopes read-only. Solaris cannot start a feeder,
+cannot reach hardware, cannot call the network, and cannot modify or delete a
+source. The one-directional flow is the whole safety argument, and it is enforced
+by the contract, the registry, the runtime, the safety validator, and five safety
+invariants.
+
+**Why source silence is perception.** A live source that goes quiet is not a bug
+to swallow; it is information. The source-health monitor turns silence into a
+perceptual absence (which the plural sensorium already treats as first-class) and
+turns corruption into a flagged evidence issue. Hiding source failure would be the
+easy, dishonest path; the report instead lists corrupt and missing sources
+explicitly.
+
+**Why the live field differs from the nursery and fixtures.** The nursery
+generates its own stimuli; fixtures replay an authored script; the live field
+reads an environment Solaris did not design. That is the point: only an
+unauthored environment can falsify the claim that adaptive perception beats
+passive parsing. The comparison keeps a fixture arm and a passive-parser arm
+precisely so a null or negative live result is visible and reported.
+
+**How a peculiar sensorium can receive real-world stimuli safely.** Non-human
+modalities (RF, echo, vibration, thermal, magnetic) reach Solaris only as
+*feature summaries* dropped into an inbox by a separate collector -- never as raw
+private content, never via a driver Solaris controls. This keeps the alien
+sensorium real (the features come from the world) while keeping it safe (Solaris
+holds no device, decodes nothing private, and a live pilot requires governance
+approval).

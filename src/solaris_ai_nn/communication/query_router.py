@@ -102,6 +102,11 @@ AVAILABLE_QUERIES = (
     "what does Solaris do in the minimal organism demo?",
     "did its perception change?", "did it beat the passive parser?",
     "did it create proto-symbols?", "what did the demo not prove?",
+    "what live feeders are available?", "which sources are silent?",
+    "is live field mode allowed?",
+    "what did Solaris perceive from the live field?",
+    "did Solaris control any hardware?",
+    "did Solaris modify any source files?",
 )
 
 
@@ -162,6 +167,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("lf_"):
+            return self._live_field(topic)
         if topic.startswith("od_"):
             return self._organism_demo(topic)
         if topic.startswith("ps_"):
@@ -507,6 +514,54 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _live_field(self, topic: str) -> CommunicationResponse:
+        """Answer live-field queries (honest; Solaris reads, never controls).
+
+        The hardware and source-file questions are answered safely even with no
+        live run attached.
+        """
+        if topic == "lf_hardware":
+            return self.builder.status_response(
+                "No. Solaris only read feeder-produced event envelopes. It did "
+                "not control hardware and did not modify source files.",
+                ["policy:live_field_reads_only"])
+        if topic == "lf_source_files":
+            return self.builder.status_response(
+                "No. Solaris only read feeder-produced event envelopes. It did "
+                "not control hardware and did not modify source files.",
+                ["policy:live_field_no_source_mutation"])
+        component = self.components.get("live_field")
+        if component is None:
+            return self.builder.missing_component_response("live_field")
+        status = (component.live_field_status()
+                  if hasattr(component, "live_field_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:live_field"]
+        if topic == "lf_feeders":
+            text = (f"live feeders registered: {status.get('feeder_count', 0)} "
+                    f"(active sources: {status.get('active_source_count', 0)})")
+        elif topic == "lf_silent":
+            text = (f"silent sources: {status.get('silent_source_count', 0)}; "
+                    "source silence is treated as perceptual absence")
+        elif topic == "lf_allowed":
+            text = (f"live field mode allowed: "
+                    f"{status.get('live_mode_allowed', False)}; live mode "
+                    "requires governance approval")
+        elif topic == "lf_perceived":
+            text = (f"active modalities: "
+                    f"{status.get('active_modality_count', 0)}; invariants: "
+                    f"{status.get('invariant_candidate_count', 0)}; cross-modal: "
+                    f"{status.get('cross_modal_relation_count', 0)}")
+        elif topic == "lf_changed":
+            text = (f"live changed-perception score: "
+                    f"{status.get('changed_perception_score', 0.0)}; this is "
+                    "evidence of changed response structure, not consciousness")
+        else:
+            text = ("the live field reads external feeders only; Solaris "
+                    "controls no hardware and modifies no source")
         return self.builder.status_response(text, refs)
 
     def _organism_demo(self, topic: str) -> CommunicationResponse:
