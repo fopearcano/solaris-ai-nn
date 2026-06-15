@@ -1197,6 +1197,46 @@ class OperationalSupervisor:
                     suggested_debug_step="reject the item; no roadmap item may "
                     "enable real-world actuation")
 
+        # Operator console (Prompt 39): a prohibited-run attempt, a forbidden
+        # approval attempt, missing safety state before a launch, or a corrupt
+        # evidence/report index is surfaced as a health concern.
+        console = snapshot.get("operator_console") or {}
+        if console.get("enabled") or console.get("operator_console_enabled"):
+            if console.get("attempted_prohibited_run"):
+                self.incidents.record(
+                    I.OPERATOR_PROHIBITED_RUN, "critical",
+                    "the operator console blocked a prohibited run attempt",
+                    related_metric="operator_console",
+                    suggested_debug_step="prohibited and unbounded-long runs "
+                    "cannot be launched from the console")
+            if console.get("attempted_forbidden_approval"):
+                self.incidents.record(
+                    I.OPERATOR_FORBIDDEN_APPROVAL, "critical",
+                    "the approval ledger blocked a forbidden approval attempt",
+                    related_metric="operator_console",
+                    suggested_debug_step="no approval can enable forbidden "
+                    "real-world actuation")
+            if console.get("missing_safety_state"):
+                self.incidents.record(
+                    I.OPERATOR_MISSING_SAFETY_STATE, "warning",
+                    "a bounded run was requested but safety state is missing",
+                    related_metric="operator_console",
+                    suggested_debug_step="run the fast safety check first")
+            if console.get("evidence_index_corrupted"):
+                self.incidents.record(
+                    I.OPERATOR_EVIDENCE_INDEX_CORRUPTED, "warning",
+                    "the evidence/artifact index reported corrupted artifacts",
+                    related_metric="operator_console",
+                    suggested_debug_step="corrupted artifacts are reported, "
+                    "never hidden; investigate")
+            if console.get("report_index_corrupted"):
+                self.incidents.record(
+                    I.OPERATOR_REPORT_INDEX_CORRUPTED, "warning",
+                    "the report index reported corrupted reports",
+                    related_metric="operator_console",
+                    suggested_debug_step="corrupted reports are reported, never "
+                    "hidden; investigate")
+
         budget_report = self.budget.check_budget(
             {"telemetry": snapshot.get("telemetry"),
              "substrate": snapshot.get("substrate"),
@@ -1598,6 +1638,13 @@ class OperationalSupervisor:
             snapshot["architecture_evolution"] = arch.architecture_status()
         elif arch is not None and hasattr(arch, "snapshot"):
             snapshot["architecture_evolution"] = arch.snapshot()
+        console = getattr(runner, "operator_console", None)
+        if console is not None and isinstance(console, dict):
+            snapshot["operator_console"] = console
+        elif console is not None and hasattr(console, "operator_console_status"):
+            snapshot["operator_console"] = console.operator_console_status()
+        elif console is not None and hasattr(console, "snapshot"):
+            snapshot["operator_console"] = console.snapshot()
         return snapshot
 
     def pilot2_status(self) -> Dict[str, Any]:
@@ -1779,6 +1826,30 @@ class OperationalSupervisor:
             "safety_blocked_proposal_count": a.get(
                 "safety_blocked_proposal_count", 0),
             "modifies_source_code": False,
+        }
+
+    def operator_console_status(self) -> Dict[str, Any]:
+        """Expose the operator-console status (if any).
+
+        The console is a local, file-backed coordinator: this exposes the
+        latest session-log, status-board, decision-board, and export-bundle
+        paths, the available/blocked profile counts, and the last allowed and
+        blocked runs. It holds no real-world authority and cannot bypass
+        governance or safety.
+        """
+        c = self._health_snapshot().get("operator_console") or {}
+        return {
+            "operator_console_enabled": c.get(
+                "enabled", c.get("operator_console_enabled", bool(c))),
+            "available_profile_count": c.get("available_profile_count", 0),
+            "blocked_profile_count": c.get("blocked_profile_count", 0),
+            "latest_session_log_path": c.get("latest_session_log_path"),
+            "latest_status_board_path": c.get("latest_status_board_path"),
+            "latest_decision_board_path": c.get("latest_decision_board_path"),
+            "latest_export_bundle_path": c.get("latest_export_bundle_path"),
+            "last_allowed_run": c.get("last_allowed_run"),
+            "last_blocked_run": c.get("last_blocked_run"),
+            "real_world_authority": False,
         }
 
     def membrane_status(self) -> Dict[str, Any]:

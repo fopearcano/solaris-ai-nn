@@ -1521,3 +1521,44 @@ repair first, and any roadmap item whose text would enable real-world actuation,
 external APIs, browser/OS/network/device control, or self-modification is marked
 *rejected* with a reason. The changelog plan is explicitly *not applied*. The
 roadmap describes what a human might choose to do; it never does it.
+
+## Phase 39 — Unified operator console and governed run control
+
+**Why an operator console is needed.** By this point Solaris-AI-NN has dozens of
+subsystems, each with its own profiles, reports, ledgers, dashboards, and
+artifacts. An operator who wants to do the right next thing has to know where
+everything is and which runs are safe. The console is the single local,
+file-backed place to inspect, plan, run, compare, and audit -- not to add new
+capability, but to make the existing capability *legible and safe to drive*.
+
+**Governed run control, not a launchpad.** The console can launch only bounded
+allowed profiles, and only through the conscience orchestrator. Prohibited
+profiles, real long-run soaks, and anything implying real-world authority are
+catalogued as blocked and cannot run; a bounded launch still requires an explicit
+operator confirmation and a passing safety check; and the launcher runs no shell
+and makes no network call. The point is that coordination never silently becomes
+authority.
+
+**Evidence navigation over recall.** The evidence navigator, artifact index, and
+report index search local files only -- no external search, no vector DB, no LLM
+authority. They make the system's own recorded evidence findable, and they report
+corrupted or missing artifacts rather than hiding them, because the inconvenient
+gaps are exactly what an operator needs to see.
+
+**Approval records vs actual authority.** An approval in the ledger is a local
+record that an operator permitted a *local* action (a bounded run, a plan, an
+export). It is not an execution and not a grant of real-world power: a forbidden
+real-world actuation approval is blocked outright, and no approval can disable
+safety checks, emergency stop, ClaimGuard, or the motor firewall.
+
+**Why a local console is not autonomous agency.** Every output is a data
+structure, a Markdown board, or a JSON artifact; the console initiates nothing on
+its own, holds no external authority, and depends on a human to confirm. It
+coordinates a workflow; it does not act in the world, and it is not consciousness,
+sentience, life, personhood, free will, or agency.
+
+**Why blocked actions must remain visible.** A console that quietly dropped the
+runs it refused would hide its own most important behaviour. Blocked runs and
+forbidden-approval attempts are written to the append-only session log and surface
+as ops incidents, so the record shows not just what was done but what was
+*refused* -- which is the part a safety reviewer most needs.

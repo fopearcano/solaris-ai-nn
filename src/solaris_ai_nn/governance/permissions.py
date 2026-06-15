@@ -203,6 +203,14 @@ class PermissionScope:
         "enable_architecture_pruning_proposals"
     ENABLE_ARCHITECTURE_ADR_GENERATION = "enable_architecture_adr_generation"
 
+    # Unified operator console and governed run control plane (Prompt 39).
+    ENABLE_OPERATOR_CONSOLE = "enable_operator_console"
+    ENABLE_OPERATOR_PROFILE_PLANNING = "enable_operator_profile_planning"
+    ENABLE_OPERATOR_BOUNDED_RUN_LAUNCH = "enable_operator_bounded_run_launch"
+    ENABLE_OPERATOR_EVIDENCE_NAVIGATION = "enable_operator_evidence_navigation"
+    ENABLE_OPERATOR_EXPORT_BUNDLE = "enable_operator_export_bundle"
+    ENABLE_OPERATOR_APPROVAL_LEDGER = "enable_operator_approval_ledger"
+
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
         ENABLE_PLASTICITY, ENABLE_PLASTICITY_APPLY, ENABLE_PLASTICITY_DRY_RUN,
@@ -285,6 +293,10 @@ class PermissionScope:
         ENABLE_ARCHITECTURE_ROADMAP_COMPILE,
         ENABLE_ARCHITECTURE_PRUNING_PROPOSALS,
         ENABLE_ARCHITECTURE_ADR_GENERATION,
+        ENABLE_OPERATOR_CONSOLE, ENABLE_OPERATOR_PROFILE_PLANNING,
+        ENABLE_OPERATOR_BOUNDED_RUN_LAUNCH,
+        ENABLE_OPERATOR_EVIDENCE_NAVIGATION, ENABLE_OPERATOR_EXPORT_BUNDLE,
+        ENABLE_OPERATOR_APPROVAL_LEDGER,
     )
 
 
@@ -775,6 +787,27 @@ class PermissionSet:
             Permission(S.ENABLE_ARCHITECTURE_ADR_GENERATION, granted=True,
                        note="ADRs are planning artifacts; operator approval is "
                             "a record, not auto-implementation"),
+            # Operator console (Prompt 39). Inspection, planning, evidence
+            # navigation, and approval-ledger recording are granted by default;
+            # bounded run launch is granted but still requires per-run operator
+            # confirmation and passing safety checks; nothing here grants
+            # real-world authority or can bypass governance hard rules.
+            Permission(S.ENABLE_OPERATOR_CONSOLE, granted=True,
+                       note="local file-backed console; inspect/plan/index only,"
+                            " no real-world authority"),
+            Permission(S.ENABLE_OPERATOR_PROFILE_PLANNING, granted=True,
+                       note="run planning generates plans; it runs nothing"),
+            Permission(S.ENABLE_OPERATOR_BOUNDED_RUN_LAUNCH, granted=True,
+                       note="bounded allowed profiles only, via the orchestrator;"
+                            " requires per-run operator confirmation and safety "
+                            "checks (enforced at the policy gate)"),
+            Permission(S.ENABLE_OPERATOR_EVIDENCE_NAVIGATION, granted=True,
+                       note="searches local artifacts only; no external search"),
+            Permission(S.ENABLE_OPERATOR_EXPORT_BUNDLE, granted=True,
+                       note="local export bundle only; no upload, no network"),
+            Permission(S.ENABLE_OPERATOR_APPROVAL_LEDGER, granted=True,
+                       note="records local planning/bounded-run approvals; cannot"
+                            " approve forbidden real-world actuation"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

@@ -262,6 +262,16 @@ DESCRIPTIONS = {
     "architecture_review": "architecture review report; recommends, not applies",
     "architecture_evolution_safety":
         "no source change / Git / safety-critical pruning",
+    "operator_console_status": "console status board; ClaimGuard-scanned",
+    "operator_profile_catalog":
+        "profile catalog; prohibited profiles cannot run",
+    "operator_run_planner": "safe run plan; planning never runs the profile",
+    "operator_run_launcher_safety":
+        "unknown/prohibited/unbounded runs blocked; confirm required",
+    "operator_evidence_navigator": "local artifact search; no external search",
+    "operator_export_bundle": "local export bundle; checksums; no upload",
+    "operator_console_safety":
+        "no shell/network/authority; no safety bypass; no evidence deletion",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -391,6 +401,9 @@ class ExperimentRegistry:
             or name in ("pruning_proposal", "impact_analysis",
                         "roadmap_compiler")
             or bool(merged.get("architecture_evolution", False)))
+        features["operator_console"] = (
+            name.startswith("operator_")
+            or bool(merged.get("operator_console", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

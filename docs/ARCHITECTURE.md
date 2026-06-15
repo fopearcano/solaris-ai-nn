@@ -2458,3 +2458,62 @@ modify its own code** and **does not prune modules automatically**. **Evidence
 drives recommendations; recommendations are reviewed by a human; nothing is
 deleted, rewritten, or executed by the system; and safety-critical modules can
 never be pruned on performance evidence alone.**
+
+## Operator Console and Governed Run Control
+
+With every subsystem now in place -- the conscience orchestrator, the four pilot
+layers, the sensory and motor membranes, the safety invariants, the research lab,
+post-pilot forensics, architecture evolution, evaluation, governance, ops, and
+the Inner MAP -- the last gap is a *human* one: there are many ways to inspect,
+run, plan, compare, and audit the system, and no single safe place to do it from.
+The operator console (`src/solaris_ai_nn/operator_console/`) is that place. It is
+**local, low-compute, and file-backed**: not a chatbot, not an autonomous agent,
+not an approval bypass, and not a GUI-heavy application. Its core principle is
+that the console can *coordinate* but cannot *grant forbidden authority*.
+
+The console **inspects, plans, indexes, and runs bounded allowed profiles**. The
+**`ProfileCatalog`** collects every scenario profile (the conscience registry
+already aggregates the pilots, safety, research, and architecture profiles) and
+assigns each a safety class; prohibited profiles, real long-run soaks, and any
+profile implying real-world authority are marked so they cannot be launched. The
+**`RunPlanner`** turns a profile into a described (never executed) plan -- its
+preconditions, safety/governance checks, confirmations, expected writes, evidence,
+duration, and a safe-shutdown plan -- and every plan states plainly that external
+authority is false. The **`RunLauncher`** launches a bounded allowed profile
+*only* through the conscience `ScenarioRunner`: it runs no shell, makes no network
+call, never touches the motor or sensory layers directly, and blocks unknown,
+prohibited, unconfirmed, unbounded, and safety-failing runs. An **`ApprovalLedger`**
+records local approvals (and blocks any forbidden real-world actuation approval);
+an **`EvidenceNavigator`**, **`ArtifactIndex`**, and **`ReportIndex`** index and
+search local artifacts and reports (no external search, no vector DB, no LLM
+authority, corrupted files reported not hidden); an **`OperatorStatusBoard`** and
+**`OperatorDecisionBoard`** compile claim-guarded status and decision views; a
+**`NextActionRecommender`** proposes the safest useful next step (safety first,
+then evidence, then architecture review -- never real-world actuation, never
+disabling safety); an **`ExportBundleBuilder`** assembles a local, checksummed,
+never-uploaded review bundle; an **`OperatorSessionLog`** keeps an append-only
+record in which blocked attempts stay visible; and an
+**`OperatorConsoleSafetyValidator`** statically refuses shell, network, external
+authority, unknown/prohibited launches, unbounded runs, safety disabling, source/
+sensory mutation, and evidence deletion.
+
+It **cannot run arbitrary commands** and **cannot bypass governance or safety**.
+The console integrates the same way every layer does: governance adds six operator
+scopes and a policy gate (inspection/planning/evidence navigation allowed by
+default; a bounded launch requires explicit operator confirmation; shell, network,
+real-world actuation, prohibited launches, unbounded runs, safety disabling,
+evidence deletion, and forbidden approvals are all refused); the safety invariants
+gate every bounded launch (a missing or critical safety state blocks the run and
+recommends a safety check first); the conscience orchestrator is the only run
+path; ops exposes the console's session/status/decision/export paths and raises
+incidents on prohibited-run and forbidden-approval attempts and on a corrupted
+index; the Inner MAP carries an `operator_console` field plus fourteen state-graph
+nodes; evaluation adds ten metrics and seven protocols; Ego classifies every
+output as an `operator_console_artifact` (never a real action); and the operator
+dialogue answers plainly that the console **cannot run everything**, **cannot
+approve real-world actuation**, and **does not delete evidence**. **The console
+centralizes the operator workflow without becoming an autonomous authority:
+evidence and plans flow to a human, the human confirms, and the system only ever
+runs bounded allowed profiles through the orchestrator -- it grants no real-world
+authority and makes no claim of consciousness, life, sentience, agency,
+personhood, or free will.**

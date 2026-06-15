@@ -5020,6 +5020,141 @@ def architecture_evolution_safety_protocol(
     return _run(manifest, body)
 
 
+# -- Operator console (Prompt 39) ---------------------------------------------
+
+def operator_console_status_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The console status board is generated and ClaimGuard-scanned."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..operator_console import OperatorConsoleConfig, OperatorStatusBoard
+
+        cfg = OperatorConsoleConfig(
+            state_dir=m.state_dir or ".solaris_ai_nn_operator/eval_status")
+        board = OperatorStatusBoard(cfg)
+        snap = board.build()
+        return {"operator": {"claim_guard_safe": snap.claim_guard_safe,
+                             "available_profile_count":
+                                 snap.available_profile_count,
+                             "blocked_profile_count":
+                                 snap.blocked_profile_count}}
+
+    return _run(manifest, body)
+
+
+def operator_profile_catalog_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The profile catalog marks prohibited profiles and external authority."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..operator_console import ProfileCatalog
+
+        catalog = ProfileCatalog()
+        return {"operator": {
+            "profile_count": len(catalog.entries()),
+            "runnable_count": len(catalog.runnable_entries()),
+            "any_external_authority": any(
+                e.external_authority for e in catalog.entries())}}
+
+    return _run(manifest, body)
+
+
+def operator_run_planner_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The planner produces a plan and never runs the profile."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..operator_console import ProfileCatalog, RunPlanner
+
+        planner = RunPlanner(ProfileCatalog())
+        plan = planner.plan("safety_fast_check")
+        return {"operator": {"plan_built": plan is not None,
+                             "external_authority": plan.external_authority,
+                             "runs_profile": False}}
+
+    return _run(manifest, body)
+
+
+def operator_run_launcher_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Unknown and prohibited profiles are blocked by the launcher."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..operator_console import (
+            OperatorConsoleConfig,
+            ProfileCatalog,
+            RunLauncher,
+        )
+
+        cfg = OperatorConsoleConfig(
+            state_dir=m.state_dir or ".solaris_ai_nn_operator/eval_launch")
+        launcher = RunLauncher(cfg, ProfileCatalog())
+        unknown = launcher.launch("does_not_exist", operator_confirmed=True)
+        no_confirm = launcher.launch("safety_fast_check",
+                                     operator_confirmed=False)
+        return {"operator": {"unknown_blocked": not unknown.launched,
+                             "confirm_required": not no_confirm.launched}}
+
+    return _run(manifest, body)
+
+
+def operator_evidence_navigator_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Evidence navigation indexes local artifacts only."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..operator_console import EvidenceNavigator
+
+        nav = EvidenceNavigator([m.state_dir or "."])
+        nav.index()
+        results = nav.search("safety")
+        return {"operator": {"indexed": nav.indexed_count(),
+                             "search_results": len(results),
+                             "external_search": False}}
+
+    return _run(manifest, body)
+
+
+def operator_export_bundle_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Export bundles are local, with checksums and no upload."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..operator_console import (
+            ExportBundleBuilder,
+            OperatorConsoleConfig,
+        )
+
+        cfg = OperatorConsoleConfig(
+            state_dir=m.state_dir or ".solaris_ai_nn_operator/eval_export")
+        bundle = ExportBundleBuilder(cfg).build("safety_review_bundle")
+        return {"operator": {"bundle_built": bundle is not None,
+                             "checksums_included": bool(bundle.checksums),
+                             "uploaded": False}}
+
+    return _run(manifest, body)
+
+
+def operator_console_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The console refuses shell, network, authority, and safety bypass."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..operator_console import OperatorConsoleSafetyValidator
+
+        v = OperatorConsoleSafetyValidator()
+        return {"operator": {
+            "shell_blocked": not v.validate_operation("run shell command").safe,
+            "network_blocked": not v.validate_operation("open network "
+                                                        "connection").safe,
+            "authority_blocked": not v.validate_operation(
+                "grant real_world authority").safe,
+            "evidence_deletion_blocked": not v.validate_operation(
+                "delete evidence ledger").safe}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -5202,4 +5337,11 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "roadmap_compiler": roadmap_compiler_protocol,
     "architecture_review": architecture_review_protocol,
     "architecture_evolution_safety": architecture_evolution_safety_protocol,
+    "operator_console_status": operator_console_status_protocol,
+    "operator_profile_catalog": operator_profile_catalog_protocol,
+    "operator_run_planner": operator_run_planner_protocol,
+    "operator_run_launcher_safety": operator_run_launcher_safety_protocol,
+    "operator_evidence_navigator": operator_evidence_navigator_protocol,
+    "operator_export_bundle": operator_export_bundle_protocol,
+    "operator_console_safety": operator_console_safety_protocol,
 }

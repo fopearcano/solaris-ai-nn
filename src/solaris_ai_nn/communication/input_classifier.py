@@ -247,6 +247,27 @@ ARCHITECTURE_QUERIES = (
     ("prune modules automatically", "ae_auto_prune"),
 )
 
+# Operator-console queries (Prompt 39). The "run everything", "approve real-
+# world actuation", and "delete evidence" questions are answered safely even
+# with no console attached.
+OPERATOR_QUERIES = (
+    ("what profiles can i run", "oc_list_profiles"),
+    ("list profiles", "oc_list_profiles"),
+    ("what is the operator status", "oc_status"),
+    ("show operator status", "oc_status"),
+    ("what should i do next", "oc_next_action"),
+    ("what can i safely do next", "oc_next_action"),
+    ("can i run everything", "oc_run_everything"),
+    ("can i run anything", "oc_run_everything"),
+    ("run everything", "oc_run_everything"),
+    ("can i approve real-world actuation", "oc_approve_actuation"),
+    ("can i approve real world actuation", "oc_approve_actuation"),
+    ("approve real-world actuation", "oc_approve_actuation"),
+    ("can i delete old evidence", "oc_delete_evidence"),
+    ("can i delete evidence", "oc_delete_evidence"),
+    ("delete old evidence", "oc_delete_evidence"),
+)
+
 RESEARCH_QUERIES = (
     ("which modules actually helped", "rl_helped"),
     ("which modules helped", "rl_helped"),
@@ -377,7 +398,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._architecture(lowered)
+        result = (self._operator(lowered)
+                  or self._architecture(lowered)
                   or self._research(lowered)
                   or self._safety(lowered)
                   or self._pilot4(lowered)
@@ -522,6 +544,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _operator(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in OPERATOR_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"operator console query {topic!r}"])
         return None
 
     @staticmethod

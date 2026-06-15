@@ -96,6 +96,9 @@ AVAILABLE_QUERIES = (
     "what evidence contradicts pruning?", "what is the compiled roadmap?",
     "what design debt exists?", "did the system modify its own code?",
     "can it prune modules automatically?",
+    "what profiles can I run?", "what should I do next?",
+    "can I run everything?", "can I approve real-world actuation?",
+    "can I delete old evidence?",
 )
 
 
@@ -156,6 +159,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("oc_"):
+            return self._operator(topic)
         if topic.startswith("ae_"):
             return self._architecture(topic)
         if topic.startswith("rl_"):
@@ -495,6 +500,51 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _operator(self, topic: str) -> CommunicationResponse:
+        """Answer operator-console queries (safe; the console grants no authority).
+
+        The "run everything", "approve real-world actuation", and "delete
+        evidence" questions are answered safely even with no console attached.
+        """
+        if topic == "oc_run_everything":
+            return self.builder.status_response(
+                "No. The console can only run bounded allowed profiles. "
+                "Long-run real profiles, prohibited profiles, and any profile "
+                "implying real-world authority are blocked.",
+                ["policy:console_runs_bounded_allowed_only"])
+        if topic == "oc_approve_actuation":
+            return self.builder.status_response(
+                "No. The approval ledger cannot approve forbidden real-world "
+                "actuation. It can only record allowed local planning or "
+                "bounded-run approvals.",
+                ["policy:no_forbidden_approval"])
+        if topic == "oc_delete_evidence":
+            return self.builder.status_response(
+                "No. The console does not delete evidence. Evidence retention "
+                "or archiving must go through approved retention/state hygiene "
+                "policies.",
+                ["policy:console_does_not_delete_evidence"])
+        component = self.components.get("operator_console")
+        if component is None:
+            return self.builder.missing_component_response("operator_console")
+        status = (component.operator_console_status()
+                  if hasattr(component, "operator_console_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:operator_console"]
+        if topic == "oc_list_profiles":
+            text = (f"runnable profiles: "
+                    f"{status.get('available_profile_count', 0)}; blocked: "
+                    f"{status.get('blocked_profile_count', 0)}")
+        elif topic == "oc_next_action":
+            text = (f"recommended next action: "
+                    f"{status.get('latest_next_action', 'inspect status board')}")
+        else:
+            text = (f"operator console status: enabled="
+                    f"{status.get('operator_console_enabled', True)}; it "
+                    "coordinates locally and grants no real-world authority")
         return self.builder.status_response(text, refs)
 
     def _architecture(self, topic: str) -> CommunicationResponse:

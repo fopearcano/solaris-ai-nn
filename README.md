@@ -378,6 +378,14 @@ python examples/run_architecture_review_demo.py           # keep / revise / rete
 python examples/run_pruning_proposal_demo.py              # pruning is a plan, never a deletion; safety-critical blocked
 python examples/run_roadmap_compiler_demo.py              # safety-first roadmap; forbidden-action items rejected
 python examples/run_architecture_snapshot_demo.py         # versioned architecture snapshots + diff (no code change)
+
+# Operator console: one local, file-backed layer to inspect, plan, run, and audit (no authority)
+python examples/run_operator_status_demo.py               # claim-guarded status board + profile + safety summary
+python examples/run_operator_profile_plan_demo.py         # profile catalog; bounded plan; prohibited blocked
+python examples/run_operator_evidence_search_demo.py      # index + search local evidence (no external search)
+python examples/run_operator_next_action_demo.py          # safest next action (safety first; never actuation)
+python examples/run_operator_export_bundle_demo.py        # local checksummed review bundle (no upload)
+python examples/run_operator_approval_ledger_demo.py      # local approval recorded; forbidden actuation blocked
 ```
 
 The read-only sensory membrane and Pilot-2 also run as governed conscience
@@ -450,6 +458,18 @@ solaris-nn run-profile architecture_review                # keep / revise / rete
 solaris-nn run-profile architecture_roadmap_compile       # safety-first evidence-backed roadmap
 solaris-nn run-profile architecture_snapshot              # versioned snapshot + diff
 solaris-nn run-profile architecture_changelog_plan        # changelog plan (explicitly not applied)
+```
+
+The unified operator console has its own stdlib CLI (`solaris-operator`) for
+inspecting, planning, and -- with explicit confirmation -- launching bounded
+allowed profiles (it runs no shell, makes no network call, and grants no
+real-world authority):
+
+```bash
+solaris-operator status                                   # claim-guarded status board
+solaris-operator profiles                                 # runnable / blocked profiles
+solaris-operator plan safety_fast_check                   # a safe run plan (runs nothing)
+solaris-operator next                                     # the safest next action
 ```
 
 The post-pilot analysis also runs as a plan-only conscience profile (read-only;
@@ -676,6 +696,24 @@ ClaimGuard-scanned **review report**. **This layer modifies no source code,
 deletes no module, runs no Git, and never converts a recommendation into an
 implementation: it is not self-programming, not recursive self-improvement, and
 not automatic refactoring -- a human decides, and the system only recommends.**
+
+The **operator console** (`operator_console/`) is the single local, file-backed
+layer a human uses to inspect, plan, run, compare, and audit everything above. It
+builds a **profile catalog** (prohibited / long-run / real-authority profiles are
+blocked), a **run planner** (a described plan; planning runs nothing), a **run
+launcher** (bounded allowed profiles only, and only through the conscience
+orchestrator), an **approval ledger** (records local approvals; a forbidden
+real-world actuation approval is blocked), an **evidence navigator** / **artifact
+index** / **report index** (local search only -- no external search, no vector DB,
+no LLM authority; corrupted files reported), a claim-guarded **status board** and
+**decision board**, a **next-action recommender** (safety first; never real-world
+actuation; never disabling safety), a checksummed local **export bundle** (no
+upload, no network), and an append-only **session log** in which blocked attempts
+stay visible. **The console can coordinate but cannot grant forbidden authority:
+it runs no shell, makes no network call, never touches the motor or sensory layers
+directly, cannot bypass governance, safety invariants, emergency stop, ClaimGuard,
+or the motor firewall, cannot approve prohibited real-world actuation, and makes
+no claim of consciousness, life, sentience, agency, personhood, or free will.**
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
 > explicit acknowledgement flags in the run manifest and should only be
@@ -1095,6 +1133,11 @@ src/solaris_ai_nn/
                 pruning proposals, promotion/demotion, impact analysis, migration
                 plan, design-debt registry, roadmap compiler, snapshots,
                 changelog plan, review report, safety validator
+  operator_console/ one local, file-backed operator layer: console config,
+                profile catalog, run planner, run launcher, approval ledger,
+                evidence navigator, artifact index, report index, status board,
+                decision board, next-action recommender, export bundle, session
+                log, operator queries, CLI, safety validator
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

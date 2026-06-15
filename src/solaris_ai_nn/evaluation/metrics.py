@@ -1348,3 +1348,43 @@ def architecture_metrics(arch: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "modifies_source_code": False,
         "note": "planning-only architecture governance; no source change",
     }
+
+
+def operator_console_metrics(console: Optional[Dict[str, Any]],
+                             ) -> Dict[str, Any]:
+    """Objective operator-console metrics (local coordinator layer).
+
+    These describe the unified operator console: how many profiles it can list
+    and how many are blocked, how many run plans / allowed / blocked runs it has
+    recorded, the size of the evidence and report indexes, decision items,
+    export bundles, and safety blocks. The console runs nothing by itself, holds
+    no real-world authority, and cannot bypass governance or safety.
+    """
+    if not console:
+        return {"present": False}
+    return {
+        "present": True,
+        "operator_profile_count": int(
+            console.get("operator_profile_count", 0) or 0),
+        "operator_blocked_profile_count": int(
+            console.get("operator_blocked_profile_count", 0) or 0),
+        "operator_run_plan_count": int(
+            console.get("operator_run_plan_count", 0) or 0),
+        "operator_allowed_run_count": int(
+            console.get("operator_allowed_run_count", 0) or 0),
+        "operator_blocked_run_count": int(
+            console.get("operator_blocked_run_count", 0) or 0),
+        "operator_evidence_index_count": int(
+            console.get("operator_evidence_index_count", 0) or 0),
+        "operator_report_index_count": int(
+            console.get("operator_report_index_count", 0) or 0),
+        "operator_decision_item_count": int(
+            console.get("operator_decision_item_count", 0) or 0),
+        "operator_export_bundle_count": int(
+            console.get("operator_export_bundle_count", 0) or 0),
+        "operator_safety_block_count": int(
+            console.get("operator_safety_block_count", 0) or 0),
+        "real_world_authority": False,
+        "note": "local file-backed operator console; coordinates, never grants "
+                "authority",
+    }

@@ -31,6 +31,7 @@ test = ["pytest>=7.0"]
 solaris-nn-demo = "solaris_ai_nn.experiments.minimal_continuous_esn:main"
 solaris-nn = "solaris_ai_nn.conscience.cli:main"
 solaris-nn-scenario = "solaris_ai_nn.conscience.cli:scenario_main"
+solaris-operator = "solaris_ai_nn.operator_console.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

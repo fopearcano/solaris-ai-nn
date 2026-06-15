@@ -1341,4 +1341,42 @@ def build_default_state_graph() -> StateGraph:
                "the roadmap feeds the architecture review")
     g.add_edge("ArchitectureReviewReportBuilder", "inner_map",
                "architecture evolution state feeds Inner MAP")
+
+    # Operator console: unified, local, file-backed run control (Prompt 39).
+    # It coordinates inspection, planning, bounded launches, evidence
+    # navigation, and approvals -- but grants no real-world authority and
+    # cannot bypass governance or safety.
+    for name, role in [
+        ("OperatorConsoleConfig", "local console; no real-world authority"),
+        ("ProfileCatalog", "catalogue of runnable / blocked profiles"),
+        ("RunPlanner", "safe run plan; planning never runs the profile"),
+        ("RunLauncher", "launches bounded allowed profiles via orchestrator"),
+        ("ApprovalLedger", "records local approvals; never forbidden actuation"),
+        ("EvidenceNavigator", "searches local artifacts only"),
+        ("ArtifactIndex", "indexes artifacts; never modifies or deletes them"),
+        ("ReportIndex", "indexes reports; detects limitations / ClaimGuard"),
+        ("OperatorStatusBoard", "claim-guarded status board"),
+        ("OperatorDecisionBoard", "evidence-linked operator decisions"),
+        ("NextActionRecommender", "safest next action; never real actuation"),
+        ("ExportBundleBuilder", "local export bundle; no upload, no network"),
+        ("OperatorSessionLog", "append-only; blocked attempts stay visible"),
+        ("OperatorConsoleSafetyValidator", "no shell/network/authority"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("ProfileCatalog", "RunPlanner",
+               "the profile catalog feeds the run planner")
+    g.add_edge("RunPlanner", "RunLauncher",
+               "the run planner feeds the run launcher")
+    g.add_edge("SafetyInvariantRunner", "RunLauncher",
+               "safety invariants gate the run launcher")
+    g.add_edge("ApprovalLedger", "governance",
+               "the approval ledger feeds governance")
+    g.add_edge("ArtifactIndex", "EvidenceNavigator",
+               "the artifact index feeds the evidence navigator")
+    g.add_edge("ReportIndex", "OperatorStatusBoard",
+               "the report index feeds the status and decision boards")
+    g.add_edge("NextActionRecommender", "OperatorConsoleConfig",
+               "the next action recommender feeds the console")
+    g.add_edge("OperatorStatusBoard", "inner_map",
+               "operator console state feeds Inner MAP")
     return g

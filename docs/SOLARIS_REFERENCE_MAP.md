@@ -717,3 +717,19 @@ implementation.
 | safety / off-switch | `ArchitectureEvolutionSafetyValidator` -- statically refuses source edits, Git, auto-deletion, safety-critical pruning, and recommendation-to-implementation |
 | decision record / governance | `ArchitectureDecisionRecord` + `ADRStore` -- operator review always required; `PruningProposalBuilder` proposals are never executed |
 | Logos / opposition | `ArchitectureEvidenceMap` + `DesignDebtRegistry` -- contradictions and uncomfortable findings are retained, not discarded |
+
+## Unified operator console and governed run control mapping (Phase 39)
+
+The operator_console package (`operator_console/`) is the single local,
+file-backed operator-facing layer that lets a human safely inspect, plan, run,
+compare, and audit every subsystem. It coordinates; it never grants forbidden
+authority, runs no shell, makes no network call, and cannot bypass governance or
+safety.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| Conscience topology / run control | `ProfileCatalog` + `RunPlanner` + `RunLauncher` -- catalogue, safe plan, bounded launch through the ScenarioRunner only |
+| Inner MAP | `OperatorStatusBoard` + `EvidenceNavigator` -- operator status view and local topology/evidence navigation (`operator_console` field + 14 state-graph nodes) |
+| governance / off-switch | governed run control: prohibited / long-run / unbounded profiles are blocked; the approval ledger cannot approve forbidden actuation; emergency stop is never disabled |
+| pilot roadmap | `OperatorDecisionBoard` + `NextActionRecommender` -- pilot/next-step status and the safest next action, never real-world actuation |
+| research / architecture evolution | `EvidenceNavigator` + `ReportIndex` + `ExportBundleBuilder` -- local evidence search, report index, and a checksummed local-only review bundle |

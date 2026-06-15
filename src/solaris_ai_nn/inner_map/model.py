@@ -366,6 +366,13 @@ class InnerMapModel:
     # latest_architecture_snapshot/review/roadmap, pruning/promotion proposal
     # counts. Planning-only; the layer modifies no source code.
     architecture_evolution: Optional[Dict[str, Any]] = None
+    # Operator-console status (Prompt 39); None when not attached. Keys:
+    # operator_console_enabled, available_profile_count, blocked_profile_count,
+    # latest_status_board_path, latest_decision_board_path, latest_next_action,
+    # latest_approval_record, latest_export_bundle, last_blocked_run. The console
+    # is a local file-backed coordinator; it holds no real-world authority and
+    # cannot bypass governance or safety.
+    operator_console: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

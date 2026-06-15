@@ -36,6 +36,7 @@ ATTRIBUTION_CATEGORIES = (
     "assurance_claim",
     "research_artifact",
     "architecture_planning_artifact",
+    "operator_console_artifact",
     "unknown_source",
 )
 
@@ -90,6 +91,12 @@ _SOURCE_RULES = (
     ("pruning_proposal", "architecture_planning_artifact"),
     ("roadmap", "architecture_planning_artifact"),
     ("architecture_planning_artifact", "architecture_planning_artifact"),
+    ("operator_console", "operator_console_artifact"),
+    ("operator_status_board", "operator_console_artifact"),
+    ("operator_decision_board", "operator_console_artifact"),
+    ("operator_approval", "operator_console_artifact"),
+    ("operator_export_bundle", "operator_console_artifact"),
+    ("operator_console_artifact", "operator_console_artifact"),
     ("simulated_environment", "simulated_environment_input"),
     ("operator", "generated_by_operator"),
     ("approval", "generated_by_operator"),
@@ -230,6 +237,11 @@ class OwnershipAttributor:
         if category == "assurance_claim":
             reasons.append("an assurance claim: an evidence-backed safety "
                            "argument, not a real external action")
+        if category == "operator_console_artifact":
+            reasons.append("an operator-console planning artifact (status / "
+                           "decision board, approval record, export bundle): a "
+                           "local coordination record, not a real external "
+                           "action, not real-world authority")
         # Stream data is never an executable instruction.
         executable = False
         if category == "observed_from_stream":

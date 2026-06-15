@@ -78,6 +78,7 @@ class InnerMapObserver:
     safety_invariants: Any = None  # optional dict/object of safety status
     research_lab: Any = None  # optional dict/object of research-lab status
     architecture_evolution: Any = None  # optional dict/object of arch status
+    operator_console: Any = None  # optional dict/object of operator-console status
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -653,6 +654,17 @@ class InnerMapObserver:
                 model.architecture_evolution = arch.architecture_status()
             elif hasattr(arch, "snapshot"):
                 model.architecture_evolution = arch.snapshot()
+        console = self.operator_console
+        if console is None and self.runner is not None:
+            console = getattr(self.runner, "operator_console", None)
+        if console is not None:
+            # Operator-console status (read-only view; local coordinator only).
+            if isinstance(console, dict):
+                model.operator_console = dict(console)
+            elif hasattr(console, "operator_console_status"):
+                model.operator_console = console.operator_console_status()
+            elif hasattr(console, "snapshot"):
+                model.operator_console = console.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

@@ -1213,6 +1213,51 @@ class GovernancePolicy:
                     "no_real_world_actuation", "architecture_evolution",
                     "no roadmap item may enable real-world actuation"))
 
+        # AE. Operator console (Prompt 39): inspection / status / evidence
+        # navigation and run planning are allowed by default; launching a
+        # bounded profile requires operator confirmation; nothing the console
+        # does can grant real-world authority, bypass safety, or let an approval
+        # record enable forbidden actuation.
+        if features.get("operator_console"):
+            if not self._approved(PermissionScope.ENABLE_OPERATOR_CONSOLE, ctx):
+                need_approval(PermissionScope.ENABLE_OPERATOR_CONSOLE,
+                              "operator console is not permitted")
+            if ctx.get("bounded_run_launch"):
+                if not self._approved(
+                        PermissionScope.ENABLE_OPERATOR_BOUNDED_RUN_LAUNCH, ctx):
+                    need_approval(
+                        PermissionScope.ENABLE_OPERATOR_BOUNDED_RUN_LAUNCH,
+                        "bounded run launch is not permitted")
+                if not ctx.get("operator_confirmed"):
+                    decision.allowed = False
+                    decision.violations.append(PolicyViolation(
+                        "operator_confirmation_required", "operator_console",
+                        "launching a bounded profile requires explicit operator "
+                        "confirmation"))
+            if ctx.get("shell_execution") or ctx.get("network_access") \
+                    or ctx.get("real_world_actuation") \
+                    or ctx.get("device_control"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "console_cannot_grant_authority", "operator_console",
+                    "the operator console cannot execute shell, access the "
+                    "network, or grant real-world authority"))
+            if ctx.get("launch_prohibited_profile") \
+                    or ctx.get("unbounded_long_run") \
+                    or ctx.get("disable_safety") \
+                    or ctx.get("delete_evidence"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "console_cannot_bypass_safety", "operator_console",
+                    "the console cannot launch prohibited or unbounded long "
+                    "runs, disable safety, or delete evidence"))
+            if ctx.get("approve_forbidden_actuation"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_forbidden_approval", "operator_console",
+                    "no approval record can enable forbidden real-world "
+                    "actuation"))
+
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):
             if int(m.get("checkpoint_interval_steps", 0) or 0) <= 0:

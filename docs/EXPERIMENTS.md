@@ -2172,3 +2172,53 @@ records; they change no source code.
 `architecture_evolution_safety`). Eight registered protocols measure the
 planning-only architecture governance layer; `modifies_source_code` is always
 false.
+
+## 228. Operator Status Demo ✅ (implemented)
+
+**Run:** `python examples/run_operator_status_demo.py --state-dir .solaris_ai_nn_operator/test_status`
+Builds the ClaimGuard-scanned operator status board from the local profile
+catalog and a safety summary, and writes STATUS_BOARD.md / .json. Local
+coordination only; no real-world authority.
+
+## 229. Operator Profile Plan Demo ✅ (implemented)
+
+**Run:** `python examples/run_operator_profile_plan_demo.py --state-dir .solaris_ai_nn_operator/test_profile_plan`
+Lists the profile catalog, builds a run plan for a bounded profile (planning runs
+nothing, external authority false), and shows that a real long-run / prohibited
+profile cannot be launched from the console.
+
+## 230. Operator Evidence Search Demo ✅ (implemented)
+
+**Run:** `python examples/run_operator_evidence_search_demo.py --state-dir .solaris_ai_nn_operator/test_evidence`
+Indexes local artifacts and reports and runs a local keyword search. Local
+artifacts only -- no external search, no vector DB, no LLM authority -- and
+corrupted artifacts are reported.
+
+## 231. Operator Next Action Demo ✅ (implemented)
+
+**Run:** `python examples/run_operator_next_action_demo.py --state-dir .solaris_ai_nn_operator/test_next_action`
+Shows the recommender's priorities: a critical safety blocker yields a safety
+review first; no evidence yields a baseline/research run; research evidence yields
+an architecture review. Never recommends real-world actuation or disabling safety.
+
+## 232. Operator Export Bundle Demo ✅ (implemented)
+
+**Run:** `python examples/run_operator_export_bundle_demo.py --state-dir .solaris_ai_nn_operator/test_export`
+Builds a safety-review bundle and a research-review bundle with checksums and a
+clear local-export-only note. No upload, no network calls.
+
+## 233. Operator Approval Ledger Demo ✅ (implemented)
+
+**Run:** `python examples/run_operator_approval_ledger_demo.py --state-dir .solaris_ai_nn_operator/test_approval`
+Records an allowed local planning approval and shows that a forbidden real-world
+actuation approval is blocked. An approval is a local record, never a grant of
+authority, and never disables safety.
+
+## 234. Operator Console Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment operator_console_status`
+(also `operator_profile_catalog`, `operator_run_planner`,
+`operator_run_launcher_safety`, `operator_evidence_navigator`,
+`operator_export_bundle`, `operator_console_safety`). Seven registered protocols
+measure the local operator console; it holds no real-world authority and cannot
+bypass governance or safety.
