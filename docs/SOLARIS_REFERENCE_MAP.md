@@ -700,3 +700,20 @@ models, and cautious comparisons -- never a consciousness benchmark.
 | safety / off-switch | safety-invariant pre/post checks around every experiment; ablations never disable hard safety |
 | pilot sequence | comparative artifact analysis (Pilot-1/2/3 artifacts vs fixture/ablation runs), inconclusive when missing |
 | Logos / opposition | `EffectAnalyzer` -- the tension between a module's apparent benefit and its overhead/failure cost, held provisionally |
+
+## Architecture evolution, module pruning, and roadmap compiler mapping (Phase 38)
+
+The architecture_evolution package (`architecture_evolution/`) turns the research
+lab's evidence into disciplined, planning-only governance: it recommends what to
+keep, prune, revise, freeze, or test next, but it modifies no source code, deletes
+no module, runs no Git, and never converts a recommendation into an
+implementation.
+
+| Solaris_Ai reference (file / concept) | Solaris-AI-NN implementation |
+|---|---|
+| roadmap / self-evolution | `RoadmapCompiler` -- evidence-backed plan, safety repair first, forbidden-action items rejected (no self-programming) |
+| module architecture | `ModuleInventory` + `ModuleLifecycleClassifier` -- catalogue + recommended lifecycle; safety-critical modules are never pruning candidates |
+| Inner MAP | architecture topology and lifecycle (`architecture_evolution` field + 13 state-graph nodes) |
+| safety / off-switch | `ArchitectureEvolutionSafetyValidator` -- statically refuses source edits, Git, auto-deletion, safety-critical pruning, and recommendation-to-implementation |
+| decision record / governance | `ArchitectureDecisionRecord` + `ADRStore` -- operator review always required; `PruningProposalBuilder` proposals are never executed |
+| Logos / opposition | `ArchitectureEvidenceMap` + `DesignDebtRegistry` -- contradictions and uncomfortable findings are retained, not discarded |

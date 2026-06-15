@@ -251,6 +251,17 @@ DESCRIPTIONS = {
     "research_module_effect": "module value positive/neutral/harmful/inconclusive",
     "research_reproducibility": "reproducibility package with checksums/labels",
     "research_report": "research report; ClaimGuard-scanned; no mind score",
+    "architecture_inventory": "module inventory; safety-critical marked",
+    "module_lifecycle_classification":
+        "lifecycle class from evidence; safety modules protected",
+    "architecture_evidence_mapping":
+        "evidence mapped to modules; contradictions retained",
+    "pruning_proposal": "pruning is recommendation-only; safety-critical blocked",
+    "impact_analysis": "impact blast radius; safety explicit; unknown not low",
+    "roadmap_compiler": "evidence-backed roadmap; forbidden items rejected",
+    "architecture_review": "architecture review report; recommends, not applies",
+    "architecture_evolution_safety":
+        "no source change / Git / safety-critical pruning",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -375,6 +386,11 @@ class ExperimentRegistry:
         features["research_lab"] = (
             name.startswith("research")
             or bool(merged.get("research_lab", False)))
+        features["architecture_evolution"] = (
+            name.startswith("architecture") or name.startswith("module_")
+            or name in ("pruning_proposal", "impact_analysis",
+                        "roadmap_compiler")
+            or bool(merged.get("architecture_evolution", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

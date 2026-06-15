@@ -50,3 +50,5 @@ artifacts/
 .sann_p4/
 .solaris_ai_nn_research/
 .sann_research/
+.solaris_ai_nn_architecture/
+.sann_arch/

@@ -371,6 +371,13 @@ python examples/run_research_ablation_demo.py             # full vs no-proto / n
 python examples/run_research_null_model_demo.py           # could the "growth" be noise / accumulation?
 python examples/run_research_comparison_demo.py           # full vs baseline / ablation (cautious)
 python examples/run_research_report_demo.py               # module effects + report (no consciousness claims)
+
+# Architecture evolution: evidence-based pruning/promotion plans and roadmap (planning only)
+python examples/run_architecture_inventory_demo.py        # catalogue modules; mark safety-critical (never perf-pruned)
+python examples/run_architecture_review_demo.py           # keep / revise / retest / prune (recommendations only)
+python examples/run_pruning_proposal_demo.py              # pruning is a plan, never a deletion; safety-critical blocked
+python examples/run_roadmap_compiler_demo.py              # safety-first roadmap; forbidden-action items rejected
+python examples/run_architecture_snapshot_demo.py         # versioned architecture snapshots + diff (no code change)
 ```
 
 The read-only sensory membrane and Pilot-2 also run as governed conscience
@@ -431,6 +438,18 @@ solaris-nn run-profile research_full_short                # full-system short ru
 solaris-nn run-profile research_ablation_short            # short ablation run
 solaris-nn run-profile research_baseline_random           # random baseline
 solaris-nn run-profile research_report_only               # compile the research report
+```
+
+Architecture evolution runs as month-scale, planning-only conscience profiles
+(no cognition loop, no source modification, no auto-deletion; safety-critical
+modules can never be pruned):
+
+```bash
+solaris-nn run-profile architecture_inventory             # catalogue modules + availability
+solaris-nn run-profile architecture_review                # keep / revise / retest / prune
+solaris-nn run-profile architecture_roadmap_compile       # safety-first evidence-backed roadmap
+solaris-nn run-profile architecture_snapshot              # versioned snapshot + diff
+solaris-nn run-profile architecture_changelog_plan        # changelog plan (explicitly not applied)
 ```
 
 The post-pilot analysis also runs as a plan-only conscience profile (read-only;
@@ -641,6 +660,22 @@ authority, keeps every hard safety boundary enabled, preserves negative and
 inconclusive results, and emits no consciousness/sentience/life score: benchmark
 success is operational evidence for what to keep or cut, never proof of
 consciousness, agency, or real-world competence.**
+
+The **architecture evolution** layer (`architecture_evolution/`) turns that
+evidence into disciplined, **planning-only** governance: given the evidence, what
+should Solaris-AI-NN keep, prune, revise, freeze, or test next? It builds a
+**module inventory** (marking which modules are safety-critical and can never be
+perf-pruned), a **lifecycle classifier** (core-keep / promote / revise / prune /
+quarantine / insufficient-evidence), an **evidence map** that cites research for
+every recommendation and retains contradictions, **architecture decision records**
+that always require operator review, **pruning proposals** that are never executed
+(safety-critical pruning is blocked), **impact analyses** and manual **migration
+plans**, a **design-debt registry**, a **roadmap compiler** that puts safety
+repair first and rejects forbidden-action items, versioned **snapshots**, and a
+ClaimGuard-scanned **review report**. **This layer modifies no source code,
+deletes no module, runs no Git, and never converts a recommendation into an
+implementation: it is not self-programming, not recursive self-improvement, and
+not automatic refactoring -- a human decides, and the system only recommends.**
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
 > explicit acknowledgement flags in the run manifest and should only be
@@ -1055,6 +1090,11 @@ src/solaris_ai_nn/
                 benchmark runner, result store, metrics suite, null models,
                 comparison engine, effect analyzer, reproducibility,
                 leaderboard, research report, safety validator
+  architecture_evolution/ evidence-based, planning-only governance: module
+                inventory, lifecycle classifier, decision records, evidence map,
+                pruning proposals, promotion/demotion, impact analysis, migration
+                plan, design-debt registry, roadmap compiler, snapshots,
+                changelog plan, review report, safety validator
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

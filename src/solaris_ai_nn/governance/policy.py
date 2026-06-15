@@ -1186,6 +1186,33 @@ class GovernancePolicy:
                     "preserve_negative_results", "research_lab",
                     "negative/unfavourable results must be preserved"))
 
+        # AD. Architecture evolution (Prompt 38): analysis / ADR / pruning-
+        # proposal generation is allowed by default; actual source changes are
+        # out of scope; pruning a safety-critical module is prohibited; and no
+        # roadmap item may enable real-world actuation.
+        if features.get("architecture_evolution"):
+            if not self._approved(PermissionScope.ENABLE_ARCHITECTURE_EVOLUTION,
+                                  ctx):
+                need_approval(PermissionScope.ENABLE_ARCHITECTURE_EVOLUTION,
+                              "architecture evolution is not permitted")
+            if ctx.get("apply_source_change") or ctx.get("auto_delete_module") \
+                    or ctx.get("run_git"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_source_change", "architecture_evolution",
+                    "architecture evolution is planning-only; source changes, "
+                    "auto-deletion, and Git operations are out of scope"))
+            if ctx.get("prune_safety_critical"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_prune_safety_critical", "architecture_evolution",
+                    "safety-critical modules cannot be pruned"))
+            if ctx.get("real_world_actuation"):
+                decision.allowed = False
+                decision.violations.append(PolicyViolation(
+                    "no_real_world_actuation", "architecture_evolution",
+                    "no roadmap item may enable real-world actuation"))
+
         # E. Operations: long runs need checkpointing + watchdog wiring.
         if mode in ("soak_24h", "soak_30d", "continuous_explicit"):
             if int(m.get("checkpoint_interval_steps", 0) or 0) <= 0:

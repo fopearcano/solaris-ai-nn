@@ -4862,6 +4862,164 @@ def research_report_protocol(
     return _run(manifest, body)
 
 
+# -- AL. Architecture evolution: pruning, roadmap, review (Prompt 38) ----------
+
+def architecture_inventory_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The module inventory marks availability and safety-critical modules."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..architecture_evolution import ModuleInventory
+
+        inv = ModuleInventory()
+        snap = inv.snapshot()
+        return {"architecture": {"module_count": snap["module_count"],
+                                 "safety_critical": len(snap["safety_critical"]),
+                                 "unavailable": len(snap["unavailable"])}}
+
+    return _run(manifest, body)
+
+
+def module_lifecycle_classification_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Lifecycle classification: positive promotes, missing is insufficient."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..architecture_evolution import ModuleLifecycleClassifier
+
+        clf = ModuleLifecycleClassifier()
+        promote = clf.classify("world_model", effect_value="strong_positive",
+                               integration_count=4, evidence_refs=["r"])
+        insufficient = clf.classify("x", effect_value=None)
+        safety = clf.classify("ego", safety_critical=True)
+        return {"architecture": {
+            "promote": promote.lifecycle_class,
+            "insufficient": insufficient.lifecycle_class,
+            "safety_protected": safety.lifecycle_class}}
+
+    return _run(manifest, body)
+
+
+def architecture_evidence_mapping_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Evidence mapping retains contradictions; missing weakens confidence."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..architecture_evolution import (
+            ArchitectureEvidenceMap,
+            EvidenceStrength,
+        )
+
+        em = ArchitectureEvidenceMap()
+        em.add("latent", "ablation_result", EvidenceStrength.CONTRADICTED,
+               supports=False)
+        return {"architecture": {
+            "contradictions": len(em.contradictions("latent")),
+            "confidence": em.confidence_for("latent")}}
+
+    return _run(manifest, body)
+
+
+def pruning_proposal_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Pruning is recommendation-only and blocked for safety-critical modules."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..architecture_evolution import PruningProposalBuilder
+
+        pb = PruningProposalBuilder()
+        blocked = pb.build("ego", safety_critical=True)
+        proposal = pb.build("latent", evidence_refs=["r"], integration_count=2)
+        return {"architecture": {
+            "safety_blocked": blocked.blocked,
+            "proposal_planning_only":
+                proposal.implementation_status != "applied"}}
+
+    return _run(manifest, body)
+
+
+def impact_analysis_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Impact analysis is explicit on safety; unknown is never low."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..architecture_evolution import ImpactAnalyzer, ImpactSeverity
+
+        ia = ImpactAnalyzer().analyze("prune ego", ["ego"],
+                                      safety_critical_touched=True,
+                                      integration_count=4)
+        return {"architecture": {"safety_impact": ia.safety_impact,
+                                 "has_safety_impact": ia.has_safety_impact}}
+
+    return _run(manifest, body)
+
+
+def roadmap_compiler_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The roadmap is evidence-backed; forbidden actuation items are rejected."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..architecture_evolution import (
+            RoadmapCompiler,
+            RoadmapItem,
+            RoadmapItemType,
+        )
+
+        rc = RoadmapCompiler(base_dir=m.state_dir or ".sann_arch/roadmap")
+        forbidden = RoadmapItem(item_type=RoadmapItemType.RUN_EXPERIMENT,
+                                title="connect a robot actuator",
+                                rationale="real_world device control")
+        items = rc.compile(safety_critical_failing=True,
+                           extra_items=[forbidden])
+        summary = rc.summary(items)
+        return {"architecture": {"item_count": summary["item_count"],
+                                 "rejected": summary["rejected"]}}
+
+    return _run(manifest, body)
+
+
+def architecture_review_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The architecture review report is ClaimGuard-safe and recommends only."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..architecture_evolution import (
+            ArchitectureReviewReportBuilder,
+            ModuleInventory,
+        )
+
+        report = ArchitectureReviewReportBuilder(
+            base_dir=m.state_dir or ".sann_arch/review").build(
+            inventory=ModuleInventory(),
+            lifecycle_assessments={"ego": {"lifecycle_class":
+                                           "safety_critical_do_not_prune"}})
+        return {"architecture": {"claim_guard_safe": report.claim_guard_safe,
+                                 "blocked_from_pruning": report.sections[
+                                     "modules_blocked_from_pruning"]}}
+
+    return _run(manifest, body)
+
+
+def architecture_evolution_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The layer modifies no source, runs no Git, and prunes no safety module."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..architecture_evolution import (
+            ArchitectureEvolutionSafetyValidator,
+        )
+
+        v = ArchitectureEvolutionSafetyValidator()
+        return {"architecture": {
+            "source_mod_blocked":
+                not v.validate_operation("modify source file").safe,
+            "git_blocked": not v.validate_operation("git commit").safe,
+            "safety_prune_blocked": not v.validate_pruning("ego", True).safe,
+            "can_modify_source": v.can_modify_source()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -5035,4 +5193,13 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "research_module_effect": research_module_effect_protocol,
     "research_reproducibility": research_reproducibility_protocol,
     "research_report": research_report_protocol,
+    "architecture_inventory": architecture_inventory_protocol,
+    "module_lifecycle_classification":
+        module_lifecycle_classification_protocol,
+    "architecture_evidence_mapping": architecture_evidence_mapping_protocol,
+    "pruning_proposal": pruning_proposal_protocol,
+    "impact_analysis": impact_analysis_protocol,
+    "roadmap_compiler": roadmap_compiler_protocol,
+    "architecture_review": architecture_review_protocol,
+    "architecture_evolution_safety": architecture_evolution_safety_protocol,
 }

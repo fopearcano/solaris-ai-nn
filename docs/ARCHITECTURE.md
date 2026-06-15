@@ -2392,3 +2392,69 @@ accumulation; the full system does not automatically win; safety stays enabled
 throughout; and benchmark scores are operational proxies (prediction,
 compression, grounding, stability, safety, reproducibility), never consciousness,
 sentience, life, personhood, or free-will scores.**
+
+## Architecture Evolution, Module Pruning, and Roadmap Compiler
+
+The research lab answers *which modules matter*; this layer answers the
+disciplined follow-up: *given that evidence, what should Solaris-AI-NN keep,
+prune, revise, freeze, or test next?* The `architecture_evolution` package
+(`src/solaris_ai_nn/architecture_evolution/`) is **planning-only governance**.
+Every output is a data structure, a Markdown record, or a JSON artifact:
+an inventory, a lifecycle assessment, an architecture decision record (ADR), a
+pruning *proposal*, an impact analysis, a migration *plan*, a design-debt item,
+a compiled roadmap, a versioned snapshot, and a review report. Nothing in this
+layer modifies source code, edits imports, runs Git, deletes a module, or
+rewrites the architecture at runtime. It is **not** self-programming, **not**
+recursive self-improvement, and **not** automatic refactoring -- a
+recommendation never becomes an implementation.
+
+The **`ModuleInventory`** catalogues every package, marking which are available
+(missing imports are recorded as *unavailable*, never hidden) and which are
+**safety-critical** (ego, governance, ops, autoregeneration, conscience, the
+sensory and motor membranes, the pilot planning layers, safety invariants, and
+communication). The **`ModuleLifecycleClassifier`** turns research effect values
+into a recommended lifecycle (core-keep, promote-to-core, experimental-keep,
+needs-revision, candidate-for-pruning, candidate-for-quarantine,
+insufficient-evidence, safety-critical-do-not-prune): a safety-critical module is
+*never* a pruning candidate on performance evidence alone, and a module with no
+evidence is "insufficient evidence", never silently removed. The
+**`ArchitectureEvidenceMap`** requires every recommendation to cite research /
+ablation evidence, retains contradictions rather than discarding them, and
+weakens confidence when artifacts are missing. The **`ArchitectureDecisionRecord`**
+store writes operator-reviewed ADRs (operator review is always required); the
+**`PruningProposalBuilder`** emits proposals whose implementation status is always
+`not_implemented` or `external_manual_change_required` (safety-critical pruning is
+*blocked*, and risky candidates are marked quarantine-first). The
+**`ImpactAnalyzer`** reports blast radius with safety made explicit (unknown areas
+are `UNKNOWN`, never `LOW`); the **`MigrationPlan`** is a manual checklist awaiting
+operator sign-off with nothing executed; the **`DesignDebtRegistry`** preserves the
+uncomfortable findings; and the **`RoadmapCompiler`** compiles an evidence-backed
+plan that puts safety repair first and *rejects* any item that would enable a
+forbidden real-world action. An **`ArchitectureSnapshotBuilder`** keeps versioned
+records and diffs them, a **`ChangelogPlan`** is explicitly marked *not applied*,
+and the **`ArchitectureReviewReportBuilder`** compiles a ClaimGuard-scanned review
+that recommends -- it does not act. The
+**`ArchitectureEvolutionSafetyValidator`** statically refuses source modification,
+Git operations, automatic deletion, safety-critical pruning, converting a
+recommendation into an implementation, hiding negative evidence, and unsupported
+claims.
+
+The layer integrates the same way every layer does: governance adds five
+architecture scopes and a policy gate that blocks source changes, auto-deletion,
+Git, safety-critical pruning, and real-world actuation; the conscience
+orchestrator adds five month-scale planning profiles (no cognition loop, no
+source modification, no auto-deletion, safety-critical modules cannot be pruned);
+Ego classifies every output as an `architecture_planning_artifact` (never a real
+action); the Inner MAP carries an `architecture_evolution` field plus thirteen
+state-graph nodes (research evidence -> evidence map -> classifier -> ADR /
+pruning / promotion -> impact -> migration; design debt -> roadmap -> review ->
+Inner MAP); ops exposes the architecture status (`modifies_source_code` is always
+false) and raises incidents on attempted safety-critical pruning, critical design
+debt, missing or contradictory evidence, and forbidden roadmap actions;
+evaluation adds eight protocols and an `architecture_metrics` function; and the
+operator dialogue answers which modules to keep, prune, or revise, what evidence
+supports a recommendation -- and answers plainly that the system **does not
+modify its own code** and **does not prune modules automatically**. **Evidence
+drives recommendations; recommendations are reviewed by a human; nothing is
+deleted, rewritten, or executed by the system; and safety-critical modules can
+never be pruned on performance evidence alone.**

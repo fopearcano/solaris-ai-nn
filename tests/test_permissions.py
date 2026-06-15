@@ -75,8 +75,9 @@ def test_all_scopes_in_default_set():
     # + 7 Pilot-3 simulated embodiment soak (P34)
     # + 4 Pilot-4 planning-only readiness (P35)
     # + 4 system-wide safety invariants (P36)
-    # + 5 research lab (P37).
-    assert len(PermissionScope.ALL) == 145
+    # + 5 research lab (P37)
+    # + 5 architecture evolution (P38).
+    assert len(PermissionScope.ALL) == 150
 
 
 def test_motor_membrane_scope_defaults():

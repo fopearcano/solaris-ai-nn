@@ -1482,3 +1482,42 @@ grounding, and cleaner safety are operational properties of a bounded software
 process. They are useful for deciding what to keep and what to cut. They do not
 measure or prove consciousness, sentience, life, personhood, or free will, and
 no metric in the suite is allowed to be named as if it did.
+
+## Phase 38 — Architecture evolution, module pruning, and roadmap compiler
+
+**Why planning-only, and never self-programming.** The research lab produces
+evidence about which modules matter; the obvious temptation is to let the system
+act on that evidence -- delete the dead weight, promote the winners, rewrite its
+own architecture. This phase deliberately refuses that. Evidence informs
+*recommendations*; a recommendation is reviewed by a human; and nothing in the
+layer modifies source code, edits imports, runs Git, deletes a module, or
+rewrites the architecture at runtime. The discipline is structural, not
+aspirational: every output is a data structure, a Markdown record, or a JSON
+artifact, and the safety validator statically refuses source edits, Git
+operations, automatic deletion, and converting a recommendation into an
+implementation. This is not recursive self-improvement and not automatic
+refactoring.
+
+**Why safety-critical modules are never pruning candidates.** A performance
+argument is the wrong lens for a safety boundary: governance, ops, the conscience
+spine, the sensory and motor membranes, autoregeneration, the pilot planning
+layers, ego, safety invariants, and communication exist to constrain the system,
+not to score well on a benchmark. The lifecycle classifier therefore assigns them
+`safety_critical_do_not_prune` regardless of measured effect, the pruning builder
+blocks any proposal against them, the policy gate refuses safety-critical pruning,
+and ops raises an incident if one is ever attempted.
+
+**Why contradictions and missing evidence are preserved, not resolved.** A
+recommendation built on a single flattering run is a liability. The evidence map
+keeps contradictions instead of discarding the inconvenient side, weakens
+confidence when artifacts are missing, and a module with no evidence is classified
+`insufficient_evidence` -- a reason to test, not to remove. The design-debt
+registry is append-only for the same reason: the uncomfortable findings are the
+ones most worth keeping.
+
+**Why the roadmap rejects forbidden actions.** A compiled plan is still a plan,
+but it is the place where scope creep would first appear. The compiler puts safety
+repair first, and any roadmap item whose text would enable real-world actuation,
+external APIs, browser/OS/network/device control, or self-modification is marked
+*rejected* with a reason. The changelog plan is explicitly *not applied*. The
+roadmap describes what a human might choose to do; it never does it.

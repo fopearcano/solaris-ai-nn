@@ -771,6 +771,41 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["run_step_count"],
             max_runtime_s=60.0))
 
+    # -- Architecture evolution profiles (Prompt 38) --------------------------
+    # Planning-only: no cognition loop, no source-code modification. Profiles
+    # generate planning artifacts (inventory, review, roadmap, snapshot,
+    # changelog plan) for operator review.
+    _arch_modules = ["governance", "ops", "evaluation", "inner_map"]
+    for pid, desc, scope, artifact in (
+            ("architecture_inventory",
+             "Generate the module inventory (analysis only).",
+             "enable_architecture_evolution", "architecture_snapshot.json"),
+            ("architecture_review",
+             "Generate the architecture review report (analysis only).",
+             "enable_architecture_review", "ARCHITECTURE_REVIEW.json"),
+            ("architecture_roadmap_compile",
+             "Compile the evidence-backed roadmap (analysis only).",
+             "enable_architecture_roadmap_compile", "ROADMAP_COMPILED.json"),
+            ("architecture_snapshot",
+             "Build an architecture snapshot (analysis only).",
+             "enable_architecture_evolution", "snapshots/latest.json"),
+            ("architecture_changelog_plan",
+             "Draft the changelog plan (not applied).",
+             "enable_architecture_evolution", "CHANGELOG_PLAN.json")):
+        add(ScenarioProfile(
+            profile_id=pid, description=desc,
+            run_context=_ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                             max_duration_s=None),
+            enabled_modules=list(_arch_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "planning only; no cognition loop, no source-code modification",
+                "no auto-deletion, no Git, no import rewriting",
+                "safety-critical modules cannot be pruned"],
+            governance_requirements=[scope],
+            expected_artifacts=[artifact],
+            expected_metrics=["report_generation_success"],
+            max_runtime_s=30.0))
+
     return profiles
 
 

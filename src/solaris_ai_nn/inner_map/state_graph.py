@@ -1306,4 +1306,39 @@ def build_default_state_graph() -> StateGraph:
                "the effect analyzer feeds the research report")
     g.add_edge("ResearchReportBuilder", "inner_map",
                "the research report feeds Inner MAP / Governance / Ops")
+
+    # Architecture evolution: evidence-based governance (Prompt 38). Turns
+    # research evidence into disciplined, planning-only architecture decisions.
+    for name, role in [
+        ("ModuleInventory", "catalogue of modules; missing = unavailable"),
+        ("ModuleLifecycleClassifier", "recommended lifecycle from evidence"),
+        ("ArchitectureDecisionRecord", "a proposed change; operator review"),
+        ("ArchitectureEvidenceMap", "every recommendation cites evidence"),
+        ("PruningProposalBuilder", "pruning is a plan, never deletion"),
+        ("PromotionProposal", "role change via ADR; not importance"),
+        ("ImpactAnalyzer", "blast radius; safety explicit; unknown != low"),
+        ("MigrationPlan", "manual checklist; nothing executed"),
+        ("DesignDebtRegistry", "preserve the uncomfortable findings"),
+        ("RoadmapCompiler", "evidence-backed plan; no forbidden action"),
+        ("ArchitectureSnapshotBuilder", "versioned record of the shape"),
+        ("ArchitectureReviewReportBuilder", "claim-guarded review; recommends"),
+        ("ArchitectureEvolutionSafetyValidator", "no source change / Git"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("ResearchReportBuilder", "ArchitectureEvidenceMap",
+               "research lab feeds the evidence mapper")
+    g.add_edge("ArchitectureEvidenceMap", "ModuleLifecycleClassifier",
+               "the evidence mapper feeds the lifecycle classifier")
+    g.add_edge("ModuleLifecycleClassifier", "ArchitectureDecisionRecord",
+               "the classifier feeds ADR / pruning / promotion")
+    g.add_edge("ModuleLifecycleClassifier", "PruningProposalBuilder",
+               "the classifier feeds pruning proposals")
+    g.add_edge("ImpactAnalyzer", "MigrationPlan",
+               "impact analysis feeds the migration plan")
+    g.add_edge("DesignDebtRegistry", "RoadmapCompiler",
+               "design debt feeds the roadmap compiler")
+    g.add_edge("RoadmapCompiler", "ArchitectureReviewReportBuilder",
+               "the roadmap feeds the architecture review")
+    g.add_edge("ArchitectureReviewReportBuilder", "inner_map",
+               "architecture evolution state feeds Inner MAP")
     return g

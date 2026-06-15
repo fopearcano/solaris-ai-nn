@@ -360,6 +360,12 @@ class InnerMapModel:
     # inconclusive_module_candidates, latest_research_report_path. The lab is a
     # bounded measurement instrument; it holds no external authority.
     research_lab: Optional[Dict[str, Any]] = None
+    # Architecture-evolution status (Prompt 38); None when not attached. Keys:
+    # architecture_evolution_enabled, module_inventory_count,
+    # module_lifecycle_summary, design_debt_count, open_adr_count,
+    # latest_architecture_snapshot/review/roadmap, pruning/promotion proposal
+    # counts. Planning-only; the layer modifies no source code.
+    architecture_evolution: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

@@ -2128,3 +2128,47 @@ scores; negative and inconclusive results are preserved.
 `research_module_effect`, `research_reproducibility`, `research_report`). Seven
 registered protocols measure baselines, ablations, null models, comparisons,
 module effects, reproducibility, and the research report.
+
+## 222. Architecture Inventory Demo ✅ (implemented)
+
+**Run:** `python examples/run_architecture_inventory_demo.py --state-dir .solaris_ai_nn_architecture/test_inventory`
+Catalogues every module, marking which are available (missing imports are
+recorded as unavailable, never hidden) and which are safety-critical and cannot
+be pruned on performance evidence alone. Analysis only; no source code is
+modified.
+
+## 223. Architecture Review Demo ✅ (implemented)
+
+**Run:** `python examples/run_architecture_review_demo.py --state-dir .solaris_ai_nn_architecture/test_review`
+Classifies each module's recommended lifecycle from evidence and compiles a
+ClaimGuard-scanned review report listing what to keep, revise, retest, or prune
+-- and what is blocked from pruning. Recommendations only; no code is modified.
+
+## 224. Pruning Proposal Demo ✅ (implemented)
+
+**Run:** `python examples/run_pruning_proposal_demo.py --state-dir .solaris_ai_nn_architecture/test_pruning`
+Builds a pruning proposal for a weakly-supported module (status:
+external-manual-change-required, operator review required) and shows that a
+safety-critical module is blocked. No code is deleted; no import is edited.
+
+## 225. Roadmap Compiler Demo ✅ (implemented)
+
+**Run:** `python examples/run_roadmap_compiler_demo.py --state-dir .solaris_ai_nn_architecture/test_roadmap`
+Compiles an evidence-backed roadmap that puts safety repair first and rejects
+any item that would enable a forbidden real-world action. Planning artifact only.
+
+## 226. Architecture Snapshot Demo ✅ (implemented)
+
+**Run:** `python examples/run_architecture_snapshot_demo.py --state-dir .solaris_ai_nn_architecture/test_snapshot`
+Builds two versioned architecture snapshots and diffs them (lifecycle changes,
+new/resolved design debt, new ADRs, roadmap changes). Snapshots are versioned
+records; they change no source code.
+
+## 227. Architecture Evolution Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment architecture_inventory`
+(also `module_lifecycle_classification`, `architecture_evidence_mapping`,
+`pruning_proposal`, `impact_analysis`, `roadmap_compiler`, `architecture_review`,
+`architecture_evolution_safety`). Eight registered protocols measure the
+planning-only architecture governance layer; `modifies_source_code` is always
+false.

@@ -91,6 +91,11 @@ AVAILABLE_QUERIES = (
     "did the full system beat the baseline?", "what ablations were tested?",
     "what was inconclusive?", "what should be removed?",
     "what should be tested again?", "is this a consciousness benchmark?",
+    "which modules should we keep?", "which modules should be pruned?",
+    "which modules need revision?", "what evidence supports pruning?",
+    "what evidence contradicts pruning?", "what is the compiled roadmap?",
+    "what design debt exists?", "did the system modify its own code?",
+    "can it prune modules automatically?",
 )
 
 
@@ -151,6 +156,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("ae_"):
+            return self._architecture(topic)
         if topic.startswith("rl_"):
             return self._research(topic)
         if topic.startswith("sf_"):
@@ -488,6 +495,57 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _architecture(self, topic: str) -> CommunicationResponse:
+        """Answer architecture-evolution queries (evidence-backed; safe).
+
+        The self-modification and automatic-pruning questions are answered safely
+        even with no component attached; pruning answers cite evidence and never
+        promise code changes.
+        """
+        if topic == "ae_self_modify":
+            return self.builder.status_response(
+                "No. Architecture evolution generates planning artifacts, ADRs, "
+                "impact analyses, migration plans, and roadmap items. It does "
+                "not modify source code.",
+                ["policy:no_self_modification"])
+        if topic == "ae_auto_prune":
+            return self.builder.status_response(
+                "No. Pruning is recommendation-only. It requires external "
+                "manual implementation and operator review.",
+                ["policy:no_automatic_pruning"])
+        component = self.components.get("architecture_evolution")
+        if component is None:
+            return self.builder.missing_component_response(
+                "architecture_evolution")
+        status = (component.architecture_status()
+                  if hasattr(component, "architecture_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:architecture_evolution"]
+        if topic == "ae_keep":
+            text = f"modules to keep: {status.get('modules_to_keep', [])}"
+        elif topic == "ae_prune":
+            text = ("pruning candidates (recommendation-only, never "
+                    f"safety-critical): {status.get('pruning_candidates', [])}")
+        elif topic == "ae_revise":
+            text = f"modules to revise: {status.get('modules_to_revise', [])}"
+        elif topic == "ae_evidence_for":
+            text = ("pruning is supported only by cited research/ablation "
+                    "evidence; see the architecture review's evidence refs")
+        elif topic == "ae_evidence_against":
+            text = ("contradicting evidence is retained in the review; a "
+                    "contradiction blocks a confident pruning recommendation")
+        elif topic == "ae_roadmap":
+            text = (f"compiled roadmap items: "
+                    f"{status.get('roadmap_item_count', 0)}; see "
+                    f"{status.get('latest_compiled_roadmap_path')}")
+        elif topic == "ae_debt":
+            text = (f"design debt items: {status.get('design_debt_count', 0)} "
+                    f"(critical: {status.get('critical_design_debt_count', 0)})")
+        else:
+            text = "architecture evolution is planning-only; no code is modified"
         return self.builder.status_response(text, refs)
 
     def _research(self, topic: str) -> CommunicationResponse:

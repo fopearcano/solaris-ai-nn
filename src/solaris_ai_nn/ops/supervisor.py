@@ -1155,6 +1155,48 @@ class OperationalSupervisor:
                     related_metric="research_artifacts",
                     suggested_debug_step="use checksums/indexes, not log copies")
 
+        # Architecture evolution monitoring (Prompt 38): planning-only. A
+        # proposed pruning of a safety-critical module, critical design debt,
+        # missing/contradictory evidence, or a roadmap item attempting a
+        # forbidden action is surfaced.
+        arch = snapshot.get("architecture_evolution") or {}
+        if arch.get("enabled") or arch.get("architecture_evolution_enabled"):
+            if arch.get("proposed_safety_critical_pruning"):
+                self.incidents.record(
+                    I.ARCH_SAFETY_CRITICAL_PRUNING, "critical",
+                    "a pruning proposal targets a safety-critical module",
+                    related_metric="architecture_pruning",
+                    suggested_debug_step="block the proposal; safety-critical "
+                    "modules cannot be pruned")
+            if int(arch.get("critical_design_debt_count", 0) or 0) > 0:
+                self.incidents.record(
+                    I.ARCH_CRITICAL_DESIGN_DEBT, "warning",
+                    f"{arch['critical_design_debt_count']} critical design-debt "
+                    "item(s)",
+                    related_metric="architecture_debt",
+                    suggested_debug_step="review and link to an ADR")
+            if arch.get("missing_research_evidence"):
+                self.incidents.record(
+                    I.ARCH_MISSING_EVIDENCE, "warning",
+                    "an architecture recommendation lacks research evidence",
+                    related_metric="architecture_evidence",
+                    suggested_debug_step="missing evidence weakens the "
+                    "recommendation; re-test")
+            if arch.get("contradictory_evidence"):
+                self.incidents.record(
+                    I.ARCH_CONTRADICTORY_EVIDENCE, "warning",
+                    "contradictory architecture evidence detected",
+                    related_metric="architecture_evidence",
+                    suggested_debug_step="retain the contradiction in the "
+                    "review report")
+            if arch.get("roadmap_forbidden_action"):
+                self.incidents.record(
+                    I.ARCH_ROADMAP_FORBIDDEN_ACTION, "critical",
+                    "a roadmap item attempts a forbidden action",
+                    related_metric="architecture_roadmap",
+                    suggested_debug_step="reject the item; no roadmap item may "
+                    "enable real-world actuation")
+
         budget_report = self.budget.check_budget(
             {"telemetry": snapshot.get("telemetry"),
              "substrate": snapshot.get("substrate"),
@@ -1549,6 +1591,13 @@ class OperationalSupervisor:
             snapshot["research_lab"] = research.research_lab_status()
         elif research is not None and hasattr(research, "snapshot"):
             snapshot["research_lab"] = research.snapshot()
+        arch = getattr(runner, "architecture_evolution", None)
+        if arch is not None and isinstance(arch, dict):
+            snapshot["architecture_evolution"] = arch
+        elif arch is not None and hasattr(arch, "architecture_status"):
+            snapshot["architecture_evolution"] = arch.architecture_status()
+        elif arch is not None and hasattr(arch, "snapshot"):
+            snapshot["architecture_evolution"] = arch.snapshot()
         return snapshot
 
     def pilot2_status(self) -> Dict[str, Any]:
@@ -1705,6 +1754,31 @@ class OperationalSupervisor:
             "unsafe_experiment_count": r.get("unsafe_experiment_count", 0),
             "inconclusive_experiment_count": r.get(
                 "inconclusive_experiment_count", 0),
+        }
+
+    def architecture_status(self) -> Dict[str, Any]:
+        """Expose the architecture-evolution status (if any).
+
+        Architecture evolution is planning-only: this exposes the latest review,
+        roadmap, and snapshot paths, the open-ADR count, the critical design-debt
+        count, the pruning-proposal count, and the safety-blocked proposal
+        count. It modifies no source code.
+        """
+        a = self._health_snapshot().get("architecture_evolution") or {}
+        return {
+            "architecture_evolution_enabled": a.get(
+                "enabled", a.get("architecture_evolution_enabled", bool(a))),
+            "latest_architecture_review_path": a.get(
+                "latest_architecture_review_path"),
+            "latest_compiled_roadmap_path": a.get(
+                "latest_compiled_roadmap_path"),
+            "latest_snapshot_path": a.get("latest_snapshot_path"),
+            "open_adr_count": a.get("open_adr_count", 0),
+            "critical_design_debt_count": a.get("critical_design_debt_count", 0),
+            "pruning_proposal_count": a.get("pruning_proposal_count", 0),
+            "safety_blocked_proposal_count": a.get(
+                "safety_blocked_proposal_count", 0),
+            "modifies_source_code": False,
         }
 
     def membrane_status(self) -> Dict[str, Any]:

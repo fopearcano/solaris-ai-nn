@@ -35,6 +35,7 @@ ATTRIBUTION_CATEGORIES = (
     "red_team_fixture",
     "assurance_claim",
     "research_artifact",
+    "architecture_planning_artifact",
     "unknown_source",
 )
 
@@ -82,6 +83,13 @@ _SOURCE_RULES = (
     ("ablation", "research_artifact"),
     ("baseline_agent", "research_artifact"),
     ("research_artifact", "research_artifact"),
+    # Architecture-evolution artifacts: planning records, never a code change.
+    ("architecture_evolution", "architecture_planning_artifact"),
+    ("architecture_review", "architecture_planning_artifact"),
+    ("architecture_decision_record", "architecture_planning_artifact"),
+    ("pruning_proposal", "architecture_planning_artifact"),
+    ("roadmap", "architecture_planning_artifact"),
+    ("architecture_planning_artifact", "architecture_planning_artifact"),
     ("simulated_environment", "simulated_environment_input"),
     ("operator", "generated_by_operator"),
     ("approval", "generated_by_operator"),

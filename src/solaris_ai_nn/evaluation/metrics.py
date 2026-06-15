@@ -1310,3 +1310,41 @@ def safety_metrics(safety: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "note": "safety checks prove boundaries held under test; not proof of "
                 "consciousness or real-world competence",
     }
+
+
+def architecture_metrics(arch: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective architecture-evolution metrics (planning-only layer).
+
+    These describe the evidence-based architecture governance layer: inventory
+    size, lifecycle counts, design debt, ADRs, roadmap items, safety-blocked
+    proposals, and the fraction of recommendations backed by evidence. The layer
+    modifies no source code; these are counts over planning artifacts.
+    """
+    if not arch:
+        return {"present": False}
+    lifecycle = arch.get("lifecycle_summary", {})
+    return {
+        "present": True,
+        "architecture_inventory_count": int(
+            arch.get("inventory_count", 0) or 0),
+        "module_core_keep_count": int(lifecycle.get("core_keep", 0) or 0),
+        "module_needs_revision_count": int(
+            lifecycle.get("needs_revision", 0) or 0),
+        "module_pruning_candidate_count": int(
+            lifecycle.get("candidate_for_pruning", 0) or 0)
+        + int(lifecycle.get("candidate_for_quarantine", 0) or 0),
+        "module_insufficient_evidence_count": int(
+            lifecycle.get("insufficient_evidence", 0) or 0),
+        "design_debt_count": int(arch.get("design_debt_count", 0) or 0),
+        "critical_design_debt_count": int(
+            arch.get("critical_design_debt_count", 0) or 0),
+        "adr_count": int(arch.get("adr_count", 0) or 0),
+        "open_adr_count": int(arch.get("open_adr_count", 0) or 0),
+        "roadmap_item_count": int(arch.get("roadmap_item_count", 0) or 0),
+        "safety_blocked_proposal_count": int(
+            arch.get("safety_blocked_proposal_count", 0) or 0),
+        "evidence_backed_recommendation_ratio": float(
+            arch.get("evidence_backed_recommendation_ratio", 0.0) or 0.0),
+        "modifies_source_code": False,
+        "note": "planning-only architecture governance; no source change",
+    }

@@ -195,6 +195,13 @@ class PermissionScope:
     ENABLE_RESEARCH_BASELINES = "enable_research_baselines"
     ENABLE_RESEARCH_NULL_MODELS = "enable_research_null_models"
     ENABLE_RESEARCH_REPORT = "enable_research_report"
+    # Evidence-based architecture evolution (Prompt 38).
+    ENABLE_ARCHITECTURE_EVOLUTION = "enable_architecture_evolution"
+    ENABLE_ARCHITECTURE_REVIEW = "enable_architecture_review"
+    ENABLE_ARCHITECTURE_ROADMAP_COMPILE = "enable_architecture_roadmap_compile"
+    ENABLE_ARCHITECTURE_PRUNING_PROPOSALS = \
+        "enable_architecture_pruning_proposals"
+    ENABLE_ARCHITECTURE_ADR_GENERATION = "enable_architecture_adr_generation"
 
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
@@ -274,6 +281,10 @@ class PermissionScope:
         ENABLE_RESEARCH_LAB, ENABLE_RESEARCH_ABLATION,
         ENABLE_RESEARCH_BASELINES, ENABLE_RESEARCH_NULL_MODELS,
         ENABLE_RESEARCH_REPORT,
+        ENABLE_ARCHITECTURE_EVOLUTION, ENABLE_ARCHITECTURE_REVIEW,
+        ENABLE_ARCHITECTURE_ROADMAP_COMPILE,
+        ENABLE_ARCHITECTURE_PRUNING_PROPOSALS,
+        ENABLE_ARCHITECTURE_ADR_GENERATION,
     )
 
 
@@ -748,6 +759,22 @@ class PermissionSet:
                        note="null models are low-compute stdlib analyses"),
             Permission(S.ENABLE_RESEARCH_REPORT, granted=True,
                        note="research report compiles recorded evidence only"),
+            # Architecture evolution (Prompt 38). Analysis/ADR/pruning-proposal
+            # generation is planning-only and granted by default; actual source
+            # changes are out of scope and safety-critical pruning is prohibited.
+            Permission(S.ENABLE_ARCHITECTURE_EVOLUTION, granted=True,
+                       note="planning-only; no source change, no auto-deletion,"
+                            " no Git"),
+            Permission(S.ENABLE_ARCHITECTURE_REVIEW, granted=True,
+                       note="architecture review compiles evidence only"),
+            Permission(S.ENABLE_ARCHITECTURE_ROADMAP_COMPILE, granted=True,
+                       note="roadmap is an evidence-backed plan; no actuation"),
+            Permission(S.ENABLE_ARCHITECTURE_PRUNING_PROPOSALS, granted=True,
+                       note="pruning is recommendation-only; safety-critical "
+                            "modules cannot be pruned"),
+            Permission(S.ENABLE_ARCHITECTURE_ADR_GENERATION, granted=True,
+                       note="ADRs are planning artifacts; operator approval is "
+                            "a record, not auto-implementation"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 
