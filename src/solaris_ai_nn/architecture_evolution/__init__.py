@@ -44,6 +44,7 @@ from .evidence_mapper import (
     EvidenceStrength,
     cognition_revision_proposals,
     ontogenesis_revision_proposals,
+    self_boundary_revision_proposals,
     semiogenesis_revision_proposals,
 )
 from .impact_analysis import (
@@ -106,7 +107,7 @@ __all__ = [
     "DecisionStatus", "DecisionRationale", "ADRStore",
     "ArchitectureEvidenceMap", "EvidenceLink", "EvidenceStrength",
     "ontogenesis_revision_proposals", "semiogenesis_revision_proposals",
-    "cognition_revision_proposals",
+    "cognition_revision_proposals", "self_boundary_revision_proposals",
     # pruning / promotion / impact / migration
     "PruningProposal", "PruningProposalBuilder", "PruningPlan", "PruningRisk",
     "PruningImplementationStatus", "PromotionProposal", "DemotionProposal",

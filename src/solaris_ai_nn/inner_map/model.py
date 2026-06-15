@@ -438,6 +438,13 @@ class InnerMapModel:
     # latest_cognition_report_path. Cognitive moves are operations over signs/
     # concepts, not human-language thought; simulation is not real observation.
     sensorium_cognition: Optional[Dict[str, Any]] = None
+    # Self-boundary status (Prompt 50); None when not attached. Keys:
+    # self_boundary_enabled, boundary_confidence_score, current_perspective_frame,
+    # receptor_body_schema_count, continuity_anchor_count, continuity_break_count,
+    # source_attribution_uncertainty_score, simulation_boundary_warning_count,
+    # identity_trace_event_count, latest_self_boundary_report_path. Self-boundary
+    # is operational, not subjective selfhood; body schema is receptor structure.
+    self_boundary: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

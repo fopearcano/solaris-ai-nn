@@ -1629,4 +1629,30 @@ def build_default_state_graph() -> StateGraph:
                "predictions seed bounded internal simulations (non-real)")
     g.add_edge("SensoriumCognitionRuntime", "inner_map",
                "sensorium cognition state feeds Inner MAP")
+
+    # Self-boundary (Prompt 50): operational self/world boundary, not selfhood.
+    # Body schema is receptor structure; identity trace is continuity metadata.
+    for name, role in [
+        ("SelfBoundaryState", "operational self/world zones, not subjective self"),
+        ("OwnershipAttributor", "self/world/sim/memory ownership; uncertainty kept"),
+        ("SensoriumPerspective", "operational attention frame, not a viewpoint"),
+        ("OrganismicContinuity", "trace continuity; breaks retained, not life"),
+        ("SensoriumBodySchema", "receptor body-organs; feeders are not body parts"),
+        ("SourceAttributionEngine", "source provenance; corruption not made truth"),
+        ("InternalExternalClassifier", "internal/external/mixed; no silent collapse"),
+        ("SimulationBoundaryMarker", "simulation/counterfactual never observation"),
+        ("OperationalIdentityTrace", "continuity metadata, not personhood"),
+        ("BoundaryTensionDetector", "self/world tensions; unknown-origin visible"),
+        ("SelfBoundaryRuntime", "bounded operational self-boundary loop"),
+        ("SelfBoundarySafetyValidator", "no personhood/subjective-self claims"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("Receptor", "SensoriumBodySchema",
+               "receptors form the sensorium body schema (organs)")
+    g.add_edge("SensoriumCognitionRuntime", "SelfBoundaryRuntime",
+               "predictions/simulations feed boundary classification")
+    g.add_edge("SimulationBoundaryMarker", "SelfBoundaryState",
+               "simulated states stay on the non-observation side of the boundary")
+    g.add_edge("SelfBoundaryRuntime", "inner_map",
+               "self-boundary state feeds Inner MAP")
     return g

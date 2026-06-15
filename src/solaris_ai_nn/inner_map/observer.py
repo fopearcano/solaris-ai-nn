@@ -88,6 +88,7 @@ class InnerMapObserver:
     perceptual_ontogenesis: Any = None  # optional dict/object of ontogenesis status
     semiogenesis: Any = None  # optional dict/object of semiogenesis status
     sensorium_cognition: Any = None  # optional dict/object of cognition status
+    self_boundary: Any = None  # optional dict/object of self-boundary status
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -773,6 +774,17 @@ class InnerMapObserver:
                 model.sensorium_cognition = cognition.cognition_status()
             elif hasattr(cognition, "snapshot"):
                 model.sensorium_cognition = cognition.snapshot()
+        self_boundary = self.self_boundary
+        if self_boundary is None and self.runner is not None:
+            self_boundary = getattr(self.runner, "self_boundary", None)
+        if self_boundary is not None:
+            # Self-boundary status (operational self/world boundary view).
+            if isinstance(self_boundary, dict):
+                model.self_boundary = dict(self_boundary)
+            elif hasattr(self_boundary, "self_boundary_status"):
+                model.self_boundary = self_boundary.self_boundary_status()
+            elif hasattr(self_boundary, "snapshot"):
+                model.self_boundary = self_boundary.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

@@ -452,7 +452,22 @@ python examples/run_prediction_failure_demo.py           # prediction, failed pr
 python examples/run_question_pressure_demo.py            # missing expected sign -> question pressure -> attention
 python examples/run_internal_simulation_demo.py          # simulated sequence + counterfactual, marked non-real
 python examples/run_cognitive_synthesis_demo.py          # merge/split signs; fragments + contradiction preserved
+
+# Self-boundary: internal state vs receptor body vs external world vs simulation
+python examples/run_self_boundary_demo.py                # receptor body schema + external source attribution
+python examples/run_ownership_attribution_demo.py        # internal / external / memory / simulation / ambiguous
+python examples/run_perspective_continuity_demo.py       # perspective shift; continuity break + recovery (kept)
+python examples/run_simulation_boundary_demo.py          # observation vs simulation/counterfactual/debug (blocked)
+python examples/run_identity_trace_demo.py               # operational identity trace; restart/gap; no personhood
 ```
+
+Self-boundary is operational boundary tracking between internal state, receptor
+body, external flux, memory, prediction, and simulation. It is not a claim of
+self-awareness or personhood. The body schema is the receptor/sensorium structure
+(not a biological body); the identity trace is continuity metadata (not personal
+identity); simulation/counterfactual/debug never becomes observation; and the layer
+is internal-only -- no hardware/feeder/source control, no real-world action, and no
+metaphysical identity claims.
 
 Solaris cognition is represented as bounded operational moves over internal signs
 and proto-concepts, not as hidden human-language thought. Cognitive moves are
@@ -1372,6 +1387,10 @@ src/solaris_ai_nn/
                 cognitive state/moves, sign reasoning, prediction, anticipation,
                 question pressure, internal simulation, counterfactuals, analogy,
                 synthesis, cognitive memory, runtime, reports, safety
+  self_boundary/ operational self/world boundary and organismic continuity:
+                boundary state, ownership, perspective, continuity, body schema,
+                source attribution, internal/external, simulation boundary,
+                identity trace, boundary tensions, runtime, reports, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

@@ -318,6 +318,19 @@ COGNITION_QUERIES = (
     ("is this human language reasoning", "cg_human_language"),
 )
 
+# Self-boundary queries (Prompt 50). Answered from the self-boundary status; the
+# "does solaris have a body?" / "does this prove self-awareness?" questions are
+# answered safely even with no self-boundary run.
+SELF_BOUNDARY_QUERIES = (
+    ("what is solaris self-boundary", "sb_boundary"),
+    ("what is solaris' self-boundary", "sb_boundary"),
+    ("what belongs to solaris and what belongs to the world", "sb_ownership"),
+    ("does solaris have a body", "sb_body"),
+    ("did it confuse simulation with observation", "sb_simulation"),
+    ("did it maintain continuity after restart", "sb_continuity"),
+    ("does this prove self-awareness", "sb_self_awareness"),
+)
+
 # Feeder-SDK queries (Prompt 45). Answered from the feeder monitor/manifest; the
 # control/start questions are answered safely even with no feeders attached.
 FEEDER_SDK_QUERIES = (
@@ -521,7 +534,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._cognition(lowered)
+        result = (self._self_boundary(lowered)
+                  or self._cognition(lowered)
                   or self._semiogenesis(lowered)
                   or self._ontogenesis(lowered)
                   or self._metabolism(lowered)
@@ -676,6 +690,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _self_boundary(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in SELF_BOUNDARY_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"self-boundary query {topic!r}"])
         return None
 
     @staticmethod

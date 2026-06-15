@@ -1810,3 +1810,50 @@ def sensorium_cognition_metrics(cog: Optional[Dict[str, Any]],
         "note": "sign-based cognition; not human-language reasoning, simulation "
                 "is not observation, and this proves no understanding",
     }
+
+
+def self_boundary_metrics(sb: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective self-boundary metrics (operational self/world boundary layer).
+
+    These describe how Solaris tracks the boundary between internal state, its
+    receptor body, and external flux: boundary events/confidence, ownership
+    attribution, perspective shifts, receptor body schema, continuity anchors/
+    breaks, simulation-boundary warnings, source-attribution uncertainty, identity
+    trace events, and boundary tensions. Self-boundary is operational, not
+    subjective selfhood; the body schema is receptor structure, not a biological
+    body; the identity trace is continuity metadata, not personhood.
+    """
+    if not sb:
+        return {"present": False}
+    return {
+        "present": True,
+        "boundary_event_count": int(sb.get("boundary_event_count", 0) or 0),
+        "boundary_confidence_score": float(
+            sb.get("boundary_confidence_score", 0.0) or 0.0),
+        "ownership_attribution_count": int(
+            sb.get("ownership_attribution_count", 0) or 0),
+        "ambiguous_ownership_count": int(
+            sb.get("ambiguous_ownership_count", 0) or 0),
+        "perspective_shift_count": int(
+            sb.get("perspective_shift_count", 0) or 0),
+        "receptor_body_schema_count": int(
+            sb.get("receptor_body_schema_count", 0) or 0),
+        "continuity_anchor_count": int(
+            sb.get("continuity_anchor_count", 0) or 0),
+        "continuity_break_count": int(
+            sb.get("continuity_break_count", 0) or 0),
+        "simulation_boundary_warning_count": int(
+            sb.get("simulation_boundary_warning_count", 0) or 0),
+        "source_attribution_uncertainty_score": float(
+            sb.get("source_attribution_uncertainty_score", 0.0) or 0.0),
+        "identity_trace_event_count": int(
+            sb.get("identity_trace_event_count", 0) or 0),
+        "boundary_tension_count": int(
+            sb.get("boundary_tension_count", 0) or 0),
+        "self_boundary_safety_block_count": int(
+            sb.get("self_boundary_safety_block_count", 0) or 0),
+        "is_subjective_selfhood": False,
+        "is_personhood": False,
+        "note": "operational self/world boundary; not subjective selfhood, not "
+                "personhood, and this proves no self-awareness",
+    }

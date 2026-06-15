@@ -32,7 +32,46 @@ EVIDENCE_SOURCES = (
     "assurance_case", "ops_incident", "auto_regeneration_repair",
     "inner_map_snapshot", "perceptual_ontogenesis_report",
     "semiogenesis_report", "sensorium_cognition_report",
+    "self_boundary_report",
 )
+
+
+def self_boundary_revision_proposals(sb_status: Dict[str, Any],
+                                     ) -> List[Dict[str, Any]]:
+    """Turn a self-boundary status into architecture *proposals* only.
+
+    Proposals are advisory: nothing here rewrites code or actuates anything. They
+    suggest boundary-attribution improvements, feeder-provenance improvements,
+    simulation-marker strengthening, ego/dimensional consolidation, source-
+    attribution policy changes, or continuity-recovery improvements.
+    """
+    proposals: List[Dict[str, Any]] = []
+    if float(sb_status.get("simulation_boundary_integrity", 1.0) or 1.0) < 1.0:
+        proposals.append({
+            "target": "simulation_marker_strengthening",
+            "proposal": "strengthen simulation/observation boundary markers",
+            "reason": "simulation boundary integrity below 1.0",
+            "advisory_only": True})
+    if float(sb_status.get("source_attribution_uncertainty_score",
+                           0.0) or 0.0) >= 0.5:
+        proposals.append({
+            "target": "source_attribution_policy",
+            "proposal": "improve feeder/source provenance attribution",
+            "reason": "high source-attribution uncertainty",
+            "advisory_only": True})
+    if int(sb_status.get("ambiguous_ownership_count", 0) or 0) > 0:
+        proposals.append({
+            "target": "boundary_attribution_improvements",
+            "proposal": "reduce ambiguous ownership via richer provenance",
+            "reason": "ambiguous ownership attributions present",
+            "advisory_only": True})
+    if int(sb_status.get("continuity_break_count", 0) or 0) > 0:
+        proposals.append({
+            "target": "continuity_recovery_improvements",
+            "proposal": "review continuity-recovery handling",
+            "reason": "continuity breaks recorded",
+            "advisory_only": True})
+    return proposals
 
 
 def cognition_revision_proposals(cog_status: Dict[str, Any],

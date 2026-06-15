@@ -381,6 +381,20 @@ DESCRIPTIONS = {
     "synthesis_evaluation": "synthesis check",
     "sensorium_cognition_safety":
         "no LLM/human-default/simulated-as-real; no understanding claims",
+    "self_boundary": "operational self/world boundary (not subjective selfhood)",
+    "self_boundary_evaluation": "self-boundary tracking check",
+    "ownership_attribution": "self/world/sim/memory ownership attribution",
+    "ownership_attribution_evaluation": "ownership attribution check",
+    "perspective_shift": "operational perspective frame and shifts",
+    "perspective_evaluation": "perspective frame check",
+    "continuity": "operational trace continuity anchors and breaks",
+    "continuity_evaluation": "continuity check",
+    "simulation_boundary": "simulation never becomes observation",
+    "simulation_boundary_evaluation": "simulation boundary integrity check",
+    "identity_trace": "operational identity-trace continuity metadata",
+    "identity_trace_evaluation": "identity trace check",
+    "self_boundary_safety":
+        "no personhood/subjective-self/simulation-as-observation claims",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -567,6 +581,15 @@ class ExperimentRegistry:
                         "counterfactual", "analogy", "analogy_evaluation",
                         "synthesis", "synthesis_evaluation")
             or bool(merged.get("sensorium_cognition", False)))
+        features["self_boundary"] = (
+            name.startswith("self_boundary")
+            or name in ("ownership_attribution",
+                        "ownership_attribution_evaluation", "perspective_shift",
+                        "perspective_evaluation", "continuity",
+                        "continuity_evaluation", "simulation_boundary",
+                        "simulation_boundary_evaluation", "identity_trace",
+                        "identity_trace_evaluation")
+            or bool(merged.get("self_boundary", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

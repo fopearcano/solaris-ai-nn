@@ -1961,3 +1961,43 @@ change future perception, but none of that is evidence of understanding,
 consciousness, sentience, or subjective experience. Failed predictions are kept,
 human-readable summaries are marked as debug glosses, and the claims stop at what
 the structures actually show.
+
+## Phase 50 — Sensorium-native self-boundary and organismic continuity
+
+**Self/world boundary from perception.** An organism that cannot tell its own body
+from the world that touches it cannot learn from either. Phase 50 asks whether an
+operational boundary can be drawn -- between internal state, the receptor body,
+external flux, feeder artifacts, memory, prediction, and simulation -- purely from
+the provenance and behaviour of records, without invoking a self. The result is a
+boundary that is measured (confidence, ambiguity, tension counts), not asserted.
+
+**Body schema as receptor structure.** The "body" here is deliberately modest: the
+set of receptors and sensory membranes, with their reliability, fatigue,
+saturation, sensitivity, and silence. Feeders are explicitly NOT body parts -- they
+are external, nerve-like signal sources outside the organism. Calling the receptor
+set a body schema (rather than a biological body) keeps a useful organismic framing
+while refusing the embodiment claim it does not earn.
+
+**Continuity as operational trace.** Continuity is tracked as anchors (heartbeat,
+receptor, field, memory, sign, concept, source rhythm, self-boundary, restart,
+absence) and breaks (silence, corruption, reset, gap, restart). A recovered break
+is kept in the log, never erased. This is trace continuity -- the persistence of
+operational structure across ticks and restarts -- not biological life or a
+persisting person.
+
+**Why simulation boundaries matter.** The single most important discipline of a
+self/world boundary is that imagined or internal states never masquerade as live
+observation. Simulations, counterfactuals, replays, debug truth, and report glosses
+are each marked, and any attempt to use a non-observation marker as observation is
+blocked and counted. A system that lets its simulations become evidence would
+confuse its own model of the world for the world; the boundary exists precisely to
+prevent that.
+
+**Why this is not self-awareness proof.** Ownership attribution, body schema,
+perspective frames, continuity anchors, and identity traces are operational
+bookkeeping. They can be measured and they change behaviour (attention, source
+trust, LOGOS tensions), but none of it is evidence of a subjective self,
+self-awareness, consciousness, sentience, life, or personhood. The identity trace
+is continuity metadata, the perspective is an attention frame, and the boundary is
+an operational distinction -- nothing here is a person, and the reports say so
+plainly.

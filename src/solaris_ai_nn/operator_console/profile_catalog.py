@@ -120,6 +120,8 @@ def _source_package(profile_id: str) -> str:
         return "semiogenesis"
     if pid.startswith("sensorium_cognition") or pid.startswith("cognition"):
         return "sensorium_cognition"
+    if pid.startswith("self_boundary"):
+        return "self_boundary"
     return "conscience"
 
 

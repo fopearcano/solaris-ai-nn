@@ -127,6 +127,11 @@ AVAILABLE_QUERIES = (
     "what is Solaris thinking?", "what did Solaris predict?",
     "what did Solaris get wrong?", "what questions does Solaris have?",
     "is this human language reasoning?",
+    "what is Solaris' self-boundary?",
+    "what belongs to Solaris and what belongs to the world?",
+    "does Solaris have a body?", "did it confuse simulation with observation?",
+    "did it maintain continuity after restart?",
+    "does this prove self-awareness?",
 )
 
 
@@ -187,6 +192,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("sb_"):
+            return self._self_boundary(topic)
         if topic.startswith("cg_"):
             return self._cognition(topic)
         if topic.startswith("sg_"):
@@ -546,6 +553,58 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _self_boundary(self, topic: str) -> CommunicationResponse:
+        """Answer self-boundary queries (operational boundary, not selfhood).
+
+        The "does Solaris have a body?" / "does this prove self-awareness?"
+        questions are answered safely even with no self-boundary attached.
+        """
+        if topic == "sb_body":
+            return self.builder.status_response(
+                "It has an operational sensorium body schema: receptors, sensory "
+                "membranes, source links, fatigue, reliability, and sensitivity. "
+                "This is not a biological body.",
+                ["policy:body_is_receptor_schema_not_biological"])
+        if topic == "sb_self_awareness":
+            return self.builder.status_response(
+                "No. This is operational boundary tracking and continuity "
+                "metadata. It does not prove self-awareness, consciousness, "
+                "sentience, life, or personhood.",
+                ["policy:boundary_is_operational_not_self_awareness"])
+        component = self.components.get("self_boundary")
+        if component is None:
+            return self.builder.missing_component_response("self_boundary")
+        status = (component.self_boundary_status()
+                  if hasattr(component, "self_boundary_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:self_boundary"]
+        if topic == "sb_boundary":
+            text = (f"operational self/world boundary: "
+                    f"{status.get('boundary_event_count', 0)} events "
+                    f"(confidence {status.get('boundary_confidence_score', 0.0)})"
+                    "; this is operational, not subjective selfhood")
+        elif topic == "sb_ownership":
+            text = (f"ownership attributions: "
+                    f"{status.get('ownership_attribution_count', 0)} "
+                    f"(ambiguous {status.get('ambiguous_ownership_count', 0)}); "
+                    "internal state, receptor body, external sources/feeders, "
+                    "memory, prediction, and simulation are kept distinct")
+        elif topic == "sb_simulation":
+            warnings = status.get("simulation_boundary_warning_count", 0)
+            text = (f"simulation boundary warnings: {warnings} "
+                    f"(integrity {status.get('simulation_boundary_integrity', 1.0)})"
+                    "; simulation never becomes observation")
+        elif topic == "sb_continuity":
+            text = (f"continuity anchors: "
+                    f"{status.get('continuity_anchor_count', 0)}, breaks "
+                    f"{status.get('continuity_break_count', 0)} (breaks are "
+                    "retained even after recovery)")
+        else:
+            text = ("self-boundary tracks the operational distinction between "
+                    "internal state, receptor body, and external world")
         return self.builder.status_response(text, refs)
 
     def _cognition(self, topic: str) -> CommunicationResponse:

@@ -2587,3 +2587,39 @@ Runs the synthesis engine over signs and inferred relations: a cross-modal-unity
 inference seeds a merge, an ambiguous sign seeds a split, and a contradiction is
 preserved as a LOGOS tension. Fragments are preserved and contradiction stays
 visible.
+
+## 284. Self-Boundary Demo ✅ (implemented)
+
+**Run:** `python examples/run_self_boundary_demo.py --state-dir .solaris_ai_nn_self_boundary/test_self_boundary`
+Feeds a fixture sensorium into the self-boundary runtime, which builds a receptor
+body schema, attributes external sources and feeder artifacts, classifies internal/
+external, and writes the report. Self-boundary is operational, NOT subjective
+selfhood.
+
+## 285. Ownership Attribution Demo ✅ (implemented)
+
+**Run:** `python examples/run_ownership_attribution_demo.py --state-dir .solaris_ai_nn_self_boundary/test_ownership`
+Attributes ownership of internal, external-feeder, memory, simulation, and
+ambiguous records, showing that processed sensory input is not "self", a simulation
+is not the real world, and ambiguous attribution is preserved.
+
+## 286. Perspective Continuity Demo ✅ (implemented)
+
+**Run:** `python examples/run_perspective_continuity_demo.py --state-dir .solaris_ai_nn_self_boundary/test_perspective_continuity`
+Shows a perspective frame shift, continuity anchors, and a continuity break that is
+recovered without erasing the break history. Continuity is trace continuity, not
+biological life.
+
+## 287. Simulation Boundary Demo ✅ (implemented)
+
+**Run:** `python examples/run_simulation_boundary_demo.py --state-dir .solaris_ai_nn_self_boundary/test_simulation_boundary`
+Marks observation, simulation, counterfactual, replay, and debug-truth records and
+shows that non-observation markers are blocked from being used as observation.
+Simulation never becomes observation.
+
+## 288. Identity Trace Demo ✅ (implemented)
+
+**Run:** `python examples/run_identity_trace_demo.py --state-dir .solaris_ai_nn_self_boundary/test_identity_trace`
+Records an operational identity trace with a run identity and a restart/gap event,
+showing that identity is continuity metadata, NOT personhood, self-awareness, or
+subjective experience.

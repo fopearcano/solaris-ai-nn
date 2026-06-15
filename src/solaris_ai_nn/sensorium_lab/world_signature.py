@@ -61,6 +61,14 @@ class SensoriumWorldSignature:
     simulation_profile: Dict[str, Any] = field(default_factory=dict)
     analogy_profile: Dict[str, Any] = field(default_factory=dict)
     synthesis_profile: Dict[str, Any] = field(default_factory=dict)
+    # Self-boundary profile (Prompt 50); zero/empty when not attached.
+    boundary_clarity_score: float = 0.0
+    simulation_boundary_integrity: float = 0.0
+    source_attribution_quality: float = 0.0
+    perspective_shift_profile: Dict[str, Any] = field(default_factory=dict)
+    receptor_body_schema_stability: float = 0.0
+    continuity_break_count: int = 0
+    identity_trace_density: float = 0.0
     limitations: List[str] = field(default_factory=lambda: [
         "An observable structural fingerprint, not subjective experience.",
         "Not qualia; this does not describe what Solaris feels.",
@@ -114,6 +122,14 @@ class SensoriumWorldSignature:
             "simulation_profile": dict(self.simulation_profile),
             "analogy_profile": dict(self.analogy_profile),
             "synthesis_profile": dict(self.synthesis_profile),
+            "boundary_clarity_score": self.boundary_clarity_score,
+            "simulation_boundary_integrity": self.simulation_boundary_integrity,
+            "source_attribution_quality": self.source_attribution_quality,
+            "perspective_shift_profile": dict(self.perspective_shift_profile),
+            "receptor_body_schema_stability":
+                self.receptor_body_schema_stability,
+            "continuity_break_count": self.continuity_break_count,
+            "identity_trace_density": self.identity_trace_density,
             "limitations": list(self.limitations),
             "note": "observable structural fingerprint; not subjective "
                     "experience, not qualia",
@@ -128,7 +144,8 @@ class WorldSignatureBuilder:
               probe_result: Any = None,
               ontogenesis: Any = None,
               semiogenesis: Any = None,
-              cognition: Any = None) -> SensoriumWorldSignature:
+              cognition: Any = None,
+              self_boundary: Any = None) -> SensoriumWorldSignature:
         rt = runtime
         if rt is None:
             return SensoriumWorldSignature(arm_id=arm_id, condition=condition)
@@ -265,6 +282,31 @@ class WorldSignatureBuilder:
             synthesis_profile = {
                 "count": cog_status.get("synthesis_count", 0)}
 
+        # Self-boundary profile (optional).
+        boundary_clarity = 0.0
+        sim_integrity = 0.0
+        source_quality = 0.0
+        perspective_profile: Dict[str, Any] = {}
+        body_stability = 0.0
+        continuity_breaks = 0
+        identity_density = 0.0
+        if self_boundary is not None:
+            sb_status = (self_boundary.self_boundary_status()
+                         if hasattr(self_boundary, "self_boundary_status")
+                         else self_boundary if isinstance(self_boundary, dict)
+                         else {})
+            boundary_clarity = sb_status.get("boundary_confidence_score", 0.0)
+            sim_integrity = sb_status.get("simulation_boundary_integrity", 0.0)
+            source_quality = round(
+                1.0 - sb_status.get("source_attribution_uncertainty_score",
+                                    0.0), 4)
+            perspective_profile = {
+                "shift_count": sb_status.get("perspective_shift_count", 0)}
+            body_stability = sb_status.get("body_schema_stability", 0.0)
+            continuity_breaks = sb_status.get("continuity_break_count", 0)
+            identity_density = round(min(
+                1.0, 0.05 * sb_status.get("identity_trace_event_count", 0)), 4)
+
         return SensoriumWorldSignature(
             arm_id=arm_id, condition=condition,
             modality_distribution=modality_dist,
@@ -304,7 +346,14 @@ class WorldSignatureBuilder:
             question_pressure_profile=question_pressure_profile,
             simulation_profile=simulation_profile,
             analogy_profile=analogy_profile,
-            synthesis_profile=synthesis_profile)
+            synthesis_profile=synthesis_profile,
+            boundary_clarity_score=boundary_clarity,
+            simulation_boundary_integrity=sim_integrity,
+            source_attribution_quality=source_quality,
+            perspective_shift_profile=perspective_profile,
+            receptor_body_schema_stability=body_stability,
+            continuity_break_count=continuity_breaks,
+            identity_trace_density=identity_density)
 
 
 @dataclass

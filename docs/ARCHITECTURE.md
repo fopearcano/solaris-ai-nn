@@ -3073,3 +3073,74 @@ anticipating, questioning, simulating, and synthesizing -- while preserving the
 distinction between sign-based cognition, debug gloss, simulation, and real
 observation, and making no claim of understanding, consciousness, sentience, life,
 or subjective experience.**
+
+## Sensorium-Native Self-Boundary and Organismic Continuity
+
+Prompts 41-49 gave Solaris a continuous sensorium, perceptual metabolism,
+proto-concepts, internal signs, and sign-based cognition. Prompt 50 adds an
+operational *self/world boundary* -- `src/solaris_ai_nn/self_boundary/` -- that
+answers, operationally, "how does this organismic AI distinguish my perceptual
+body from the world that touches it?"
+
+**Self-boundary is operational, not subjective selfhood.** The `SelfBoundaryState`
+assigns each record to a `BoundaryZone` -- internal state, receptor body, sensory
+membrane, external feeder, external world source, memory trace, prediction,
+simulation, counterfactual, operator annotation, or unknown -- with an explicit
+confidence, and boundary uncertainty is allowed. This is not a subjective self, not
+personhood, and not a metaphysical claim.
+
+**Ownership attribution separates self, world, feeder, memory, and simulation.**
+The `OwnershipAttributor` decides whether an event belongs to Solaris' internal
+state, its receptor body, an external source/feeder, a report/debug layer, an
+internal simulation, or a remembered trace. Crucially, sensory input is not "self"
+merely because Solaris processed it; internal simulation is not the real world;
+operator annotation is not ground truth; and failed/ambiguous attribution is
+preserved. The `InternalExternalClassifier` makes mixed records explicit rather
+than silently collapsing processed sensory data into "internal self".
+
+**Body schema means receptor/sensorium body, not biological body.** The
+`SensoriumBodySchema` treats receptors and sensory membranes as body-like organs
+(tracking reliability, fatigue, saturation, sensitivity, silence, boundary
+confidence, and inter-receptor relations). External feeders are NOT body parts --
+they are external nerve-like signal sources. The `SourceAttributionEngine`
+attributes provenance while preserving uncertainty, refusing to promote a corrupted
+source to internal truth and refusing to treat a human-readable gloss as source
+evidence.
+
+**Identity trace means continuity metadata, not personhood.** The
+`OperationalIdentityTrace` / `IdentityTraceStore` record run identity, continuity
+anchors, active receptors, stable signs/concepts, boundary shifts, memory gaps,
+restart and drift events, and safety blocks to append-only logs. The
+`OrganismicContinuity` tracks anchors and logs `ContinuityBreak`s (silence,
+corruption, receptor reset, memory gap, restart); recovery marks a break recovered
+WITHOUT erasing it. Continuity here is trace continuity, not biological life, and
+identity is operational continuity, not personal identity.
+
+**Simulation boundary prevents confusing imagined/internal states with live
+observation.** The `SimulationBoundaryValidator` marks simulations, counterfactuals,
+fixture, replay, live-read-only, debug-truth, and report-gloss records, and blocks
+any non-observation marker from being used as observation or sensory evidence:
+simulation never becomes observation, a counterfactual never overwrites memory of a
+real event, and debug truth never enters cognition. The `BoundaryTensionDetector`
+surfaces self/world tensions (internal-vs-external, simulation-vs-observation,
+memory-vs-current-flux, feeder-artifact-vs-world-source, self-continuity-vs-restart
+gap, human-gloss-vs-internal-sign, unknown-origin) and feeds them to LOGOS without
+resolving ambiguous ones prematurely.
+
+**It stays internal and bounded.** The `SelfBoundaryRuntime` reads the plural
+sensorium (and optional feeder provenance, metabolism, ontogenesis, semiogenesis,
+and cognition state), attributes ownership, builds the body schema, updates the
+perspective frame, maintains continuity anchors, marks simulation boundaries,
+attributes sources, classifies internal/external, detects boundary tensions, and
+updates the identity trace -- all bounded, with no hardware/feeder/source control,
+no real-world action, and no metaphysical identity claims. It bridges the older
+`ego/` module (offering a sensorium-native boundary summary without duplicating or
+clobbering it) and integrates with LOGOS, memory/latent replay, the research lab
+and evaluation, the sensorium differentiation lab (world signatures gain a
+boundary-clarity/simulation-integrity/source-quality/body-stability/continuity/
+identity profile), the architecture evolution layer (advisory proposals only), the
+operator console (with the mandated safe answers about "body" and "self-awareness"),
+and Inner MAP. **Self-boundary lets Solaris distinguish its perceptual body from
+the world that touches it -- internal state, receptor body, external flux, memory,
+prediction, and simulation kept operationally distinct -- without claiming
+self-awareness, consciousness, sentience, life, or personhood.**
