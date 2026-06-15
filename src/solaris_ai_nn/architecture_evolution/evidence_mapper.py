@@ -33,8 +33,52 @@ EVIDENCE_SOURCES = (
     "inner_map_snapshot", "perceptual_ontogenesis_report",
     "semiogenesis_report", "sensorium_cognition_report",
     "self_boundary_report", "desire_formation_report",
-    "action_reaction_report",
+    "action_reaction_report", "developmental_life_report",
 )
+
+
+def developmental_revision_proposals(dev_status: Dict[str, Any],
+                                     ) -> List[Dict[str, Any]]:
+    """Turn a developmental-life status into architecture *proposals* only.
+
+    Proposals are advisory: nothing here rewrites code or actuates anything. They
+    suggest module pruning/promotion, sensorium/metabolism tuning, concept/sign
+    threshold changes, desire/action policy changes, source-diet changes, or pilot
+    protocol changes based on long-horizon development.
+    """
+    proposals: List[Dict[str, Any]] = []
+    verdict = str(dev_status.get("structural_growth_status", "inconclusive"))
+    if verdict in ("mere_event_accumulation", "log_bloat"):
+        proposals.append({
+            "target": "module_pruning",
+            "proposal": "review modules that accumulate without growth",
+            "reason": f"growth verdict: {verdict}",
+            "advisory_only": True})
+    if verdict == "fixture_overfit":
+        proposals.append({
+            "target": "source_diet_changes",
+            "proposal": "broaden source diet / add live read-only exposure",
+            "reason": "fixture overfit detected",
+            "advisory_only": True})
+    if verdict == "human_label_overfit":
+        proposals.append({
+            "target": "contamination_mitigation",
+            "proposal": "reduce human-label weight in sign/concept formation",
+            "reason": "human-label overfit detected",
+            "advisory_only": True})
+    if int(dev_status.get("regression_count", 0) or 0) > 0:
+        proposals.append({
+            "target": "pilot_protocol_changes",
+            "proposal": "schedule auto-regeneration / regression review",
+            "reason": "regressions recorded",
+            "advisory_only": True})
+    if int(dev_status.get("plateau_count", 0) or 0) > 0:
+        proposals.append({
+            "target": "sensorium_changes",
+            "proposal": "vary sensorium / consolidation to break a plateau",
+            "reason": "plateaus recorded",
+            "advisory_only": True})
+    return proposals
 
 
 def action_reaction_revision_proposals(ar_status: Dict[str, Any],

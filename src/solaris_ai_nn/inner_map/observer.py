@@ -91,6 +91,7 @@ class InnerMapObserver:
     self_boundary: Any = None  # optional dict/object of self-boundary status
     desire_formation: Any = None  # optional dict/object of desire-formation status
     action_reaction: Any = None  # optional dict/object of action-reaction status
+    developmental_life: Any = None  # optional dict/object of developmental status
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -810,6 +811,17 @@ class InnerMapObserver:
                     action_reaction.action_reaction_status()
             elif hasattr(action_reaction, "snapshot"):
                 model.action_reaction = action_reaction.snapshot()
+        developmental = self.developmental_life
+        if developmental is None and self.runner is not None:
+            developmental = getattr(self.runner, "developmental_life", None)
+        if developmental is not None:
+            # Developmental-life status (long-horizon structural change view).
+            if isinstance(developmental, dict):
+                model.developmental_life = dict(developmental)
+            elif hasattr(developmental, "developmental_status"):
+                model.developmental_life = developmental.developmental_status()
+            elif hasattr(developmental, "snapshot"):
+                model.developmental_life = developmental.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

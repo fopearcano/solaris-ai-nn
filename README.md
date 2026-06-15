@@ -473,7 +473,23 @@ python examples/run_habit_formation_demo.py              # repeated action-effec
 python examples/run_action_inhibition_demo.py            # unsafe/uncertain action inhibited; LOGOS tension
 python examples/run_no_effect_action_demo.py             # no-effect action weakens the action policy
 python examples/run_blocked_action_reaction_demo.py      # forbidden external action blocked -> evidence
+
+# Long-horizon developmental runtime: structural change over time (bounded)
+python examples/run_developmental_life_demo.py               # bounded cycle -> epochs -> growth -> report
+python examples/run_developmental_epoch_demo.py              # phase/epoch transition from growth
+python examples/run_plateau_detection_demo.py               # no-growth plateau + report-only recommendation
+python examples/run_regression_detection_demo.py            # decline -> regression + auto-regeneration rec
+python examples/run_growth_vs_accumulation_demo.py          # real growth vs mere accumulation (conservative)
 ```
+
+Developmental life is operational long-horizon trace continuity and structural
+change tracking. It is not a claim of biological life, consciousness, sentience,
+personhood, agency, or free will. The life cycle is operational runtime structure;
+maturation markers are structural observations (not consciousness milestones);
+growth means structural change (which may include pruning, decay, inhibition, and
+no-op learning), not proof of intelligence; regressions and plateaus are preserved;
+and the runtime is bounded per invocation, persists across restarts, uses no human
+teaching loop, and controls no hardware/feeders/source/network.
 
 Actions are internal/simulated/report-only. Solaris does not act in the real world.
 The action-reaction loop records operational reactions, evidence-backed consequence
@@ -1427,6 +1443,10 @@ src/solaris_ai_nn/
                 action model, reaction, consequence, effect learning, habit
                 formation, inhibition, action policy, reaction memory, runtime,
                 reports, safety
+  developmental_life/ long-horizon life cycle, epochs, growth state,
+                maturation markers, phase transitions, plateaus, regressions,
+                growth-vs-accumulation, developmental runtime, life history,
+                memory, reports, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

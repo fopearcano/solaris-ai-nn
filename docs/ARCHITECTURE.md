@@ -3285,3 +3285,76 @@ and Inner MAP. **The action-reaction loop lets Solaris learn what its safe inter
 actions do -- forming habits, inhibiting useless churn, and revising policy -- with
 NO real-world actuation and no claim of agency, free will, consciousness,
 sentience, life, personhood, or subjective experience.**
+
+## Long-Horizon Developmental Runtime
+
+Prompts 41-52 gave Solaris a complete internal loop (stimulus -> push -> desire ->
+internal action -> reaction -> consequence -> memory -> habit -> changed future
+perception). Prompt 53 stretches that loop across long time --
+`src/solaris_ai_nn/developmental_life/`:
+
+    bounded developmental cycles -> life-cycle phases -> epochs -> growth state ->
+    maturation markers -> phase transitions -> plateaus -> regressions ->
+    growth-vs-accumulation -> persistent life history -> changed future perception
+
+It is a long-duration developmental *substrate* -- not a product release, an
+intelligence benchmark, or a consciousness test. It reads the outputs of the full
+sensorium-native stack and detects long-horizon structure.
+
+**Immediate action-reaction loops become developmental history.** The
+`LongHorizonDevelopmentalRuntime` collects per-tick status snapshots from the prior
+modules, advances an operational `LifeCycleState` (boot, baseline exposure, growth,
+consolidation, maturation probe, plateau, regression watch, recovery, shutdown),
+and accumulates them into a persistent record. "Life cycle" is operational runtime
+language, not biological life; every phase is bounded and leaves trace evidence.
+
+**Epochs track structural change over time.** A `DevelopmentalEpoch` is a
+developmental slice (not a biological age) whose boundary records an explainable
+`EpochTransitionReason` (new stable concepts/signs, prediction improvement,
+plateau, regression, ...). Epochs are persisted so they survive restart. The
+`DevelopmentalGrowthState` derives a value per growth dimension (sensorium
+adaptation, concept/sign growth, prediction skill, action-effect learning,
+inhibition quality, boundary clarity, contamination resistance, ...); growth means
+*structural change* -- which may include pruning, decay, inhibition, and no-op
+learning -- not an intelligence score, and more is not always better.
+
+**Maturation markers are operational observations.** The `MaturationDetector`
+records first occurrences of structural markers (first stable concept, first useful
+prediction, first weakened bad habit, first preserved simulation boundary, ...).
+These are observational, kept with weak/ambiguous markers separated; they are NOT
+consciousness or developmental-psychology milestones.
+
+**Phase transitions are evidence-backed; plateaus and regressions are preserved.**
+The `PhaseTransitionDetector` flags developmental transitions (adaptive sensing ->
+concept growth, concept growth -> sign formation, fixture dependence -> live
+grounding, ...) with low/moderate/high confidence and a false-transition risk;
+missing evidence is inconclusive. The `PlateauDetector` flags no-growth stretches
+(with internal/report-only recommendations -- a plateau is not failure), and the
+`RegressionDetector` makes declines visible (recommending an auto-regeneration
+check when severe). The append-only `DevelopmentalMemoryStore` preserves
+regressions, plateaus, failed transitions, and inconclusive results.
+
+**Growth vs accumulation is evaluated conservatively.** The
+`StructuralGrowthAnalyzer` distinguishes real structural growth (durable prediction
+improvement, stable concept/sign utility, action-effect learning, lower
+contamination) from mere event accumulation, log bloat, fixture or human-label
+overfit, random fluctuation, or regression. It is deliberately conservative: a
+negative or inconclusive verdict is valid, and growth is never over-claimed. The
+`OperationalLifeHistory` summarizes major operational events as trace history, not
+biography.
+
+**It stays bounded, persistent, and internal.** The runtime is bounded per
+invocation but may be called repeatedly over days/months, persisting and reloading
+its index across restarts. It starts no feeders, controls no hardware, modifies no
+source, performs no external action, and uses no human teaching loop. It integrates
+with the Conscience spine (a `developmental_life_update` phase after the action-
+reaction phase and before stimulus ingestion, with six bounded profiles; live read-
+only requires governance), the research lab and evaluation (metrics plus protocols
+for developmental life, epochs, maturation, phase transitions, plateaus,
+regressions, growth-vs-accumulation, and safety), architecture evolution (advisory
+proposals only), the operator console (with the mandated safe answers about
+"developing" and "life or consciousness"), and Inner MAP. **The long-horizon
+developmental runtime lets Solaris accumulate an operational growth history and ask
+whether it changes structurally over time -- conservatively, with regressions and
+plateaus preserved -- without being biological life, consciousness, sentience,
+personhood, agency, free will, or subjective experience.**

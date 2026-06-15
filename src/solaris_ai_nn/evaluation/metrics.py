@@ -1941,3 +1941,57 @@ def action_reaction_metrics(ar: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "note": "internal action-consequence learning; no real-world actuation; "
                 "not agency, free will, or subjective experience",
     }
+
+
+def developmental_life_metrics(dev: Optional[Dict[str, Any]],
+                               ) -> Dict[str, Any]:
+    """Objective developmental-life metrics (long-horizon growth-history layer).
+
+    These describe long-horizon structural change: epochs, life-cycle phases,
+    maturation markers, phase transitions, plateaus, regressions, the growth-vs-
+    accumulation verdict, and durable improvement signals. The life cycle is
+    operational runtime structure, not biological life; maturation markers are
+    structural observations, not consciousness milestones; growth means structural
+    change, not proof of intelligence.
+    """
+    if not dev:
+        return {"present": False}
+    verdict = str(dev.get("structural_growth_status", "inconclusive"))
+    return {
+        "present": True,
+        "developmental_epoch_count": int(
+            dev.get("developmental_epoch_count", 0) or 0),
+        "life_cycle_phase_count": int(dev.get("life_cycle_phase_count", 0) or 0),
+        "maturation_marker_count": int(
+            dev.get("maturation_marker_count", 0) or 0),
+        "phase_transition_count": int(
+            dev.get("phase_transition_count", 0) or 0),
+        "plateau_count": int(dev.get("plateau_count", 0) or 0),
+        "regression_count": int(dev.get("regression_count", 0) or 0),
+        "structural_growth_score": float(
+            dev.get("structural_growth_score", 0.0) or 0.0),
+        "structural_growth_status": verdict,
+        "accumulation_warning_count": int(
+            dev.get("accumulation_warning_count", 0) or 0),
+        "fixture_overfit_warning_count": 1 if verdict == "fixture_overfit"
+        else 0,
+        "human_label_overfit_warning_count": 1
+        if verdict == "human_label_overfit" else 0,
+        "durable_prediction_improvement_score": float(
+            dev.get("durable_prediction_improvement_score", 0.0) or 0.0),
+        "durable_action_effect_learning_score": float(
+            dev.get("durable_action_effect_learning_score", 0.0) or 0.0),
+        "durable_concept_stability_score": float(
+            dev.get("durable_concept_stability_score", 0.0) or 0.0),
+        "durable_sign_stability_score": float(
+            dev.get("durable_sign_stability_score", 0.0) or 0.0),
+        "continuity_recovery_count": int(
+            dev.get("continuity_recovery_count", 0) or 0),
+        "developmental_safety_block_count": int(
+            dev.get("developmental_safety_block_count", 0) or 0),
+        "is_biological_life": False,
+        "is_consciousness_or_personhood": False,
+        "note": "long-horizon operational development tracking; not biological "
+                "life, consciousness, personhood, agency, or subjective "
+                "experience",
+    }

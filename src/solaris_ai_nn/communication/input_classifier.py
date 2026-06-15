@@ -356,6 +356,19 @@ ACTION_REACTION_QUERIES = (
     ("did it act in the real world", "ar_real_world"),
 )
 
+# Developmental-life queries (Prompt 53). Answered from the developmental status;
+# the "is Solaris developing?" / "does this prove life or consciousness?"
+# questions are answered safely even with no run.
+DEVELOPMENTAL_QUERIES = (
+    ("is solaris developing", "dl_developing"),
+    ("what changed over time", "dl_changed"),
+    ("did it mature", "dl_mature"),
+    ("is it stuck", "dl_stuck"),
+    ("did it regress", "dl_regress"),
+    ("is this just log accumulation", "dl_accumulation"),
+    ("does this prove life or consciousness", "dl_life"),
+)
+
 # Feeder-SDK queries (Prompt 45). Answered from the feeder monitor/manifest; the
 # control/start questions are answered safely even with no feeders attached.
 FEEDER_SDK_QUERIES = (
@@ -559,7 +572,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._action_reaction(lowered)
+        result = (self._developmental_life(lowered)
+                  or self._action_reaction(lowered)
                   or self._desire_formation(lowered)
                   or self._self_boundary(lowered)
                   or self._cognition(lowered)
@@ -717,6 +731,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _developmental_life(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in DEVELOPMENTAL_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"developmental life query {topic!r}"])
         return None
 
     @staticmethod

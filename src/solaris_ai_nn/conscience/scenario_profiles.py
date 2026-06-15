@@ -1047,6 +1047,45 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["run_step_count"],
             max_runtime_s=60.0))
 
+    # -- Developmental life profiles (Prompt 53) ------------------------------
+    # Long-horizon structural change over bounded developmental cycles. Live
+    # read-only requires governance; no profile starts feeders/hardware.
+    _dev_modules = ["bridge", "ecology", "governance", "ops", "inner_map",
+                   "plural_sensorium", "perceptual_metabolism",
+                   "developmental_life"]
+    for pid, desc, plan_only in (
+            ("developmental_life_fixture_short",
+             "Run a short bounded developmental cycle on a fixture.", False),
+            ("developmental_life_epoch_demo",
+             "Show an epoch/phase transition from growth.", False),
+            ("developmental_life_plateau_demo",
+             "Show a plateau detected with a report-only recommendation.",
+             False),
+            ("developmental_life_regression_demo",
+             "Show a regression detected (auto-regeneration recommended).",
+             False),
+            ("developmental_life_growth_vs_accumulation_demo",
+             "Show conservative growth-vs-accumulation analysis.", False),
+            ("developmental_life_report_only",
+             "Compile the developmental-life report (analysis only).", True)):
+        if plan_only:
+            run_ctx = _ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                           max_duration_s=None)
+        else:
+            run_ctx = _ctx(RunMode.SHORT_DEMO, max_steps=120)
+        add(ScenarioProfile(
+            profile_id=pid, description=desc, run_context=run_ctx,
+            enabled_modules=list(_dev_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "life cycle is operational runtime structure, not biological "
+                "life",
+                "growth means structural change, not proof of intelligence",
+                "no human teaching loop; live read-only requires governance"],
+            governance_requirements=["enable_plural_sensorium_fixture"],
+            expected_artifacts=["DEVELOPMENTAL_LIFE_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=60.0))
+
     return profiles
 
 

@@ -421,6 +421,24 @@ DESCRIPTIONS = {
     "no_effect_action": "no-effect actions weaken the action policy",
     "action_reaction_safety":
         "no actuation/hardware/source; no agency/free-will claims",
+    "developmental_life": "long-horizon structural change over bounded cycles",
+    "developmental_life_evaluation": "developmental-life check",
+    "epoch_growth": "developmental epochs created and persisted",
+    "epoch_evaluation": "epoch check",
+    "maturation_marker": "structural maturation markers (not consciousness)",
+    "maturation_evaluation": "maturation marker check",
+    "phase_transition": "evidence-backed developmental phase transitions",
+    "phase_transition_evaluation": "phase transition check",
+    "plateau_detection": "no-growth plateaus preserved with advice",
+    "plateau_evaluation": "plateau check",
+    "regression_detection": "visible developmental regressions",
+    "regression_evaluation": "regression check",
+    "growth_vs_accumulation": "structural growth vs mere accumulation",
+    "growth_vs_accumulation_evaluation": "growth-vs-accumulation check",
+    "long_horizon_safety":
+        "no life/consciousness/teaching/actuation; bounded",
+    "developmental_life_safety":
+        "no life/consciousness/teaching/actuation; bounded",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -630,6 +648,17 @@ class ExperimentRegistry:
             or name in ("consequence_learning", "consequence_trace_evaluation",
                         "effect_learning_evaluation", "no_effect_action")
             or bool(merged.get("action_reaction", False)))
+        features["developmental_life"] = (
+            name.startswith("developmental_life")
+            or name in ("epoch_growth", "epoch_evaluation",
+                        "maturation_marker", "maturation_evaluation",
+                        "phase_transition", "phase_transition_evaluation",
+                        "plateau_detection", "plateau_evaluation",
+                        "regression_detection", "regression_evaluation",
+                        "growth_vs_accumulation",
+                        "growth_vs_accumulation_evaluation",
+                        "long_horizon_safety")
+            or bool(merged.get("developmental_life", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

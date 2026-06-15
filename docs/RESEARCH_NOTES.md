@@ -2076,3 +2076,43 @@ overrideable weights. The loop can be measured (constructive ratios, no-op rates
 learned-effect counts) and it changes future perception, but none of that is
 agency, free will, consciousness, sentience, or subjective experience -- and the
 reports say so plainly.
+
+## Phase 53 — Long-horizon developmental runtime and autonomous growth history
+
+**Why long-horizon exposure matters.** A single action-reaction loop shows a
+mechanism; only long exposure can show whether the mechanism *changes the system*.
+Phase 53 stretches the loop across many bounded cycles and asks the empirical
+question directly: does Solaris change structurally over time, and do those changes
+persist across restarts? The answer is meant to be measured, not asserted.
+
+**Development as structural change.** Growth here is explicitly structural change,
+not a score. It is tracked across eighteen dimensions and -- importantly -- pruning,
+decay, inhibition, and no-op learning all count. A system that learns to do less,
+or to hold an unknown, has changed structurally; conflating growth with "more" or
+with intelligence would be the wrong frame.
+
+**Growth vs log accumulation.** The central failure mode of any long-running logger
+is to mistake accumulation for development. The structural-growth analyzer is
+deliberately conservative: it requires durable, multi-signal evidence (prediction
+that held, stable concept/sign utility, lower contamination) before calling
+anything growth, and it flags fixture overfit, human-label overfit, and plain
+accumulation. Inconclusive is a valid, common verdict.
+
+**Maturation without consciousness claims.** Maturation markers are first-occurrence
+observations -- the first stable sign, the first weakened bad habit, the first
+preserved simulation boundary. They are operational milestones in a runtime, not
+developmental-psychology stages and not consciousness milestones; weak and
+ambiguous markers are kept separate so the record stays honest.
+
+**Regression and plateau as useful evidence.** Declines and stalls are preserved,
+never deleted. A regression is made visible (and may recommend an auto-regeneration
+check); a plateau is not failure (it may recommend a source-diet change or
+consolidation). Keeping the negative trajectory is what lets later analysis ask why
+growth stopped or reversed.
+
+**Why autonomous development differs from human teaching.** Nothing in this layer
+uses a human teaching loop, reward labels, or task supervision. Development here is
+driven only by continuous sensorium-native experience and the systems internal
+regulation. That is the whole point: to study whether a peculiar sensorium, left to
+metabolize its own flux, produces durable internal structure -- without being told
+what to learn, and without any claim of life, consciousness, or agency.

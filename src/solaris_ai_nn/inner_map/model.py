@@ -460,6 +460,14 @@ class InnerMapModel:
     # latest_action_reaction_report_path. Actions are internal/simulated/
     # report-only; no real-world actuation; not agency or free will.
     action_reaction: Optional[Dict[str, Any]] = None
+    # Developmental-life status (Prompt 53); None when not attached. Keys:
+    # developmental_life_enabled, current_life_cycle_phase,
+    # developmental_epoch_count, maturation_marker_count,
+    # phase_transition_count, plateau_count, regression_count,
+    # structural_growth_status, latest_developmental_report_path. Life cycle is
+    # operational runtime structure, not biological life; growth is structural
+    # change, not proof of intelligence.
+    developmental_life: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

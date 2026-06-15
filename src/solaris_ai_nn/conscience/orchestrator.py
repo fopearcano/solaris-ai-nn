@@ -314,6 +314,9 @@ class ConscienceOrchestrator:
                 self._phase_safe_internal_action_arbitration
         if "action_reaction" in self.components:
             h[SpinePhase.ACTION_REACTION_UPDATE] = self._phase_action_reaction
+        if "developmental_life" in self.components:
+            h[SpinePhase.DEVELOPMENTAL_LIFE_UPDATE] = \
+                self._phase_developmental_life
         if "motor_membrane" in self.components:
             h[SpinePhase.MOTOR_ACTION_FIREWALL] = self._phase_motor_firewall
         if "ecology" in self.components or "signals" in self.components:
@@ -467,6 +470,16 @@ class ConscienceOrchestrator:
         if hasattr(action_reaction, "update"):
             action_reaction.update(tick=step)
         self._count("action_reaction_update")
+        return PhaseStatus.RAN
+
+    def _phase_developmental_life(self, step: int) -> str:
+        """Update long-horizon development (bounded; persistent; no actuation)."""
+        developmental = self.components.get("developmental_life")
+        if developmental is None:
+            return PhaseStatus.SKIPPED
+        if hasattr(developmental, "update"):
+            developmental.update(tick=step)
+        self._count("developmental_life_update")
         return PhaseStatus.RAN
 
     def _phase_stimulus(self, step: int) -> str:

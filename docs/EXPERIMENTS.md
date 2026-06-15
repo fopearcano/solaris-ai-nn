@@ -2691,3 +2691,37 @@ the policy moving to "avoid". No-effect actions are preserved as evidence.
 Injects a forbidden external action and shows it blocked, with the block becoming a
 reaction (blocked_by_safety) and an unsafe-block consequence trace -- preserved as
 evidence, never deleted.
+
+## 299. Developmental Life Demo ✅ (implemented)
+
+**Run:** `python examples/run_developmental_life_demo.py --state-dir .solaris_ai_nn_development/test_life`
+Builds a small sensorium-native stack and runs a short bounded developmental cycle:
+life-cycle phases, epochs, growth state, maturation markers, and a report.
+Developmental life is operational long-horizon structural-change tracking, NOT
+biological life or consciousness.
+
+## 300. Developmental Epoch Demo ✅ (implemented)
+
+**Run:** `python examples/run_developmental_epoch_demo.py --state-dir .solaris_ai_nn_development/test_epoch`
+Drives rising growth metrics so an epoch boundary opens on a confident phase
+transition. Epochs are developmental slices with explainable boundaries, not
+biological ages; they persist across restart.
+
+## 301. Plateau Detection Demo ✅ (implemented)
+
+**Run:** `python examples/run_plateau_detection_demo.py --state-dir .solaris_ai_nn_development/test_plateau`
+Drives flat statuses and a narrow source diet so a plateau is detected with a
+report-only recommendation. A plateau is not failure.
+
+## 302. Regression Detection Demo ✅ (implemented)
+
+**Run:** `python examples/run_regression_detection_demo.py --state-dir .solaris_ai_nn_development/test_regression`
+Drives declining prediction skill and concept stability so a regression is detected
+(with an auto-regeneration recommendation when severe). Regression is made visible.
+
+## 303. Growth vs Accumulation Demo ✅ (implemented)
+
+**Run:** `python examples/run_growth_vs_accumulation_demo.py --state-dir .solaris_ai_nn_development/test_growth_vs_accumulation`
+Contrasts a flat (mere-accumulation) run with a durably-improving (real structural
+growth) run. The analyzer is conservative; an inconclusive result is valid and
+growth is never over-claimed.

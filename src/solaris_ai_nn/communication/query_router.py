@@ -138,6 +138,9 @@ AVAILABLE_QUERIES = (
     "what did Solaris do?", "what happened after it acted?",
     "did the action help?", "what habits formed?",
     "what actions were inhibited?", "did it act in the real world?",
+    "is Solaris developing?", "what changed over time?", "did it mature?",
+    "is it stuck?", "did it regress?", "is this just log accumulation?",
+    "does this prove life or consciousness?",
 )
 
 
@@ -198,6 +201,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("dl_"):
+            return self._developmental_life(topic)
         if topic.startswith("ar_"):
             return self._action_reaction(topic)
         if topic.startswith("df_"):
@@ -563,6 +568,59 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _developmental_life(self, topic: str) -> CommunicationResponse:
+        """Answer developmental-life queries (long-horizon structure, not life).
+
+        The "is Solaris developing?" / "does this prove life or consciousness?"
+        questions are answered safely even with no developmental run.
+        """
+        if topic == "dl_developing":
+            return self.builder.status_response(
+                "The developmental runtime can report structural changes, "
+                "persistence, regressions, plateaus, and growth-vs-accumulation "
+                "evidence. It does not prove life or consciousness.",
+                ["policy:developmental_is_structural_not_life"])
+        if topic == "dl_life":
+            return self.builder.status_response(
+                "No. This is long-horizon operational development tracking. It "
+                "does not prove biological life, consciousness, sentience, "
+                "personhood, agency, free will, or subjective experience.",
+                ["policy:development_does_not_prove_life"])
+        component = self.components.get("developmental_life")
+        if component is None:
+            return self.builder.missing_component_response("developmental_life")
+        status = (component.developmental_status()
+                  if hasattr(component, "developmental_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:developmental_life"]
+        if topic == "dl_changed":
+            text = (f"epochs: {status.get('developmental_epoch_count', 0)}, "
+                    f"maturation markers "
+                    f"{status.get('maturation_marker_count', 0)}, phase "
+                    f"transitions {status.get('phase_transition_count', 0)}; "
+                    "structural change, not proof of intelligence")
+        elif topic == "dl_mature":
+            text = (f"maturation markers: "
+                    f"{status.get('maturation_marker_count', 0)} -- structural "
+                    "observations, not consciousness milestones")
+        elif topic == "dl_stuck":
+            text = (f"plateaus: {status.get('plateau_count', 0)}; a plateau is "
+                    "not failure and may recommend a source-diet change or "
+                    "consolidation (report-only)")
+        elif topic == "dl_regress":
+            text = (f"regressions: {status.get('regression_count', 0)}; "
+                    "regressions are made visible and preserved as evidence")
+        elif topic == "dl_accumulation":
+            text = (f"growth verdict: "
+                    f"{status.get('structural_growth_status', 'inconclusive')} "
+                    f"(score {status.get('structural_growth_score', 0.0)}); "
+                    "growth vs accumulation is judged conservatively")
+        else:
+            text = ("the developmental runtime tracks long-horizon structural "
+                    "change; not biological life or consciousness")
         return self.builder.status_response(text, refs)
 
     def _action_reaction(self, topic: str) -> CommunicationResponse:

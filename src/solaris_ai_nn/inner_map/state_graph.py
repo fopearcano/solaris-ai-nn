@@ -1709,4 +1709,28 @@ def build_default_state_graph() -> StateGraph:
                "repeated constructive consequences form habits (overrideable)")
     g.add_edge("ActionReactionRuntime", "inner_map",
                "action-reaction state feeds Inner MAP")
+
+    # Long-horizon developmental life (Prompt 53): structural change over time.
+    # Operational runtime life cycle, not biological life or consciousness.
+    for name, role in [
+        ("LifeCycleState", "operational runtime phases, not biological life"),
+        ("DevelopmentalEpoch", "explainable developmental slice; survives restart"),
+        ("DevelopmentalGrowthState", "structural change, not an intelligence score"),
+        ("MaturationDetector", "structural observations, not consciousness marks"),
+        ("PhaseTransitionDetector", "evidence-backed transitions; inconclusive ok"),
+        ("DevelopmentalMemoryStore", "append-only; regressions/plateaus kept"),
+        ("OperationalLifeHistory", "operational trace history, not biography"),
+        ("PlateauDetector", "no-growth stretches; recommendation report-only"),
+        ("RegressionDetector", "visible declines; auto-regeneration optional"),
+        ("StructuralGrowthAnalyzer", "growth vs accumulation, conservatively"),
+        ("LongHorizonDevelopmentalRuntime", "bounded persistent developmental loop"),
+        ("DevelopmentalLifeSafetyValidator", "no life/consciousness/teaching"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("ActionReactionRuntime", "LongHorizonDevelopmentalRuntime",
+               "immediate action-reaction loops accumulate into development")
+    g.add_edge("DevelopmentalGrowthState", "StructuralGrowthAnalyzer",
+               "growth snapshots are judged growth-vs-accumulation")
+    g.add_edge("LongHorizonDevelopmentalRuntime", "inner_map",
+               "developmental life state feeds Inner MAP")
     return g
