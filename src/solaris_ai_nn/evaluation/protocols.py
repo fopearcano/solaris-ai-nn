@@ -5509,6 +5509,122 @@ def live_field_comparison_protocol(
     return live_field_vs_fixture_protocol(manifest)
 
 
+# -- Sensorium differentiation lab (Prompt 44) --------------------------------
+
+def _run_sensorium_study(state_dir, arms=None, ticks=40):
+    """Run a small bounded sensorium differentiation study for protocols."""
+    from ..sensorium_lab import (
+        SensoriumDifferentiationRunner,
+        SensoriumStudyArm,
+        SensoriumStudyCondition,
+        SensoriumStudyDesign,
+    )
+    from ..sensorium_lab.sensorium_profiles import SensoriumProfileType as P
+
+    base = state_dir or ".solaris_ai_nn_sensorium_lab/eval"
+    design = SensoriumStudyDesign(ticks=ticks, max_events=200)
+    spec = arms or [
+        ("human_like", SensoriumStudyCondition.HUMAN_LIKE_ONLY,
+         P.HUMAN_LIKE_TEXT_LIGHT_TEMPERATURE),
+        ("non_human", SensoriumStudyCondition.NON_HUMAN_ONLY,
+         P.RF_ECHO_VIBRATION_MAGNETIC),
+        ("mixed", SensoriumStudyCondition.MIXED_PLURAL_SENSORIUM,
+         P.MIXED_HUMAN_NONHUMAN),
+        ("passive", SensoriumStudyCondition.PASSIVE_PARSER,
+         P.PASSIVE_EVENT_LIST),
+        ("adaptive", SensoriumStudyCondition.ADAPTIVE_RECEPTORS,
+         P.ADAPTIVE_RECEPTOR_FIELD),
+    ]
+    for arm_id, condition, profile_type in spec:
+        design.add_arm(SensoriumStudyArm(arm_id=arm_id, condition=condition,
+                                         profile_type=profile_type))
+    runner = SensoriumDifferentiationRunner(state_dir=base, design=design)
+    runner.prepare_study(design)
+    runner.run_all()
+    return runner
+
+
+def sensorium_lab_study_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A bounded sensorium study runs every arm and builds world signatures."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        runner = _run_sensorium_study(m.state_dir)
+        comparison = runner.compare_results()
+        return {"sensorium_lab": {
+            "arm_count": len(runner.arm_results),
+            "world_signature_count": sum(
+                1 for r in runner.arm_results.values() if r.signature),
+            "strongest": comparison.strongest}}
+
+    return _run(manifest, body)
+
+
+def sensorium_lab_comparison_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Human-like vs non-human vs mixed differences are reported structurally."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        runner = _run_sensorium_study(m.state_dir)
+        comparison = runner.compare_results()
+        return {"sensorium_lab": {
+            "difference_count": len(comparison.differences),
+            "inconclusive_count": comparison.inconclusive_count,
+            "negative_result_count": comparison.negative_result_count}}
+
+    return _run(manifest, body)
+
+
+def sensorium_world_signature_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A world signature is an observable structural fingerprint, not qualia."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        runner = _run_sensorium_study(m.state_dir)
+        sig = runner.arm_results["non_human"].signature
+        return {"sensorium_lab": {
+            "modality_count": len(sig.modality_distribution),
+            "proto_families": len(sig.proto_symbol_family_distribution),
+            "changed_perception_score": sig.changed_perception_score}}
+
+    return _run(manifest, body)
+
+
+def sensorium_ontology_drift_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Ontology drift is measured; human-label contamination is reported."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        runner = _run_sensorium_study(m.state_dir)
+        drift = runner.arm_results["non_human"].ontology_drift
+        return {"sensorium_lab": {
+            "dominant_ontology": drift.dominant_ontology,
+            "drift_score": drift.drift_score}}
+
+    return _run(manifest, body)
+
+
+def sensorium_lab_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The lab refuses hardware, feeder-start, mutation, and superiority claims."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..sensorium_lab import SensoriumLabSafetyValidator
+
+        v = SensoriumLabSafetyValidator()
+        return {"sensorium_lab": {
+            "hardware_blocked":
+                not v.validate_operation("open device driver").safe,
+            "feeder_start_blocked":
+                not v.validate_operation("start feeder").safe,
+            "superiority_claim_blocked":
+                not v.validate_claim_text("this is the more conscious "
+                                          "sensorium").safe,
+            "ranks_sensoriums": v.can_rank_sensoriums()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -5719,4 +5835,14 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "live_field_source_uncertainty": live_field_source_uncertainty_protocol,
     "live_field_comparison": live_field_comparison_protocol,
     "live_field_safety": live_field_safety_protocol,
+    "sensorium_differentiation": sensorium_lab_study_protocol,
+    "human_vs_nonhuman_sensorium": sensorium_lab_comparison_protocol,
+    "mixed_sensorium_study": sensorium_lab_comparison_protocol,
+    "label_contamination": sensorium_lab_comparison_protocol,
+    "sensorium_lab_study": sensorium_lab_study_protocol,
+    "sensorium_lab_comparison": sensorium_lab_comparison_protocol,
+    "sensorium_lab_safety": sensorium_lab_safety_protocol,
+    "sensorium_world_signature": sensorium_world_signature_protocol,
+    "sensorium_ontology_drift": sensorium_ontology_drift_protocol,
+    "modality_fingerprint_study": sensorium_world_signature_protocol,
 }

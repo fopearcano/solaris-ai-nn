@@ -300,6 +300,20 @@ DESCRIPTIONS = {
     "live_field_comparison": "live vs fixture/passive comparison arms",
     "live_field_safety":
         "no hardware/network/feeder-start; live needs governance",
+    "sensorium_differentiation":
+        "do different senses build different internal structures?",
+    "human_vs_nonhuman_sensorium":
+        "human-like vs non-human structural differences",
+    "mixed_sensorium_study": "mixed vs single-class sensorium structures",
+    "label_contamination": "human labels visible, never ontology",
+    "sensorium_lab_study": "bounded sensorium differentiation study",
+    "sensorium_lab_comparison": "pairwise structural comparison across arms",
+    "sensorium_lab_safety":
+        "no hardware/feeder-start/mutation; no superiority claim",
+    "sensorium_world_signature":
+        "observable structural fingerprint, not subjective experience",
+    "sensorium_ontology_drift": "which ontology the categories drifted toward",
+    "modality_fingerprint_study": "what each modality actually contributed",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -447,6 +461,13 @@ class ExperimentRegistry:
         features["live_field"] = (
             name.startswith("live_field")
             or bool(merged.get("live_field", False)))
+        features["sensorium_lab"] = (
+            name.startswith("sensorium_lab")
+            or name in ("sensorium_differentiation", "sensorium_world_signature",
+                        "sensorium_ontology_drift", "human_vs_nonhuman_sensorium",
+                        "mixed_sensorium_study", "label_contamination",
+                        "modality_fingerprint_study")
+            or bool(merged.get("sensorium_lab", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

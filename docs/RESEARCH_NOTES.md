@@ -1688,3 +1688,44 @@ private content, never via a driver Solaris controls. This keeps the alien
 sensorium real (the features come from the world) while keeping it safe (Solaris
 holds no device, decodes nothing private, and a live pilot requires governance
 approval).
+
+## Phase 44 — Sensorium differentiation lab
+
+**Nagel-style sensorium differentiation.** Nagel's question is usually read as a
+claim about the inaccessibility of subjective experience. This lab deliberately
+does not try to access an inner point of view. It asks the narrower, observable
+question: does a different sensorium build a different internal *structure*? That
+question is answerable with fingerprints and comparisons; the inner question is
+not, and the lab never claims to answer it.
+
+**World signature vs subjective experience.** A world signature is the observable
+structure an arm built -- its modality distribution, the families of symbols and
+hypotheses it formed, its grounding and contamination. It is emphatically not
+qualia and not "what Solaris feels". Keeping that distinction explicit is the
+whole ethical point of the lab: it studies structure, not experience, and it says
+so in every report.
+
+**Human ontology drift.** A system fed human labels can quietly reorganise its
+categories around human concepts, which looks like understanding but is borrowed.
+The ontology-drift detector measures how far the categories leaned toward a
+human-object ontology versus a modality-native one. Human ontology is not
+forbidden; it just must not dominate silently, so the drift is measured and
+reported.
+
+**Modality-native categories.** When the sensorium is non-human, the categories
+that emerge are RF invariants, echo boundaries, vibration rhythms, machine
+cycles -- not chairs and rooms. The lab preserves those modality-native
+categories rather than translating them into human words, because the translation
+is exactly where the interesting structure would be lost.
+
+**Why a mixed sensorium may produce different intelligence-like structures.** The
+comparison arms exist to test, not assume, that mixing human-like and non-human
+modalities yields cross-modal structure that neither produces alone. The mixed
+arm's cross-modal relations are the operational signature of that hypothesis; if
+they do not appear, the comparison says so.
+
+**Why negative and inconclusive differences matter.** A study that could only
+report "they differ" would be useless. The comparison preserves no-difference
+(negative) results and marks missing data inconclusive, so a finding that two
+sensoriums built *the same* structure, or that the data was insufficient to tell,
+is reported as honestly as a strong difference.

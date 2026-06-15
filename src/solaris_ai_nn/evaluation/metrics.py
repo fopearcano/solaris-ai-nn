@@ -1535,3 +1535,42 @@ def live_field_metrics(live: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "note": "real read-only feeder pilot; no hardware control, no source "
                 "mutation; changed response structure is not consciousness",
     }
+
+
+def sensorium_lab_metrics(lab: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective sensorium-differentiation-lab metrics (structural study layer).
+
+    These describe a comparative sensorium study: how many studies/arms and world
+    signatures/fingerprints were produced, the structural difference score and
+    strongest difference strength, ontology drift, the modality-native structure
+    ratio, human-label contamination, and the inconclusive/negative counts. These
+    are structural proxies for comparing sensoriums; there is no consciousness,
+    sentience, life, or subjective-experience score.
+    """
+    if not lab:
+        return {"present": False}
+    return {
+        "present": True,
+        "sensorium_study_count": int(lab.get("sensorium_study_count", 1) or 0),
+        "sensorium_arm_count": int(lab.get("sensorium_arm_count", 0) or 0),
+        "world_signature_count": int(lab.get("world_signature_count", 0) or 0),
+        "modality_fingerprint_count": int(
+            lab.get("modality_fingerprint_count", 0) or 0),
+        "structural_difference_score": float(
+            lab.get("structural_difference_score", 0.0) or 0.0),
+        "strongest_difference_strength": str(
+            lab.get("strongest_difference_strength", "none")),
+        "ontology_drift_score": float(lab.get("ontology_drift_score", 0.0)
+                                      or 0.0),
+        "modality_native_structure_ratio": float(
+            lab.get("modality_native_structure_ratio", 0.0) or 0.0),
+        "human_label_contamination_score": float(
+            lab.get("human_label_contamination_score", 0.0) or 0.0),
+        "inconclusive_sensorium_comparison_count": int(
+            lab.get("inconclusive_sensorium_comparison_count", 0) or 0),
+        "sensorium_negative_result_count": int(
+            lab.get("sensorium_negative_result_count", 0) or 0),
+        "ranks_sensoriums": False,
+        "note": "structural differentiation study; no consciousness/sentience/"
+                "life score and no sensorium ranking",
+    }

@@ -58,3 +58,5 @@ artifacts/
 .sann_live/
 .sann_live_cmp/
 .sann_live_ref/
+.solaris_ai_nn_sensorium_lab/
+.sann_sensorium_lab/

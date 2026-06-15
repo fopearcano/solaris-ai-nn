@@ -107,6 +107,9 @@ AVAILABLE_QUERIES = (
     "what did Solaris perceive from the live field?",
     "did Solaris control any hardware?",
     "did Solaris modify any source files?",
+    "did human-like and non-human senses produce different structures?",
+    "did labels contaminate the result?", "which modality actually mattered?",
+    "was this a consciousness test?",
 )
 
 
@@ -167,6 +170,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("sl_"):
+            return self._sensorium_lab(topic)
         if topic.startswith("lf_"):
             return self._live_field(topic)
         if topic.startswith("od_"):
@@ -514,6 +519,49 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _sensorium_lab(self, topic: str) -> CommunicationResponse:
+        """Answer sensorium-differentiation-lab queries (structural; no ranking).
+
+        The "was this a consciousness test?" question is answered safely even
+        with no study attached.
+        """
+        if topic == "sl_consciousness":
+            return self.builder.status_response(
+                "No. This study compares observable internal structures under "
+                "different perceptual conditions. It does not measure or prove "
+                "consciousness, sentience, life, personhood, or subjective "
+                "experience.",
+                ["policy:sensorium_lab_is_not_a_consciousness_test"])
+        component = self.components.get("sensorium_lab")
+        if component is None:
+            return self.builder.missing_component_response("sensorium_lab")
+        status = (component.sensorium_lab_status()
+                  if hasattr(component, "sensorium_lab_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:sensorium_lab"]
+        if topic == "sl_diff":
+            text = (f"strongest structural difference: "
+                    f"{status.get('strongest_structural_difference', 'none')}; "
+                    "this is a structural fingerprint, not a ranking")
+        elif topic == "sl_rf_world":
+            text = ("the RF-like sensorium built a modality-native world of "
+                    "RF invariants/rhythms; see its world signature")
+        elif topic == "sl_mixed":
+            text = ("the mixed sensorium adds cross-modal relations between "
+                    "human-like and non-human modalities; see its signature")
+        elif topic == "sl_contamination":
+            text = (f"human-label contamination score: "
+                    f"{status.get('human_label_contamination_score', 0.0)}; "
+                    "labels are annotations, never ground truth")
+        elif topic == "sl_modality":
+            text = ("see the modality fingerprints; a modality with many events "
+                    "but no structural effect is reported as structurally weak")
+        else:
+            text = ("the sensorium lab compares observable internal structures; "
+                    "it does not test consciousness")
         return self.builder.status_response(text, refs)
 
     def _live_field(self, topic: str) -> CommunicationResponse:

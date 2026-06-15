@@ -2351,3 +2351,48 @@ payload is rejected; and sensory text is treated as observation, never a command
 `live_field_source_uncertainty`, `live_field_comparison`, `live_field_safety`).
 Eight registered protocols measure the real read-only feeder pilot; Solaris
 controls no hardware and modifies no source.
+
+## 252. Sensorium Differentiation Demo ✅ (implemented)
+
+**Run:** `python examples/run_sensorium_differentiation_demo.py --state-dir .solaris_ai_nn_sensorium_lab/test_differentiation`
+Runs the default differentiation study (human-like, non-human, machine-native,
+absence-heavy, mixed, feature-only, human-labelled, passive, adaptive arms),
+compares the world signatures structurally, and writes the report. Compares
+internal structures under different perceptual conditions; does not test
+consciousness.
+
+## 253. Human Label Contamination Demo ✅ (implemented)
+
+**Run:** `python examples/run_human_label_contamination_demo.py --state-dir .solaris_ai_nn_sensorium_lab/test_label_contamination`
+Runs a feature-only arm and a human-labelled arm; the analyzer detects
+contamination in the labelled arm (reported, never hidden) while the feature-only
+arm rests on features. Human labels are annotations, never ground truth.
+
+## 254. Modality Fingerprint Demo ✅ (implemented)
+
+**Run:** `python examples/run_modality_fingerprint_demo.py --state-dir .solaris_ai_nn_sensorium_lab/test_modality_fingerprint`
+Runs a mixed-modality arm and prints each modality's fingerprint (events,
+invariants, proto-symbols, structural effect), so a modality with many events but
+no structural effect is reported as structurally weak.
+
+## 255. World Signature Demo ✅ (implemented)
+
+**Run:** `python examples/run_world_signature_demo.py --state-dir .solaris_ai_nn_sensorium_lab/test_world_signature`
+Builds a world signature for a human-like-only arm and a non-human-only arm and
+compares them structurally. A world signature is an observable structural
+fingerprint, not subjective experience or qualia.
+
+## 256. Live vs Fixture Sensorium Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_vs_fixture_sensorium_demo.py --state-dir .solaris_ai_nn_sensorium_lab/test_live_vs_fixture`
+Runs a fixture-replay arm and a live read-only arm; without governance the live
+arm is blocked and the live-vs-fixture comparison is inconclusive -- reported
+honestly rather than failing.
+
+## 257. Sensorium Lab Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment sensorium_lab_study`
+(also `sensorium_lab_comparison`, `sensorium_world_signature`,
+`sensorium_ontology_drift`, `sensorium_lab_safety`, `sensorium_differentiation`,
+`human_vs_nonhuman_sensorium`, `label_contamination`). Structural-differentiation
+protocols; no consciousness score and no sensorium ranking.

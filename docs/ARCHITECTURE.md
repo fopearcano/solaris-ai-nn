@@ -2698,3 +2698,55 @@ rules), the Inner MAP (a `live_field` field plus ten state-graph nodes), the
 research lab and evaluation (eight protocols and fourteen metrics), and the
 operator dialogue (which answers plainly that **Solaris only read feeder-produced
 event envelopes; it did not control hardware and did not modify source files**).
+
+## Sensorium Differentiation Lab
+
+Prompts 41-43 built the plural sensorium, the observable organism demo, and the
+real read-only live field. The sensorium differentiation lab
+(`src/solaris_ai_nn/sensorium_lab/`) runs the comparative study they were built
+for. It asks, in the spirit of Nagel's "what is it like to be a bat?", the
+narrower and *observable* question: **does a different sensorium build a different
+internal structure?** It is a structural differentiation study -- not a task
+benchmark, not a chatbot benchmark, and not a consciousness test.
+
+**Different sensoriums are expected to produce different internal structures.**
+A :class:`SensoriumDifferentiationRunner` runs each study arm (human-like,
+non-human, machine-native, absence-heavy, mixed, feature-only, human-labelled,
+passive, adaptive) through the Prompt-41 :class:`PluralSensoriumRuntime` over
+bounded, seed-replayable events, and records what each built: receptor adaptation,
+field pressures, baselines, absences, rhythms, invariants, cross-modal relations,
+proto-symbol families, world-model topology, hypothesis families, LOGOS tensions,
+attention strategies, changed-perception, grounding, and contamination.
+
+**Human-like senses are included but not privileged; non-human and machine-native
+modalities are compared structurally.** No arm is the default truth. The
+:class:`SensoriumComparison` weighs pairs (human-like vs non-human, feature-only
+vs human-labelled, passive vs adaptive, ...) across eight structural dimensions and
+assigns a :class:`DifferenceStrength` (none / weak / moderate / strong /
+inconclusive); missing data is inconclusive, and a no-difference result is
+preserved, not discarded.
+
+**World signatures are observable fingerprints, not subjective experience.** A
+:class:`SensoriumWorldSignature` summarises the *structure* an arm built; it is
+explicitly not qualia and does not describe "what Solaris feels". An
+:class:`OntologyDriftDetector` measures whether the categories drifted toward a
+human-object, modality-native, cross-modal, machine-rhythm, absence-rhythm, or
+label-contaminated ontology -- human ontology is not forbidden, but it must not
+silently dominate. A :class:`ModalityFingerprintBuilder` reports what each
+modality actually contributed, flagging a modality with many events but no
+structural effect as *structurally weak*.
+
+**Label contamination is tracked, and live vs fixture differences are measured.**
+A :class:`HumanLabelContaminationAnalyzer` reports where human annotations
+influenced the structure (labels are allowed as annotations, never ground truth).
+Live read-only arms require governance approval; without it they are marked
+*blocked* and the live-vs-fixture comparison is *inconclusive*, while the fixture
+arms continue. The lab integrates with the research lab and evaluation (seven
+research protocols, five evaluation protocols, eleven metrics), feeds architecture
+evolution *proposal inputs* (modality additions/pruning, receptor/attention
+revision, contamination mitigation, live follow-ups -- proposals only, never
+automatic code changes), exposes its state to the operator console and the Inner
+MAP (a `sensorium_lab` field plus ten state-graph nodes), and answers the operator
+plainly that **this compares observable internal structures under different
+perceptual conditions; it does not measure or prove consciousness, sentience,
+life, personhood, or subjective experience, and it does not rank sensoriums.**

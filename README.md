@@ -406,6 +406,13 @@ python examples/run_live_field_fixture_fallback_demo.py   # run the live runtime
 python examples/run_live_field_report_demo.py             # report incl. corrupt/missing sources (never hidden)
 python examples/run_live_field_comparison_demo.py         # live-like stream vs fixture vs passive parser
 python examples/run_feeder_contract_demo.py               # valid envelope accepted; command payload rejected
+
+# Sensorium differentiation lab: do different senses build different structures?
+python examples/run_sensorium_differentiation_demo.py     # human-like vs non-human vs mixed world signatures
+python examples/run_human_label_contamination_demo.py     # feature-only vs human-labelled (labels never ground truth)
+python examples/run_modality_fingerprint_demo.py          # which modality actually shaped the system
+python examples/run_world_signature_demo.py               # build + compare two world signatures (not qualia)
+python examples/run_live_vs_fixture_sensorium_demo.py     # fixture vs live arm (inconclusive without governance)
 ```
 
 The read-only sensory membrane and Pilot-2 also run as governed conscience
@@ -782,6 +789,21 @@ real-world actuation. Live mode requires governance approval; preflight,
 report-only, fixture-fallback, and comparison run by default. The data contract
 and the rule that **hardware collectors must export feature summaries, not raw
 private content,** are documented in `feeders/README.md`.
+
+The **sensorium differentiation lab** (`sensorium_lab/`) runs the comparative
+study the previous phases were built for: it asks, Nagel-style, whether a
+*different* sensorium builds a *different* internal structure. It runs human-like,
+non-human, machine-native, absence-heavy, mixed, feature-only, human-labelled,
+passive, and adaptive arms through the plural sensorium, then produces **world
+signatures** (observable structural fingerprints), **modality fingerprints** (what
+each modality contributed), **ontology-drift** reports (did the categories lean
+human-object or modality-native?), **contamination** analysis (human labels are
+annotations, never ground truth), structural metrics, and pairwise comparisons
+with explicit *inconclusive* and *negative* results. **This compares internal
+structures under different perceptual conditions; it does not test consciousness.**
+A world signature is an observable fingerprint, never subjective experience or
+qualia; no sensorium is ranked as "more conscious" or "more alive"; and no claim
+of consciousness, sentience, life, personhood, agency, or free will is made.
 
 > **Warning:** the live field controls **no hardware**. Hardware-specific
 > collectors (SDR, mmWave, ultrasound, thermal, magnetic) are out of scope here:
@@ -1231,6 +1253,10 @@ src/solaris_ai_nn/
                 feeder registry, local feeder validators, feature dropbox,
                 source health, live field runtime/pilot/trace/report,
                 comparison, safety validator (Solaris reads, never controls)
+  sensorium_lab/ sensorium differentiation lab: study design, sensorium
+                profiles, world signatures, ontology drift, structure metrics,
+                differentiation runner, comparative analysis, label
+                contamination, modality fingerprints, study report, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

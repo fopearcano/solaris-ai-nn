@@ -395,6 +395,13 @@ class InnerMapModel:
     # changed_perception_score, latest_live_field_report_path. The live field
     # reads external feeders only; it controls no hardware and mutates no source.
     live_field: Optional[Dict[str, Any]] = None
+    # Sensorium-lab status (Prompt 44); None when not attached. Keys:
+    # sensorium_lab_enabled, latest_study_id, world_signature_count,
+    # modality_fingerprint_count, strongest_structural_difference,
+    # inconclusive_comparison_count, human_label_contamination_score,
+    # latest_differentiation_report_path. The lab compares observable internal
+    # structures only; it makes no claim of subjective experience.
+    sensorium_lab: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

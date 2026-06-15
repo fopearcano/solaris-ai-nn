@@ -82,6 +82,7 @@ class InnerMapObserver:
     plural_sensorium: Any = None  # optional dict/object of plural-sensorium status
     organismic_demo: Any = None  # optional dict/object of organismic-demo status
     live_field: Any = None  # optional dict/object of live-field status
+    sensorium_lab: Any = None  # optional dict/object of sensorium-lab status
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -701,6 +702,17 @@ class InnerMapObserver:
                 model.live_field = live.live_field_status()
             elif hasattr(live, "snapshot"):
                 model.live_field = live.snapshot()
+        lab = self.sensorium_lab
+        if lab is None and self.runner is not None:
+            lab = getattr(self.runner, "sensorium_lab", None)
+        if lab is not None:
+            # Sensorium-lab status (structural differentiation study view).
+            if isinstance(lab, dict):
+                model.sensorium_lab = dict(lab)
+            elif hasattr(lab, "sensorium_lab_status"):
+                model.sensorium_lab = lab.sensorium_lab_status()
+            elif hasattr(lab, "snapshot"):
+                model.sensorium_lab = lab.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

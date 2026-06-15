@@ -1465,4 +1465,34 @@ def build_default_state_graph() -> StateGraph:
                "source silence becomes perceptual absence")
     g.add_edge("LiveFieldRuntime", "inner_map",
                "live field state feeds Inner MAP")
+
+    # Sensorium differentiation lab (Prompt 44): does a different sensorium
+    # build a different internal structure? Compares world signatures across
+    # perceptual conditions -- observable structure, never subjective experience.
+    for name, role in [
+        ("SensoriumStudyDesign", "bounded comparative differentiation study"),
+        ("SensoriumProfile", "one perceptual configuration per arm"),
+        ("SensoriumWorldSignature", "observable structural fingerprint"),
+        ("OntologyDriftDetector", "which ontology the categories drifted toward"),
+        ("SensoriumStructureMetrics", "structural proxies; no mind score"),
+        ("SensoriumDifferentiationRunner", "runs arms via the plural sensorium"),
+        ("SensoriumComparison", "pairwise structural differences"),
+        ("HumanLabelContaminationAnalyzer", "labels visible, never ontology"),
+        ("ModalityFingerprintBuilder", "what each modality contributed"),
+        ("SensoriumDifferentiationStudyReportBuilder",
+         "what differed; what it does not prove"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("SensoriumStudyDesign", "SensoriumDifferentiationRunner",
+               "the study design feeds the differentiation runner")
+    g.add_edge("SensoriumProfile", "SensoriumDifferentiationRunner",
+               "profiles configure each arm")
+    g.add_edge("SensoriumDifferentiationRunner", "PluralSensoriumRuntime",
+               "each arm runs through the plural sensorium")
+    g.add_edge("SensoriumDifferentiationRunner", "SensoriumWorldSignature",
+               "the runner builds a world signature per arm")
+    g.add_edge("SensoriumWorldSignature", "SensoriumComparison",
+               "signatures are compared structurally")
+    g.add_edge("SensoriumDifferentiationRunner", "inner_map",
+               "sensorium-lab state feeds Inner MAP")
     return g
