@@ -1008,6 +1008,45 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["run_step_count"],
             max_runtime_s=60.0))
 
+    # -- Action-reaction profiles (Prompt 52) ---------------------------------
+    # Close the loop: internal action -> reaction -> consequence -> learning /
+    # habit / inhibition. Actions are internal/simulated/report-only; no profile
+    # starts feeders/hardware or actuates the external world.
+    _action_reaction_modules = ["bridge", "ecology", "governance", "ops",
+                               "inner_map", "plural_sensorium",
+                               "perceptual_metabolism", "desire_formation",
+                               "action_reaction"]
+    for pid, desc, plan_only in (
+            ("action_reaction_fixture_short",
+             "Close the action-reaction loop on a bounded fixture.", False),
+            ("habit_formation_demo",
+             "Reinforce a repeated action-effect into a habit candidate.",
+             False),
+            ("action_inhibition_demo",
+             "Inhibit an unsafe/uncertain action and record it.", False),
+            ("no_effect_action_demo",
+             "Show a no-effect action weakening the action policy.", False),
+            ("blocked_action_reaction_demo",
+             "Block a forbidden external action; record it as evidence.", False),
+            ("action_reaction_report_only",
+             "Compile the action-reaction report (analysis only).", True)):
+        if plan_only:
+            run_ctx = _ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                           max_duration_s=None)
+        else:
+            run_ctx = _ctx(RunMode.SHORT_DEMO, max_steps=120)
+        add(ScenarioProfile(
+            profile_id=pid, description=desc, run_context=run_ctx,
+            enabled_modules=list(_action_reaction_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "internal/simulated/report-only actions; no real-world actuation",
+                "reaction valence is operational effect, not feeling",
+                "habits are learned policy tendencies, not instincts or will"],
+            governance_requirements=["enable_plural_sensorium_fixture"],
+            expected_artifacts=["ACTION_REACTION_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=60.0))
+
     return profiles
 
 

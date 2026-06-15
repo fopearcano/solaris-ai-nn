@@ -344,6 +344,18 @@ DESIRE_QUERIES = (
     ("does this prove agency", "df_agency"),
 )
 
+# Action-reaction queries (Prompt 52). Answered from the action-reaction status;
+# the "did it act in the real world?" / "does this prove agency?" questions are
+# answered safely even with no run.
+ACTION_REACTION_QUERIES = (
+    ("what did solaris do", "ar_did"),
+    ("what happened after it acted", "ar_after"),
+    ("did the action help", "ar_help"),
+    ("what habits formed", "ar_habits"),
+    ("what actions were inhibited", "ar_inhibited"),
+    ("did it act in the real world", "ar_real_world"),
+)
+
 # Feeder-SDK queries (Prompt 45). Answered from the feeder monitor/manifest; the
 # control/start questions are answered safely even with no feeders attached.
 FEEDER_SDK_QUERIES = (
@@ -547,7 +559,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._desire_formation(lowered)
+        result = (self._action_reaction(lowered)
+                  or self._desire_formation(lowered)
                   or self._self_boundary(lowered)
                   or self._cognition(lowered)
                   or self._semiogenesis(lowered)
@@ -704,6 +717,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _action_reaction(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in ACTION_REACTION_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"action-reaction query {topic!r}"])
         return None
 
     @staticmethod

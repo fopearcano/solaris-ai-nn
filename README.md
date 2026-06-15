@@ -466,7 +466,21 @@ python examples/run_desire_conflict_demo.py              # novelty vs stability;
 python examples/run_internal_action_readiness_demo.py    # readiness gates; selected internal action; unsafe blocked
 python examples/run_no_action_arbitration_demo.py        # no-op on overload/insufficient evidence (preserved)
 python examples/run_safety_blocked_desire_demo.py        # forbidden external action blocked + recorded
+
+# Action-reaction: close the loop -- action -> reaction -> consequence -> learning
+python examples/run_action_reaction_demo.py              # internal action -> reaction -> consequence -> report
+python examples/run_habit_formation_demo.py              # repeated action-effect -> habit (overrideable)
+python examples/run_action_inhibition_demo.py            # unsafe/uncertain action inhibited; LOGOS tension
+python examples/run_no_effect_action_demo.py             # no-effect action weakens the action policy
+python examples/run_blocked_action_reaction_demo.py      # forbidden external action blocked -> evidence
 ```
+
+Actions are internal/simulated/report-only. Solaris does not act in the real world.
+The action-reaction loop records operational reactions, evidence-backed consequence
+traces, provisional learned effects, and overrideable habits; reaction valence is
+operational effect (not feeling); inhibition and no-op are valid outcomes; and
+failed/blocked/no-effect actions are preserved as evidence. It controls no hardware,
+feeders, files, browser, OS, or network, and proves no agency or free will.
 
 Desire candidates are operational pressures toward internal actions. They are not
 emotions, human wants, free will, or proof of agency. Valence is operational
@@ -1408,6 +1422,10 @@ src/solaris_ai_nn/
   desire_formation/ operational valence, desire, and internal action readiness:
                 valence, push, desire, readiness, motivation field, conflict,
                 arbitration, internal actions, outcome trace, memory, runtime,
+                reports, safety
+  action_reaction/ closed action-reaction loop and consequence learning:
+                action model, reaction, consequence, effect learning, habit
+                formation, inhibition, action policy, reaction memory, runtime,
                 reports, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo

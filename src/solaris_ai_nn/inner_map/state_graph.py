@@ -1683,4 +1683,30 @@ def build_default_state_graph() -> StateGraph:
                "safe arbitration selects internal actions only (no actuation)")
     g.add_edge("DesireFormationRuntime", "inner_map",
                "desire formation / motivation field feeds Inner MAP")
+
+    # Action-reaction loop (Prompt 52): learn what internal actions do.
+    # Actions are internal/simulated/report-only; not agency or free will.
+    for name, role in [
+        ("ActionCandidateRecord", "internal action; no real-world actuation"),
+        ("SensoriumReaction", "operational effect of an action, not feeling"),
+        ("ConsequenceTrace", "evidence-backed before/after change; not invented"),
+        ("ActionEffectModel", "provisional action->reaction; not causation"),
+        ("SensoriumHabit", "learned policy tendency, overrideable; not instinct"),
+        ("ActionInhibition", "protects against unsafe/useless churn; recorded"),
+        ("ActionPolicyEngine", "internal-only preferences; no external authority"),
+        ("ReactionMemoryStore", "append-only; failed/blocked/no-effect kept"),
+        ("ActionReactionRuntime", "bounded closed action-reaction loop"),
+        ("ActionReactionSafetyValidator", "no actuation/agency/free-will claims"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("DesireFormationRuntime", "ActionReactionRuntime",
+               "selected internal actions feed the action-reaction loop")
+    g.add_edge("ActionCandidateRecord", "SensoriumReaction",
+               "internal actions produce operational reactions")
+    g.add_edge("SensoriumReaction", "ConsequenceTrace",
+               "reactions are recorded as evidence-backed consequences")
+    g.add_edge("ConsequenceTrace", "SensoriumHabit",
+               "repeated constructive consequences form habits (overrideable)")
+    g.add_edge("ActionReactionRuntime", "inner_map",
+               "action-reaction state feeds Inner MAP")
     return g

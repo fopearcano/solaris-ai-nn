@@ -78,6 +78,14 @@ class SensoriumWorldSignature:
     conflict_profile: Dict[str, Any] = field(default_factory=dict)
     blocked_desire_count: int = 0
     desire_outcome_utility: float = 0.0
+    # Action-reaction profile (Prompt 52); empty/zero when not attached.
+    action_kind_distribution: Dict[str, int] = field(default_factory=dict)
+    reaction_valence_distribution: Dict[str, int] = field(default_factory=dict)
+    consequence_trace_profile: Dict[str, Any] = field(default_factory=dict)
+    habit_profile: Dict[str, Any] = field(default_factory=dict)
+    inhibition_profile: Dict[str, Any] = field(default_factory=dict)
+    no_effect_action_profile: Dict[str, Any] = field(default_factory=dict)
+    learned_policy_profile: Dict[str, Any] = field(default_factory=dict)
     limitations: List[str] = field(default_factory=lambda: [
         "An observable structural fingerprint, not subjective experience.",
         "Not qualia; this does not describe what Solaris feels.",
@@ -147,6 +155,14 @@ class SensoriumWorldSignature:
             "conflict_profile": dict(self.conflict_profile),
             "blocked_desire_count": self.blocked_desire_count,
             "desire_outcome_utility": self.desire_outcome_utility,
+            "action_kind_distribution": dict(self.action_kind_distribution),
+            "reaction_valence_distribution":
+                dict(self.reaction_valence_distribution),
+            "consequence_trace_profile": dict(self.consequence_trace_profile),
+            "habit_profile": dict(self.habit_profile),
+            "inhibition_profile": dict(self.inhibition_profile),
+            "no_effect_action_profile": dict(self.no_effect_action_profile),
+            "learned_policy_profile": dict(self.learned_policy_profile),
             "limitations": list(self.limitations),
             "note": "observable structural fingerprint; not subjective "
                     "experience, not qualia",
@@ -163,7 +179,8 @@ class WorldSignatureBuilder:
               semiogenesis: Any = None,
               cognition: Any = None,
               self_boundary: Any = None,
-              desire_formation: Any = None) -> SensoriumWorldSignature:
+              desire_formation: Any = None,
+              action_reaction: Any = None) -> SensoriumWorldSignature:
         rt = runtime
         if rt is None:
             return SensoriumWorldSignature(arm_id=arm_id, condition=condition)
@@ -355,6 +372,39 @@ class WorldSignatureBuilder:
             blocked_desires = df_status.get("safety_blocked_desire_count", 0)
             desire_utility = df_status.get("desire_outcome_success_rate", 0.0)
 
+        # Action-reaction profile (optional).
+        action_kinds: Dict[str, int] = {}
+        reaction_valences: Dict[str, int] = {}
+        consequence_profile: Dict[str, Any] = {}
+        habit_profile: Dict[str, Any] = {}
+        inhibition_profile: Dict[str, Any] = {}
+        no_effect_profile: Dict[str, Any] = {}
+        policy_profile: Dict[str, Any] = {}
+        if action_reaction is not None:
+            ar_status = (action_reaction.action_reaction_status()
+                         if hasattr(action_reaction, "action_reaction_status")
+                         else action_reaction
+                         if isinstance(action_reaction, dict) else {})
+            if hasattr(action_reaction, "actions"):
+                for a in action_reaction.actions:
+                    k = getattr(a, "kind", "unknown")
+                    action_kinds[k] = action_kinds.get(k, 0) + 1
+            if hasattr(action_reaction, "reactions"):
+                for r in action_reaction.reactions:
+                    v = getattr(r, "valence", "unknown")
+                    reaction_valences[v] = reaction_valences.get(v, 0) + 1
+            consequence_profile = {
+                "count": ar_status.get("consequence_trace_count", 0)}
+            habit_profile = {
+                "candidate": ar_status.get("habit_candidate_count", 0),
+                "strengthened": ar_status.get("strengthened_habit_count", 0)}
+            inhibition_profile = {
+                "count": ar_status.get("inhibition_count", 0)}
+            no_effect_profile = {
+                "count": ar_status.get("no_effect_action_count", 0)}
+            policy_profile = {
+                "updates": ar_status.get("action_policy_update_count", 0)}
+
         return SensoriumWorldSignature(
             arm_id=arm_id, condition=condition,
             modality_distribution=modality_dist,
@@ -409,7 +459,14 @@ class WorldSignatureBuilder:
             no_op_profile=no_op_profile,
             conflict_profile=conflict_profile,
             blocked_desire_count=blocked_desires,
-            desire_outcome_utility=desire_utility)
+            desire_outcome_utility=desire_utility,
+            action_kind_distribution=action_kinds,
+            reaction_valence_distribution=reaction_valences,
+            consequence_trace_profile=consequence_profile,
+            habit_profile=habit_profile,
+            inhibition_profile=inhibition_profile,
+            no_effect_action_profile=no_effect_profile,
+            learned_policy_profile=policy_profile)
 
 
 @dataclass

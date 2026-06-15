@@ -1898,3 +1898,46 @@ def desire_formation_metrics(des: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "note": "operational desire/valence; not emotion, free will, agency, or "
                 "subjective experience",
     }
+
+
+def action_reaction_metrics(ar: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective action-reaction metrics (closed-loop consequence-learning layer).
+
+    These describe internal actions and their operational reactions: action/
+    reaction counts, constructive/disruptive ratios, consequence traces, learned
+    effects, habits, inhibitions, and policy updates. Actions are internal/
+    simulated/report-only; reaction valence is operational effect, not feeling;
+    habits are learned policy tendencies, not instincts or will; and none of this
+    proves agency, free will, or subjective experience.
+    """
+    if not ar:
+        return {"present": False}
+    return {
+        "present": True,
+        "selected_action_count": int(ar.get("selected_action_count", 0) or 0),
+        "internal_action_count": int(ar.get("internal_action_count", 0) or 0),
+        "blocked_action_count": int(ar.get("blocked_action_count", 0) or 0),
+        "no_op_count": int(ar.get("no_op_count", 0) or 0),
+        "reaction_count": int(ar.get("reaction_count", 0) or 0),
+        "constructive_reaction_ratio": float(
+            ar.get("constructive_reaction_ratio", 0.0) or 0.0),
+        "disruptive_reaction_ratio": float(
+            ar.get("disruptive_reaction_ratio", 0.0) or 0.0),
+        "no_effect_action_count": int(ar.get("no_effect_action_count", 0) or 0),
+        "consequence_trace_count": int(
+            ar.get("consequence_trace_count", 0) or 0),
+        "learned_effect_count": int(ar.get("learned_effect_count", 0) or 0),
+        "habit_candidate_count": int(ar.get("habit_candidate_count", 0) or 0),
+        "strengthened_habit_count": int(
+            ar.get("strengthened_habit_count", 0) or 0),
+        "weakened_habit_count": int(ar.get("weakened_habit_count", 0) or 0),
+        "inhibition_count": int(ar.get("inhibition_count", 0) or 0),
+        "action_policy_update_count": int(
+            ar.get("action_policy_update_count", 0) or 0),
+        "action_reaction_changed_perception_delta": float(
+            ar.get("action_reaction_changed_perception_delta", 0.0) or 0.0),
+        "is_real_world_action": False,
+        "is_agency_or_free_will": False,
+        "note": "internal action-consequence learning; no real-world actuation; "
+                "not agency, free will, or subjective experience",
+    }

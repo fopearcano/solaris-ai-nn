@@ -312,6 +312,8 @@ class ConscienceOrchestrator:
             h[SpinePhase.DESIRE_FORMATION_UPDATE] = self._phase_desire_formation
             h[SpinePhase.SAFE_INTERNAL_ACTION_ARBITRATION] = \
                 self._phase_safe_internal_action_arbitration
+        if "action_reaction" in self.components:
+            h[SpinePhase.ACTION_REACTION_UPDATE] = self._phase_action_reaction
         if "motor_membrane" in self.components:
             h[SpinePhase.MOTOR_ACTION_FIREWALL] = self._phase_motor_firewall
         if "ecology" in self.components or "signals" in self.components:
@@ -455,6 +457,16 @@ class ConscienceOrchestrator:
         if desire is None:
             return PhaseStatus.SKIPPED
         self._count("safe_internal_action_arbitration")
+        return PhaseStatus.RAN
+
+    def _phase_action_reaction(self, step: int) -> str:
+        """Close the action-reaction loop (internal-only; no actuation)."""
+        action_reaction = self.components.get("action_reaction")
+        if action_reaction is None:
+            return PhaseStatus.SKIPPED
+        if hasattr(action_reaction, "update"):
+            action_reaction.update(tick=step)
+        self._count("action_reaction_update")
         return PhaseStatus.RAN
 
     def _phase_stimulus(self, step: int) -> str:

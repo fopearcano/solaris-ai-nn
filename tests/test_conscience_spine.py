@@ -16,14 +16,16 @@ def test_phase_order_preserves_solaris_spine():
         < order.index(SpinePhase.ACTION_SUGGESTION) \
         < order.index(SpinePhase.REACTION_COLLECTION) \
         < order.index(SpinePhase.MEMORY_UPDATE)
-    assert len(order) == 27
-    # Desire formation sits after metabolism/cognition/self-boundary and before
-    # stimulus ingestion (sensorium-native cognition feeds back into the spine).
+    assert len(order) == 28
+    # Desire formation and the action-reaction loop sit after metabolism/
+    # cognition/self-boundary and before stimulus ingestion (sensorium-native
+    # cognition feeds back into the spine).
     assert order.index(SpinePhase.PERCEPTUAL_METABOLISM_UPDATE) \
         < order.index(SpinePhase.COGNITION_UPDATE) \
         < order.index(SpinePhase.SELF_BOUNDARY_UPDATE) \
         < order.index(SpinePhase.DESIRE_FORMATION_UPDATE) \
         < order.index(SpinePhase.SAFE_INTERNAL_ACTION_ARBITRATION) \
+        < order.index(SpinePhase.ACTION_REACTION_UPDATE) \
         < order.index(SpinePhase.STIMULUS_INGESTION)
     # The motor action firewall sits between safety/governance and action
     # suggestion (the outbound boundary).

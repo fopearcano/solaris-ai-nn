@@ -135,6 +135,9 @@ AVAILABLE_QUERIES = (
     "what does Solaris want?", "what desires are active?", "did Solaris act?",
     "why did it choose no action?", "were any desires blocked?",
     "are these emotions?", "does this prove agency?",
+    "what did Solaris do?", "what happened after it acted?",
+    "did the action help?", "what habits formed?",
+    "what actions were inhibited?", "did it act in the real world?",
 )
 
 
@@ -195,6 +198,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("ar_"):
+            return self._action_reaction(topic)
         if topic.startswith("df_"):
             return self._desire_formation(topic)
         if topic.startswith("sb_"):
@@ -558,6 +563,55 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _action_reaction(self, topic: str) -> CommunicationResponse:
+        """Answer action-reaction queries (internal actions only, not agency).
+
+        The "did it act in the real world?" question is answered safely even with
+        no action-reaction run.
+        """
+        if topic == "ar_did":
+            return self.builder.status_response(
+                "Solaris executed or selected internal actions only, such as "
+                "attention shifts, simulations, consolidation recommendations, "
+                "preserving unknowns, or no-op decisions.",
+                ["policy:actions_are_internal_only"])
+        if topic == "ar_real_world":
+            return self.builder.status_response(
+                "No. The action-reaction layer is internal/simulated/report-"
+                "only. It does not control hardware, feeders, files, browser, "
+                "OS, network, or physical devices.",
+                ["policy:no_real_world_actuation"])
+        component = self.components.get("action_reaction")
+        if component is None:
+            return self.builder.missing_component_response("action_reaction")
+        status = (component.action_reaction_status()
+                  if hasattr(component, "action_reaction_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:action_reaction"]
+        if topic == "ar_after":
+            text = (f"reactions: {status.get('reaction_count', 0)}, consequence "
+                    f"traces {status.get('consequence_trace_count', 0)}; "
+                    "operational effects only, never real-world effects")
+        elif topic == "ar_help":
+            text = (f"constructive reaction ratio: "
+                    f"{status.get('constructive_reaction_ratio', 0.0)} "
+                    f"(disruptive {status.get('disruptive_reaction_ratio', 0.0)})"
+                    "; reaction valence is operational effect, not feeling")
+        elif topic == "ar_habits":
+            text = (f"habit candidates: "
+                    f"{status.get('habit_candidate_count', 0)} (strengthened "
+                    f"{status.get('strengthened_habit_count', 0)}); habits are "
+                    "learned policy tendencies, not instincts or will")
+        elif topic == "ar_inhibited":
+            text = (f"inhibited actions: {status.get('inhibition_count', 0)}, "
+                    f"blocked {status.get('blocked_action_count', 0)}; "
+                    "inhibition protects against unsafe/useless internal churn")
+        else:
+            text = ("the action-reaction loop records internal actions and their "
+                    "operational consequences; no real-world actuation")
         return self.builder.status_response(text, refs)
 
     def _desire_formation(self, topic: str) -> CommunicationResponse:

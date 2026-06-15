@@ -453,6 +453,13 @@ class InnerMapModel:
     # report_path. Desire is operational pressure toward internal action, not
     # emotion, free will, or agency.
     desire_formation: Optional[Dict[str, Any]] = None
+    # Action-reaction status (Prompt 52); None when not attached. Keys:
+    # action_reaction_enabled, selected_action_count, blocked_action_count,
+    # no_op_count, reaction_count, consequence_trace_count, learned_effect_count,
+    # habit_candidate_count, inhibition_count, action_policy_update_count,
+    # latest_action_reaction_report_path. Actions are internal/simulated/
+    # report-only; no real-world actuation; not agency or free will.
+    action_reaction: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

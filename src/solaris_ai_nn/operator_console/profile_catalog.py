@@ -127,6 +127,10 @@ def _source_package(profile_id: str) -> str:
                        "no_action_arbitration_demo",
                        "safety_blocked_desire_demo"):
         return "desire_formation"
+    if pid.startswith("action_reaction") or pid in (
+            "habit_formation_demo", "action_inhibition_demo",
+            "no_effect_action_demo", "blocked_action_reaction_demo"):
+        return "action_reaction"
     return "conscience"
 
 

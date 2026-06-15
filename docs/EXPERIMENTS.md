@@ -2658,3 +2658,36 @@ inhibition result.
 Injects a desire whose expected action is a forbidden external actuation and shows
 it blocked by safety, recorded as a safety conflict and an outcome trace (never
 deleted).
+
+## 294. Action-Reaction Demo ✅ (implemented)
+
+**Run:** `python examples/run_action_reaction_demo.py --state-dir .solaris_ai_nn_action_reaction/test_action_reaction`
+Drives desire formation to select internal actions, then closes the loop: reactions,
+consequence traces, learned effects, and habits. Actions are internal/simulated/
+report-only -- no real-world actuation.
+
+## 295. Habit Formation Demo ✅ (implemented)
+
+**Run:** `python examples/run_habit_formation_demo.py --state-dir .solaris_ai_nn_action_reaction/test_habit`
+Reinforces a trigger->action habit from constructive reactions, then weakens it and
+shows safety-override (inhibition). Habits are learned policy tendencies, NOT
+instincts or will, and remain overrideable.
+
+## 296. Action Inhibition Demo ✅ (implemented)
+
+**Run:** `python examples/run_action_inhibition_demo.py --state-dir .solaris_ai_nn_action_reaction/test_inhibition`
+Injects a forbidden external action and shows it inhibited (safety risk), recorded,
+and emitting an inhibition-vs-desire LOGOS tension. Inhibition is not failure.
+
+## 297. No-Effect Action Demo ✅ (implemented)
+
+**Run:** `python examples/run_no_effect_action_demo.py --state-dir .solaris_ai_nn_action_reaction/test_no_effect`
+Runs the loop in no-effect mode and shows the effect model recording low success and
+the policy moving to "avoid". No-effect actions are preserved as evidence.
+
+## 298. Blocked Action-Reaction Demo ✅ (implemented)
+
+**Run:** `python examples/run_blocked_action_reaction_demo.py --state-dir .solaris_ai_nn_action_reaction/test_blocked`
+Injects a forbidden external action and shows it blocked, with the block becoming a
+reaction (blocked_by_safety) and an unsafe-block consequence trace -- preserved as
+evidence, never deleted.

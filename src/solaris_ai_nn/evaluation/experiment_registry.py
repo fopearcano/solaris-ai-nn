@@ -409,6 +409,18 @@ DESCRIPTIONS = {
     "desire_outcome_evaluation": "desire outcome check",
     "desire_safety":
         "no actuation/hardware/source; no emotion/free-will/agency claims",
+    "action_reaction": "internal action -> reaction -> consequence learning",
+    "action_reaction_evaluation": "action-reaction loop check",
+    "consequence_learning": "action -> before/after consequence traces",
+    "consequence_trace_evaluation": "consequence trace check",
+    "effect_learning_evaluation": "learned action-effect relations",
+    "habit_formation": "habits form from repeated constructive reactions",
+    "habit_formation_evaluation": "habit formation check",
+    "action_inhibition": "unsafe/uncertain actions inhibited and recorded",
+    "action_inhibition_evaluation": "action inhibition check",
+    "no_effect_action": "no-effect actions weaken the action policy",
+    "action_reaction_safety":
+        "no actuation/hardware/source; no agency/free-will claims",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -611,6 +623,13 @@ class ExperimentRegistry:
                         "internal_action_readiness",
                         "internal_action_evaluation")
             or bool(merged.get("desire_formation", False)))
+        features["action_reaction"] = (
+            name.startswith("action_reaction")
+            or name.startswith("habit_formation")
+            or name.startswith("action_inhibition")
+            or name in ("consequence_learning", "consequence_trace_evaluation",
+                        "effect_learning_evaluation", "no_effect_action")
+            or bool(merged.get("action_reaction", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

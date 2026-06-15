@@ -3216,3 +3216,72 @@ formation lets Solaris turn sensorium-native pressures into operational valence,
 pushes, and desires that lead only to safe internal actions -- while preserving the
 distinction between operational desire and human emotion, free will, agency,
 consciousness, sentience, life, or subjective experience.**
+
+## Sensorium-Native Action-Reaction Loop
+
+Prompts 41-51 gave Solaris perception, metabolism, proto-concepts, signs,
+cognition, a self/world boundary, and desire formation. Prompt 52 closes the loop
+-- `src/solaris_ai_nn/action_reaction/`:
+
+    Stimulus -> Push -> Desire -> ActionCandidate -> InternalAction -> Reaction
+    -> ConsequenceTrace -> Learning -> Habit / Inhibition / Revision
+    -> changed future perception
+
+The system learns what its *internal* actions do (shifting attention reduces
+uncertainty, no-op prevents overload, an unsafe candidate is blocked and becomes
+evidence). This is NOT agency and NOT free will -- it is operational action-
+consequence learning inside the system.
+
+**Action is internal/simulated/report-only.** An `ActionCandidateRecord` carries a
+scope (internal_only / simulation_only / report_only / governance_record_only /
+forbidden_external) and a full evidence chain back to the desire/push/valence/
+readiness/arbitration that produced it. No real-world scope exists; any external/
+hardware/source-modifying action is forbidden and blocked. `no_op` is a real,
+traceable action result.
+
+**Reaction is operational consequence, not feeling.** A `SensoriumReaction`
+classifies the effect of an action (uncertainty reduced/increased, prediction
+confirmed/failed, overload reduced, boundary clarified, ...) with an operational
+valence (constructive/disruptive/stabilizing/destabilizing/neutral) -- never
+pleasure/pain. A failed or blocked action still produces a reaction trace.
+
+**Consequence learning links actions to effects.** The `ConsequenceTrace` records
+an evidence-backed before/after internal change over a bounded window (or
+ambiguous / no-observed-change when undetermined; effects are never invented). The
+`EffectLearningEngine` accumulates provisional action->reaction relations whose
+confidence grows only with repeated evidence; correlation is never causation and
+failed effects remain visible.
+
+**Habits are learned policy tendencies, and inhibition protects the organism.** The
+`HabitFormationEngine` strengthens trigger->action habits from repeated
+constructive reactions and weakens or inhibits them otherwise; habits are NOT
+instincts, personality, or will, and remain overrideable by safety/governance. The
+`InhibitionEngine` records why an action was withheld (safety risk, uncertainty,
+overload, no-effect history, ...) -- inhibition is not failure, it protects against
+unsafe or useless churn. The `ActionPolicyEngine` updates internal-only
+preferences (prefer/avoid/require-more-evidence/always-block-forbidden) that cannot
+authorize external action and preserve the safety/governance veto.
+
+**No-op is valid, and failed/blocked/no-effect actions are evidence.** The
+append-only `ReactionMemoryStore` preserves every action, reaction, consequence,
+effect, habit, inhibition, and policy update -- including failures, blocks, and
+no-effect actions; none are deleted.
+
+**It stays internal and bounded.** The `ActionReactionRuntime` reads the internal
+actions selected by desire formation, validates scope, generates reactions, builds
+consequences, learns effects/habits, and records inhibitions -- all bounded, with
+no external actuation, no hardware/feeder/source control, and no unbounded loop. It
+integrates with the Conscience spine (an `action_reaction_update` phase after the
+desire/arbitration phases and before stimulus ingestion, with six bounded
+profiles), feeds results back into perceptual metabolism, cognition, self-boundary,
+ontogenesis, and semiogenesis, emits LOGOS tensions (action-success-vs-failure,
+habit-vs-novelty, inhibition-vs-desire, no-action-vs-pressure), seeds the
+hypothesis engine with action-effect hypotheses, stores traces in memory/latent
+replay, and reports to the research lab, sensorium differentiation lab (action/
+reaction/consequence/habit/inhibition/no-effect/policy profiles), architecture
+evolution (advisory proposals only), operator console (with the mandated safe
+answers about "what did Solaris do", "did it act in the real world", and "agency"),
+and Inner MAP. **The action-reaction loop lets Solaris learn what its safe internal
+actions do -- forming habits, inhibiting useless churn, and revising policy -- with
+NO real-world actuation and no claim of agency, free will, consciousness,
+sentience, life, personhood, or subjective experience.**

@@ -42,6 +42,7 @@ from .evidence_mapper import (
     ArchitectureEvidenceMap,
     EvidenceLink,
     EvidenceStrength,
+    action_reaction_revision_proposals,
     cognition_revision_proposals,
     desire_revision_proposals,
     ontogenesis_revision_proposals,
@@ -109,7 +110,7 @@ __all__ = [
     "ArchitectureEvidenceMap", "EvidenceLink", "EvidenceStrength",
     "ontogenesis_revision_proposals", "semiogenesis_revision_proposals",
     "cognition_revision_proposals", "self_boundary_revision_proposals",
-    "desire_revision_proposals",
+    "desire_revision_proposals", "action_reaction_revision_proposals",
     # pruning / promotion / impact / migration
     "PruningProposal", "PruningProposalBuilder", "PruningPlan", "PruningRisk",
     "PruningImplementationStatus", "PromotionProposal", "DemotionProposal",

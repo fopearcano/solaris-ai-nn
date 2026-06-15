@@ -2040,3 +2040,39 @@ arbitration, and internal actions are operational mechanisms. They can be measur
 but none of it is evidence of emotion, free will, agency, consciousness, sentience,
 or subjective experience. Safety-blocked and failed desires are kept precisely so
 the claims stay honest about what the mechanism does and does not show.
+
+## Phase 52 — Sensorium-native action-reaction loop and consequence learning
+
+**Closing the Stimulus -> Push -> Desire -> Action -> Reaction loop.** Until now the
+chain stopped at a selected internal action. Phase 52 closes it: the system
+observes what the action did, records the consequence, and folds that back into
+future desire arbitration. The loop is the smallest unit of learning -- not "the
+system wanted X and got it", but "this internal move had this internal effect, so
+weight it accordingly next time".
+
+**Consequence learning without agency claims.** Learning here is bookkeeping over
+action->reaction pairs: repeated constructive reactions raise an effect model's
+confidence, repeated no-effect or disruptive reactions lower it. This is ordinary
+credit assignment, deliberately stripped of agency language. Correlation is not
+causation, effects are provisional, and a failed effect is kept visible rather than
+quietly forgotten.
+
+**Habit without instinct or personality.** A habit is just a trigger->action
+tendency that earned its strength through repeated useful consequences. We refuse
+the words instinct, personality, and will: a habit is an editable weight, it can be
+weakened when it stops helping, and safety/governance can inhibit it outright. A
+habit that could not be overridden would be a liability, not an achievement.
+
+**Inhibition and no-op as intelligence-like regulation.** The most under-rated
+outcomes are the ones where nothing happens. Inhibiting an unsafe or low-evidence
+action, and choosing no-op under overload, are first-class results -- recorded,
+counted, and learned from. An organism that acts on every pressure burns itself
+out; restraint, made measurable, is part of the regulation.
+
+**Why action-reaction does not prove free will.** Every action in this layer is
+internal/simulated/report-only; forbidden external actions are blocked and become
+evidence; reaction valence is operational effect, not feeling; and habits are
+overrideable weights. The loop can be measured (constructive ratios, no-op rates,
+learned-effect counts) and it changes future perception, but none of that is
+agency, free will, consciousness, sentience, or subjective experience -- and the
+reports say so plainly.

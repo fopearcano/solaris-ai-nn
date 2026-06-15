@@ -33,7 +33,47 @@ EVIDENCE_SOURCES = (
     "inner_map_snapshot", "perceptual_ontogenesis_report",
     "semiogenesis_report", "sensorium_cognition_report",
     "self_boundary_report", "desire_formation_report",
+    "action_reaction_report",
 )
+
+
+def action_reaction_revision_proposals(ar_status: Dict[str, Any],
+                                       ) -> List[Dict[str, Any]]:
+    """Turn an action-reaction status into architecture *proposals* only.
+
+    Proposals are advisory: nothing here rewrites code or actuates anything. They
+    suggest action-policy, habit-threshold, inhibition-threshold, desire-
+    arbitration, no-op-policy, or safety-gate revisions based on observed action
+    consequences.
+    """
+    proposals: List[Dict[str, Any]] = []
+    reactions = int(ar_status.get("reaction_count", 0) or 0)
+    disruptive = float(ar_status.get("disruptive_reaction_ratio", 0.0) or 0.0)
+    if reactions and disruptive >= 0.5:
+        proposals.append({
+            "target": "action_policy_revision",
+            "proposal": "raise action thresholds; many disruptive reactions",
+            "reason": f"disruptive_reaction_ratio {disruptive}",
+            "advisory_only": True})
+    if int(ar_status.get("no_effect_action_count", 0) or 0) > 0:
+        proposals.append({
+            "target": "no_op_policy_revision",
+            "proposal": "review no-effect actions; prefer no-op or evidence",
+            "reason": "no-effect actions recorded",
+            "advisory_only": True})
+    if int(ar_status.get("blocked_action_count", 0) or 0) > 0:
+        proposals.append({
+            "target": "safety_gate_reinforcement",
+            "proposal": "review desire sources producing forbidden actions",
+            "reason": "blocked (forbidden external) actions observed",
+            "advisory_only": True})
+    if int(ar_status.get("strengthened_habit_count", 0) or 0) > 0:
+        proposals.append({
+            "target": "habit_threshold_changes",
+            "proposal": "review habit strengthening for harmful rigidity",
+            "reason": "strengthened habits present",
+            "advisory_only": True})
+    return proposals
 
 
 def desire_revision_proposals(df_status: Dict[str, Any],
