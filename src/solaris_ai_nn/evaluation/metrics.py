@@ -1388,3 +1388,57 @@ def operator_console_metrics(console: Optional[Dict[str, Any]],
         "note": "local file-backed operator console; coordinates, never grants "
                 "authority",
     }
+
+
+def plural_sensorium_metrics(sensorium: Optional[Dict[str, Any]],
+                             ) -> Dict[str, Any]:
+    """Objective plural-sensorium metrics (organismic perception layer).
+
+    These describe the continuous, read-only sensorium: how many modalities and
+    receptors are active, the field pressures, receptor adaptation and baseline
+    shifts, flux / absence / rhythm / invariant / cross-modal counts, the count
+    of modality-grounded proto-symbols, and the grounding scores. The sensorium
+    controls no hardware and human labels are never ground truth.
+    """
+    if not sensorium:
+        return {"present": False}
+    return {
+        "present": True,
+        "active_modality_count": int(
+            sensorium.get("active_modality_count", 0) or 0),
+        "active_receptor_count": int(
+            sensorium.get("active_receptor_count", 0) or 0),
+        "sensory_field_pressure": float(
+            sensorium.get("sensory_field_pressure", 0.0) or 0.0),
+        "absence_pressure": float(sensorium.get("absence_pressure", 0.0) or 0.0),
+        "novelty_pressure": float(sensorium.get("novelty_pressure", 0.0) or 0.0),
+        "rhythm_pressure": float(sensorium.get("rhythm_pressure", 0.0) or 0.0),
+        "cross_modal_pressure": float(
+            sensorium.get("cross_modal_pressure", 0.0) or 0.0),
+        "receptor_adaptation_count": int(
+            sensorium.get("receptor_adaptation_count", 0) or 0),
+        "baseline_shift_count": int(
+            sensorium.get("baseline_shift_count", 0) or 0),
+        "flux_event_count": int(sensorium.get("flux_event_count", 0) or 0),
+        "absence_event_count": int(
+            sensorium.get("absence_event_count", 0) or 0),
+        "rhythm_signature_count": int(
+            sensorium.get("rhythm_signature_count", 0) or 0),
+        "invariant_candidate_count": int(
+            sensorium.get("invariant_candidate_count", 0) or 0),
+        "cross_modal_relation_count": int(
+            sensorium.get("cross_modal_relation_count", 0) or 0),
+        "modality_grounded_proto_symbol_count": int(
+            sensorium.get("modality_grounded_proto_symbol_count", 0) or 0),
+        "modality_native_grounding_score": float(
+            sensorium.get("modality_native_grounding_score", 0.0) or 0.0),
+        "human_label_contamination_score": float(
+            sensorium.get("human_label_contamination_score", 0.0) or 0.0),
+        "sensorium_prediction_delta": float(
+            sensorium.get("sensorium_prediction_delta", 0.0) or 0.0),
+        "sensorium_compression_delta": float(
+            sensorium.get("sensorium_compression_delta", 0.0) or 0.0),
+        "controls_hardware": False,
+        "note": "read-only organismic perception; no hardware, no human-label "
+                "ground truth",
+    }

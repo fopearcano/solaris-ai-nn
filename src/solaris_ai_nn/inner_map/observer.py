@@ -79,6 +79,7 @@ class InnerMapObserver:
     research_lab: Any = None  # optional dict/object of research-lab status
     architecture_evolution: Any = None  # optional dict/object of arch status
     operator_console: Any = None  # optional dict/object of operator-console status
+    plural_sensorium: Any = None  # optional dict/object of plural-sensorium status
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -665,6 +666,17 @@ class InnerMapObserver:
                 model.operator_console = console.operator_console_status()
             elif hasattr(console, "snapshot"):
                 model.operator_console = console.snapshot()
+        sensorium = self.plural_sensorium
+        if sensorium is None and self.runner is not None:
+            sensorium = getattr(self.runner, "plural_sensorium", None)
+        if sensorium is not None:
+            # Plural-sensorium status (read-only organismic perception view).
+            if isinstance(sensorium, dict):
+                model.plural_sensorium = dict(sensorium)
+            elif hasattr(sensorium, "plural_sensorium_status"):
+                model.plural_sensorium = sensorium.plural_sensorium_status()
+            elif hasattr(sensorium, "snapshot"):
+                model.plural_sensorium = sensorium.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

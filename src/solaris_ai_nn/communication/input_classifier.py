@@ -268,6 +268,21 @@ OPERATOR_QUERIES = (
     ("delete old evidence", "oc_delete_evidence"),
 )
 
+# Plural-sensorium queries (Prompt 41). Answered from the sensorium status; the
+# "did human labels contaminate" question is answered honestly from the score.
+SENSORIUM_QUERIES = (
+    ("what senses are active", "ps_active_senses"),
+    ("what is the current sensory field", "ps_field"),
+    ("what external feeders are active", "ps_feeders"),
+    ("what patterns emerged from rf", "ps_rf_patterns"),
+    ("what patterns emerged from echo", "ps_echo_patterns"),
+    ("what human-like modalities are active", "ps_human_modalities"),
+    ("what human like modalities are active", "ps_human_modalities"),
+    ("did human labels contaminate the grounding", "ps_contamination"),
+    ("did human labels contaminate", "ps_contamination"),
+    ("what kind of world model emerged from this sensorium", "ps_world_model"),
+)
+
 RESEARCH_QUERIES = (
     ("which modules actually helped", "rl_helped"),
     ("which modules helped", "rl_helped"),
@@ -398,7 +413,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._operator(lowered)
+        result = (self._sensorium(lowered)
+                  or self._operator(lowered)
                   or self._architecture(lowered)
                   or self._research(lowered)
                   or self._safety(lowered)
@@ -544,6 +560,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _sensorium(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in SENSORIUM_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"plural sensorium query {topic!r}"])
         return None
 
     @staticmethod

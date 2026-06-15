@@ -77,8 +77,9 @@ def test_all_scopes_in_default_set():
     # + 4 system-wide safety invariants (P36)
     # + 5 research lab (P37)
     # + 5 architecture evolution (P38)
-    # + 6 operator console (P39).
-    assert len(PermissionScope.ALL) == 156
+    # + 6 operator console (P39)
+    # + 3 plural sensorium (P41).
+    assert len(PermissionScope.ALL) == 159
 
 
 def test_motor_membrane_scope_defaults():

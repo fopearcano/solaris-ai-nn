@@ -298,6 +298,9 @@ class ConscienceOrchestrator:
         }
         if "sensory_membrane" in self.components:
             h[SpinePhase.READ_ONLY_SENSORY_POLL] = self._phase_sensory_poll
+        if "plural_sensorium" in self.components:
+            h[SpinePhase.PLURAL_SENSORIUM_POLL] = self._phase_plural_sensorium
+            h[SpinePhase.SENSORY_FIELD_UPDATE] = self._phase_sensory_field
         if "motor_membrane" in self.components:
             h[SpinePhase.MOTOR_ACTION_FIREWALL] = self._phase_motor_firewall
         if "ecology" in self.components or "signals" in self.components:
@@ -376,6 +379,23 @@ class ConscienceOrchestrator:
         self._count("sensory_poll")
         if not out.get("polled"):
             return PhaseStatus.SKIPPED
+        return PhaseStatus.RAN
+
+    def _phase_plural_sensorium(self, step: int) -> str:
+        """Poll the plural sensorium once (read-only feeders; no hardware)."""
+        sensorium = self.components.get("plural_sensorium")
+        if sensorium is None:
+            return PhaseStatus.SKIPPED
+        sensorium.poll_once()
+        self._count("plural_sensorium_poll")
+        return PhaseStatus.RAN
+
+    def _phase_sensory_field(self, step: int) -> str:
+        """The continuous sensory field is updated as part of the poll."""
+        sensorium = self.components.get("plural_sensorium")
+        if sensorium is None:
+            return PhaseStatus.SKIPPED
+        self._count("sensory_field_update")
         return PhaseStatus.RAN
 
     def _phase_stimulus(self, step: int) -> str:

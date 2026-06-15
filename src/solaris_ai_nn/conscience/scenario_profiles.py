@@ -806,6 +806,51 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["report_generation_success"],
             max_runtime_s=30.0))
 
+    # -- Plural sensorium profiles (Prompt 41) --------------------------------
+    # Solaris as an organism bathed in environmental flux through plural senses.
+    # Fixture profiles are bounded and safe by default; there is NO hardware
+    # profile. Real read-only profiles (not defined here) require governance.
+    _sensorium_modules = ["bridge", "ecology", "governance", "ops",
+                          "inner_map", "plural_sensorium"]
+    for pid, desc in (
+            ("plural_sensorium_fixture_short",
+             "Mixed human-like + non-human fixture sensorium (bounded)."),
+            ("plural_sensorium_human_like_fixture_short",
+             "Human-like-only fixture sensorium (bounded)."),
+            ("plural_sensorium_rf_fixture_short",
+             "RF-only fixture sensorium (bounded; no SDR/hardware)."),
+            ("plural_sensorium_echo_fixture_short",
+             "Echo-only fixture sensorium (bounded; no hardware)."),
+            ("plural_sensorium_mixed_fixture_short",
+             "Mixed-modality fixture sensorium (bounded)."),
+            ("plural_sensorium_cross_modal_fixture_short",
+             "Cross-modal fixture sensorium (bounded).")):
+        add(ScenarioProfile(
+            profile_id=pid, description=desc,
+            run_context=_ctx(RunMode.SHORT_DEMO, max_steps=40),
+            enabled_modules=list(_sensorium_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "read-only external feeders only; no hardware/SDR/capture",
+                "human labels are never ground truth; features are primary",
+                "human ontology does not dominate by default"],
+            governance_requirements=["enable_plural_sensorium_fixture"],
+            expected_artifacts=["PLURAL_SENSORIUM_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=45.0))
+    # Report-only: compile the sensorium report from artifacts (analysis only).
+    add(ScenarioProfile(
+        profile_id="plural_sensorium_report_only",
+        description="Compile the plural sensorium report (analysis only).",
+        run_context=_ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                         max_duration_s=None),
+        enabled_modules=["governance", "ops", "evaluation", "inner_map"],
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "analysis only; no hardware; read-only"],
+        governance_requirements=["enable_plural_sensorium_report"],
+        expected_artifacts=["PLURAL_SENSORIUM_REPORT.json"],
+        expected_metrics=["report_generation_success"],
+        max_runtime_s=30.0))
+
     return profiles
 
 

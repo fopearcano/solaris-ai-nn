@@ -104,6 +104,8 @@ def _source_package(profile_id: str) -> str:
         return "research_lab"
     if pid.startswith("architecture"):
         return "architecture_evolution"
+    if pid.startswith("plural_sensorium"):
+        return "plural_sensorium"
     return "conscience"
 
 

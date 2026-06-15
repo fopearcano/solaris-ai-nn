@@ -272,6 +272,17 @@ DESCRIPTIONS = {
     "operator_export_bundle": "local export bundle; checksums; no upload",
     "operator_console_safety":
         "no shell/network/authority; no safety bypass; no evidence deletion",
+    "plural_sensorium_fixture":
+        "mixed fixture sensorium; receptors + continuous field",
+    "human_like_sensorium": "human-like-only sensorium; valid, not privileged",
+    "non_human_sensorium": "non-human-only sensorium; equally first-class",
+    "mixed_sensorium": "mixed human/non-human sensorium; cross-modal structure",
+    "continuous_field": "sensory field persists across ticks",
+    "receptor_adaptation": "receptors adapt over repeated exposure",
+    "cross_modal_sensorium": "cross-modal relations; no human object ontology",
+    "sensorium_grounding": "feature grounding; human-label contamination tracked",
+    "plural_sensorium_safety":
+        "no hardware/SDR/capture/network/source modification",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -404,6 +415,13 @@ class ExperimentRegistry:
         features["operator_console"] = (
             name.startswith("operator_")
             or bool(merged.get("operator_console", False)))
+        features["plural_sensorium"] = (
+            name.startswith("plural_sensorium")
+            or name in ("human_like_sensorium", "non_human_sensorium",
+                        "mixed_sensorium", "continuous_field",
+                        "receptor_adaptation", "cross_modal_sensorium",
+                        "sensorium_grounding")
+            or bool(merged.get("plural_sensorium", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

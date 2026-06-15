@@ -211,6 +211,12 @@ class PermissionScope:
     ENABLE_OPERATOR_EXPORT_BUNDLE = "enable_operator_export_bundle"
     ENABLE_OPERATOR_APPROVAL_LEDGER = "enable_operator_approval_ledger"
 
+    # Plural sensorium / organismic perception (Prompt 41).
+    ENABLE_PLURAL_SENSORIUM_FIXTURE = "enable_plural_sensorium_fixture"
+    ENABLE_PLURAL_SENSORIUM_REPORT = "enable_plural_sensorium_report"
+    ENABLE_PLURAL_SENSORIUM_REAL_READ_ONLY = \
+        "enable_plural_sensorium_real_read_only"
+
     ALL = (
         RUN_BOUNDED, RUN_SOAK_24H, RUN_SOAK_30D,
         ENABLE_PLASTICITY, ENABLE_PLASTICITY_APPLY, ENABLE_PLASTICITY_DRY_RUN,
@@ -297,6 +303,8 @@ class PermissionScope:
         ENABLE_OPERATOR_BOUNDED_RUN_LAUNCH,
         ENABLE_OPERATOR_EVIDENCE_NAVIGATION, ENABLE_OPERATOR_EXPORT_BUNDLE,
         ENABLE_OPERATOR_APPROVAL_LEDGER,
+        ENABLE_PLURAL_SENSORIUM_FIXTURE, ENABLE_PLURAL_SENSORIUM_REPORT,
+        ENABLE_PLURAL_SENSORIUM_REAL_READ_ONLY,
     )
 
 
@@ -808,6 +816,21 @@ class PermissionSet:
             Permission(S.ENABLE_OPERATOR_APPROVAL_LEDGER, granted=True,
                        note="records local planning/bounded-run approvals; cannot"
                             " approve forbidden real-world actuation"),
+            # Plural sensorium (Prompt 41). Fixture and report compilation are
+            # bounded, read-only, and granted by default; reading a *real*
+            # outside-world feeder requires explicit approval. No profile ever
+            # controls hardware or captures media.
+            Permission(S.ENABLE_PLURAL_SENSORIUM_FIXTURE, granted=True,
+                       note="bounded fixture sensorium; read-only feeders, no "
+                            "hardware/SDR/capture"),
+            Permission(S.ENABLE_PLURAL_SENSORIUM_REPORT, granted=True,
+                       note="plural sensorium report compiles recorded "
+                            "artifacts only"),
+            Permission(S.ENABLE_PLURAL_SENSORIUM_REAL_READ_ONLY, granted=False,
+                       requires_approval=True,
+                       note="reading a real outside-world read-only feeder "
+                            "requires explicit governance approval; still no "
+                            "hardware control or capture"),
         ]
         return cls(permissions={p.scope: p for p in rows})
 

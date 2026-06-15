@@ -1562,3 +1562,49 @@ runs it refused would hide its own most important behaviour. Blocked runs and
 forbidden-approval attempts are written to the append-only session log and surface
 as ops incidents, so the record shows not just what was done but what was
 *refused* -- which is the part a safety reviewer most needs.
+
+## Phase 41 — Plural sensorium and organismic perception
+
+**The Nagel-style sensorium problem.** "What is it like to be a bat?" is usually
+read as a question about consciousness; here it is repurposed as a question about
+*structure*: an organism with echolocation builds a different internal world than
+an organism with eyes, not because one is more conscious but because the
+sensorium is different. Solaris is not a bat simulation. The claim is narrower and
+testable: the kind of intelligence-like internal structure that emerges depends on
+the sensorium it develops through.
+
+**Why text-only input biases cognition.** A system fed only text inherits human
+language's ontology -- its objects, categories, and labels -- before it has
+learned anything from the world. That is convenient and deeply misleading: it
+looks like grounding but is borrowed. The plural sensorium keeps text as one valid
+human-like modality while refusing to let it dominate, so that structure can also
+emerge from RF, echo, vibration, thermal, magnetic, and machine-rhythm features
+that carry no human labels at all.
+
+**Organismic perception and peculiar senses.** Perception here is continuous, not
+event-by-event: a sensory field with persisting pressures, receptors that adapt,
+baselines that drift, and absences that are felt. RF/echo/vibration/thermal/
+magnetic perception are first-class, and a recurring RF burst or a missing echo
+boundary is as real a percept as a line of text. Absence is treated as the
+Subtraction Principle made literal: the expected signal that fails to arrive is a
+stimulus.
+
+**Human / non-human mixed sensorium.** The interesting experiments are
+comparative: human-like-only vs non-human-only vs mixed. The research lab can run
+these as bounded fixtures and ask whether the internal structures (invariants,
+cross-modal relations, proto-symbols) actually differ -- not whether one produced
+"more consciousness", which it cannot measure and does not claim.
+
+**Human-label contamination.** When a feeder supplies a human label, it is kept as
+non-ground-truth and flagged. Grounding that leans on those labels is classified
+`human_label_contaminated` and capped; strong, modality-native grounding must rest
+on feature patterns with preserved provenance. The contamination score is a
+first-class metric precisely because borrowed grounding is the easiest way to fool
+yourself into thinking a symbol means something.
+
+**Modality-native proto-symbols.** Symbols do not come from feature *names*; they
+emerge from recurrent invariants, rhythms, absences, and cross-modal structures,
+and they are typed by the modality that grounded them (`rf_grounded_symbol`,
+`echo_grounded_symbol`, `absence_grounded_symbol`, `cross_modal_symbol`). The
+point is to let an alien vocabulary form rather than to translate everything back
+into human words.

@@ -2517,3 +2517,68 @@ evidence and plans flow to a human, the human confirms, and the system only ever
 runs bounded allowed profiles through the orchestrator -- it grants no real-world
 authority and makes no claim of consciousness, life, sentience, agency,
 personhood, or free will.**
+
+## Plural Sensorium and Organismic Sensory Membrane
+
+Every earlier layer treated input as a pipeline: a file is parsed, an event is
+produced, a module consumes it. The plural sensorium
+(`src/solaris_ai_nn/plural_sensorium/`) reframes that entirely. Solaris-AI-NN is
+treated as an evolving **organism continuously bathed in environmental flux**
+through its own peculiar senses, and input is modelled as a **continuous sensory
+field**, not a stream of isolated events. The research question is Nagel-shaped --
+*what kind of intelligence-like internal structure emerges from a particular
+sensorium?* -- and the answer is allowed to be non-human, because the sensorium
+itself is plural.
+
+**Human-like senses are allowed; non-human senses are allowed; human ontology is
+not the default.** The modality model spans human-like families (text, light,
+ordinary temperature, movement, pressure/touch, visual/audio metadata) and
+non-human / machine-native families (RF, microwave/mmWave, ultrasound/echo,
+vibration, magnetic, thermal gradient, barometric, electric-field-like, machine
+rhythm) plus the absence/silence and interference families. No modality is
+privileged, and the layer deliberately refuses to collapse signals into human
+object labels (person, chair, room, sentence) unless those arrive as explicit
+external annotations -- and even then they are marked non-ground-truth.
+
+**External feeders provide the flux; Solaris only reads their output.** The layer
+adds no hardware drivers: an external feeder (an SDR feature exporter, a radar/
+thermal/vibration/magnetic logger, a system-metrics logger, a watched folder, a
+manual log, or a fixture replay) is a *separate* process that writes feature
+events into local files. An :class:`ExternalFeederDescriptor` describes the
+origin but grants Solaris no control over it, and read-only stream adapters turn
+each line into a :class:`SensoryEventEnvelope` whose features are primary, whose
+human annotation (if any) is secondary and never ground truth, and whose
+provenance is always preserved.
+
+**Receptors adapt, and the sensory field changes future perception.** Each
+modality/source has a stateful :class:`Receptor` that learns a baseline,
+sensitises to novelty, habituates to the familiar, and fatigues/saturates under
+sustained intensity; its adaptation changes only internal attention, never the
+feeder. A continuous :class:`SensoryField` carries field / noise / absence /
+novelty / rhythm / cross-modal / uncertainty pressures across ticks. On top of
+the field, detectors find flux (bursts, drift, interference, sudden silence),
+**absence** (a first-class perception -- the expected RF band that went missing),
+rhythms, modality-native invariants, and cross-modal relations (an RF burst
+*followed by* a vibration). Strong invariants become modality-grounded
+proto-symbol candidates (an `rf_grounded_symbol`, an `echo_grounded_symbol`, an
+`absence_grounded_symbol`), grounded by feature patterns and provenance rather
+than by human labels; a grounding analyzer tracks human-label contamination
+explicitly.
+
+**No direct hardware control is implemented.** The
+:class:`PluralSensoriumSafetyValidator` refuses hardware access, SDR drivers,
+microphone/camera capture, network calls, source modification, command
+execution, decoding of private communications, treating sensory text as an
+operator command, treating human labels as ground truth, unbounded polling, and
+real-world actuation. The layer integrates the usual way: governance adds three
+scopes (fixture and report compilation granted by default; reading a *real*
+outside-world feeder requires explicit approval); the conscience spine gains a
+`plural_sensorium_poll` -> `sensory_field_update` phase pair and seven fixture
+profiles (there is **no** hardware profile); safety invariants register five
+sensorium rules; the Inner MAP carries a `plural_sensorium` field plus fifteen
+state-graph nodes; evaluation adds nineteen metrics and nine protocols; the
+research lab can compare human-like-only vs non-human-only vs mixed sensoria; and
+the operator console lists the fixture profiles. **Solaris becomes different
+because of long exposure to a particular sensorium -- and this is operational
+perception, not consciousness, sentience, life, personhood, free will, or
+agency.**

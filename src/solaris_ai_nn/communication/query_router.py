@@ -159,6 +159,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("ps_"):
+            return self._sensorium(topic)
         if topic.startswith("oc_"):
             return self._operator(topic)
         if topic.startswith("ae_"):
@@ -500,6 +502,55 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _sensorium(self, topic: str) -> CommunicationResponse:
+        """Answer plural-sensorium queries (read-only; honest about labels).
+
+        The contamination question is answered honestly from the recorded
+        score; nothing here controls hardware or privileges human senses.
+        """
+        component = self.components.get("plural_sensorium")
+        if component is None:
+            return self.builder.missing_component_response("plural_sensorium")
+        status = (component.plural_sensorium_status()
+                  if hasattr(component, "plural_sensorium_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:plural_sensorium"]
+        if topic == "ps_active_senses":
+            text = (f"active senses: {status.get('active_modalities', [])} "
+                    f"({status.get('active_modality_count', 0)} modalities; "
+                    "human-like and non-human are equally first-class)")
+        elif topic == "ps_field":
+            text = (f"sensory field pressure="
+                    f"{status.get('sensory_field_pressure', 0.0):.2f}, novelty="
+                    f"{status.get('novelty_pressure', 0.0):.2f}, absence="
+                    f"{status.get('absence_pressure', 0.0):.2f}")
+        elif topic == "ps_feeders":
+            text = ("external feeders are read-only and never controllable by "
+                    "Solaris; see the plural sensorium report")
+        elif topic == "ps_rf_patterns":
+            text = ("RF patterns are modality-native invariants/rhythms; see "
+                    "the report's invariant candidates for radio_frequency")
+        elif topic == "ps_echo_patterns":
+            text = ("echo patterns are modality-native boundaries/rhythms; see "
+                    "the report's invariant candidates for ultrasound_echo")
+        elif topic == "ps_human_modalities":
+            text = ("human-like modalities are valid but not privileged; see "
+                    "active_modalities for which are present")
+        elif topic == "ps_contamination":
+            score = status.get("human_label_contamination_score", 0.0)
+            text = (f"human-label contamination score={score}; human labels "
+                    "are never ground truth, so strong grounding rests on "
+                    "feature patterns, not labels")
+        elif topic == "ps_world_model":
+            text = ("the world model preserves modality-native structure "
+                    "(sources, receptors, invariants, cross-modal relations); "
+                    "human object ontology is not forced")
+        else:
+            text = ("the plural sensorium is read-only organismic perception; "
+                    "no hardware is controlled")
         return self.builder.status_response(text, refs)
 
     def _operator(self, topic: str) -> CommunicationResponse:

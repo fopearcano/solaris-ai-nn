@@ -18,6 +18,8 @@ from typing import Any, Callable, Dict, List, Optional
 class SpinePhase:
     HEARTBEAT = "heartbeat"
     READ_ONLY_SENSORY_POLL = "read_only_sensory_poll"
+    PLURAL_SENSORIUM_POLL = "plural_sensorium_poll"
+    SENSORY_FIELD_UPDATE = "sensory_field_update"
     STIMULUS_INGESTION = "stimulus_ingestion"
     PUSH_GENERATION = "push_generation"
     DESIRE_SYNTHESIS = "desire_synthesis"
@@ -38,7 +40,8 @@ class SpinePhase:
     LATENT_OR_CONSOLIDATION_WINDOW = "latent_or_consolidation_window"
 
     # The canonical order in which phases run each step.
-    ORDER = (HEARTBEAT, READ_ONLY_SENSORY_POLL,
+    ORDER = (HEARTBEAT, READ_ONLY_SENSORY_POLL, PLURAL_SENSORIUM_POLL,
+             SENSORY_FIELD_UPDATE,
              STIMULUS_INGESTION, PUSH_GENERATION, DESIRE_SYNTHESIS,
              ACTION_CANDIDATE_GENERATION, EXECUTIVE_ARBITRATION,
              SAFETY_GOVERNANCE_VALIDATION, MOTOR_ACTION_FIREWALL,

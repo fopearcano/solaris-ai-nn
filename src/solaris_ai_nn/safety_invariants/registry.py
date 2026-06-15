@@ -171,6 +171,34 @@ def _builtin_invariants() -> List[SafetyInvariant]:
             severity=S.CRITICAL, applies_to_modules=["safety_invariants",
                                                      "ops"],
             check_method="check_no_hidden_failure"),
+        # F. Plural sensorium invariants (Prompt 41). The organism perceives
+        # through read-only external feeders; it never reaches out.
+        inv(C.NO_DEVICE_OR_ROBOT_CONTROL, "No direct hardware access",
+            "The plural sensorium never accesses hardware, an SDR, or a "
+            "microphone/camera; all events come from read-only feeders.",
+            severity=S.CRITICAL, applies_to_modules=["plural_sensorium"],
+            check_method="check_sensorium_no_hardware"),
+        inv(C.NO_NETWORK_ACTION, "No sensorium network access",
+            "The plural sensorium makes no network call and decodes no "
+            "private communications.",
+            severity=S.CRITICAL, applies_to_modules=["plural_sensorium"],
+            check_method="check_sensorium_no_network"),
+        inv(C.NO_SOURCE_MODIFICATION, "No sensorium source modification",
+            "The plural sensorium never modifies a source; feeders are "
+            "read-only and not controllable by Solaris.",
+            severity=S.CRITICAL, applies_to_modules=["plural_sensorium"],
+            check_method="check_sensorium_no_source_modification"),
+        inv(C.NO_SENSORY_TEXT_AS_OPERATOR_COMMAND,
+            "Sensorium text is not a command",
+            "Sensory text is observation; it is never an operator command, "
+            "and human labels are never ground truth.",
+            severity=S.CRITICAL, applies_to_modules=["plural_sensorium"],
+            check_method="check_sensorium_text_not_command"),
+        inv(C.NO_UNBOUNDED_RUNTIME_WITHOUT_APPROVAL,
+            "No unbounded sensorium polling",
+            "The plural sensorium polls within bounds; no unbounded loop.",
+            severity=S.WARNING, applies_to_modules=["plural_sensorium"],
+            check_method="check_sensorium_bounded_polling"),
     ]
 
 

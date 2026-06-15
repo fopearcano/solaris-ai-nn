@@ -2222,3 +2222,47 @@ authority, and never disables safety.
 `operator_export_bundle`, `operator_console_safety`). Seven registered protocols
 measure the local operator console; it holds no real-world authority and cannot
 bypass governance or safety.
+
+## 235. Plural Sensorium Fixture Demo ✅ (implemented)
+
+**Run:** `python examples/run_plural_sensorium_fixture_demo.py --state-dir .solaris_ai_nn_state/test_plural_sensorium`
+Builds external (fixture) feeders for human-like text and non-human RF / echo /
+vibration features, runs the bounded sensorium, updates receptors and the
+continuous sensory field, detects absence and invariants, and writes the report.
+Read-only feeders only; no hardware; human labels never ground truth.
+
+## 236. Receptor Adaptation Demo ✅ (implemented)
+
+**Run:** `python examples/run_receptor_adaptation_demo.py --state-dir .solaris_ai_nn_state/test_receptor_adaptation`
+Drives one receptor with a calm baseline, a sustained burst, and then silence,
+showing baseline learning, sensitivity shift, fatigue/saturation, and recovery --
+i.e. long exposure changes future perception. Internal attention only.
+
+## 237. Cross-Modal Sensorium Demo ✅ (implemented)
+
+**Run:** `python examples/run_cross_modal_sensorium_demo.py --state-dir .solaris_ai_nn_state/test_cross_modal_sensorium`
+Feeds interleaved RF-then-vibration and thermal-then-machine-rhythm streams and
+shows cross-modal relations forming without forcing a human object ontology.
+
+## 238. Human vs Non-Human Sensorium Demo ✅ (implemented)
+
+**Run:** `python examples/run_human_vs_nonhuman_sensorium_demo.py --state-dir .solaris_ai_nn_state/test_human_vs_nonhuman`
+Runs human-like-only, non-human-only, and mixed sensoria over the same number of
+events and compares the internal structures that emerge. Human senses are valid
+but not privileged.
+
+## 239. Sensorium Grounding Demo ✅ (implemented)
+
+**Run:** `python examples/run_sensorium_grounding_demo.py --state-dir .solaris_ai_nn_state/test_sensorium_grounding`
+Drives a recurring RF burst until it becomes a stable invariant, which is promoted
+to a modality-grounded proto-symbol candidate, a world-model node, and a seeded
+hypothesis -- all without any human semantic label.
+
+## 240. Plural Sensorium Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment plural_sensorium_fixture`
+(also `human_like_sensorium`, `non_human_sensorium`, `mixed_sensorium`,
+`continuous_field`, `receptor_adaptation`, `cross_modal_sensorium`,
+`sensorium_grounding`, `plural_sensorium_safety`). Nine registered protocols
+measure the read-only organismic perception layer; it controls no hardware and
+human labels are never ground truth.

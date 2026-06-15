@@ -373,6 +373,15 @@ class InnerMapModel:
     # is a local file-backed coordinator; it holds no real-world authority and
     # cannot bypass governance or safety.
     operator_console: Optional[Dict[str, Any]] = None
+    # Plural-sensorium status (Prompt 41); None when not attached. Keys:
+    # plural_sensorium_enabled, active_modality_count, active_receptor_count,
+    # sensory_field_pressure, absence_pressure, novelty_pressure,
+    # rhythm_pressure, cross_modal_pressure, receptor_adaptation_count,
+    # baseline_shift_count, invariant_candidate_count,
+    # modality_grounded_proto_symbol_count, cross_modal_relation_count,
+    # human_label_contamination_score, latest_plural_sensorium_report_path. The
+    # sensorium is read-only; it controls no hardware and holds no authority.
+    plural_sensorium: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

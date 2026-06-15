@@ -386,6 +386,13 @@ python examples/run_operator_evidence_search_demo.py      # index + search local
 python examples/run_operator_next_action_demo.py          # safest next action (safety first; never actuation)
 python examples/run_operator_export_bundle_demo.py        # local checksummed review bundle (no upload)
 python examples/run_operator_approval_ledger_demo.py      # local approval recorded; forbidden actuation blocked
+
+# Plural sensorium: Solaris as an organism bathed in flux through its own peculiar senses
+python examples/run_plural_sensorium_fixture_demo.py      # mixed human-like + non-human feature feeders (no hardware)
+python examples/run_receptor_adaptation_demo.py           # baseline learning, fatigue -> changed future perception
+python examples/run_cross_modal_sensorium_demo.py         # RF burst -> vibration; cross-modal relations
+python examples/run_human_vs_nonhuman_sensorium_demo.py   # human-like vs non-human vs mixed -> different structure
+python examples/run_sensorium_grounding_demo.py           # invariant -> modality-grounded proto-symbol (no human label)
 ```
 
 The read-only sensory membrane and Pilot-2 also run as governed conscience
@@ -714,6 +721,29 @@ it runs no shell, makes no network call, never touches the motor or sensory laye
 directly, cannot bypass governance, safety invariants, emergency stop, ClaimGuard,
 or the motor firewall, cannot approve prohibited real-world actuation, and makes
 no claim of consciousness, life, sentience, agency, personhood, or free will.**
+
+The **plural sensorium** (`plural_sensorium/`) treats Solaris-AI-NN as an evolving
+organism continuously bathed in environmental flux through its own peculiar
+senses. Input is a **continuous sensory field**, not isolated parsed events.
+Human-like modalities (text, light, temperature, movement, pressure) are valid;
+non-human and machine-native modalities (RF, microwave/mmWave, ultrasound/echo,
+vibration, magnetic, thermal gradient, machine rhythm) are equally first-class;
+**absence and interference are perceptions too**; and human ontology never
+dominates by default. Outside events arrive through **external feeders** (a
+separate SDR/radar/thermal/vibration/magnetic logger, a watched folder, a manual
+log, or a fixture) that write feature events into local files -- **Solaris only
+reads their output via a common Sensory Event Envelope** (features primary, human
+labels never ground truth, provenance preserved). Stateful **receptors** adapt
+over time, a learned **baseline** drifts, and detectors find flux / absence /
+rhythm / invariants / cross-modal relations that can become **modality-grounded
+proto-symbols**. The research question is:
+*What kind of internal structure emerges from a continuous peculiar sensorium?*
+
+> **Warning:** the plural sensorium adds **no hardware drivers**. It never accesses
+> an SDR, microphone, camera, or any device; makes no network call; decodes no
+> private communications; modifies no source; treats no sensory text as a command;
+> and actuates nothing. Real outside-world feeders are read-only and require
+> governance approval; fixtures are safe by default.
 
 > **Warning:** long-running modes (24h/30d soak, explicit continuous) require
 > explicit acknowledgement flags in the run manifest and should only be
@@ -1138,6 +1168,12 @@ src/solaris_ai_nn/
                 evidence navigator, artifact index, report index, status board,
                 decision board, next-action recommender, export bundle, session
                 log, operator queries, CLI, safety validator
+  plural_sensorium/ organismic perception through plural senses: modality model,
+                sensory event envelope, external feeders, read-only stream
+                adapters, adapting receptors, continuous sensory field,
+                perceptual baseline, flux/absence/rhythm/invariant/cross-modal
+                detection, adaptive attention, grounding analyzer, runtime,
+                reports, safety validator (no hardware/SDR/capture/network)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

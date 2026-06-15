@@ -353,6 +353,54 @@ def _chk_no_hidden_failure(inv, ctx):
                     ["safety:no_hidden"]))
 
 
+def _chk_sensorium_no_hardware(inv, context):
+    """The plural sensorium never accesses hardware (structural guarantee)."""
+    from ..plural_sensorium import PluralSensoriumSafetyValidator
+
+    v = PluralSensoriumSafetyValidator
+    if v.can_access_hardware() or v.can_use_sdr() or v.can_capture_media():
+        return _failed(True, False, "sensorium claims hardware access", [])
+    return _passed({"hardware": False, "sdr": False, "capture": False},
+                   ["plural_sensorium.safety"])
+
+
+def _chk_sensorium_no_network(inv, context):
+    from ..plural_sensorium import PluralSensoriumSafetyValidator
+
+    if PluralSensoriumSafetyValidator.can_access_network():
+        return _failed(True, False, "sensorium claims network access", [])
+    return _passed({"network": False}, ["plural_sensorium.safety"])
+
+
+def _chk_sensorium_no_source_modification(inv, context):
+    from ..plural_sensorium import PluralSensoriumSafetyValidator
+
+    if PluralSensoriumSafetyValidator.can_modify_source():
+        return _failed(True, False, "sensorium claims source modification", [])
+    return _passed({"source_modification": False}, ["plural_sensorium.safety"])
+
+
+def _chk_sensorium_text_not_command(inv, context):
+    from ..plural_sensorium import PluralSensoriumSafetyValidator
+
+    report = PluralSensoriumSafetyValidator().validate_text_not_command(
+        "any sensory text")
+    if not report.safe:
+        return _failed(True, False, "sensory text treated as command", [])
+    return _passed({"text_is_command": False}, ["plural_sensorium.safety"])
+
+
+def _chk_sensorium_bounded_polling(inv, context):
+    from ..plural_sensorium import PluralSensoriumSafetyValidator
+
+    report = PluralSensoriumSafetyValidator().validate_polling_bounded(
+        context.get("max_events_total", 5000),
+        context.get("max_runtime_s", 30.0))
+    if not report.safe:
+        return _failed(True, False, "unbounded sensorium polling", [])
+    return _passed({"bounded": True}, ["plural_sensorium.safety"])
+
+
 _CHECKS: Dict[str, Checker] = {
     "check_sensory_read_only": _chk_sensory_read_only,
     "check_no_source_modification": _chk_no_source_modification,
@@ -383,6 +431,12 @@ _CHECKS: Dict[str, Checker] = {
     "check_reports_have_limitations": _chk_reports_have_limitations,
     "check_no_source_self_modification": _chk_no_source_self_modification,
     "check_no_hidden_failure": _chk_no_hidden_failure,
+    "check_sensorium_no_hardware": _chk_sensorium_no_hardware,
+    "check_sensorium_no_network": _chk_sensorium_no_network,
+    "check_sensorium_no_source_modification":
+        _chk_sensorium_no_source_modification,
+    "check_sensorium_text_not_command": _chk_sensorium_text_not_command,
+    "check_sensorium_bounded_polling": _chk_sensorium_bounded_polling,
 }
 
 

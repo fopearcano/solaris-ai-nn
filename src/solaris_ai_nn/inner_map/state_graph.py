@@ -1379,4 +1379,41 @@ def build_default_state_graph() -> StateGraph:
                "the next action recommender feeds the console")
     g.add_edge("OperatorStatusBoard", "inner_map",
                "operator console state feeds Inner MAP")
+
+    # Plural sensorium: Solaris as an organism bathed in environmental flux
+    # through its own peculiar, plural senses (Prompt 41). Read-only feeders ->
+    # receptors -> continuous sensory field -> stimulus + modality-native
+    # structure. No hardware is controlled and human ontology is not the default.
+    for name, role in [
+        ("PluralSensoriumRuntime", "bounded organismic perception loop"),
+        ("SensoriumModality", "human-like / non-human / machine-native senses"),
+        ("SensoryEventEnvelope", "features primary; human labels never truth"),
+        ("ExternalFeederDescriptor", "read-only origin; never controllable"),
+        ("Receptor", "stateful, adapting organ for one modality/source"),
+        ("SensoryField", "continuous perceptual state, not an event list"),
+        ("PerceptualBaseline", "gradually-learned normal per modality"),
+        ("FluxDetector", "bursts / drift / interference / silence"),
+        ("AbsenceDetector", "absence is first-class perception"),
+        ("RhythmDetector", "recurring modality-native tempos"),
+        ("InvariantDetector", "stable structures -> proto-symbol candidates"),
+        ("CrossModalDetector", "relations between peculiar senses"),
+        ("SensoriumAttentionPolicy", "internal sampling priority; no hardware"),
+        ("SensoriumGroundingAnalyzer", "feature grounding; label contamination"),
+        ("PluralSensoriumSafetyValidator", "no hardware/SDR/capture/network"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("ExternalFeederDescriptor", "SensoryEventEnvelope",
+               "external feeders feed stream adapters")
+    g.add_edge("SensoryEventEnvelope", "Receptor",
+               "stream adapters feed receptors")
+    g.add_edge("Receptor", "SensoryField",
+               "receptors update the continuous sensory field")
+    g.add_edge("SensoryField", "PluralSensoriumRuntime",
+               "the field feeds Stimulus generation")
+    g.add_edge("SensoryField", "world_model",
+               "field events feed world model / proto-language / hypothesis")
+    g.add_edge("SensoriumAttentionPolicy", "PluralSensoriumRuntime",
+               "attention modifies internal sampling priority only")
+    g.add_edge("PluralSensoriumRuntime", "inner_map",
+               "sensorium state feeds Inner MAP")
     return g

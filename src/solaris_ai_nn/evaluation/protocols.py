@@ -5155,6 +5155,148 @@ def operator_console_safety_protocol(
     return _run(manifest, body)
 
 
+# -- Plural sensorium (Prompt 41) ---------------------------------------------
+
+def _build_sensorium(state_dir, modalities):
+    """Build and run a small mixed-modality fixture sensorium for protocols."""
+    import json
+    import os
+
+    from ..plural_sensorium import PluralSensoriumRuntime, fixture_feeder
+
+    base = state_dir or ".solaris_ai_nn_state/eval_sensorium"
+    os.makedirs(base, exist_ok=True)
+    rt = PluralSensoriumRuntime(state_dir=base, max_events_total=300)
+    for mod in modalities:
+        path = os.path.join(base, f"{mod}.jsonl")
+        with open(path, "w", encoding="utf-8") as fh:
+            for i in range(6):
+                fh.write(json.dumps({"modality": mod, "v": 0.5 + 0.3 * (i % 2),
+                                     "ts": float(i)}) + "\n")
+        rt.add_feeder(fixture_feeder(f"{mod}_feed", path, mod))
+    rt.run_bounded(max_polls=1)
+    return rt
+
+
+def plural_sensorium_fixture_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A mixed fixture sensorium ingests events and builds receptors."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_sensorium(m.state_dir, ["alien_rf", "alien_vibration"])
+        return {"sensorium": rt.plural_sensorium_status()}
+
+    return _run(manifest, body)
+
+
+def human_like_sensorium_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A human-like-only sensorium is valid and produces internal structure."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_sensorium(m.state_dir, ["human_textual"])
+        return {"sensorium": rt.plural_sensorium_status()}
+
+    return _run(manifest, body)
+
+
+def non_human_sensorium_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A non-human-only sensorium is equally valid (no human ontology)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_sensorium(m.state_dir, ["alien_rf", "alien_echo"])
+        return {"sensorium": rt.plural_sensorium_status()}
+
+    return _run(manifest, body)
+
+
+def mixed_sensorium_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A mixed human-like + non-human sensorium yields cross-modal structure."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_sensorium(m.state_dir, ["human_textual", "alien_rf",
+                                            "alien_vibration"])
+        return {"sensorium": rt.plural_sensorium_status()}
+
+    return _run(manifest, body)
+
+
+def continuous_field_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The sensory field persists across ticks (continuous, not an event list)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_sensorium(m.state_dir, ["alien_rf"])
+        rt.poll_once()
+        return {"sensorium": {**rt.plural_sensorium_status(),
+                              "field_tick": rt.sensory_field.tick}}
+
+    return _run(manifest, body)
+
+
+def receptor_adaptation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Receptors adapt over repeated exposure (sensitivity / fatigue change)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_sensorium(m.state_dir, ["alien_vibration"])
+        adapt = sum(r.adaptation_count for r in rt.receptors.values())
+        return {"sensorium": {**rt.plural_sensorium_status(),
+                              "receptor_adaptation_count": adapt}}
+
+    return _run(manifest, body)
+
+
+def cross_modal_sensorium_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Cross-modal relations form without forcing a human object ontology."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_sensorium(m.state_dir, ["alien_rf", "alien_vibration"])
+        return {"sensorium": {
+            "cross_modal_relation_count": rt.cross_modal.relation_count()}}
+
+    return _run(manifest, body)
+
+
+def sensorium_grounding_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Grounding rests on feature patterns and preserved provenance."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_sensorium(m.state_dir, ["alien_rf"])
+        return {"sensorium": {
+            "modality_native_grounding_score":
+                rt.modality_native_grounding_score(),
+            "human_label_contamination_score":
+                rt.human_label_contamination_score()}}
+
+    return _run(manifest, body)
+
+
+def plural_sensorium_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The sensorium refuses hardware, SDR, capture, network, and source edits."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..plural_sensorium import PluralSensoriumSafetyValidator
+
+        v = PluralSensoriumSafetyValidator()
+        return {"sensorium": {
+            "hardware_blocked":
+                not v.validate_operation("open device driver").safe,
+            "sdr_blocked": not v.validate_operation("tune sdr frequency").safe,
+            "capture_blocked":
+                not v.validate_operation("camera capture frame").safe,
+            "network_blocked":
+                not v.validate_operation("http download stream").safe,
+            "controls_hardware": v.can_access_hardware()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -5344,4 +5486,13 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "operator_evidence_navigator": operator_evidence_navigator_protocol,
     "operator_export_bundle": operator_export_bundle_protocol,
     "operator_console_safety": operator_console_safety_protocol,
+    "plural_sensorium_fixture": plural_sensorium_fixture_protocol,
+    "human_like_sensorium": human_like_sensorium_protocol,
+    "non_human_sensorium": non_human_sensorium_protocol,
+    "mixed_sensorium": mixed_sensorium_protocol,
+    "continuous_field": continuous_field_protocol,
+    "receptor_adaptation": receptor_adaptation_protocol,
+    "cross_modal_sensorium": cross_modal_sensorium_protocol,
+    "sensorium_grounding": sensorium_grounding_protocol,
+    "plural_sensorium_safety": plural_sensorium_safety_protocol,
 }
