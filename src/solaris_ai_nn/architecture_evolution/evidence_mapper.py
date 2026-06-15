@@ -34,7 +34,63 @@ EVIDENCE_SOURCES = (
     "semiogenesis_report", "sensorium_cognition_report",
     "self_boundary_report", "desire_formation_report",
     "action_reaction_report", "developmental_life_report",
+    "developmental_soak_report", "evidence_dossier", "post_run_autopsy",
 )
+
+
+def soak_revision_proposals(soak_status: Dict[str, Any],
+                            ) -> List[Dict[str, Any]]:
+    """Turn a developmental-soak status into architecture *proposals* only.
+
+    Proposals are advisory: nothing here rewrites code or actuates anything.
+    They use the soak's evidence dossier / autopsy to suggest continuing the
+    architecture, revising the sensorium/metabolism/ontogenesis/semiogenesis/
+    cognition/desire-action/safety gates, running another soak, freezing a
+    branch, or creating a new experimental branch.
+    """
+    proposals: List[Dict[str, Any]] = []
+    rec = str(soak_status.get("autopsy_recommendation") or "")
+    verdict = str(soak_status.get("structural_growth_status", "inconclusive"))
+    if rec == "continue_architecture" or verdict == "real_structural_growth":
+        proposals.append({
+            "target": "continue_architecture",
+            "proposal": "keep the current architecture; evidence supports "
+                        "structural development",
+            "reason": f"autopsy={rec or 'n/a'}, verdict={verdict}",
+            "advisory_only": True})
+    if verdict == "fixture_overfit":
+        proposals.append({
+            "target": "revise_sensorium",
+            "proposal": "broaden source diet / add live read-only exposure",
+            "reason": "fixture overfit detected by the soak",
+            "advisory_only": True})
+    if int(soak_status.get("regression_count", 0) or 0) > 0:
+        proposals.append({
+            "target": "revise_safety_gates",
+            "proposal": "run another soak after auto-regeneration review",
+            "reason": "regressions recorded across the soak",
+            "advisory_only": True})
+    if int(soak_status.get("plateau_count", 0) or 0) > 0:
+        proposals.append({
+            "target": "revise_metabolism",
+            "proposal": "vary metabolism/consolidation to break a plateau",
+            "reason": "plateaus recorded across the soak",
+            "advisory_only": True})
+    if rec in ("revise_architecture", "pause_for_operator_review",
+               "abort_or_freeze_branch"):
+        proposals.append({
+            "target": ("freeze_branch" if rec == "abort_or_freeze_branch"
+                       else "run_another_soak"),
+            "proposal": f"autopsy recommends: {rec}",
+            "reason": "post-run autopsy recommendation",
+            "advisory_only": True})
+    if int(soak_status.get("evidence_claim_count", 0) or 0) == 0:
+        proposals.append({
+            "target": "run_another_soak",
+            "proposal": "insufficient evidence; run a longer bounded soak",
+            "reason": "no evidence claims compiled",
+            "advisory_only": True})
+    return proposals
 
 
 def developmental_revision_proposals(dev_status: Dict[str, Any],

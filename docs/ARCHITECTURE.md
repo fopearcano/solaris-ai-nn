@@ -3358,3 +3358,95 @@ developmental runtime lets Solaris accumulate an operational growth history and 
 whether it changes structurally over time -- conservatively, with regressions and
 plateaus preserved -- without being biological life, consciousness, sentience,
 personhood, agency, free will, or subjective experience.**
+
+## Month-Scale Developmental Soak Protocol
+
+Prompt 53 built the *engine* that detects structural change over time. Prompt 54
+builds the formal *study protocol* around it -- `src/solaris_ai_nn/developmental_soak/`:
+
+    preflight -> 2h dry run -> 24h trial -> 7d stabilization -> 30d soak ->
+    optional 90d extension -> post-run autopsy
+
+The central research question is: *did Solaris undergo measurable structural
+development through autonomous sensorium-native experience?* -- not "did it become
+conscious / understand / become alive / become an agent?".
+
+**The developmental runtime is the engine; the soak is the study manager.** The
+`DevelopmentalSoakRuntime` calls the `LongHorizonDevelopmentalRuntime` as its growth
+detector and never re-implements the detectors. It is *protocol orchestration and
+evidence compilation only*. Developmental Life remains the growth detector; Soak
+remains the study manager.
+
+**Runs are staged and bounded.** The `DevelopmentalSoakPlan` defines seven stages,
+each with a purpose, a duration *target* (2h/24h/7d/30d/90d), a hard runtime cap, a
+tick cap, required/optional modules, a sensory-source policy, a live read-only
+policy (governance-gated), checkpoint/report/safety intervals, an append-only
+artifact-retention policy, and explicit exit/abort criteria. No stage starts
+feeders or controls hardware; no stage is unbounded. Long runs are reached by
+repeated bounded invocations + checkpoints, never an unbounded daemon. Each
+invocation walks a bounded `SoakRunPhase` sequence (boot, baseline capture, active
+developmental cycle, quiet consolidation, checkpoint, safety scan, daily packet,
+weekly review, restart drill, phase summary, shutdown-or-continue) where every phase
+writes trace evidence and every failure is recorded.
+
+**Preflight validates readiness without starting the run.** `SoakPreflight` checks
+that required packages import (a missing one fails), optional packages import (a
+missing one warns), state dirs are writable, prior reports are discoverable, the
+developmental runtime and ClaimGuard are available, no hardware/feeder/network/shell
+capability is enabled, and -- for live read-only -- that a feeder registry, source
+paths, and governance approval exist (a missing live source *blocks* the live stage
+rather than crashing).
+
+**Daily packets and weekly reviews preserve evidence.** The
+`DailyEvidencePacketBuilder` compiles one honest day (sensorium/source health,
+metabolism, concept/sign/cognition/boundary/desire-action/habit changes, maturation
+markers, plateaus/regressions, safety blocks, contamination, an early
+growth-vs-accumulation signal) -- evidence, not marketing, with negatives always
+included and the Markdown ClaimGuard-scanned. The `WeeklyReviewBuilder` aggregates a
+week and emits a conservative, *recommendation-only* `WeeklyReviewDecision`
+(continue / continue-with-warning / source-diet / consolidation / autoregeneration /
+pause / abort / inconclusive) -- no automatic external change, no feeder control.
+
+**Checkpoints and restart drills keep continuity honest.** The `CheckpointManager`
+writes append-only, checksum-verified checkpoints (run manifest, per-module state,
+Inner MAP snapshot, developmental-life state, safety state, artifact index); it never
+auto-deletes, records corrupt checkpoints rather than dropping them, and preserves
+the break history through recovery. The `RestartDrillRunner` exercises graceful
+restart, a simulated crash marker, missing-checkpoint recovery, source silence,
+corruption detection, and continuity verification -- it never kills the process, and
+gaps are logged operationally, not biologically.
+
+**Control arms prevent self-flattering conclusions.** `SoakControlArm` runs
+shortened comparison arms (full stack, passive-parser-only, ablations of each
+module, fixture-only, human-label-heavy, feature-only, and an optional governance-
+gated live read-only arm). Missing modules mark an arm unavailable; arms with
+insufficient data stay inconclusive; controls are never over-claimed.
+
+**The evidence dossier and post-run autopsy ask whether growth occurred or logs
+accumulated.** The `EvidenceDossierBuilder` compiles conservative,
+evidence-referenced `EvidenceClaim`s (every claim requires refs; negative and
+inconclusive claims are allowed; consciousness/life/agency claims are structurally
+impossible). The `PostRunAutopsy` answers the closing questions -- did growth occur,
+was it durable across restart, did the system merely accumulate logs, did source
+diet dominate, did live differ from fixture, did human labels contaminate, did
+proto-concepts/signs/predictions improve, did action-reaction improve later
+arbitration, did habits help or harden, did inhibition prevent churn, did
+self-boundary prevent confusion, were safety boundaries preserved -- and recommends
+continue/revise/pause/abort. The autopsy must include failures and missing data and
+does not praise the system by default.
+
+**It integrates and stays safe.** The soak feeds the research lab and evaluation
+(metrics + protocols for the soak, preflight, checkpoints, daily packets, weekly
+reviews, restart drills, control arms, the dossier, the autopsy, and soak safety),
+architecture evolution (advisory `soak_revision_proposals` only), the operator
+console (soak status + the mandated safe answer for "does this prove consciousness
+or life?"), and Inner MAP. The `DevelopmentalSoakSafetyValidator` blocks unbounded
+daemons, hardware/feeder/network/shell/OS, source modification, real-world
+actuation, the human teaching loop, sensory-text-as-command, human-label-as-ground-
+truth, deletion of negative evidence, hiding failed checkpoints, and hiding
+regressions/plateaus. **The soak protocol studies structural development through
+repeated bounded runs: long runtime does not imply life, persistence does not imply
+consciousness, and the evidence dossier does not prove sentience, personhood,
+agency, free will, emotion, feeling, understanding, or subjective experience -- no
+real-world actuation, no feeder/hardware/source control, and no human teaching loop
+ever occurred.**

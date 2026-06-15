@@ -2116,3 +2116,57 @@ driven only by continuous sensorium-native experience and the systems internal
 regulation. That is the whole point: to study whether a peculiar sensorium, left to
 metabolize its own flux, produces durable internal structure -- without being told
 what to learn, and without any claim of life, consciousness, or agency.
+
+## Phase 54 — Month-scale developmental soak protocol, evidence dossier, autopsy
+
+**Why month-scale runtime matters.** Phase 53 gave us a growth detector; a detector
+alone cannot answer whether development actually happens, only whether it *could* be
+measured. A mechanism that shifts over six bounded ticks may be noise; the same
+shift sustained over a 30-day staged soak, across restarts, against controls, is
+evidence. Phase 54 is the protocol that turns the engine into an experiment with a
+falsifiable question: *did Solaris undergo measurable structural development through
+autonomous sensorium-native experience?* The staging (preflight -> 2h -> 24h -> 7d
+-> 30d -> optional 90d -> autopsy) exists so readiness, stability, and durability
+are each demonstrated before the next claim is allowed.
+
+**Why controls are necessary.** A long run that only ever executes the full stack
+cannot distinguish growth from artefact, fixture overfit, or the mere passage of
+ticks. The control arms (passive-parser-only, per-module ablations, fixture-only,
+human-label-heavy, feature-only, and -- governance permitting -- live read-only)
+are the guard against self-flattering conclusions. If the full stack does not
+out-develop its controls, the honest verdict is inconclusive, and the dossier says
+so. Arms with insufficient data are marked unavailable rather than scored.
+
+**Why logs are not growth.** The default failure mode of any month-scale logger is
+to mistake accumulation for development: more events, more files, more checkpoints,
+all of which can rise while nothing structural changes. The soak inherits the
+engine's conservative growth-vs-accumulation verdict and adds protocol-level guards
+-- daily packets that include negatives, weekly reviews that explicitly ask "did the
+system merely accumulate events?", and an autopsy question dedicated to it. "Logs
+accumulated, structure did not" is a first-class, reportable outcome.
+
+**Why daily and weekly evidence matter.** Compiling evidence only at the end invites
+hindsight narrative. Daily packets capture each day as it was -- including the days
+that regressed, plateaued, or showed nothing -- and weekly reviews force a
+conservative, recommendation-only decision while the run is still in progress. The
+cadence makes the trajectory inspectable and keeps any final claim anchored to a
+contemporaneous record rather than a retrospective story.
+
+**Why the post-run autopsy must include failure.** An autopsy that only lists
+successes is marketing, not science. The post-run autopsy is required to enumerate
+failures and missing data as first-class findings, to report the safety boundary
+explicitly, and to withhold praise by default. Its recommendation
+(continue/revise/pause/abort) is advisory and must be supported by
+evidence-referenced claims; it cannot, by construction, assert consciousness or
+life.
+
+**How to interpret inconclusive developmental evidence.** Inconclusive is the
+expected verdict for short or narrow runs, and it is not a failure of the protocol
+-- it is the protocol working. A bounded fixture soak that reports "inconclusive,
+insufficient control-arm data, several missing-data findings" is behaving
+correctly; over-reading such a run would be the error. A positive verdict requires
+durable, multi-signal, control-differentiated evidence sustained across restarts,
+and even then it proves only structural development -- never biological life,
+consciousness, sentience, personhood, agency, free will, emotion, feeling,
+understanding, or subjective experience. The soak makes structural development
+*measurable*; it deliberately makes the larger claims *impossible*.

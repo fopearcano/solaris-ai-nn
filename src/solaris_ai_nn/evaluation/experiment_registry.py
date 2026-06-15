@@ -439,6 +439,28 @@ DESCRIPTIONS = {
         "no life/consciousness/teaching/actuation; bounded",
     "developmental_life_safety":
         "no life/consciousness/teaching/actuation; bounded",
+    "developmental_soak": "bounded soak stage: checkpoint + daily packet",
+    "developmental_soak_protocol": "month-scale developmental soak study",
+    "developmental_soak_evaluation": "developmental-soak check",
+    "soak_preflight_protocol": "soak preflight validates readiness (no run)",
+    "preflight_evaluation": "soak preflight check",
+    "checkpoint_evaluation": "append-only checksum-verified checkpoints",
+    "daily_packet_protocol": "daily evidence packet (negatives included)",
+    "daily_packet_evaluation": "daily packet check",
+    "weekly_review_protocol": "conservative recommendation-only weekly review",
+    "weekly_review_evaluation": "weekly review check",
+    "restart_drill_protocol": "restart drills with recovery assessment",
+    "restart_drill_evaluation": "restart drill check",
+    "control_arm_protocol": "control arms prevent self-flattering conclusions",
+    "control_arm_evaluation": "control arm check",
+    "evidence_dossier_protocol": "conservative evidence-referenced claims",
+    "evidence_dossier_evaluation": "evidence dossier check",
+    "post_run_autopsy_protocol": "growth vs accumulation autopsy with failures",
+    "post_run_autopsy_evaluation": "post-run autopsy check",
+    "developmental_soak_safety":
+        "no daemon/actuation/teaching/life; negatives preserved",
+    "developmental_soak_safety_protocol":
+        "no daemon/actuation/teaching/life; negatives preserved",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -659,6 +681,19 @@ class ExperimentRegistry:
                         "growth_vs_accumulation_evaluation",
                         "long_horizon_safety")
             or bool(merged.get("developmental_life", False)))
+        features["developmental_soak"] = (
+            name.startswith("developmental_soak")
+            or name.startswith("soak_")
+            or name in ("preflight_evaluation", "checkpoint_evaluation",
+                        "daily_packet_protocol", "daily_packet_evaluation",
+                        "weekly_review_protocol", "weekly_review_evaluation",
+                        "restart_drill_protocol", "restart_drill_evaluation",
+                        "control_arm_protocol", "control_arm_evaluation",
+                        "evidence_dossier_protocol",
+                        "evidence_dossier_evaluation",
+                        "post_run_autopsy_protocol",
+                        "post_run_autopsy_evaluation")
+            or bool(merged.get("developmental_soak", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

@@ -2725,3 +2725,39 @@ Drives declining prediction skill and concept stability so a regression is detec
 Contrasts a flat (mere-accumulation) run with a durably-improving (real structural
 growth) run. The analyzer is conservative; an inconclusive result is valid and
 growth is never over-claimed.
+
+## 304. Soak Preflight Demo ✅ (implemented)
+
+**Run:** `python examples/run_soak_preflight_demo.py --state-dir .solaris_ai_nn_soak/test_preflight`
+Runs the month-scale soak preflight: required modules present, the run is *not*
+started, live mode is blocked without governance, and optional-module gaps warn
+rather than fail. Preflight validates readiness only.
+
+## 305. Developmental Soak Short Demo ✅ (implemented)
+
+**Run:** `python examples/run_developmental_soak_short_demo.py --state-dir .solaris_ai_nn_soak/test_short_soak`
+Runs one short bounded soak stage on fixtures, creates a checkpoint and a daily
+evidence packet, compiles a conservative evidence dossier, and writes the protocol
+report. Long runs are repeated bounded runs + checkpoints, never a daemon.
+
+## 306. Weekly Review Demo ✅ (implemented)
+
+**Run:** `python examples/run_weekly_review_demo.py --state-dir .solaris_ai_nn_soak/test_weekly_review`
+Builds a week of synthetic daily packets (one rising, one flat) and shows the
+conservative weekly review decision (`continue` vs `continue_with_warning` for mere
+accumulation). Decisions are recommendation-only.
+
+## 307. Soak Control Arms Demo ✅ (implemented)
+
+**Run:** `python examples/run_soak_control_arms_demo.py --state-dir .solaris_ai_nn_soak/test_control_arms`
+Compares the full stack against passive-parser-only, no-metabolism, and
+fixture-only control arms. Controls prevent self-flattering conclusions;
+insufficient-data arms stay inconclusive.
+
+## 308. Post-Run Autopsy Demo ✅ (implemented)
+
+**Run:** `python examples/run_post_run_autopsy_demo.py --state-dir .solaris_ai_nn_soak/test_autopsy`
+Runs a short soak, compiles the evidence dossier, and produces the post-run
+autopsy: the growth-vs-accumulation finding, the safety finding, and the
+missing-data findings. The autopsy includes failures and does not praise the
+system by default.

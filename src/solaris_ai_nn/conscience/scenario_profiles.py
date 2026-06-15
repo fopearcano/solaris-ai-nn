@@ -1086,6 +1086,44 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["run_step_count"],
             max_runtime_s=60.0))
 
+    # -- Developmental soak profiles (Prompt 54) ------------------------------
+    # Month-scale study protocol around the developmental engine. Every stage is
+    # bounded; live read-only requires governance; no profile starts feeders.
+    _soak_modules = ["bridge", "ecology", "governance", "ops", "inner_map",
+                    "plural_sensorium", "perceptual_metabolism",
+                    "developmental_life", "developmental_soak"]
+    for pid, desc, plan_only in (
+            ("developmental_soak_preflight",
+             "Validate soak readiness; do not start the run.", False),
+            ("developmental_soak_short",
+             "Run a short bounded soak stage with checkpoint + daily packet.",
+             False),
+            ("developmental_soak_weekly_review",
+             "Build a weekly developmental review from daily packets.", False),
+            ("developmental_soak_control_arms",
+             "Compare full stack against control arms (conservative).", False),
+            ("developmental_soak_autopsy",
+             "Compile the post-run autopsy (growth vs accumulation).", False),
+            ("developmental_soak_30d_plan",
+             "Plan the 30-day developmental soak (plan only; no run).", True)):
+        if plan_only:
+            run_ctx = _ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                           max_duration_s=None)
+        else:
+            run_ctx = _ctx(RunMode.SHORT_DEMO, max_steps=120)
+        add(ScenarioProfile(
+            profile_id=pid, description=desc, run_context=run_ctx,
+            enabled_modules=list(_soak_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "soak protocol studies structural development, not life",
+                "every stage is bounded; no unbounded daemon",
+                "long runtime does not imply life; persistence not consciousness",
+                "no human teaching loop; live read-only requires governance"],
+            governance_requirements=["enable_plural_sensorium_fixture"],
+            expected_artifacts=["SOAK_PROTOCOL_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=90.0))
+
     return profiles
 
 

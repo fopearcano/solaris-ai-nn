@@ -141,6 +141,10 @@ AVAILABLE_QUERIES = (
     "is Solaris developing?", "what changed over time?", "did it mature?",
     "is it stuck?", "did it regress?", "is this just log accumulation?",
     "does this prove life or consciousness?",
+    "is the soak ready?", "what stage is the soak in?",
+    "what happened today in the soak?", "what changed this week?",
+    "did Solaris develop?", "did the controls differ?", "did safety hold?",
+    "does this prove consciousness or life?",
 )
 
 
@@ -201,6 +205,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("sk_"):
+            return self._developmental_soak(topic)
         if topic.startswith("dl_"):
             return self._developmental_life(topic)
         if topic.startswith("ar_"):
@@ -568,6 +574,65 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _developmental_soak(self, topic: str) -> CommunicationResponse:
+        """Answer developmental-soak queries (the study protocol, not life).
+
+        The "did Solaris develop?" / "does this prove consciousness or life?"
+        questions are answered safely even with no soak run.
+        """
+        if topic == "sk_develop":
+            return self.builder.status_response(
+                "The soak protocol can report whether structural development "
+                "occurred through autonomous sensorium-native experience, "
+                "judged conservatively against control arms. It does not prove "
+                "life or consciousness.",
+                ["policy:soak_studies_structural_development"])
+        if topic == "sk_life":
+            return self.builder.status_response(
+                "No. The soak protocol studies structural development and "
+                "long-run continuity. It does not prove consciousness, "
+                "sentience, biological life, personhood, agency, free will, "
+                "emotion, feeling, understanding, or subjective experience.",
+                ["policy:soak_does_not_prove_life"])
+        component = self.components.get("developmental_soak")
+        if component is None:
+            return self.builder.missing_component_response("developmental_soak")
+        status = (component.soak_status()
+                  if hasattr(component, "soak_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:developmental_soak"]
+        if topic == "sk_ready":
+            text = (f"preflight passed: {status.get('preflight_passed')} "
+                    f"(pass {status.get('preflight_pass_count', 0)}, fail "
+                    f"{status.get('preflight_fail_count', 0)}); preflight does "
+                    "not start the run")
+        elif topic == "sk_stage":
+            text = (f"current stage: {status.get('current_stage')} of plan "
+                    f"{status.get('active_plan_id')} "
+                    f"({status.get('soak_stage_count', 0)} stages)")
+        elif topic == "sk_today":
+            text = (f"daily packets: {status.get('daily_packet_count', 0)}; "
+                    "each is evidence, not marketing, and includes negative "
+                    "and inconclusive results")
+        elif topic == "sk_week":
+            text = (f"weekly reviews: {status.get('weekly_review_count', 0)}; "
+                    "decisions are recommendation-only (no automatic external "
+                    "change)")
+        elif topic == "sk_controls":
+            text = (f"control arms: {status.get('control_arm_count', 0)}; "
+                    "controls exist to prevent self-flattering conclusions, "
+                    "and arms with insufficient data stay inconclusive")
+        elif topic == "sk_safety":
+            text = (f"safety blocks: {status.get('soak_safety_block_count', 0)}"
+                    "; no real-world actuation, hardware, feeder, source, or "
+                    "teaching occurred")
+        else:
+            text = ("the soak protocol studies structural development through "
+                    "repeated bounded runs; not biological life or "
+                    "consciousness")
         return self.builder.status_response(text, refs)
 
     def _developmental_life(self, topic: str) -> CommunicationResponse:

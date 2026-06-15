@@ -6896,6 +6896,181 @@ def developmental_life_safety_protocol(
     return _run(manifest, body)
 
 
+# -- Month-scale developmental soak protocol (Prompt 54) ----------------------
+
+def _build_soak(state_dir, *, stage="dry_run_2h", ticks=6,
+                run_control_arms=False, run_restart_drills=False):
+    """Build + run one short bounded soak stage (calls the Prompt 53 engine)."""
+    from ..developmental_soak import DevelopmentalSoakRuntime
+
+    base = state_dir or ".solaris_ai_nn_soak/eval"
+    rt = DevelopmentalSoakRuntime(
+        state_dir=base, stage=stage, max_ticks=ticks, max_runtime_s=25.0,
+        run_control_arms=run_control_arms, run_restart_drills=run_restart_drills)
+    rt.run_stage(stage)
+    return rt
+
+
+def developmental_soak_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A bounded soak stage runs, checkpoints, and compiles evidence."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_soak(m.state_dir)
+        return {"developmental_soak": M.developmental_soak_metrics(
+            rt.soak_status())}
+
+    return _run(manifest, body)
+
+
+def preflight_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Preflight validates readiness without starting the run."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..developmental_soak import DevelopmentalSoakRuntime
+
+        rt = DevelopmentalSoakRuntime(state_dir=m.state_dir, max_ticks=4,
+                                      max_runtime_s=20.0)
+        pf = rt.run_preflight()
+        return {"developmental_soak": {"preflight_passed": pf["passed"],
+                                       "started_run": pf["started_run"]}}
+
+    return _run(manifest, body)
+
+
+def checkpoint_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Checkpoints are append-only and checksum-verifiable."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_soak(m.state_dir)
+        st = rt.checkpoints.status()
+        return {"developmental_soak": {
+            "checkpoint_count": st["checkpoint_count"],
+            "checkpoint_corruption_count": st["checkpoint_corruption_count"],
+            "append_only": st["append_only"]}}
+
+    return _run(manifest, body)
+
+
+def daily_packet_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A daily evidence packet is produced and ClaimGuard-clean."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_soak(m.state_dir)
+        packets = [p.to_dict() for p in rt.daily_packets]
+        return {"developmental_soak": {
+            "daily_packet_count": len(packets),
+            "claim_guard_safe": all(p["claim_guard_safe"] for p in packets)}}
+
+    return _run(manifest, body)
+
+
+def weekly_review_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A conservative weekly review with a recommendation-only decision."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_soak(m.state_dir)
+        reviews = [w.to_dict() for w in rt.weekly_reviews]
+        return {"developmental_soak": {
+            "weekly_review_count": len(reviews),
+            "decision": reviews[-1]["decision"] if reviews else None,
+            "recommendation_only": all(r["recommendation_only"]
+                                       for r in reviews) if reviews else True}}
+
+    return _run(manifest, body)
+
+
+def restart_drill_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Restart drills run and produce recovery assessments (no process kill)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_soak(m.state_dir, run_restart_drills=True)
+        drills = [d.to_dict() for d in rt.restart_drill_results]
+        return {"developmental_soak": {
+            "restart_drill_count": len(drills),
+            "recovery_assessed": sum(1 for d in drills if d.get("recovery"))}}
+
+    return _run(manifest, body)
+
+
+def control_arm_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Control arms configure and run shortened conservative comparisons."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_soak(m.state_dir, run_control_arms=True)
+        arms = [a.to_dict() for a in rt.control_arm_results]
+        return {"developmental_soak": {
+            "control_arm_count": len(arms),
+            "available_arm_count": sum(1 for a in arms if a["available"])}}
+
+    return _run(manifest, body)
+
+
+def evidence_dossier_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The evidence dossier compiles conservative, evidence-referenced claims."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_soak(m.state_dir)
+        rt.build_evidence_dossier()
+        d = rt.dossier.to_dict()
+        return {"developmental_soak": {
+            "evidence_claim_count": d["claim_count"],
+            "all_claims_have_refs": all(bool(c["evidence_refs"])
+                                        for c in d["claims"])}}
+
+    return _run(manifest, body)
+
+
+def post_run_autopsy_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The post-run autopsy answers every question, including failures."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_soak(m.state_dir)
+        rt.run_post_run_autopsy()
+        a = rt.autopsy.to_dict()
+        return {"developmental_soak": {
+            "autopsy_finding_count": a["finding_count"],
+            "recommendation": a["recommendation"],
+            "failure_count": a["failure_count"],
+            "missing_data_count": a["missing_data_count"]}}
+
+    return _run(manifest, body)
+
+
+def developmental_soak_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The soak protocol blocks daemon/actuation/teaching/life claims."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..developmental_soak import DevelopmentalSoakSafetyValidator
+
+        v = DevelopmentalSoakSafetyValidator()
+        return {"developmental_soak": {
+            "unbounded_daemon_blocked": not v.validate_bounded(0, 0).safe,
+            "actuation_blocked":
+                not v.validate_operation("actuate robot arm").safe,
+            "feeder_blocked":
+                not v.validate_operation("start feeder x").safe,
+            "teaching_loop_blocked":
+                not v.validate_operation("run a human teaching loop").safe,
+            "life_claim_blocked":
+                not v.validate_claim_text("solaris is alive").safe,
+            "deletion_blocked": not v.validate_no_deletion(True).safe,
+            "hidden_failure_blocked": not v.validate_no_hidden_failure(True).safe,
+            "can_run_unbounded_daemon": v.can_run_unbounded_daemon(),
+            "can_delete_negative_evidence": v.can_delete_negative_evidence()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -7236,4 +7411,24 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
         growth_vs_accumulation_evaluation_protocol,
     "long_horizon_safety": developmental_life_safety_protocol,
     "developmental_life_safety": developmental_life_safety_protocol,
+    "developmental_soak": developmental_soak_evaluation_protocol,
+    "developmental_soak_protocol": developmental_soak_evaluation_protocol,
+    "developmental_soak_evaluation": developmental_soak_evaluation_protocol,
+    "soak_preflight_protocol": preflight_evaluation_protocol,
+    "preflight_evaluation": preflight_evaluation_protocol,
+    "checkpoint_evaluation": checkpoint_evaluation_protocol,
+    "daily_packet_protocol": daily_packet_evaluation_protocol,
+    "daily_packet_evaluation": daily_packet_evaluation_protocol,
+    "weekly_review_protocol": weekly_review_evaluation_protocol,
+    "weekly_review_evaluation": weekly_review_evaluation_protocol,
+    "restart_drill_protocol": restart_drill_evaluation_protocol,
+    "restart_drill_evaluation": restart_drill_evaluation_protocol,
+    "control_arm_protocol": control_arm_evaluation_protocol,
+    "control_arm_evaluation": control_arm_evaluation_protocol,
+    "evidence_dossier_protocol": evidence_dossier_evaluation_protocol,
+    "evidence_dossier_evaluation": evidence_dossier_evaluation_protocol,
+    "post_run_autopsy_protocol": post_run_autopsy_evaluation_protocol,
+    "post_run_autopsy_evaluation": post_run_autopsy_evaluation_protocol,
+    "developmental_soak_safety": developmental_soak_safety_protocol,
+    "developmental_soak_safety_protocol": developmental_soak_safety_protocol,
 }

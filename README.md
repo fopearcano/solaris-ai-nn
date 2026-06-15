@@ -480,7 +480,26 @@ python examples/run_developmental_epoch_demo.py              # phase/epoch trans
 python examples/run_plateau_detection_demo.py               # no-growth plateau + report-only recommendation
 python examples/run_regression_detection_demo.py            # decline -> regression + auto-regeneration rec
 python examples/run_growth_vs_accumulation_demo.py          # real growth vs mere accumulation (conservative)
+
+# Month-scale developmental soak protocol: the study around the engine (bounded)
+python examples/run_soak_preflight_demo.py                  # validate readiness; never starts the run
+python examples/run_developmental_soak_short_demo.py        # short bounded stage -> checkpoint -> daily packet
+python examples/run_weekly_review_demo.py                   # weekly review: continue vs accumulation warning
+python examples/run_soak_control_arms_demo.py               # full stack vs controls (conservative)
+python examples/run_post_run_autopsy_demo.py                # growth-vs-accumulation + safety + autopsy
 ```
+
+The soak protocol studies structural development through repeated bounded runs. It
+does not prove life, consciousness, sentience, personhood, agency, free will,
+emotion, feeling, understanding, or subjective experience. The Long-Horizon
+Developmental Runtime is the engine (the growth detector); the soak is the study
+manager: staged (preflight, 2h, 24h, 7d, 30d, optional 90d, post-run autopsy),
+bounded per invocation (long runs are repeated bounded runs + checkpoints, never a
+daemon), with daily evidence packets and weekly reviews that preserve negatives,
+restart/corruption/source-silence drills, control arms that prevent self-flattering
+conclusions, a conservative evidence dossier, and a post-run autopsy that includes
+failures and does not praise the system by default. No real-world actuation, no
+feeder/hardware/source control, and no human teaching loop ever occur.
 
 Developmental life is operational long-horizon trace continuity and structural
 change tracking. It is not a claim of biological life, consciousness, sentience,
@@ -1447,6 +1466,10 @@ src/solaris_ai_nn/
                 maturation markers, phase transitions, plateaus, regressions,
                 growth-vs-accumulation, developmental runtime, life history,
                 memory, reports, safety
+  developmental_soak/ month-scale soak protocol: soak plan, preflight, run
+                phases, checkpointing, daily packets, weekly reviews, restart
+                drills, control arms, evidence dossier, post-run autopsy,
+                soak runtime, reports, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

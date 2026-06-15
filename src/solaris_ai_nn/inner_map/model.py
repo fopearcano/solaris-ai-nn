@@ -468,6 +468,14 @@ class InnerMapModel:
     # operational runtime structure, not biological life; growth is structural
     # change, not proof of intelligence.
     developmental_life: Optional[Dict[str, Any]] = None
+    # Developmental-soak status (Prompt 54); None when not attached. Keys:
+    # developmental_soak_enabled, active_plan_id, current_stage,
+    # preflight_passed, checkpoint_count, daily_packet_count,
+    # weekly_review_count, restart_drill_count, control_arm_count,
+    # evidence_claim_count, autopsy_recommendation, soak_safety_block_count,
+    # latest_soak_report_path. The soak protocol studies structural
+    # development; it is not biological life, consciousness, or agency.
+    developmental_soak: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

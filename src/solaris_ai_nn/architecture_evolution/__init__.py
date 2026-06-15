@@ -49,6 +49,7 @@ from .evidence_mapper import (
     ontogenesis_revision_proposals,
     self_boundary_revision_proposals,
     semiogenesis_revision_proposals,
+    soak_revision_proposals,
 )
 from .impact_analysis import (
     ArchitectureImpactAnalysis,
@@ -112,7 +113,7 @@ __all__ = [
     "ontogenesis_revision_proposals", "semiogenesis_revision_proposals",
     "cognition_revision_proposals", "self_boundary_revision_proposals",
     "desire_revision_proposals", "action_reaction_revision_proposals",
-    "developmental_revision_proposals",
+    "developmental_revision_proposals", "soak_revision_proposals",
     # pruning / promotion / impact / migration
     "PruningProposal", "PruningProposalBuilder", "PruningPlan", "PruningRisk",
     "PruningImplementationStatus", "PromotionProposal", "DemotionProposal",

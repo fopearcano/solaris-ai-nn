@@ -1995,3 +1995,49 @@ def developmental_life_metrics(dev: Optional[Dict[str, Any]],
                 "life, consciousness, personhood, agency, or subjective "
                 "experience",
     }
+
+
+def developmental_soak_metrics(soak: Optional[Dict[str, Any]],
+                               ) -> Dict[str, Any]:
+    """Objective developmental-soak metrics (month-scale study protocol).
+
+    These describe the *study* around the developmental engine: stages,
+    preflight, checkpoints, daily packets, weekly reviews, restart drills,
+    control arms, evidence claims, and the autopsy. The soak protocol studies
+    structural development; it is not biological life, consciousness, or agency.
+    """
+    if not soak:
+        return {"present": False}
+    return {
+        "present": True,
+        "soak_stage_count": int(soak.get("soak_stage_count", 0) or 0),
+        "preflight_pass_count": int(soak.get("preflight_pass_count", 0) or 0),
+        "preflight_fail_count": int(soak.get("preflight_fail_count", 0) or 0),
+        "checkpoint_count": int(soak.get("checkpoint_count", 0) or 0),
+        "checkpoint_corruption_count": int(
+            soak.get("checkpoint_corruption_count", 0) or 0),
+        "daily_packet_count": int(soak.get("daily_packet_count", 0) or 0),
+        "weekly_review_count": int(soak.get("weekly_review_count", 0) or 0),
+        "restart_drill_count": int(soak.get("restart_drill_count", 0) or 0),
+        "control_arm_count": int(soak.get("control_arm_count", 0) or 0),
+        "evidence_claim_count": int(soak.get("evidence_claim_count", 0) or 0),
+        "strong_evidence_claim_count": int(
+            soak.get("strong_evidence_claim_count", 0) or 0),
+        "inconclusive_claim_count": int(
+            soak.get("inconclusive_claim_count", 0) or 0),
+        "accumulation_warning_count": int(
+            soak.get("accumulation_warning_count", 0) or 0),
+        "regression_count": int(soak.get("regression_count", 0) or 0),
+        "plateau_count": int(soak.get("plateau_count", 0) or 0),
+        "soak_safety_block_count": int(
+            soak.get("soak_safety_block_count", 0) or 0),
+        "autopsy_finding_count": int(soak.get("autopsy_finding_count", 0) or 0),
+        "structural_growth_status": str(
+            soak.get("structural_growth_status", "inconclusive")),
+        "autopsy_recommendation": soak.get("autopsy_recommendation"),
+        "is_biological_life": False,
+        "is_consciousness_or_personhood": False,
+        "note": "month-scale structural-development study protocol; not "
+                "biological life, consciousness, personhood, agency, or "
+                "subjective experience",
+    }

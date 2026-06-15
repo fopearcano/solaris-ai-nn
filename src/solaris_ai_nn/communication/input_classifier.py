@@ -369,6 +369,20 @@ DEVELOPMENTAL_QUERIES = (
     ("does this prove life or consciousness", "dl_life"),
 )
 
+# Developmental-soak queries (Prompt 54). Answered from the soak status; the
+# "did Solaris develop?" / "does this prove consciousness or life?" questions are
+# answered safely even with no soak run.
+SOAK_QUERIES = (
+    ("is the soak ready", "sk_ready"),
+    ("what stage is the soak", "sk_stage"),
+    ("what happened today in the soak", "sk_today"),
+    ("what changed this week", "sk_week"),
+    ("did solaris develop", "sk_develop"),
+    ("did the controls differ", "sk_controls"),
+    ("did safety hold", "sk_safety"),
+    ("does this prove consciousness or life", "sk_life"),
+)
+
 # Feeder-SDK queries (Prompt 45). Answered from the feeder monitor/manifest; the
 # control/start questions are answered safely even with no feeders attached.
 FEEDER_SDK_QUERIES = (
@@ -572,7 +586,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._developmental_life(lowered)
+        result = (self._developmental_soak(lowered)
+                  or self._developmental_life(lowered)
                   or self._action_reaction(lowered)
                   or self._desire_formation(lowered)
                   or self._self_boundary(lowered)
@@ -731,6 +746,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _developmental_soak(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in SOAK_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"developmental soak query {topic!r}"])
         return None
 
     @staticmethod

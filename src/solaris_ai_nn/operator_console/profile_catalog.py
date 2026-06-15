@@ -131,6 +131,8 @@ def _source_package(profile_id: str) -> str:
             "habit_formation_demo", "action_inhibition_demo",
             "no_effect_action_demo", "blocked_action_reaction_demo"):
         return "action_reaction"
+    if pid.startswith("developmental_soak") or pid.startswith("soak_"):
+        return "developmental_soak"
     if pid.startswith("developmental_life"):
         return "developmental_life"
     return "conscience"

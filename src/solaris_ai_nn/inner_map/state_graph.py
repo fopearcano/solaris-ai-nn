@@ -1733,4 +1733,30 @@ def build_default_state_graph() -> StateGraph:
                "growth snapshots are judged growth-vs-accumulation")
     g.add_edge("LongHorizonDevelopmentalRuntime", "inner_map",
                "developmental life state feeds Inner MAP")
+
+    # Month-scale developmental soak protocol (Prompt 54): the study manager.
+    # It wraps the developmental engine in staged bounded runs; it is not life.
+    for name, role in [
+        ("DevelopmentalSoakPlan", "staged bounded plan: 2h/24h/7d/30d/90d"),
+        ("SoakPreflight", "validates readiness; never starts the run"),
+        ("SoakRunPhase", "bounded explainable per-cycle phase sequence"),
+        ("CheckpointManager", "append-only checkpoints; corruption recorded"),
+        ("DailyEvidencePacketBuilder", "evidence, not marketing; negatives kept"),
+        ("WeeklyReviewBuilder", "conservative recommendation-only weekly review"),
+        ("RestartDrill", "recovery drills; no real process kill"),
+        ("SoakControlArm", "controls prevent self-flattering conclusions"),
+        ("DevelopmentalEvidenceDossier", "conservative evidence-referenced claims"),
+        ("PostRunAutopsy", "did growth occur or did logs accumulate?"),
+        ("DevelopmentalSoakRuntime", "bounded staged study manager"),
+        ("DevelopmentalSoakSafetyValidator", "no daemon/actuation/life claims"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("LongHorizonDevelopmentalRuntime", "DevelopmentalSoakRuntime",
+               "the developmental engine is the soak's growth detector")
+    g.add_edge("DevelopmentalSoakRuntime", "DevelopmentalEvidenceDossier",
+               "the soak compiles evidence into a conservative dossier")
+    g.add_edge("DevelopmentalEvidenceDossier", "PostRunAutopsy",
+               "the dossier feeds the post-run autopsy")
+    g.add_edge("DevelopmentalSoakRuntime", "inner_map",
+               "developmental soak state feeds Inner MAP")
     return g
