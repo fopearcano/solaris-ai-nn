@@ -445,6 +445,14 @@ class InnerMapModel:
     # identity_trace_event_count, latest_self_boundary_report_path. Self-boundary
     # is operational, not subjective selfhood; body schema is receptor structure.
     self_boundary: Optional[Dict[str, Any]] = None
+    # Desire-formation status (Prompt 51); None when not attached. Keys:
+    # desire_formation_enabled, valence_gradient_count, push_count,
+    # desire_candidate_count, active_desire_count, inhibited_desire_count,
+    # deferred_desire_count, internal_action_count, no_op_count,
+    # safety_blocked_desire_count, motivation_field, latest_desire_formation_
+    # report_path. Desire is operational pressure toward internal action, not
+    # emotion, free will, or agency.
+    desire_formation: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

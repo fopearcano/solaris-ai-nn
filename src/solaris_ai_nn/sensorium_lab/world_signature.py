@@ -69,6 +69,15 @@ class SensoriumWorldSignature:
     receptor_body_schema_stability: float = 0.0
     continuity_break_count: int = 0
     identity_trace_density: float = 0.0
+    # Desire-formation profile (Prompt 51); empty/zero when not attached.
+    valence_profile: Dict[str, Any] = field(default_factory=dict)
+    push_profile: Dict[str, Any] = field(default_factory=dict)
+    desire_kind_distribution: Dict[str, int] = field(default_factory=dict)
+    internal_action_profile: Dict[str, Any] = field(default_factory=dict)
+    no_op_profile: Dict[str, Any] = field(default_factory=dict)
+    conflict_profile: Dict[str, Any] = field(default_factory=dict)
+    blocked_desire_count: int = 0
+    desire_outcome_utility: float = 0.0
     limitations: List[str] = field(default_factory=lambda: [
         "An observable structural fingerprint, not subjective experience.",
         "Not qualia; this does not describe what Solaris feels.",
@@ -130,6 +139,14 @@ class SensoriumWorldSignature:
                 self.receptor_body_schema_stability,
             "continuity_break_count": self.continuity_break_count,
             "identity_trace_density": self.identity_trace_density,
+            "valence_profile": dict(self.valence_profile),
+            "push_profile": dict(self.push_profile),
+            "desire_kind_distribution": dict(self.desire_kind_distribution),
+            "internal_action_profile": dict(self.internal_action_profile),
+            "no_op_profile": dict(self.no_op_profile),
+            "conflict_profile": dict(self.conflict_profile),
+            "blocked_desire_count": self.blocked_desire_count,
+            "desire_outcome_utility": self.desire_outcome_utility,
             "limitations": list(self.limitations),
             "note": "observable structural fingerprint; not subjective "
                     "experience, not qualia",
@@ -145,7 +162,8 @@ class WorldSignatureBuilder:
               ontogenesis: Any = None,
               semiogenesis: Any = None,
               cognition: Any = None,
-              self_boundary: Any = None) -> SensoriumWorldSignature:
+              self_boundary: Any = None,
+              desire_formation: Any = None) -> SensoriumWorldSignature:
         rt = runtime
         if rt is None:
             return SensoriumWorldSignature(arm_id=arm_id, condition=condition)
@@ -307,6 +325,36 @@ class WorldSignatureBuilder:
             identity_density = round(min(
                 1.0, 0.05 * sb_status.get("identity_trace_event_count", 0)), 4)
 
+        # Desire-formation profile (optional).
+        valence_profile: Dict[str, Any] = {}
+        push_profile: Dict[str, Any] = {}
+        desire_kinds: Dict[str, int] = {}
+        internal_action_profile: Dict[str, Any] = {}
+        no_op_profile: Dict[str, Any] = {}
+        conflict_profile: Dict[str, Any] = {}
+        blocked_desires = 0
+        desire_utility = 0.0
+        if desire_formation is not None:
+            df_status = (desire_formation.desire_status()
+                         if hasattr(desire_formation, "desire_status")
+                         else desire_formation
+                         if isinstance(desire_formation, dict) else {})
+            valence_profile = {
+                "count": df_status.get("valence_gradient_count", 0),
+                "dominant": df_status.get("dominant_valence_direction", "")}
+            push_profile = {"count": df_status.get("push_count", 0)}
+            if hasattr(desire_formation, "desires"):
+                for d in desire_formation.desires:
+                    k = getattr(d, "kind", "unknown")
+                    desire_kinds[k] = desire_kinds.get(k, 0) + 1
+            internal_action_profile = {
+                "count": df_status.get("internal_action_count", 0)}
+            no_op_profile = {"count": df_status.get("no_op_count", 0)}
+            conflict_profile = {
+                "count": df_status.get("desire_conflict_count", 0)}
+            blocked_desires = df_status.get("safety_blocked_desire_count", 0)
+            desire_utility = df_status.get("desire_outcome_success_rate", 0.0)
+
         return SensoriumWorldSignature(
             arm_id=arm_id, condition=condition,
             modality_distribution=modality_dist,
@@ -353,7 +401,15 @@ class WorldSignatureBuilder:
             perspective_shift_profile=perspective_profile,
             receptor_body_schema_stability=body_stability,
             continuity_break_count=continuity_breaks,
-            identity_trace_density=identity_density)
+            identity_trace_density=identity_density,
+            valence_profile=valence_profile,
+            push_profile=push_profile,
+            desire_kind_distribution=desire_kinds,
+            internal_action_profile=internal_action_profile,
+            no_op_profile=no_op_profile,
+            conflict_profile=conflict_profile,
+            blocked_desire_count=blocked_desires,
+            desire_outcome_utility=desire_utility)
 
 
 @dataclass

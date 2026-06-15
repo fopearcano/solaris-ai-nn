@@ -395,6 +395,20 @@ DESCRIPTIONS = {
     "identity_trace_evaluation": "identity trace check",
     "self_boundary_safety":
         "no personhood/subjective-self/simulation-as-observation claims",
+    "desire_formation": "operational valence/push/desire toward internal action",
+    "desire_formation_evaluation": "desire formation check",
+    "valence_assessment": "operational valence gradient (not feeling)",
+    "valence_evaluation": "valence check",
+    "push_formation": "pre-desire push formation",
+    "push_evaluation": "push check",
+    "desire_arbitration": "safe arbitration of desires (safety vetoes)",
+    "desire_arbitration_evaluation": "desire arbitration check",
+    "internal_action_readiness": "conservative internal action readiness",
+    "internal_action_evaluation": "internal action readiness check",
+    "desire_outcome": "desire outcomes incl. failures/blocks/no-ops",
+    "desire_outcome_evaluation": "desire outcome check",
+    "desire_safety":
+        "no actuation/hardware/source; no emotion/free-will/agency claims",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -590,6 +604,13 @@ class ExperimentRegistry:
                         "simulation_boundary_evaluation", "identity_trace",
                         "identity_trace_evaluation")
             or bool(merged.get("self_boundary", False)))
+        features["desire_formation"] = (
+            name.startswith("desire_")
+            or name in ("valence_assessment", "valence_evaluation",
+                        "push_formation", "push_evaluation",
+                        "internal_action_readiness",
+                        "internal_action_evaluation")
+            or bool(merged.get("desire_formation", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

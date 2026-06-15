@@ -132,6 +132,9 @@ AVAILABLE_QUERIES = (
     "does Solaris have a body?", "did it confuse simulation with observation?",
     "did it maintain continuity after restart?",
     "does this prove self-awareness?",
+    "what does Solaris want?", "what desires are active?", "did Solaris act?",
+    "why did it choose no action?", "were any desires blocked?",
+    "are these emotions?", "does this prove agency?",
 )
 
 
@@ -192,6 +195,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("df_"):
+            return self._desire_formation(topic)
         if topic.startswith("sb_"):
             return self._self_boundary(topic)
         if topic.startswith("cg_"):
@@ -553,6 +558,63 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _desire_formation(self, topic: str) -> CommunicationResponse:
+        """Answer desire-formation queries (operational desire, not emotion).
+
+        The "what does Solaris want?" / "are these emotions?" / "does this prove
+        agency?" questions are answered safely even with no desire attached.
+        """
+        if topic == "df_want":
+            return self.builder.status_response(
+                "Solaris does not have human wanting. The console can show "
+                "operational desire candidates: pressures toward internal "
+                "actions such as attention shifts, simulations, consolidation, "
+                "or preserving unknowns.",
+                ["policy:desire_is_operational_not_human_wanting"])
+        if topic == "df_emotions":
+            return self.builder.status_response(
+                "No. These are operational valence and regulation states, not "
+                "feelings or emotions.",
+                ["policy:valence_is_operational_not_emotion"])
+        if topic == "df_agency":
+            return self.builder.status_response(
+                "No. Desire formation and internal action readiness do not "
+                "prove agency, free will, consciousness, sentience, or "
+                "subjective experience.",
+                ["policy:desire_does_not_prove_agency"])
+        component = self.components.get("desire_formation")
+        if component is None:
+            return self.builder.missing_component_response("desire_formation")
+        status = (component.desire_status()
+                  if hasattr(component, "desire_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:desire_formation"]
+        if topic == "df_active":
+            text = (f"active desire candidates: "
+                    f"{status.get('active_desire_count', 0)} of "
+                    f"{status.get('desire_candidate_count', 0)}; these are "
+                    "operational pressures toward internal actions")
+        elif topic == "df_acted":
+            text = (f"internal actions taken: "
+                    f"{status.get('internal_action_count', 0)} (no-op "
+                    f"{status.get('no_op_count', 0)}); internal-only, never "
+                    "external actuation")
+        elif topic == "df_no_action":
+            text = (f"no-op count: {status.get('no_op_count', 0)}; no-action is "
+                    "a valid organismic inhibition outcome (e.g. insufficient "
+                    "evidence or overload)")
+        elif topic == "df_blocked":
+            text = (f"safety-blocked desires: "
+                    f"{status.get('safety_blocked_desire_count', 0)}, "
+                    f"governance-blocked "
+                    f"{status.get('governance_blocked_desire_count', 0)}; "
+                    "blocks are preserved as evidence")
+        else:
+            text = ("desire formation produces operational pressures toward "
+                    "internal actions; not emotion or human wanting")
         return self.builder.status_response(text, refs)
 
     def _self_boundary(self, topic: str) -> CommunicationResponse:

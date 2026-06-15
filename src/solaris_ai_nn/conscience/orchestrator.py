@@ -304,6 +304,14 @@ class ConscienceOrchestrator:
         if "perceptual_metabolism" in self.components:
             h[SpinePhase.PERCEPTUAL_METABOLISM_UPDATE] = \
                 self._phase_perceptual_metabolism
+        if "sensorium_cognition" in self.components:
+            h[SpinePhase.COGNITION_UPDATE] = self._phase_cognition
+        if "self_boundary" in self.components:
+            h[SpinePhase.SELF_BOUNDARY_UPDATE] = self._phase_self_boundary
+        if "desire_formation" in self.components:
+            h[SpinePhase.DESIRE_FORMATION_UPDATE] = self._phase_desire_formation
+            h[SpinePhase.SAFE_INTERNAL_ACTION_ARBITRATION] = \
+                self._phase_safe_internal_action_arbitration
         if "motor_membrane" in self.components:
             h[SpinePhase.MOTOR_ACTION_FIREWALL] = self._phase_motor_firewall
         if "ecology" in self.components or "signals" in self.components:
@@ -409,6 +417,44 @@ class ConscienceOrchestrator:
         if hasattr(metabolism, "update"):
             metabolism.update(tick=step)
         self._count("perceptual_metabolism_update")
+        return PhaseStatus.RAN
+
+    def _phase_cognition(self, step: int) -> str:
+        """Sign-based cognition over signs/concepts (internal-only)."""
+        cognition = self.components.get("sensorium_cognition")
+        if cognition is None:
+            return PhaseStatus.SKIPPED
+        if hasattr(cognition, "update"):
+            cognition.update(tick=step)
+        self._count("cognition_update")
+        return PhaseStatus.RAN
+
+    def _phase_self_boundary(self, step: int) -> str:
+        """Operational self/world boundary tracking (internal-only)."""
+        boundary = self.components.get("self_boundary")
+        if boundary is None:
+            return PhaseStatus.SKIPPED
+        if hasattr(boundary, "update"):
+            boundary.update(tick=step)
+        self._count("self_boundary_update")
+        return PhaseStatus.RAN
+
+    def _phase_desire_formation(self, step: int) -> str:
+        """Form valence/pushes/desires (internal-only; no actuation)."""
+        desire = self.components.get("desire_formation")
+        if desire is None:
+            return PhaseStatus.SKIPPED
+        if hasattr(desire, "update"):
+            desire.update(tick=step)
+        self._count("desire_formation_update")
+        return PhaseStatus.RAN
+
+    def _phase_safe_internal_action_arbitration(self, step: int) -> str:
+        """Arbitration runs inside desire formation; this records it ran."""
+        desire = self.components.get("desire_formation")
+        if desire is None:
+            return PhaseStatus.SKIPPED
+        self._count("safe_internal_action_arbitration")
         return PhaseStatus.RAN
 
     def _phase_stimulus(self, step: int) -> str:

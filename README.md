@@ -459,7 +459,21 @@ python examples/run_ownership_attribution_demo.py        # internal / external /
 python examples/run_perspective_continuity_demo.py       # perspective shift; continuity break + recovery (kept)
 python examples/run_simulation_boundary_demo.py          # observation vs simulation/counterfactual/debug (blocked)
 python examples/run_identity_trace_demo.py               # operational identity trace; restart/gap; no personhood
+
+# Desire formation: valence -> push -> desire -> safe internal action readiness
+python examples/run_desire_formation_demo.py             # valence gradient -> pushes -> desires -> report
+python examples/run_desire_conflict_demo.py              # novelty vs stability; inspect vs consolidate; LOGOS
+python examples/run_internal_action_readiness_demo.py    # readiness gates; selected internal action; unsafe blocked
+python examples/run_no_action_arbitration_demo.py        # no-op on overload/insufficient evidence (preserved)
+python examples/run_safety_blocked_desire_demo.py        # forbidden external action blocked + recorded
 ```
+
+Desire candidates are operational pressures toward internal actions. They are not
+emotions, human wants, free will, or proof of agency. Valence is operational
+priority (not feeling); internal actions affect only internal state; no-op is a
+valid outcome; safety and governance can veto any desire; and failed/blocked
+desires are preserved as evidence. The desire layer is internal-only -- no
+hardware/feeder/source control, no real-world actuation, and no unbounded loop.
 
 Self-boundary is operational boundary tracking between internal state, receptor
 body, external flux, memory, prediction, and simulation. It is not a claim of
@@ -1391,6 +1405,10 @@ src/solaris_ai_nn/
                 boundary state, ownership, perspective, continuity, body schema,
                 source attribution, internal/external, simulation boundary,
                 identity trace, boundary tensions, runtime, reports, safety
+  desire_formation/ operational valence, desire, and internal action readiness:
+                valence, push, desire, readiness, motivation field, conflict,
+                arbitration, internal actions, outcome trace, memory, runtime,
+                reports, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

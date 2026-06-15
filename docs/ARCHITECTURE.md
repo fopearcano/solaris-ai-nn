@@ -3144,3 +3144,75 @@ and Inner MAP. **Self-boundary lets Solaris distinguish its perceptual body from
 the world that touches it -- internal state, receptor body, external flux, memory,
 prediction, and simulation kept operationally distinct -- without claiming
 self-awareness, consciousness, sentience, life, or personhood.**
+
+## Sensorium-Native Valence and Desire Formation
+
+Prompts 41-50 gave Solaris perception, metabolism, proto-concepts, signs,
+cognition, and a self/world boundary. Prompt 51 adds *desire formation* --
+`src/solaris_ai_nn/desire_formation/` -- where "desire" means an operational
+pressure toward an internal action tendency, NOT emotion, human wanting, conscious
+intention, or free will. This layer closes the loop back to the Solaris spine
+(Stimulus -> Push -> Desire -> ActionCandidate -> Reaction/Trace):
+
+    sensory field -> perceptual metabolism -> cognitive pressure -> self-boundary
+    state -> valence gradient -> push formation -> desire candidate -> internal
+    action readiness -> safe arbitration -> internal action / attention shift /
+    simulation / consolidation / no-op -> result becomes a new trace
+
+**Valence is operational priority, not emotion.** The `ValenceAssessment` derives a
+`ValenceGradient` from upstream states (novelty, overload, deprivation, absence,
+prediction success/failure, LOGOS tension, concept/sign dynamics, boundary
+uncertainty, continuity breaks, consolidation pressure) with directions
+(attractive/aversive/stabilizing/destabilizing/ambiguous). Valence influences
+internal attention, simulation, consolidation, and readiness only -- it is never
+pleasure/pain and can never authorize real-world action.
+
+**Push is pre-desire pressure.** The `PushFormationEngine` turns valence into
+`SensoriumPush`es (pre-desire pressures that preserve evidence and may decay
+without ever acting). The `DesireFormationEngine` turns pushes into
+`DesireCandidate`s whose kinds are all internal tendencies (inspect absence, focus/
+compare modalities, stabilize concept, test prediction, simulate, resolve/preserve
+tension, consolidate, rest receptor, mark source/concept/sign, request operator
+review, no-action). Each desire maps only to an allowed internal action.
+
+**Desire is internal action readiness, not human wanting.** The `ReadinessGate`
+conservatively gates each desire across evidence/energy/attention/memory/boundary/
+safety/governance/uncertainty/simulation/consolidation dimensions; readiness is not
+execution and cannot bypass arbitration. The `DesireArbitrator` selects among ready
+desires by utility/risk/urgency -- but safety and governance have veto power, and
+no real-world actuation, code execution, or source modification may ever be
+selected. The `MotivationField` exposes *why* an action was selected or inhibited,
+and the `ConflictDetector` surfaces competing tendencies (novelty-vs-stability,
+inspect-vs-consolidate, safety-vs-desire, ...) that feed LOGOS without premature
+resolution.
+
+**Internal actions are safe and non-actuating.** The `InternalActionExecutor` runs
+only allowed internal actions (attention shifts, monitoring changes, bounded
+simulation, hypothesis generation, internal prediction tests, preserve-unknown,
+marking source/concept/sign, consolidation recommendations, operator-review
+requests, no-op). Anything outside that set is downgraded to a safe no-op;
+`request_operator_review` creates a decision item only. Nothing controls hardware,
+feeders, the network, a shell, an OS device, or a source file.
+
+**No-op is a valid action result, and failed/blocked desires are evidence.**
+Overload, insufficient evidence, or poor boundary clarity lead to conservative
+no-op / inhibition / deferral -- organismic inhibition rather than churn. The
+`DesireOutcomeTrace` and append-only `DesireMemoryStore` preserve every outcome,
+including failures, safety/governance blocks, and no-ops; none are deleted.
+
+**It stays internal and bounded.** The `DesireFormationRuntime` reads metabolism/
+cognition/self-boundary state (and LOGOS tension count), runs bounded ticks, and
+integrates with the Conscience spine (a `desire_formation_update` phase plus a
+`safe_internal_action_arbitration` phase, after the cognition and self-boundary
+phases and before stimulus ingestion, with six bounded profiles), LOGOS (desire
+conflicts as tensions), the hypothesis engine (test/inspect/compare desires as
+seeds), memory/latent replay, the research lab and evaluation (metrics plus
+protocols for desire formation, valence, push, arbitration, readiness, outcome, and
+safety), the sensorium differentiation lab (world signatures gain a valence/push/
+desire-kind/internal-action/no-op/conflict profile), the architecture evolution
+layer (advisory proposals only), the operator console (with the mandated safe
+answers about "wanting", "emotions", and "agency"), and Inner MAP. **Desire
+formation lets Solaris turn sensorium-native pressures into operational valence,
+pushes, and desires that lead only to safe internal actions -- while preserving the
+distinction between operational desire and human emotion, free will, agency,
+consciousness, sentience, life, or subjective experience.**

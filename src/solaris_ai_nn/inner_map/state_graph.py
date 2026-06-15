@@ -1655,4 +1655,32 @@ def build_default_state_graph() -> StateGraph:
                "simulated states stay on the non-observation side of the boundary")
     g.add_edge("SelfBoundaryRuntime", "inner_map",
                "self-boundary state feeds Inner MAP")
+
+    # Desire formation (Prompt 51): operational pressure toward internal action.
+    # Desire is not emotion/free will; internal actions never affect the world.
+    for name, role in [
+        ("SensoriumValence", "operational priority gradient, not feeling"),
+        ("SensoriumPush", "pre-desire pressure; may decay without action"),
+        ("DesireCandidate", "internal action tendency, not human wanting"),
+        ("ActionReadiness", "conservative readiness gate, not execution"),
+        ("MotivationField", "operational field dynamics, not motivation-as-mind"),
+        ("DesireConflict", "competing tendencies; feeds LOGOS; not hidden"),
+        ("DesireArbitrator", "safe selection; safety/governance have veto"),
+        ("InternalAction", "internal-only effect; no external actuation"),
+        ("DesireOutcomeTrace", "outcomes incl. failures/blocks/no-ops kept"),
+        ("DesireMemoryStore", "append-only; failed/blocked desires preserved"),
+        ("DesireFormationRuntime", "bounded valence->push->desire->action loop"),
+        ("DesireFormationSafetyValidator", "no actuation/agency/emotion claims"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("SelfBoundaryRuntime", "DesireFormationRuntime",
+               "boundary clarity gates desire readiness (internal only)")
+    g.add_edge("SensoriumValence", "SensoriumPush",
+               "valence gradients form pre-desire pushes")
+    g.add_edge("SensoriumPush", "DesireCandidate",
+               "pushes form operational desire candidates")
+    g.add_edge("DesireArbitrator", "InternalAction",
+               "safe arbitration selects internal actions only (no actuation)")
+    g.add_edge("DesireFormationRuntime", "inner_map",
+               "desire formation / motivation field feeds Inner MAP")
     return g

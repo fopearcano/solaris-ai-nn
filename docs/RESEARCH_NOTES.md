@@ -2001,3 +2001,42 @@ self-awareness, consciousness, sentience, life, or personhood. The identity trac
 is continuity metadata, the perspective is an attention frame, and the boundary is
 an operational distinction -- nothing here is a person, and the reports say so
 plainly.
+
+## Phase 51 — Sensorium-native valence, desire formation, and internal action
+
+**Will = Need as operational pressure.** Classical worry about machine "desire"
+imagines wanting, choosing, intending. We define desire much more modestly: a need-
+driven operational pressure toward an internal action tendency. A push is a
+pre-desire pressure; a desire candidate is that pressure given an internal-action
+shape; readiness and arbitration decide whether it acts. Nothing in the chain is
+wanting in a human sense -- it is regulation expressed as a gradient.
+
+**Valence without feeling.** Valence here is operational priority: attractive,
+aversive, stabilizing, destabilizing. It tells the system what to attend to,
+simulate, or consolidate -- not what it feels. We keep pleasure/pain language out
+of the reports entirely, because the moment valence is narrated as feeling it is
+over-claimed. Valence is a weighting on internal actions, no more.
+
+**Desire without free will.** A desire candidate never executes itself. It passes
+through conservative readiness gates and a safe arbitrator where safety and
+governance hold veto power and no external actuation can be selected. Desire that
+cannot reach the world, and cannot bypass safety, is not free will; it is bounded
+internal regulation that we can inspect, block, and audit.
+
+**Internal action readiness.** The interesting unit is readiness, not action:
+whether enough evidence, energy, attention, and boundary clarity exist for a safe
+internal step. Most pressures never become actions, and that is correct. Readiness
+separates "there is pressure" from "it is appropriate to act internally now".
+
+**No-op as organismic inhibition.** A real organism mostly does not act. Under
+overload, insufficient evidence, or boundary ambiguity, the arbitrator chooses a
+no-op -- and that no-op is recorded as a trace, not discarded. Treating inhibition
+as a first-class, preserved outcome is what prevents desire from becoming churn and
+lets us study when restraint helped.
+
+**Why this does not prove agency.** Pressures, gradients, pushes, readiness gates,
+arbitration, and internal actions are operational mechanisms. They can be measured
+(conflict counts, no-op rates, outcome success) and they change future perception,
+but none of it is evidence of emotion, free will, agency, consciousness, sentience,
+or subjective experience. Safety-blocked and failed desires are kept precisely so
+the claims stay honest about what the mechanism does and does not show.

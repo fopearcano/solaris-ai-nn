@@ -32,8 +32,47 @@ EVIDENCE_SOURCES = (
     "assurance_case", "ops_incident", "auto_regeneration_repair",
     "inner_map_snapshot", "perceptual_ontogenesis_report",
     "semiogenesis_report", "sensorium_cognition_report",
-    "self_boundary_report",
+    "self_boundary_report", "desire_formation_report",
 )
+
+
+def desire_revision_proposals(df_status: Dict[str, Any],
+                              ) -> List[Dict[str, Any]]:
+    """Turn a desire-formation status into architecture *proposals* only.
+
+    Proposals are advisory: nothing here rewrites code or actuates anything. They
+    suggest valence-weighting, desire-threshold, arbitration-policy, no-op-policy,
+    conflict-handling, or safety-gate improvements based on observed desire
+    dynamics.
+    """
+    proposals: List[Dict[str, Any]] = []
+    desires = int(df_status.get("desire_candidate_count", 0) or 0)
+    inhibited = int(df_status.get("inhibited_desire_count", 0) or 0)
+    if desires and inhibited / max(1, desires) >= 0.6:
+        proposals.append({
+            "target": "desire_threshold",
+            "proposal": "lower readiness thresholds; most desires inhibited",
+            "reason": f"inhibited/desires = {inhibited}/{desires}",
+            "advisory_only": True})
+    if int(df_status.get("safety_blocked_desire_count", 0) or 0) > 0:
+        proposals.append({
+            "target": "safety_gate_improvements",
+            "proposal": "review desire sources that produced forbidden actions",
+            "reason": "safety-blocked desires observed",
+            "advisory_only": True})
+    if int(df_status.get("desire_conflict_count", 0) or 0) > 0:
+        proposals.append({
+            "target": "conflict_handling",
+            "proposal": "tune conflict resolution / LOGOS routing",
+            "reason": "desire conflicts present",
+            "advisory_only": True})
+    if int(df_status.get("no_op_count", 0) or 0) == 0 and desires:
+        proposals.append({
+            "target": "no_op_policy",
+            "proposal": "review no-op policy; no inhibition observed",
+            "reason": "no no-op decisions despite active desires",
+            "advisory_only": True})
+    return proposals
 
 
 def self_boundary_revision_proposals(sb_status: Dict[str, Any],

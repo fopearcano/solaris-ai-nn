@@ -89,6 +89,7 @@ class InnerMapObserver:
     semiogenesis: Any = None  # optional dict/object of semiogenesis status
     sensorium_cognition: Any = None  # optional dict/object of cognition status
     self_boundary: Any = None  # optional dict/object of self-boundary status
+    desire_formation: Any = None  # optional dict/object of desire-formation status
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -785,6 +786,17 @@ class InnerMapObserver:
                 model.self_boundary = self_boundary.self_boundary_status()
             elif hasattr(self_boundary, "snapshot"):
                 model.self_boundary = self_boundary.snapshot()
+        desire = self.desire_formation
+        if desire is None and self.runner is not None:
+            desire = getattr(self.runner, "desire_formation", None)
+        if desire is not None:
+            # Desire-formation status (operational desire/motivation view).
+            if isinstance(desire, dict):
+                model.desire_formation = dict(desire)
+            elif hasattr(desire, "desire_status"):
+                model.desire_formation = desire.desire_status()
+            elif hasattr(desire, "snapshot"):
+                model.desire_formation = desire.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

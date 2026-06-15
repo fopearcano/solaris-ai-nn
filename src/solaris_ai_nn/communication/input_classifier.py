@@ -331,6 +331,19 @@ SELF_BOUNDARY_QUERIES = (
     ("does this prove self-awareness", "sb_self_awareness"),
 )
 
+# Desire-formation queries (Prompt 51). Answered from the desire status; the
+# "what does solaris want?" / "are these emotions?" / "does this prove agency?"
+# questions are answered safely even with no desire run.
+DESIRE_QUERIES = (
+    ("what does solaris want", "df_want"),
+    ("what desires are active", "df_active"),
+    ("did solaris act", "df_acted"),
+    ("why did it choose no action", "df_no_action"),
+    ("were any desires blocked", "df_blocked"),
+    ("are these emotions", "df_emotions"),
+    ("does this prove agency", "df_agency"),
+)
+
 # Feeder-SDK queries (Prompt 45). Answered from the feeder monitor/manifest; the
 # control/start questions are answered safely even with no feeders attached.
 FEEDER_SDK_QUERIES = (
@@ -534,7 +547,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._self_boundary(lowered)
+        result = (self._desire_formation(lowered)
+                  or self._self_boundary(lowered)
                   or self._cognition(lowered)
                   or self._semiogenesis(lowered)
                   or self._ontogenesis(lowered)
@@ -690,6 +704,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _desire_formation(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in DESIRE_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"desire formation query {topic!r}"])
         return None
 
     @staticmethod

@@ -970,6 +970,44 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["run_step_count"],
             max_runtime_s=60.0))
 
+    # -- Desire formation profiles (Prompt 51) --------------------------------
+    # Operational valence -> push -> desire -> safe internal action readiness.
+    # Desire is operational pressure toward internal actions; no profile starts
+    # feeders/hardware or actuates the external world.
+    _desire_modules = ["bridge", "ecology", "governance", "ops", "inner_map",
+                       "plural_sensorium", "perceptual_metabolism",
+                       "desire_formation"]
+    for pid, desc, plan_only in (
+            ("desire_formation_fixture_short",
+             "Form valence/pushes/desires on a bounded fixture (desire on).",
+             False),
+            ("desire_conflict_demo",
+             "Drive competing desires and show conflicts feeding LOGOS.", False),
+            ("internal_action_readiness_demo",
+             "Show readiness gates selecting a safe internal action.", False),
+            ("no_action_arbitration_demo",
+             "Show no-op selected when evidence is insufficient.", False),
+            ("safety_blocked_desire_demo",
+             "Show a forbidden external action blocked by safety.", False),
+            ("desire_formation_report_only",
+             "Compile the desire formation report (analysis only).", True)):
+        if plan_only:
+            run_ctx = _ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                           max_duration_s=None)
+        else:
+            run_ctx = _ctx(RunMode.SHORT_DEMO, max_steps=120)
+        add(ScenarioProfile(
+            profile_id=pid, description=desc, run_context=run_ctx,
+            enabled_modules=list(_desire_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "internal actions only; no real-world actuation",
+                "desire is operational pressure, not emotion or human wanting",
+                "safety and governance can veto any desire"],
+            governance_requirements=["enable_plural_sensorium_fixture"],
+            expected_artifacts=["DESIRE_FORMATION_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=60.0))
+
     return profiles
 
 

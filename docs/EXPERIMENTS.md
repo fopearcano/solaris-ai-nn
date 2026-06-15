@@ -2623,3 +2623,38 @@ Simulation never becomes observation.
 Records an operational identity trace with a run identity and a restart/gap event,
 showing that identity is continuity metadata, NOT personhood, self-awareness, or
 subjective experience.
+
+## 289. Desire Formation Demo ✅ (implemented)
+
+**Run:** `python examples/run_desire_formation_demo.py --state-dir .solaris_ai_nn_desire/test_desire_formation`
+Feeds a fixture sensorium + metabolism into the desire-formation runtime, which
+assesses valence, forms pushes and desire candidates, arbitrates safely, runs
+allowed internal actions, and writes the report. Desire is operational pressure
+toward internal actions, NOT emotion or human wanting.
+
+## 290. Desire Conflict Demo ✅ (implemented)
+
+**Run:** `python examples/run_desire_conflict_demo.py --state-dir .solaris_ai_nn_desire/test_desire_conflict`
+Builds competing desire candidates and shows the conflict detector surfacing
+novelty-vs-stability and inspect-vs-consolidate conflicts that feed LOGOS tensions.
+
+## 291. Internal Action Readiness Demo ✅ (implemented)
+
+**Run:** `python examples/run_internal_action_readiness_demo.py --state-dir .solaris_ai_nn_desire/test_action_readiness`
+Shows a ready desire selecting a safe internal action, a low-confidence desire held
+back by readiness gates, and an unsafe (external) action being safety-blocked.
+Safety has veto power; no real-world actuation may be selected.
+
+## 292. No-Action Arbitration Demo ✅ (implemented)
+
+**Run:** `python examples/run_no_action_arbitration_demo.py --state-dir .solaris_ai_nn_desire/test_no_action`
+Drives a metabolic overload so the arbitrator forces conservative no-op inhibition,
+and preserves the no-op decisions as outcome traces. No-op is a valid organismic
+inhibition result.
+
+## 293. Safety-Blocked Desire Demo ✅ (implemented)
+
+**Run:** `python examples/run_safety_blocked_desire_demo.py --state-dir .solaris_ai_nn_desire/test_safety_blocked`
+Injects a desire whose expected action is a forbidden external actuation and shows
+it blocked by safety, recorded as a safety conflict and an outcome trace (never
+deleted).

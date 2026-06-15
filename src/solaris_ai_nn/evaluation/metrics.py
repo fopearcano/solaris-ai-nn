@@ -1857,3 +1857,44 @@ def self_boundary_metrics(sb: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "note": "operational self/world boundary; not subjective selfhood, not "
                 "personhood, and this proves no self-awareness",
     }
+
+
+def desire_formation_metrics(des: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective desire-formation metrics (operational valence/desire layer).
+
+    These describe operational valence gradients, pushes, desire candidates,
+    readiness/arbitration outcomes, internal actions, no-ops, conflicts, and
+    outcome success. Desire is operational pressure toward an internal action
+    tendency, NOT emotion, human wanting, free will, or agency; valence is
+    operational priority, not feeling.
+    """
+    if not des:
+        return {"present": False}
+    return {
+        "present": True,
+        "valence_gradient_count": int(des.get("valence_gradient_count", 0) or 0),
+        "push_count": int(des.get("push_count", 0) or 0),
+        "desire_candidate_count": int(des.get("desire_candidate_count", 0) or 0),
+        "active_desire_count": int(des.get("active_desire_count", 0) or 0),
+        "inhibited_desire_count": int(des.get("inhibited_desire_count", 0) or 0),
+        "deferred_desire_count": int(des.get("deferred_desire_count", 0) or 0),
+        "satisfied_desire_count": int(des.get("satisfied_desire_count", 0) or 0),
+        "failed_desire_count": int(des.get("failed_desire_count", 0) or 0),
+        "safety_blocked_desire_count": int(
+            des.get("safety_blocked_desire_count", 0) or 0),
+        "governance_blocked_desire_count": int(
+            des.get("governance_blocked_desire_count", 0) or 0),
+        "internal_action_count": int(des.get("internal_action_count", 0) or 0),
+        "no_op_count": int(des.get("no_op_count", 0) or 0),
+        "desire_conflict_count": int(des.get("desire_conflict_count", 0) or 0),
+        "desire_outcome_success_rate": float(
+            des.get("desire_outcome_success_rate", 0.0) or 0.0),
+        "desire_changed_perception_delta": float(
+            des.get("desire_changed_perception_delta", 0.0) or 0.0),
+        "desire_overload_reduction_score": float(
+            des.get("desire_overload_reduction_score", 0.0) or 0.0),
+        "is_emotion": False,
+        "is_free_will_or_agency": False,
+        "note": "operational desire/valence; not emotion, free will, agency, or "
+                "subjective experience",
+    }

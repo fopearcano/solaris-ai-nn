@@ -122,6 +122,11 @@ def _source_package(profile_id: str) -> str:
         return "sensorium_cognition"
     if pid.startswith("self_boundary"):
         return "self_boundary"
+    if pid.startswith("desire_formation") or pid.startswith("desire_") \
+            or pid in ("internal_action_readiness_demo",
+                       "no_action_arbitration_demo",
+                       "safety_blocked_desire_demo"):
+        return "desire_formation"
     return "conscience"
 
 
