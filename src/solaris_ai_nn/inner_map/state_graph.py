@@ -1416,4 +1416,26 @@ def build_default_state_graph() -> StateGraph:
                "attention modifies internal sampling priority only")
     g.add_edge("PluralSensoriumRuntime", "inner_map",
                "sensorium state feeds Inner MAP")
+
+    # Minimal field organism demo: the first observable organismic-perception
+    # demo (Prompt 42). It orchestrates the plural sensorium over bounded
+    # continuous flux and measures whether future perception changed.
+    for name, role in [
+        ("OrganismicDemoScenario", "structured-but-uncertain continuous flux"),
+        ("MinimalFieldOrganismRunner", "bounded demo runner; read-only path"),
+        ("ObservationTrace", "auditable record of what was perceived"),
+        ("PerceptionChangeProbe", "early-vs-late response delta"),
+        ("OrganismicDemoComparison", "full vs passive/no-adaptation baselines"),
+        ("MinimalFieldOrganismDemoReportBuilder", "what changed / did not prove"),
+        ("OrganismicDemoSafetyValidator", "no hardware/network/debug leakage"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("OrganismicDemoScenario", "MinimalFieldOrganismRunner",
+               "the scenario feeds the demo runner (via fixture feeders)")
+    g.add_edge("MinimalFieldOrganismRunner", "PluralSensoriumRuntime",
+               "the runner drives the plural sensorium through the adapter path")
+    g.add_edge("MinimalFieldOrganismRunner", "PerceptionChangeProbe",
+               "the runner runs the changed-perception probe")
+    g.add_edge("MinimalFieldOrganismRunner", "inner_map",
+               "demo state feeds Inner MAP")
     return g

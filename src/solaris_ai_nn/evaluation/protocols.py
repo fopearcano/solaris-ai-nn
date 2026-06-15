@@ -5297,6 +5297,86 @@ def plural_sensorium_safety_protocol(
     return _run(manifest, body)
 
 
+# -- Minimal field organism demo (Prompt 42) ----------------------------------
+
+def _run_organism_demo(state_dir, ticks=40, max_events=120):
+    """Run a small bounded organismic demo for protocol use."""
+    from ..organismic_demo import MinimalFieldOrganismRunner, OrganismicDemoConfig
+
+    base = state_dir or ".solaris_ai_nn_state/eval_organism"
+    runner = MinimalFieldOrganismRunner(
+        state_dir=base,
+        config=OrganismicDemoConfig(ticks=ticks, max_events_total=max_events,
+                                    seed=7))
+    runner.run()
+    return runner
+
+
+def minimal_field_organism_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The bounded organismic demo runs and reports its response structure."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        runner = _run_organism_demo(m.state_dir)
+        return {"organismic_demo": runner.demo_status()}
+
+    return _run(manifest, body)
+
+
+def changed_perception_probe_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The changed-perception probe reports an early-vs-late response delta."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        runner = _run_organism_demo(m.state_dir)
+        probe = runner.probe_result
+        return {"organismic_demo": {
+            "changed_perception_score": probe.changed_perception_score,
+            "changed": probe.changed,
+            "metric_count": len(probe.metrics)}}
+
+    return _run(manifest, body)
+
+
+def organismic_demo_comparison_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Adaptive sensorium vs passive parser vs no-adaptation baselines."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..organismic_demo import OrganismicDemoComparison, OrganismicDemoConfig
+
+        comp = OrganismicDemoComparison(
+            state_dir=(m.state_dir or ".sann_organism_cmp") + "/cmp",
+            config=OrganismicDemoConfig(ticks=40, max_events_total=120, seed=7))
+        result = comp.run()
+        return {"organismic_demo": {
+            "full_beats_passive": result.full_beats_passive,
+            "negative_result": result.negative_result,
+            "arm_count": len(result.arms)}}
+
+    return _run(manifest, body)
+
+
+def organismic_demo_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The demo refuses hardware, network, and debug-truth leakage."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..organismic_demo import OrganismicDemoSafetyValidator
+
+        v = OrganismicDemoSafetyValidator()
+        return {"organismic_demo": {
+            "hardware_blocked":
+                not v.validate_operation("open device driver").safe,
+            "network_blocked":
+                not v.validate_operation("http download").safe,
+            "debug_leak_blocked": not v.validate_no_debug_leakage(
+                ["x/cross_modal_truth_debug.jsonl"]).safe,
+            "controls_hardware": v.can_access_hardware()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -5495,4 +5575,8 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "cross_modal_sensorium": cross_modal_sensorium_protocol,
     "sensorium_grounding": sensorium_grounding_protocol,
     "plural_sensorium_safety": plural_sensorium_safety_protocol,
+    "minimal_field_organism": minimal_field_organism_protocol,
+    "changed_perception_probe": changed_perception_probe_protocol,
+    "organismic_demo_comparison": organismic_demo_comparison_protocol,
+    "organismic_demo_safety": organismic_demo_safety_protocol,
 }

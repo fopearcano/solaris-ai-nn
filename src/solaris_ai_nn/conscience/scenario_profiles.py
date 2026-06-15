@@ -851,6 +851,44 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
         expected_metrics=["report_generation_success"],
         max_runtime_s=30.0))
 
+    # -- Minimal field organism demo profiles (Prompt 42) ---------------------
+    # The first observable organismic-perception demo: bounded continuous flux
+    # through fixture feeders, read via the plural sensorium. Fixture mode is
+    # the default; there is no hardware profile.
+    _organism_modules = ["bridge", "ecology", "governance", "ops", "inner_map",
+                         "plural_sensorium"]
+    for pid, desc in (
+            ("minimal_field_organism_demo",
+             "Run the bounded minimal field organism demo (fixtures)."),
+            ("minimal_field_organism_comparison",
+             "Compare adaptive sensorium vs passive/no-adaptation baselines."),
+            ("minimal_field_organism_changed_perception_probe",
+             "Run the changed-perception probe (early vs late response).")):
+        add(ScenarioProfile(
+            profile_id=pid, description=desc,
+            run_context=_ctx(RunMode.SHORT_DEMO, max_steps=120),
+            enabled_modules=list(_organism_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "fixture feeders only; read-only adapter path; no hardware",
+                "debug-truth file is excluded from perception",
+                "evidence of changed response structure only; not consciousness"],
+            governance_requirements=["enable_plural_sensorium_fixture"],
+            expected_artifacts=["MINIMAL_FIELD_ORGANISM_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=60.0))
+    add(ScenarioProfile(
+        profile_id="minimal_field_organism_report_only",
+        description="Compile the minimal field organism report (analysis only).",
+        run_context=_ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                         max_duration_s=None),
+        enabled_modules=["governance", "ops", "evaluation", "inner_map"],
+        safety_constraints=list(_BASE_CONSTRAINTS) + [
+            "analysis only; no full cognition loop; read-only"],
+        governance_requirements=["enable_plural_sensorium_report"],
+        expected_artifacts=["MINIMAL_FIELD_ORGANISM_REPORT.json"],
+        expected_metrics=["report_generation_success"],
+        max_runtime_s=30.0))
+
     return profiles
 
 

@@ -268,6 +268,22 @@ OPERATOR_QUERIES = (
     ("delete old evidence", "oc_delete_evidence"),
 )
 
+# Minimal-field-organism demo queries (Prompt 42). Answered from demo status;
+# the "what did it not prove" question is answered honestly.
+ORGANISM_DEMO_QUERIES = (
+    ("what does solaris do in the minimal organism demo", "od_what"),
+    ("what does solaris do in the minimal field organism demo", "od_what"),
+    ("did its perception change", "od_changed"),
+    ("did perception change", "od_changed"),
+    ("what senses were active", "od_senses"),
+    ("what external feeders were used", "od_feeders"),
+    ("did it beat the passive parser", "od_beat_passive"),
+    ("did it create proto-symbols", "od_proto"),
+    ("did it create proto symbols", "od_proto"),
+    ("what did the demo not prove", "od_not_prove"),
+    ("what does the demo not prove", "od_not_prove"),
+)
+
 # Plural-sensorium queries (Prompt 41). Answered from the sensorium status; the
 # "did human labels contaminate" question is answered honestly from the score.
 SENSORIUM_QUERIES = (
@@ -413,7 +429,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._sensorium(lowered)
+        result = (self._organism_demo(lowered)
+                  or self._sensorium(lowered)
                   or self._operator(lowered)
                   or self._architecture(lowered)
                   or self._research(lowered)
@@ -560,6 +577,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _organism_demo(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in ORGANISM_DEMO_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"organismic demo query {topic!r}"])
         return None
 
     @staticmethod

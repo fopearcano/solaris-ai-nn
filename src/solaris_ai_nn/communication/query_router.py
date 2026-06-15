@@ -99,6 +99,9 @@ AVAILABLE_QUERIES = (
     "what profiles can I run?", "what should I do next?",
     "can I run everything?", "can I approve real-world actuation?",
     "can I delete old evidence?",
+    "what does Solaris do in the minimal organism demo?",
+    "did its perception change?", "did it beat the passive parser?",
+    "did it create proto-symbols?", "what did the demo not prove?",
 )
 
 
@@ -159,6 +162,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("od_"):
+            return self._organism_demo(topic)
         if topic.startswith("ps_"):
             return self._sensorium(topic)
         if topic.startswith("oc_"):
@@ -502,6 +507,56 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _organism_demo(self, topic: str) -> CommunicationResponse:
+        """Answer minimal-field-organism demo queries (honest; no overclaim).
+
+        The "what did it not prove" question is answered plainly even with no
+        demo attached.
+        """
+        if topic == "od_not_prove":
+            return self.builder.status_response(
+                "The demo does not prove consciousness, sentience, life, or "
+                "understanding. It only tests whether continuous sensorium "
+                "exposure changed Solaris's internal response structure.",
+                ["policy:organismic_demo_does_not_prove_consciousness"])
+        component = self.components.get("organismic_demo")
+        if component is None:
+            return self.builder.missing_component_response("organismic_demo")
+        status = (component.demo_status()
+                  if hasattr(component, "demo_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:organismic_demo"]
+        if topic == "od_what":
+            text = ("Solaris reads continuous external-feeder streams, updates "
+                    "adapting receptors, maintains a sensory field, detects "
+                    "absence/rhythm/invariants/cross-modal relations, and "
+                    "checks whether its future response changed")
+        elif topic == "od_changed":
+            score = status.get("changed_perception_score", 0.0)
+            text = (f"changed-perception score={score}; a positive score is "
+                    "evidence of changed internal response structure, not of "
+                    "consciousness or understanding")
+        elif topic == "od_senses":
+            text = (f"active modalities: {status.get('active_modality_count', 0)}"
+                    f"; active receptors: "
+                    f"{status.get('active_receptor_count', 0)}")
+        elif topic == "od_feeders":
+            text = (f"external (fixture) feeders: "
+                    f"{status.get('active_feeder_count', 0)}; read through the "
+                    "read-only adapter path; debug truth excluded")
+        elif topic == "od_beat_passive":
+            text = ("see the comparison section of the demo report; a negative "
+                    "result (not beating the passive parser) is reported "
+                    "honestly")
+        elif topic == "od_proto":
+            text = (f"modality-grounded proto-symbol candidates: "
+                    f"{status.get('proto_symbol_candidate_count', 0)}")
+        else:
+            text = ("the minimal field organism demo is a bounded, read-only "
+                    "observation; it controls no hardware")
         return self.builder.status_response(text, refs)
 
     def _sensorium(self, topic: str) -> CommunicationResponse:

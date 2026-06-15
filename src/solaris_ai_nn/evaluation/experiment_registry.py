@@ -283,6 +283,14 @@ DESCRIPTIONS = {
     "sensorium_grounding": "feature grounding; human-label contamination tracked",
     "plural_sensorium_safety":
         "no hardware/SDR/capture/network/source modification",
+    "minimal_field_organism":
+        "bounded organismic demo; continuous flux changes response structure",
+    "changed_perception_probe":
+        "early-vs-late response delta; honest about null results",
+    "organismic_demo_comparison":
+        "adaptive sensorium vs passive parser / no-adaptation baselines",
+    "organismic_demo_safety":
+        "no hardware/network; debug-truth excluded from perception",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -422,6 +430,11 @@ class ExperimentRegistry:
                         "receptor_adaptation", "cross_modal_sensorium",
                         "sensorium_grounding")
             or bool(merged.get("plural_sensorium", False)))
+        features["organismic_demo"] = (
+            name.startswith("minimal_field_organism")
+            or name.startswith("changed_perception")
+            or name.startswith("organismic_demo")
+            or bool(merged.get("organismic_demo", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

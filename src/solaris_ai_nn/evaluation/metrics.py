@@ -1442,3 +1442,52 @@ def plural_sensorium_metrics(sensorium: Optional[Dict[str, Any]],
         "note": "read-only organismic perception; no hardware, no human-label "
                 "ground truth",
     }
+
+
+def organismic_demo_metrics(demo: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective minimal-field-organism demo metrics (observation layer).
+
+    These describe the bounded organismic-perception demo: how many feeders,
+    receptors, and modalities were active, the structure detected (baseline
+    shifts, absences, rhythms, invariants, cross-modal relations, proto-symbols,
+    attention shifts), the changed-perception score, the false-pattern rate, the
+    human-label contamination score, and the safety-block count. A positive
+    changed-perception score is evidence of changed internal response structure,
+    not of consciousness or understanding.
+    """
+    if not demo:
+        return {"present": False}
+    return {
+        "present": True,
+        "organismic_demo_run_count": int(
+            demo.get("organismic_demo_run_count", 1) or 0),
+        "organismic_demo_active_modality_count": int(
+            demo.get("active_modality_count", 0) or 0),
+        "organismic_demo_active_receptor_count": int(
+            demo.get("active_receptor_count", 0) or 0),
+        "organismic_demo_baseline_shift_count": int(
+            demo.get("baseline_shift_count", 0) or 0),
+        "organismic_demo_absence_event_count": int(
+            demo.get("absence_event_count", 0) or 0),
+        "organismic_demo_rhythm_signature_count": int(
+            demo.get("rhythm_signature_count", 0) or 0),
+        "organismic_demo_invariant_candidate_count": int(
+            demo.get("invariant_candidate_count", 0) or 0),
+        "organismic_demo_cross_modal_relation_count": int(
+            demo.get("cross_modal_relation_count", 0) or 0),
+        "organismic_demo_attention_shift_count": int(
+            demo.get("attention_shift_count", 0) or 0),
+        "organismic_demo_proto_symbol_candidate_count": int(
+            demo.get("proto_symbol_candidate_count", 0) or 0),
+        "organismic_demo_changed_perception_score": float(
+            demo.get("changed_perception_score", 0.0) or 0.0),
+        "organismic_demo_false_pattern_rate": float(
+            demo.get("false_pattern_rate", 0.0) or 0.0),
+        "organismic_demo_human_label_contamination_score": float(
+            demo.get("human_label_contamination_score", 0.0) or 0.0),
+        "organismic_demo_safety_block_count": int(
+            demo.get("safety_block_count", 0) or 0),
+        "controls_hardware": False,
+        "note": "bounded read-only organismic-perception demo; changed response "
+                "structure is not consciousness or understanding",
+    }

@@ -201,8 +201,34 @@ class PluralSensoriumRuntime:
         for envelope in new_events:
             self._ingest(envelope, now)
 
-        # Silence + absence for receptors that did not fire this poll.
         fired = {e.source_id for e in new_events}
+        field_state = self._advance_tick(fired, now)
+        return {"events": len(new_events), "field": field_state.to_dict()}
+
+    def observe_envelope(self, envelope: SensoryEventEnvelope,
+                         now: Optional[float] = None) -> None:
+        """Ingest one externally-read envelope (read-only adapter path).
+
+        The caller is expected to have read the envelope through a stream
+        adapter; this only updates internal perceptual state.
+        """
+        self._ingest(envelope, now if now is not None else envelope.timestamp)
+
+    def advance_tick(self, fired_source_ids: Optional[List[str]] = None,
+                     now: Optional[float] = None) -> Dict[str, Any]:
+        """Run one perceptual tick (silence/absence/flux/rhythm/field/attention).
+
+        Use after :meth:`observe_envelope` to advance the continuous field by
+        one tick without re-reading any feeder.
+        """
+        import time as _time
+
+        state = self._advance_tick(set(fired_source_ids or []),
+                                   now if now is not None else _time.time())
+        return state.to_dict()
+
+    def _advance_tick(self, fired, now):
+        # Silence + absence for receptors that did not fire this tick.
         for receptor in self.receptors.values():
             if receptor.source_id not in fired:
                 receptor.observe_silence()
@@ -243,7 +269,7 @@ class PluralSensoriumRuntime:
 
         # Field deformation as a whole-field flux event.
         self.flux.detect_field_deformation(field_state.stability)
-        return {"events": len(new_events), "field": field_state.to_dict()}
+        return field_state
 
     def _ingest(self, envelope: SensoryEventEnvelope, now: float) -> None:
         self.events_ingested += 1

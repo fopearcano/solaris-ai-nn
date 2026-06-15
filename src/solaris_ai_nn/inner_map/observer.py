@@ -80,6 +80,7 @@ class InnerMapObserver:
     architecture_evolution: Any = None  # optional dict/object of arch status
     operator_console: Any = None  # optional dict/object of operator-console status
     plural_sensorium: Any = None  # optional dict/object of plural-sensorium status
+    organismic_demo: Any = None  # optional dict/object of organismic-demo status
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -677,6 +678,17 @@ class InnerMapObserver:
                 model.plural_sensorium = sensorium.plural_sensorium_status()
             elif hasattr(sensorium, "snapshot"):
                 model.plural_sensorium = sensorium.snapshot()
+        demo = self.organismic_demo
+        if demo is None and self.runner is not None:
+            demo = getattr(self.runner, "organismic_demo", None)
+        if demo is not None:
+            # Minimal-field-organism demo status (read-only observation view).
+            if isinstance(demo, dict):
+                model.organismic_demo = dict(demo)
+            elif hasattr(demo, "demo_status"):
+                model.organismic_demo = demo.demo_status()
+            elif hasattr(demo, "snapshot"):
+                model.organismic_demo = demo.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

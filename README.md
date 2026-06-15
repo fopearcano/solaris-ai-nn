@@ -393,6 +393,12 @@ python examples/run_receptor_adaptation_demo.py           # baseline learning, f
 python examples/run_cross_modal_sensorium_demo.py         # RF burst -> vibration; cross-modal relations
 python examples/run_human_vs_nonhuman_sensorium_demo.py   # human-like vs non-human vs mixed -> different structure
 python examples/run_sensorium_grounding_demo.py           # invariant -> modality-grounded proto-symbol (no human label)
+
+# Minimal field organism: the first observable organismic-perception demo
+python examples/run_minimal_field_organism_demo.py        # continuous flux -> changed future perception
+python examples/run_changed_perception_probe_demo.py      # early vs late response delta (honest about nulls)
+python examples/run_organismic_comparison_demo.py         # full adaptive sensorium vs passive parser baselines
+python examples/run_external_feeder_contract_demo.py      # read-only feeder envelopes + provenance (no hardware)
 ```
 
 The read-only sensory membrane and Pilot-2 also run as governed conscience
@@ -738,6 +744,20 @@ over time, a learned **baseline** drifts, and detectors find flux / absence /
 rhythm / invariants / cross-modal relations that can become **modality-grounded
 proto-symbols**. The research question is:
 *What kind of internal structure emerges from a continuous peculiar sensorium?*
+
+The **minimal field organism demo** (`organismic_demo/`) is the first *observable*
+behaviour built on the plural sensorium: Solaris is run as a minimal evolving
+organism exposed to continuous environmental flux. It generates external-feeder-
+style fixture files, reads them through the same read-only sensory adapter path,
+lets receptors adapt and a continuous sensory field evolve, detects
+absences/rhythms/invariants/cross-modal relations, forms modality-grounded
+proto-symbol candidates, and then runs a **changed-perception probe** that asks
+whether the organism's future response actually changed after exposure. It
+compares the full adaptive sensorium against a passive event-list parser and
+no-adaptation/fixed-attention baselines, and reports negative results honestly. A
+positive changed-perception score is **evidence of changed internal response
+structure only -- not consciousness, sentience, life, or understanding**, and the
+cross-modal debug-truth file is kept out of perception entirely.
 
 > **Warning:** the plural sensorium adds **no hardware drivers**. It never accesses
 > an SDR, microphone, camera, or any device; makes no network call; decodes no
@@ -1174,6 +1194,9 @@ src/solaris_ai_nn/
                 perceptual baseline, flux/absence/rhythm/invariant/cross-modal
                 detection, adaptive attention, grounding analyzer, runtime,
                 reports, safety validator (no hardware/SDR/capture/network)
+  organismic_demo/ first observable organismic-perception demo: scenario,
+                fixture feeders, field runner, observation trace, changed-
+                perception probe, comparison arms, demo report, safety validator
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

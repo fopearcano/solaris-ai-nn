@@ -97,6 +97,8 @@ _SOURCE_RULES = (
     ("operator_approval", "operator_console_artifact"),
     ("operator_export_bundle", "operator_console_artifact"),
     ("operator_console_artifact", "operator_console_artifact"),
+    ("organismic_demo", "operator_console_artifact"),
+    ("minimal_field_organism", "operator_console_artifact"),
     ("simulated_environment", "simulated_environment_input"),
     ("operator", "generated_by_operator"),
     ("approval", "generated_by_operator"),

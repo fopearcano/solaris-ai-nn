@@ -382,6 +382,12 @@ class InnerMapModel:
     # human_label_contamination_score, latest_plural_sensorium_report_path. The
     # sensorium is read-only; it controls no hardware and holds no authority.
     plural_sensorium: Optional[Dict[str, Any]] = None
+    # Minimal-field-organism demo status (Prompt 42); None when not attached.
+    # Keys: organismic_demo_enabled, latest_demo_run_id, active_feeder_count,
+    # active_receptor_count, changed_perception_score, cross_modal_relation_count,
+    # proto_symbol_candidate_count, latest_report_path,
+    # latest_negative_result_count. The demo is a bounded, read-only observation.
+    organismic_demo: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

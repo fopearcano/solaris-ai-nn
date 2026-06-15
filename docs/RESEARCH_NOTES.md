@@ -1608,3 +1608,42 @@ and they are typed by the modality that grounded them (`rf_grounded_symbol`,
 `echo_grounded_symbol`, `absence_grounded_symbol`, `cross_modal_symbol`). The
 point is to let an alien vocabulary form rather than to translate everything back
 into human words.
+
+## Phase 42 — Minimal field organism demo
+
+**Why a closed nursery is insufficient.** The developmental nursery generates its
+own stimuli, which is convenient and circular: the system is graded on a world it
+helped author. A nursery-only demo can look like learning while only rehearsing a
+script. The minimal field organism demo deliberately avoids using nursery-only
+generated events as its main scenario; instead it ingests external-feeder-style
+files through the read-only sensory path, so the world is something the organism
+*reads*, not something it writes.
+
+**Why environmental flux matters.** Real perception is continuous and partly
+unpredictable. The demo's scenario is structured but not fully scripted -- rhythms
+have jitter, expected events go missing, cross-modal pairs are delayed, and some
+"patterns" are false. That uncertainty is the point: a system that only handles a
+perfectly clean toy world has learned the toy, not perception. The continuous
+sensory field, not a list of events, is what carries state across ticks.
+
+**How peculiar senses shape internal categories.** Because the sensorium is
+plural, the categories that emerge are modality-native: an `rf_grounded_symbol`, an
+`echo_grounded_symbol`, an `absence_grounded_symbol` -- not human object labels.
+The comparison arms (human-like-only vs non-human-only vs mixed) exist to test
+whether the *shape* of what emerges depends on which senses were available, which
+is the operational core of the Nagel-style question.
+
+**Changed future perception as the first meaningful observable effect.** The
+honest first claim is small and testable: after continuous exposure, does the
+organism respond differently to a similar stimulus than it did at the start? The
+changed-perception probe measures exactly that across receptors, baselines,
+attention, invariants, and proto-symbols. A positive score is evidence of changed
+internal response *structure* -- explicitly not consciousness, understanding, or
+sentience.
+
+**Why negative results matter.** The comparison includes a passive event-list
+parser precisely so the demo can expose its own decorative plumbing: if the full
+adaptive sensorium does not beat a parser that merely lists events, the report
+says so. A demo that could only ever report success would prove nothing; the
+ability to report a null or negative result is what makes a positive result worth
+anything.

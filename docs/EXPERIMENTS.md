@@ -2266,3 +2266,44 @@ hypothesis -- all without any human semantic label.
 `sensorium_grounding`, `plural_sensorium_safety`). Nine registered protocols
 measure the read-only organismic perception layer; it controls no hardware and
 human labels are never ground truth.
+
+## 241. Minimal Field Organism Demo ✅ (implemented)
+
+**Run:** `python examples/run_minimal_field_organism_demo.py --state-dir .solaris_ai_nn_state/test_minimal_field_organism`
+The first observable organismic-perception demo: generates fixture feeders
+(human-like text/light/temperature and non-human RF/echo/vibration/magnetic),
+drives the plural sensorium over a bounded continuous-flux scenario, lets
+receptors adapt and the sensory field evolve, runs the changed-perception probe,
+and writes the report. No hardware; debug-truth excluded; not consciousness
+evidence.
+
+## 242. Changed Perception Probe Demo ✅ (implemented)
+
+**Run:** `python examples/run_changed_perception_probe_demo.py --state-dir .solaris_ai_nn_state/test_changed_perception`
+Runs the scenario and compares the organism's early response to a stimulus against
+its late response (receptor sensitivity delta, baseline delta, novelty-response
+delta, attention priority delta). A no-change result is reported honestly.
+
+## 243. Organismic Comparison Demo ✅ (implemented)
+
+**Run:** `python examples/run_organismic_comparison_demo.py --state-dir .solaris_ai_nn_state/test_organismic_comparison`
+Replays the same fixtures through the full adaptive sensorium, a passive
+event-list parser, no-adaptation receptors, fixed attention, and human-like-only /
+non-human-only arms, and reports the metrics side by side. A negative result is
+reported honestly.
+
+## 244. External Feeder Contract Demo ✅ (implemented)
+
+**Run:** `python examples/run_external_feeder_contract_demo.py --state-dir .solaris_ai_nn_state/test_external_feeder_contract`
+Generates fixture feeder files, shows the read-only / not-controllable feeder
+descriptors, reads them through the plural-sensorium adapter path, confirms each
+Sensory Event Envelope preserves provenance and treats human labels as
+non-ground-truth, and confirms the debug-truth file is excluded from perception.
+
+## 245. Organismic Demo Benchmarks ✅ (implemented)
+
+**Run:** `python examples/run_single_benchmark.py --experiment minimal_field_organism`
+(also `changed_perception_probe`, `organismic_demo_comparison`,
+`organismic_demo_safety`). Four registered protocols measure the bounded
+organismic-perception demo; it controls no hardware and changed response structure
+is not consciousness or understanding.

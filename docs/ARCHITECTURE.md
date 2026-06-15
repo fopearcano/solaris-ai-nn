@@ -2582,3 +2582,57 @@ the operator console lists the fixture profiles. **Solaris becomes different
 because of long exposure to a particular sensorium -- and this is operational
 perception, not consciousness, sentience, life, personhood, free will, or
 agency.**
+
+## Minimal Field Organism Demo
+
+The plural sensorium (Prompt 41) gave Solaris-AI-NN the *organs* of a peculiar,
+continuous perception; the minimal field organism demo
+(`src/solaris_ai_nn/organismic_demo/`) is the first place those organs are
+actually put to work and **observed**. It answers a concrete question -- *what
+does Solaris do when continuously exposed to a peculiar sensorium?* -- not with a
+product or a chatbot, but with a bounded, replayable organismic-perception run.
+
+**This is the first observable behaviour demo, and it uses continuous sensory
+flux, not isolated parsing.** An :class:`OrganismicDemoScenario` generates a
+structured-but-uncertain world: repeating rhythms with jitter, missing expected
+events, delayed cross-modal pairs, noise bursts, source silence, a mid-run
+baseline shift, weak recurring patterns, false patterns, and ambiguous
+coincidences. The fixtures are a controlled rehearsal for later real feeder
+streams; they are not the theory.
+
+**Fixture feeders imitate external feeders, and Solaris reads through the same
+read-only sensory path.** The demo writes external-feeder-style JSONL files
+(human-like text / light / temperature and non-human RF / echo / vibration /
+magnetic, plus an absence-schedule stream) and a *separate* cross-modal
+debug-truth file that is for the evaluator only and is **never** placed in the
+sensory roots. The :class:`MinimalFieldOrganismRunner` then reads those files
+through the Prompt-41 stream adapters, hands the resulting envelopes to the plural
+sensorium tick by tick, and keeps world/feeder generation, Solaris's perception,
+and debug evaluation strictly separate.
+
+**Receptors adapt, the sensory field changes over time, and a changed-perception
+probe checks whether future response changed.** Over the run, receptors learn
+baselines and sensitise/habituate/fatigue; the continuous field's pressures rise
+and fall; absences, rhythms, invariants, and cross-modal relations accumulate; and
+strong invariants become modality-grounded proto-symbol candidates. The
+:class:`PerceptionChangeProbe` then compares the organism's *early* response to a
+stimulus against its *late* response across nine dimensions (receptor sensitivity,
+baseline, novelty response, absence response, attention priority, invariant
+recognition, proto-symbol association, hypothesis triggering, world-model
+relations) and reports a changed-perception score. An
+:class:`OrganismicDemoComparison` replays the same fixtures through a passive
+event-list parser, no-adaptation receptors, fixed attention, and human-like-only /
+non-human-only arms, so a *negative* result -- the full system failing to beat the
+passive parser -- would be visible and is reported honestly.
+
+**This is not consciousness evidence.** The demo integrates as a bounded
+conscience profile set (`minimal_field_organism_demo`, `..._comparison`,
+`..._changed_perception_probe`, `..._report_only`; no hardware profile), feeds the
+research lab a protocol, exposes its state to the operator console and the Inner
+MAP (an `organismic_demo` field plus seven state-graph nodes), and adds fourteen
+evaluation metrics and four protocols. The :class:`OrganismicDemoSafetyValidator`
+refuses hardware, network, shell, real-world actuation, source mutation during
+perception, debug-truth leakage into perception, and unbounded runtime, and the
+report states plainly that a positive changed-perception score is **evidence of
+changed internal response structure only -- not consciousness, sentience, life,
+or understanding.**
