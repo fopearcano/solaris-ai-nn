@@ -1713,3 +1713,52 @@ def perceptual_ontogenesis_metrics(ont: Optional[Dict[str, Any]],
                 "and world formation is not subjective experience or "
                 "understanding",
     }
+
+
+def semiogenesis_metrics(sem: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective semiogenesis metrics (internal-sign-formation layer).
+
+    These describe how internal signs form from proto-concepts: sign counts and
+    stability, families, private-syntax patterns, internal utterances, modality-
+    native vs cross-modal vs absence vs contaminated ratios, compression/
+    prediction/attention utility, drift, and gloss dependence. Signs are
+    operational markers, not human words; private syntax is internal relation
+    structure, not human grammar; gloss is approximate, never ground truth.
+    """
+    if not sem:
+        return {"present": False}
+    return {
+        "present": True,
+        "internal_sign_count": int(sem.get("internal_sign_count", 0) or 0),
+        "stable_sign_count": int(sem.get("stable_sign_count", 0) or 0),
+        "ambiguous_sign_count": int(sem.get("ambiguous_sign_count", 0) or 0),
+        "rejected_sign_count": int(sem.get("rejected_sign_count", 0) or 0),
+        "sign_family_count": int(sem.get("sign_family_count", 0) or 0),
+        "private_syntax_pattern_count": int(
+            sem.get("private_syntax_pattern_count", 0) or 0),
+        "internal_utterance_count": int(
+            sem.get("internal_utterance_count", 0) or 0),
+        "modality_native_sign_ratio": float(
+            sem.get("modality_native_sign_ratio", 0.0) or 0.0),
+        "cross_modal_sign_ratio": float(
+            sem.get("cross_modal_sign_ratio", 0.0) or 0.0),
+        "absence_sign_ratio": float(sem.get("absence_sign_ratio", 0.0) or 0.0),
+        "contaminated_sign_ratio": float(
+            sem.get("contaminated_sign_ratio", 0.0) or 0.0),
+        "sign_compression_utility_mean": float(
+            sem.get("sign_compression_utility_mean", 0.0) or 0.0),
+        "sign_prediction_utility_mean": float(
+            sem.get("sign_prediction_utility_mean", 0.0) or 0.0),
+        "sign_attention_utility_mean": float(
+            sem.get("sign_attention_utility_mean", 0.0) or 0.0),
+        "sign_drift_count": int(sem.get("sign_drift_count", 0) or 0),
+        "gloss_dependence_score": float(
+            sem.get("gloss_dependence_score", 0.0) or 0.0),
+        "sign_explosion_warning_count": int(
+            sem.get("sign_explosion_warning_count", 0) or 0),
+        "signs_are_words": False,
+        "private_syntax_is_human_grammar": False,
+        "note": "internal sign formation; signs are not human words, private "
+                "syntax is not human grammar, and this proves no language "
+                "understanding",
+    }

@@ -67,3 +67,5 @@ artifacts/
 .sann_dep/
 .solaris_ai_nn_ontogenesis/
 .sann_ontogenesis/
+.solaris_ai_nn_semiogenesis/
+.sann_semiogenesis/

@@ -2513,3 +2513,39 @@ world formed is structural, NOT subjective experience or qualia.
 Contrasts a feature-grounded concept with a human-label contaminated one and runs
 the contamination analyzer. Human-labelled concepts are allowed but marked, and
 contamination lowers grounding/stability; human labels are never ground truth.
+
+## 274. Semiogenesis Demo ✅ (implemented)
+
+**Run:** `python examples/run_semiogenesis_demo.py --state-dir .solaris_ai_nn_semiogenesis/test_semiogenesis`
+Feeds a mixed fixture sensorium through ontogenesis into the semiogenesis runtime,
+which conservatively births internal signs (`rf:01`, `vib:02`, ...), clusters them
+into families, derives a private syntax, composes internal utterances, and writes
+the report. Signs are operational markers, NOT human words.
+
+## 275. Sign Birth Utility Demo ✅ (implemented)
+
+**Run:** `python examples/run_sign_birth_utility_demo.py --state-dir .solaris_ai_nn_semiogenesis/test_sign_birth_utility`
+Shows a stable, useful proto-concept producing a stable sign while isolated noise
+produces none, and a low-utility sign being demoted from stable (never deleted).
+Useful does not mean true or understood.
+
+## 276. Private Syntax Demo ✅ (implemented)
+
+**Run:** `python examples/run_private_syntax_demo.py --state-dir .solaris_ai_nn_semiogenesis/test_private_syntax`
+Builds internal signs (including an absence sign) and shows the private syntax
+patterns and internal utterances that emerge from their relations. This is internal
+sign-relation structure, NOT human grammar (no subject/verb/object).
+
+## 277. Sign Drift Demo ✅ (implemented)
+
+**Run:** `python examples/run_sign_drift_demo.py --state-dir .solaris_ai_nn_semiogenesis/test_sign_drift`
+Observes one sign twice with changed grounding (new modality + source + rising
+ambiguity) and shows the visible drift report and its LOGOS-tension/concept-split
+recommendation. Drift is made visible, not automatically bad.
+
+## 278. Gloss Contamination Demo ✅ (implemented)
+
+**Run:** `python examples/run_gloss_contamination_demo.py --state-dir .solaris_ai_nn_semiogenesis/test_gloss_contamination`
+Builds a feature-grounded sign and a human-label contaminated sign, generates
+approximate debug glosses, and runs the contamination analyzer. Gloss is approximate
+and never ground truth; contaminated signs remain usable but are marked.

@@ -45,6 +45,14 @@ class SensoriumWorldSignature:
     concept_relation_profile: Dict[str, Any] = field(default_factory=dict)
     human_label_concept_contamination: float = 0.0
     modality_native_concept_ratio: float = 0.0
+    # Semiogenesis profile (Prompt 48); empty/zero when not attached.
+    sign_family_distribution: Dict[str, int] = field(default_factory=dict)
+    modality_native_sign_ratio: float = 0.0
+    cross_modal_sign_ratio: float = 0.0
+    absence_sign_ratio: float = 0.0
+    contaminated_sign_ratio: float = 0.0
+    private_syntax_density: float = 0.0
+    gloss_dependence_score: float = 0.0
     limitations: List[str] = field(default_factory=lambda: [
         "An observable structural fingerprint, not subjective experience.",
         "Not qualia; this does not describe what Solaris feels.",
@@ -83,6 +91,13 @@ class SensoriumWorldSignature:
             "human_label_concept_contamination":
                 self.human_label_concept_contamination,
             "modality_native_concept_ratio": self.modality_native_concept_ratio,
+            "sign_family_distribution": dict(self.sign_family_distribution),
+            "modality_native_sign_ratio": self.modality_native_sign_ratio,
+            "cross_modal_sign_ratio": self.cross_modal_sign_ratio,
+            "absence_sign_ratio": self.absence_sign_ratio,
+            "contaminated_sign_ratio": self.contaminated_sign_ratio,
+            "private_syntax_density": self.private_syntax_density,
+            "gloss_dependence_score": self.gloss_dependence_score,
             "limitations": list(self.limitations),
             "note": "observable structural fingerprint; not subjective "
                     "experience, not qualia",
@@ -95,7 +110,8 @@ class WorldSignatureBuilder:
 
     def build(self, arm_id: str, condition: str, runtime: Any, *,
               probe_result: Any = None,
-              ontogenesis: Any = None) -> SensoriumWorldSignature:
+              ontogenesis: Any = None,
+              semiogenesis: Any = None) -> SensoriumWorldSignature:
         rt = runtime
         if rt is None:
             return SensoriumWorldSignature(arm_id=arm_id, condition=condition)
@@ -171,6 +187,35 @@ class WorldSignatureBuilder:
             ont_native_ratio = ont_status.get(
                 "modality_native_concept_ratio", 0.0)
 
+        # Semiogenesis profile (optional).
+        sign_families: Dict[str, int] = {}
+        sign_native_ratio = 0.0
+        sign_cross_modal_ratio = 0.0
+        sign_absence_ratio = 0.0
+        sign_contaminated_ratio = 0.0
+        syntax_density = 0.0
+        gloss_dependence = 0.0
+        if semiogenesis is not None:
+            sem_status = (semiogenesis.semiogenesis_status()
+                          if hasattr(semiogenesis, "semiogenesis_status")
+                          else semiogenesis if isinstance(semiogenesis, dict)
+                          else {})
+            if hasattr(semiogenesis, "family_builder"):
+                sign_families = semiogenesis.family_builder.distribution()
+            sign_native_ratio = sem_status.get("modality_native_sign_ratio",
+                                               0.0)
+            sign_cross_modal_ratio = sem_status.get("cross_modal_sign_ratio",
+                                                    0.0)
+            sign_absence_ratio = sem_status.get("absence_sign_ratio", 0.0)
+            sign_contaminated_ratio = sem_status.get("contaminated_sign_ratio",
+                                                     0.0)
+            patterns = sem_status.get("private_syntax_pattern_count", 0)
+            signs = sem_status.get("internal_sign_count", 0)
+            if signs >= 2:
+                syntax_density = round(
+                    min(1.0, patterns / (signs * (signs - 1) / 2)), 4)
+            gloss_dependence = sem_status.get("gloss_dependence_score", 0.0)
+
         return SensoriumWorldSignature(
             arm_id=arm_id, condition=condition,
             modality_distribution=modality_dist,
@@ -196,7 +241,14 @@ class WorldSignatureBuilder:
             concept_decay_profile=decay_profile,
             concept_relation_profile=relation_profile,
             human_label_concept_contamination=ont_contamination,
-            modality_native_concept_ratio=ont_native_ratio)
+            modality_native_concept_ratio=ont_native_ratio,
+            sign_family_distribution=sign_families,
+            modality_native_sign_ratio=sign_native_ratio,
+            cross_modal_sign_ratio=sign_cross_modal_ratio,
+            absence_sign_ratio=sign_absence_ratio,
+            contaminated_sign_ratio=sign_contaminated_ratio,
+            private_syntax_density=syntax_density,
+            gloss_dependence_score=gloss_dependence)
 
 
 @dataclass

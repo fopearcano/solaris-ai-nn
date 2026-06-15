@@ -31,7 +31,49 @@ EVIDENCE_SOURCES = (
     "pilot2_report", "pilot3_report", "safety_invariant_report",
     "assurance_case", "ops_incident", "auto_regeneration_repair",
     "inner_map_snapshot", "perceptual_ontogenesis_report",
+    "semiogenesis_report",
 )
+
+
+def semiogenesis_revision_proposals(sem_status: Dict[str, Any],
+                                    ) -> List[Dict[str, Any]]:
+    """Turn a semiogenesis status into architecture *proposals* only.
+
+    Proposals are advisory: nothing here rewrites code or actuates anything. They
+    suggest semiogenesis tuning, proto-language deprecation/merge, sign-birth
+    threshold changes, contamination mitigation, sign-explosion control, or
+    private-syntax revision based on the observed sign formation.
+    """
+    proposals: List[Dict[str, Any]] = []
+    contamination = float(sem_status.get("contaminated_sign_ratio", 0.0) or 0.0)
+    gloss_dep = float(sem_status.get("gloss_dependence_score", 0.0) or 0.0)
+    if contamination >= 0.5 or gloss_dep >= 0.5:
+        proposals.append({
+            "target": "contamination_mitigation",
+            "proposal": "down-weight human-label-contaminated signs / glosses",
+            "reason": f"contaminated_sign_ratio {contamination}, "
+                      f"gloss_dependence {gloss_dep}",
+            "advisory_only": True})
+    if int(sem_status.get("sign_explosion_warning_count", 0) or 0) > 0:
+        proposals.append({
+            "target": "sign_explosion_control",
+            "proposal": "tighten max_signs_per_tick / sign-birth thresholds",
+            "reason": "sign-explosion warnings observed",
+            "advisory_only": True})
+    if float(sem_status.get("modality_native_sign_ratio", 0.0) or 0.0) < 0.3:
+        proposals.append({
+            "target": "semiogenesis_tuning",
+            "proposal": "raise modality-native sign-birth priority",
+            "reason": "few modality-native signs formed",
+            "advisory_only": True})
+    if int(sem_status.get("private_syntax_pattern_count", 0) or 0) == 0 \
+            and int(sem_status.get("internal_sign_count", 0) or 0) >= 2:
+        proposals.append({
+            "target": "private_syntax_revision",
+            "proposal": "review sign-relation thresholds; no syntax emerged",
+            "reason": "signs present but no private syntax patterns",
+            "advisory_only": True})
+    return proposals
 
 
 def ontogenesis_revision_proposals(ont_status: Dict[str, Any],

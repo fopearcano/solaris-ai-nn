@@ -293,6 +293,20 @@ ONTOGENESIS_QUERIES = (
     ("does this prove understanding", "po_understanding"),
 )
 
+# Semiogenesis queries (Prompt 48). Answered from the semiogenesis status; the
+# "are these words?" / "translate" / "language understanding" questions are
+# answered safely even with no semiogenesis run.
+SEMIOGENESIS_QUERIES = (
+    ("what signs has solaris formed", "sg_signs"),
+    ("what is solaris private language", "sg_language"),
+    ("what is solaris' private language", "sg_language"),
+    ("can you translate its signs", "sg_translate"),
+    ("can you translate", "sg_translate"),
+    ("did human labels contaminate signs", "sg_contamination"),
+    ("does this prove language understanding", "sg_understanding"),
+    ("are these words", "sg_words"),
+)
+
 # Feeder-SDK queries (Prompt 45). Answered from the feeder monitor/manifest; the
 # control/start questions are answered safely even with no feeders attached.
 FEEDER_SDK_QUERIES = (
@@ -496,7 +510,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._ontogenesis(lowered)
+        result = (self._semiogenesis(lowered)
+                  or self._ontogenesis(lowered)
                   or self._metabolism(lowered)
                   or self._feeder_sdk(lowered)
                   or self._sensorium_lab(lowered)
@@ -649,6 +664,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _semiogenesis(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in SEMIOGENESIS_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"semiogenesis query {topic!r}"])
         return None
 
     @staticmethod

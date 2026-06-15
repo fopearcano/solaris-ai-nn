@@ -1874,3 +1874,46 @@ quietly drive concept formation, contamination is detected, scored, and surfaced
 will visibly produce label-grounded concepts; making that visible is what keeps a
 skewed perceptual diet from silently re-imposing human ontology on a system built
 to escape it.
+## Phase 48 — Sensorium-native semiogenesis and internal signs
+
+**Semiogenesis from perception.** Proto-concepts are categories; the next question
+is whether a system of *signs* -- compact internal markers that stand in for those
+categories -- will emerge and earn their keep. Phase 48 builds that step: signs are
+born from stable/useful concepts, grouped into families, related by a private
+syntax, and composed into internal utterances. The empirical interest is whether
+signs measurably improve compression, prediction, and attention, not whether they
+look like language.
+
+**Private language vs human language.** It would be a category error to render this
+as English (or any human language). A sign is `rf:03a`, not "radio burst"; it is an
+internal handle whose meaning is its grounding in perceptual structure and its
+utility, not a dictionary entry. No LLM is used and no human language is the
+internal default precisely because borrowing human words would smuggle human
+ontology back in and destroy what is being studied -- a genuinely non-human sign
+system.
+
+**Why translation is approximate.** A human-readable gloss is offered only for
+reports and debugging, and only ever as an approximation marked as such. A
+modality-native sign has no faithful human word; pretending otherwise would treat
+the gloss as ground truth. Keeping gloss strictly downstream of the sign (never the
+reverse) is what preserves the integrity of the internal markers.
+
+**Signs as compression/prediction/attention tools.** The test of a sign is
+structural usefulness: does it let the system represent more with less, anticipate
+what follows, or allocate attention better? Utility is evidence-backed and a useful
+sign is explicitly *not* therefore true or understood. Signs that earn nothing are
+demoted to ambiguous rather than trusted -- and never deleted, so the record of
+what failed remains.
+
+**Sign drift.** Meaning, source, and modality drift are expected, not pathological;
+a sign that broadens or narrows its grounding is doing what living representations
+do. The discipline is to make drift *visible* (and to let severe drift recommend a
+LOGOS tension or a concept split) rather than silently letting a sign mean
+everything and therefore nothing.
+
+**Human gloss contamination.** Because a human word can quietly become a sign code,
+or a gloss can start standing in for the sign, contamination is measured (a human
+word used as a code, a text stream dominating formation, a gloss replacing a
+low-grounding sign) and marked, with a gloss-dependence score. Contaminated signs
+stay usable -- but visibly so, so that human language never silently becomes the
+private language by default.

@@ -120,6 +120,10 @@ AVAILABLE_QUERIES = (
     "what world is forming?",
     "did human labels contaminate concept formation?",
     "does this prove understanding?",
+    "what signs has Solaris formed?", "are these words?",
+    "what is Solaris' private language?", "can you translate its signs?",
+    "did human labels contaminate signs?",
+    "does this prove language understanding?",
 )
 
 
@@ -180,6 +184,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("sg_"):
+            return self._semiogenesis(topic)
         if topic.startswith("po_"):
             return self._ontogenesis(topic)
         if topic.startswith("pm_"):
@@ -535,6 +541,58 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _semiogenesis(self, topic: str) -> CommunicationResponse:
+        """Answer semiogenesis queries (operational signs, not human words).
+
+        The "are these words?" / "translate" / "language understanding"
+        questions are answered safely even with no semiogenesis attached.
+        """
+        if topic == "sg_words":
+            return self.builder.status_response(
+                "No. These are internal operational signs grounded in "
+                "perceptual structures. They are not human words by default.",
+                ["policy:signs_are_operational_not_words"])
+        if topic == "sg_translate":
+            return self.builder.status_response(
+                "Only approximately. Any human-readable gloss is a debug "
+                "approximation, not the sign itself.",
+                ["policy:gloss_is_approximate_debug_only"])
+        if topic == "sg_understanding":
+            return self.builder.status_response(
+                "No. It shows internal sign formation and utility. It does not "
+                "prove language understanding, consciousness, sentience, or "
+                "subjective experience.",
+                ["policy:signs_do_not_prove_language_understanding"])
+        component = self.components.get("semiogenesis")
+        if component is None:
+            return self.builder.missing_component_response("semiogenesis")
+        status = (component.semiogenesis_status()
+                  if hasattr(component, "semiogenesis_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:semiogenesis"]
+        if topic == "sg_signs":
+            text = (f"internal signs formed: "
+                    f"{status.get('internal_sign_count', 0)} "
+                    f"(stable {status.get('stable_sign_count', 0)}, families "
+                    f"{status.get('sign_family_count', 0)}); these are "
+                    "operational markers, not words")
+        elif topic == "sg_language":
+            text = (f"private syntax patterns: "
+                    f"{status.get('private_syntax_pattern_count', 0)}; internal "
+                    f"utterances {status.get('internal_utterance_count', 0)} -- "
+                    "internal sign-relation structure, not a human language")
+        elif topic == "sg_contamination":
+            text = (f"contaminated signs: "
+                    f"{status.get('contaminated_sign_count', 0)} "
+                    f"(ratio {status.get('contaminated_sign_ratio', 0.0)}); "
+                    f"gloss dependence {status.get('gloss_dependence_score', 0.0)}"
+                    " -- contamination is measured and marked, never hidden")
+        else:
+            text = ("semiogenesis forms internal operational signs from "
+                    "perceptual structures; they are not human words")
         return self.builder.status_response(text, refs)
 
     def _ontogenesis(self, topic: str) -> CommunicationResponse:

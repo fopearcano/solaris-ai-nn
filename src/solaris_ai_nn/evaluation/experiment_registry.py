@@ -349,6 +349,20 @@ DESCRIPTIONS = {
     "world_formation_evaluation": "world formation check",
     "perceptual_ontogenesis_safety":
         "no hardware/feeder/mutation; no understanding/subjective claims",
+    "semiogenesis": "internal signs form from sensorium-native proto-concepts",
+    "semiogenesis_evaluation": "internal-sign formation and utility check",
+    "sign_birth": "stable concepts birth signs; noise does not",
+    "sign_birth_evaluation": "sign birth check",
+    "sign_utility": "signs carry compression/prediction/attention utility",
+    "sign_utility_evaluation": "sign utility check",
+    "private_syntax": "private sign-relation syntax (not human grammar)",
+    "private_syntax_evaluation": "private syntax check",
+    "sign_drift": "sign drift made visible",
+    "sign_drift_evaluation": "sign drift check",
+    "sign_contamination": "human-language contamination of signs made visible",
+    "sign_contamination_evaluation": "sign contamination check",
+    "semiogenesis_safety":
+        "no LLM/human-default/gloss-as-truth; no language-understanding claims",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -521,6 +535,11 @@ class ExperimentRegistry:
             or name in ("proto_concept_birth", "world_formation",
                         "world_formation_evaluation")
             or bool(merged.get("perceptual_ontogenesis", False)))
+        features["semiogenesis"] = (
+            name.startswith("semiogenesis")
+            or name.startswith("sign_")
+            or name in ("private_syntax", "private_syntax_evaluation")
+            or bool(merged.get("semiogenesis", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

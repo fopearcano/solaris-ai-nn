@@ -2944,3 +2944,66 @@ to form from peculiar perception -- evidence-backed, decay-aware, contamination-
 honest -- while keeping proto-concepts as operational structures rather than words
 and world formation as structure rather than subjective experience or
 understanding.**
+
+## Sensorium-Native Semiogenesis and Internal Signs
+
+Prompt 47 let an internal world begin to form as sensorium-native proto-concepts.
+Prompt 48 adds *semiogenesis* -- `src/solaris_ai_nn/semiogenesis/` -- the birth of
+internal **signs** from those concepts:
+
+    perceptual atoms -> proto-concepts -> internal signs -> sign families ->
+    private syntax -> internal utterances -> compression/prediction/attention
+    utility -> optional human-readable gloss (for reports only)
+
+**A sign is not a word and not a human label.** An `InternalSign` is a compact
+operational marker (`rf:03a`, `abs:burst_gap_07`, `xmod:rf_vib_11`) that helps
+Solaris compress, recall, relate, predict, or attend to sensorium-native
+structures. Sign codes are generated structurally (modality/kind prefix + a short
+base-36 suffix), never via an LLM and never from a human language. No human
+language is the internal default, and human labels enter only as external
+annotations that are never ground truth.
+
+**Signs emerge from proto-concepts, conservatively.** The `SignBirthEngine` turns
+stable/useful proto-concepts (and their relations) into signs; isolated noise earns
+no sign, signs born from human labels are marked contaminated, and fixture-vs-live
+grounding is preserved. The `SignUtilityEvaluator` scores each sign's
+compression/prediction/attention/memory/hypothesis/LOGOS/relation utility -- a
+useful sign is not therefore true or understood, and low-utility signs are demoted
+(never deleted). The append-only `SignMemoryStore` keeps rejected, ambiguous, and
+drifted signs as historical evidence.
+
+**Private syntax is internal relation structure, not human grammar.** The
+`SyntaxPatternBuilder` derives recurring sign relations (sequence, co-occurrence,
+before/after-absence, predicts, contradicts, ...) and the `UtteranceBuilder`
+composes `InternalUtterance`s from them. There is no subject/verb/object and no
+natural-language syntax is forced. The `SignDriftDetector` makes meaning/source/
+modality/label drift *visible* (severe drift can recommend a LOGOS tension or a
+concept split), and the `SignContaminationAnalyzer` measures human-language
+domination (a human word used as a sign code, a gloss replacing the sign, a text
+stream dominating formation) -- marking it, never forbidding it.
+
+**Human-readable gloss is approximate, debug-only, never the sign.** The
+`GlossBuilder` produces clearly-marked approximate descriptions for reports;
+modality-native signs are always glossed approximately and never as a human object
+category. Gloss is never ground truth and never the internal language; a
+gloss-dependence score is tracked.
+
+**It stays internal and bounded.** The `SemiogenesisRuntime` reads the ontogenesis
+proto-concepts (and optional metabolism state), runs bounded ticks under per-tick
+and total sign caps (raising explosion warnings rather than exploding), and
+produces a ClaimGuard-scanned report. It uses no LLM, makes no human language the
+default, and touches no hardware/feeder/source/action. The layer integrates with
+perceptual ontogenesis (concepts -> signs), the proto-language lineage (signs are
+the sensorium-native successor markers), the world model (signs as proto-symbol
+reference nodes distinct from concepts), the hypothesis engine (signs as compact
+references), LOGOS (sign/gloss and sign/drift tensions), memory/latent replay,
+perceptual metabolism (sign overload/starvation/ambiguity signals throttle birth),
+the research lab and evaluation (metrics + protocols for semiogenesis, sign birth,
+utility, private syntax, drift, contamination, and safety), the sensorium
+differentiation lab (world signatures gain a sign-family/ratio/syntax-density/
+gloss-dependence profile), the architecture evolution layer (advisory proposals
+only), the operator console, and Inner MAP. **Semiogenesis lets Solaris form a
+private system of internal signs from its peculiar perception -- grounded,
+drift-aware, contamination-honest -- while keeping the distinction between
+proto-concept, sign, utterance, and gloss, and making no claim of language
+understanding, consciousness, sentience, life, or subjective experience.**

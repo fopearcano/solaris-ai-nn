@@ -1573,4 +1573,33 @@ def build_default_state_graph() -> StateGraph:
                "concepts/families/relations form a structural world")
     g.add_edge("PerceptualOntogenesisRuntime", "inner_map",
                "perceptual ontogenesis state feeds Inner MAP")
+
+    # Semiogenesis (Prompt 48): internal signs form from proto-concepts.
+    # Signs are operational markers (not words); private syntax is internal
+    # relation structure (not human grammar); gloss is approximate/debug-only.
+    for name, role in [
+        ("InternalSign", "compact operational marker, not a human word"),
+        ("SignBirthEngine", "conservative birth of signs from concepts"),
+        ("SignMemoryStore", "append-only signs/relations/utterances; no deletion"),
+        ("SignFamilyBuilder", "structural sign groupings, not human taxonomies"),
+        ("PrivateSyntaxPattern", "internal sign-relation structure, not grammar"),
+        ("InternalUtterance", "structured sign sequence, not human speech"),
+        ("TranslationGloss", "approximate debug gloss, never ground truth"),
+        ("SignUtilityEvaluator", "structural utility; useful != true/understood"),
+        ("SignDriftDetector", "make sign drift visible; not automatically bad"),
+        ("SignContaminationAnalyzer", "human-language domination made visible"),
+        ("SemiogenesisRuntime", "bounded internal sign-formation loop"),
+        ("SemiogenesisSafetyValidator", "no LLM/human-default; internal-only"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("ProtoConcept", "InternalSign",
+               "stable/useful proto-concepts birth internal signs")
+    g.add_edge("PerceptualOntogenesisRuntime", "SemiogenesisRuntime",
+               "ontogenesis concepts feed semiogenesis (internal only)")
+    g.add_edge("InternalSign", "PrivateSyntaxPattern",
+               "sign relations form a private syntax")
+    g.add_edge("PrivateSyntaxPattern", "InternalUtterance",
+               "syntax patterns compose internal utterances")
+    g.add_edge("SemiogenesisRuntime", "inner_map",
+               "semiogenesis state feeds Inner MAP")
     return g

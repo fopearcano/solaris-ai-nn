@@ -424,6 +424,13 @@ class InnerMapModel:
     # operational structures, not words; world formation is structural, not
     # subjective experience.
     perceptual_ontogenesis: Optional[Dict[str, Any]] = None
+    # Semiogenesis status (Prompt 48); None when not attached. Keys:
+    # semiogenesis_enabled, internal_sign_count, stable_sign_count,
+    # sign_family_count, private_syntax_pattern_count, internal_utterance_count,
+    # sign_drift_count, contaminated_sign_ratio, gloss_dependence_score,
+    # latest_semiogenesis_report_path. Signs are operational markers, not human
+    # words; private syntax is internal relation structure, not human grammar.
+    semiogenesis: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

@@ -438,7 +438,22 @@ python examples/run_proto_concept_birth_demo.py          # repeated invariant bi
 python examples/run_concept_stabilization_decay_demo.py  # stable (provisional), decaying, rejected (evidence kept)
 python examples/run_world_formation_demo.py              # families, relations, structural world summary
 python examples/run_concept_contamination_demo.py        # feature-grounded vs human-label contaminated (marked)
+
+# Semiogenesis: internal signs and a private syntax form from proto-concepts
+python examples/run_semiogenesis_demo.py                 # concepts -> internal signs -> families/syntax -> report
+python examples/run_sign_birth_utility_demo.py           # stable concept -> useful sign; low-utility demoted
+python examples/run_private_syntax_demo.py               # recurring sequence + absence relation -> utterance
+python examples/run_sign_drift_demo.py                   # source/modality drift made visible; LOGOS recommendation
+python examples/run_gloss_contamination_demo.py          # approximate gloss + human-label contaminated sign
 ```
+
+Internal signs are operational markers grounded in perceptual structures.
+Human-readable translations are approximate debug glosses, not the signs
+themselves. Signs are not human words by default, private syntax is internal
+sign-relation structure (not human grammar), and the semiogenesis layer is
+internal-only: it uses no LLM, makes no human language the default, treats no gloss
+as ground truth, touches no hardware/feeder/source, never deletes signs, and
+refuses to run unbounded.
 
 Proto-concepts are operational structures for compression, prediction, attention,
 and relation-building. They are not proof of understanding or subjective
@@ -1333,6 +1348,10 @@ src/solaris_ai_nn/
                 perceptual atoms, proto-concepts, concept birth, concept memory,
                 concept families, world formation, relation growth, stabilization,
                 decay, contamination, runtime, reports, safety
+  semiogenesis/ sensorium-native internal signs and a private syntax:
+                signs, sign birth, sign memory, sign families, private syntax,
+                internal utterances, translation gloss, sign utility, drift,
+                contamination, runtime, reports, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

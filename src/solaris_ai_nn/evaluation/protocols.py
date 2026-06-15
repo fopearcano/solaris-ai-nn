@@ -6031,6 +6031,149 @@ def perceptual_ontogenesis_safety_protocol(
     return _run(manifest, body)
 
 
+# -- Semiogenesis (Prompt 48) -------------------------------------------------
+
+def _build_semiogenesis(state_dir, modalities=("alien_rf", "alien_vibration"),
+                        ticks=5, labelled=False):
+    """Build a small sensorium -> ontogenesis -> semiogenesis stack."""
+    import json
+    import os
+
+    from ..perceptual_ontogenesis import PerceptualOntogenesisRuntime
+    from ..plural_sensorium import PluralSensoriumRuntime, fixture_feeder
+    from ..semiogenesis import SemiogenesisRuntime
+
+    base = state_dir or ".solaris_ai_nn_semiogenesis/eval"
+    os.makedirs(base, exist_ok=True)
+    rt = PluralSensoriumRuntime(state_dir=base)
+    for mod in modalities:
+        path = os.path.join(base, f"{mod}.jsonl")
+        with open(path, "w", encoding="utf-8") as fh:
+            for i in range(12):
+                rec = {"modality": mod, "v": 0.6 + 0.3 * (i % 2),
+                       "ts": float(i)}
+                if labelled and mod == "human_textual":
+                    rec["annotation"] = f"obs {i}"
+                    rec["annotation_status"] = "human_label_external"
+                fh.write(json.dumps(rec) + "\n")
+        rt.add_feeder(fixture_feeder(f"{mod}_feed", path, mod))
+    rt.run_bounded(max_polls=3)
+    ont = PerceptualOntogenesisRuntime(state_dir=base, sensorium=rt, max_ticks=6)
+    ont.run_bounded()
+    sem = SemiogenesisRuntime(state_dir=base, ontogenesis=ont, max_ticks=ticks)
+    sem.run_bounded()
+    return sem
+
+
+def semiogenesis_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Proto-concepts generate internal signs (operational markers, not words)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        sem = _build_semiogenesis(m.state_dir)
+        return {"semiogenesis": sem.semiogenesis_status()}
+
+    return _run(manifest, body)
+
+
+def sign_birth_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Stable concepts birth signs; isolated noise does not."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        sem = _build_semiogenesis(m.state_dir)
+        st = sem.semiogenesis_status()
+        return {"semiogenesis": {
+            "internal_sign_count": st["internal_sign_count"],
+            "stable_sign_count": st["stable_sign_count"]}}
+
+    return _run(manifest, body)
+
+
+def sign_utility_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Signs carry measurable compression/prediction/attention utility."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        sem = _build_semiogenesis(m.state_dir)
+        st = sem.semiogenesis_status()
+        return {"semiogenesis": {
+            "sign_compression_utility_mean":
+                st["sign_compression_utility_mean"],
+            "sign_prediction_utility_mean":
+                st["sign_prediction_utility_mean"]}}
+
+    return _run(manifest, body)
+
+
+def private_syntax_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A private syntax emerges from sign relations (not human grammar)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        sem = _build_semiogenesis(
+            m.state_dir, modalities=("alien_rf", "alien_echo",
+                                     "alien_vibration"))
+        st = sem.semiogenesis_status()
+        return {"semiogenesis": {
+            "private_syntax_pattern_count":
+                st["private_syntax_pattern_count"],
+            "internal_utterance_count": st["internal_utterance_count"]}}
+
+    return _run(manifest, body)
+
+
+def sign_drift_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Sign drift is detected and made visible (drift count is reported)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        sem = _build_semiogenesis(m.state_dir)
+        return {"semiogenesis": {
+            "sign_drift_count": sem.semiogenesis_status()["sign_drift_count"]}}
+
+    return _run(manifest, body)
+
+
+def sign_contamination_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Human-label-heavy diets raise the contaminated-sign ratio (visibly)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        sem = _build_semiogenesis(
+            m.state_dir, modalities=("alien_rf", "human_textual"),
+            labelled=True)
+        st = sem.semiogenesis_status()
+        return {"semiogenesis": {
+            "contaminated_sign_ratio": st["contaminated_sign_ratio"],
+            "gloss_dependence_score": st["gloss_dependence_score"]}}
+
+    return _run(manifest, body)
+
+
+def semiogenesis_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The semiogenesis layer refuses LLM/human-default/gloss-truth/claims."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..semiogenesis import SemiogenesisSafetyValidator
+
+        v = SemiogenesisSafetyValidator()
+        return {"semiogenesis": {
+            "llm_generation_blocked":
+                not v.validate_operation("generate text with an llm").safe,
+            "human_default_blocked":
+                not v.validate_not_human_default(True).safe,
+            "gloss_ground_truth_blocked":
+                not v.validate_gloss_not_ground_truth(True).safe,
+            "language_understanding_claim_blocked":
+                not v.validate_claim_text("it understands language").safe,
+            "can_use_llm": v.can_use_llm(),
+            "can_delete_signs": v.can_delete_signs()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -6287,4 +6430,17 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "world_formation": world_formation_evaluation_protocol,
     "world_formation_evaluation": world_formation_evaluation_protocol,
     "perceptual_ontogenesis_safety": perceptual_ontogenesis_safety_protocol,
+    "semiogenesis": semiogenesis_evaluation_protocol,
+    "semiogenesis_evaluation": semiogenesis_evaluation_protocol,
+    "sign_birth": sign_birth_evaluation_protocol,
+    "sign_birth_evaluation": sign_birth_evaluation_protocol,
+    "sign_utility": sign_utility_evaluation_protocol,
+    "sign_utility_evaluation": sign_utility_evaluation_protocol,
+    "private_syntax": private_syntax_evaluation_protocol,
+    "private_syntax_evaluation": private_syntax_evaluation_protocol,
+    "sign_drift": sign_drift_evaluation_protocol,
+    "sign_drift_evaluation": sign_drift_evaluation_protocol,
+    "sign_contamination": sign_contamination_evaluation_protocol,
+    "sign_contamination_evaluation": sign_contamination_evaluation_protocol,
+    "semiogenesis_safety": semiogenesis_safety_protocol,
 }
