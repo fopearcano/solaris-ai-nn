@@ -16,7 +16,7 @@ def test_phase_order_preserves_solaris_spine():
         < order.index(SpinePhase.ACTION_SUGGESTION) \
         < order.index(SpinePhase.REACTION_COLLECTION) \
         < order.index(SpinePhase.MEMORY_UPDATE)
-    assert len(order) == 22
+    assert len(order) == 23
     # The motor action firewall sits between safety/governance and action
     # suggestion (the outbound boundary).
     assert order.index(SpinePhase.SAFETY_GOVERNANCE_VALIDATION) \

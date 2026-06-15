@@ -409,6 +409,13 @@ class InnerMapModel:
     # latest_feeder_monitor_snapshot_path. Feeders are outside Solaris; Solaris
     # reads their output read-only and controls nothing.
     feeder_sdk: Optional[Dict[str, Any]] = None
+    # Perceptual-metabolism status (Prompt 46); None when not attached. Keys:
+    # perceptual_metabolism_enabled, perceptual_need_count,
+    # dominant_perceptual_need, overload_state, deprivation_state,
+    # source_diet_diversity, attention_allocation_state,
+    # consolidation_pressure_score, latest_metabolism_report_path. Needs are
+    # operational pressures, not feelings; regulation is internal and bounded.
+    perceptual_metabolism: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

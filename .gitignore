@@ -62,3 +62,6 @@ artifacts/
 .sann_sensorium_lab/
 .solaris_ai_nn_feeders/
 .sann_feeders/
+.solaris_ai_nn_metabolism/
+.sann_metabolism/
+.sann_dep/

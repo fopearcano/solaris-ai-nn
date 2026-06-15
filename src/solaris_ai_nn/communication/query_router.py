@@ -112,6 +112,9 @@ AVAILABLE_QUERIES = (
     "was this a consciousness test?",
     "what feeders are available?", "are any feeders active?",
     "does Solaris control the feeders?", "can Solaris start the SDR feeder?",
+    "is Solaris overloaded?", "is Solaris sensorily deprived?",
+    "what does Solaris need perceptually?", "which source dominates its diet?",
+    "does it need consolidation?", "are these needs feelings?",
 )
 
 
@@ -172,6 +175,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("pm_"):
+            return self._metabolism(topic)
         if topic.startswith("fs_"):
             return self._feeder_sdk(topic)
         if topic.startswith("sl_"):
@@ -523,6 +528,55 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _metabolism(self, topic: str) -> CommunicationResponse:
+        """Answer perceptual-metabolism queries (operational pressures, not feelings).
+
+        The "are these feelings?" question is answered safely even with no
+        metabolism attached.
+        """
+        if topic == "pm_feelings":
+            return self.builder.status_response(
+                "No. These are operational perceptual pressures used for "
+                "regulation. They are not feelings, emotions, consciousness, "
+                "sentience, or subjective experience.",
+                ["policy:needs_are_operational_pressures_not_feelings"])
+        component = self.components.get("perceptual_metabolism")
+        if component is None:
+            return self.builder.missing_component_response(
+                "perceptual_metabolism")
+        status = (component.metabolism_status()
+                  if hasattr(component, "metabolism_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:perceptual_metabolism"]
+        if topic == "pm_overload":
+            text = (f"overloaded: {status.get('overload_state', False)} "
+                    f"({status.get('overload_event_count', 0)} events); "
+                    "overload throttles internally and deletes no evidence")
+        elif topic == "pm_deprivation":
+            text = (f"sensorily deprived: "
+                    f"{status.get('deprivation_state', False)} "
+                    f"({status.get('deprivation_event_count', 0)} events); "
+                    "silence is treated as stimulus")
+        elif topic == "pm_needs":
+            text = (f"dominant perceptual need: "
+                    f"{status.get('dominant_perceptual_need')} (pressure "
+                    f"{status.get('dominant_need_pressure', 0.0)}); these are "
+                    "operational pressures, not feelings")
+        elif topic == "pm_diet":
+            text = (f"source diet diversity: "
+                    f"{status.get('source_diet_diversity', 0.0)}; human-label "
+                    f"dominance {status.get('human_label_dominance_score', 0.0)}"
+                    " (dominance is measured, never hidden)")
+        elif topic == "pm_consolidation":
+            text = (f"consolidation pressure: "
+                    f"{status.get('consolidation_pressure_score', 0.0)} "
+                    "(recommendation only; nothing sleeps forever)")
+        else:
+            text = ("perceptual metabolism is internal sensory regulation; "
+                    "needs are operational pressures, not feelings")
         return self.builder.status_response(text, refs)
 
     def _feeder_sdk(self, topic: str) -> CommunicationResponse:

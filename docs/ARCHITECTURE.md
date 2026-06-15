@@ -2801,3 +2801,71 @@ evaluation (nine metrics, six protocols). **The feeder SDK makes real environmen
 flux feedable into Solaris while preserving the boundary that Solaris reads
 sensory-organ outputs but never controls sensors, hardware, feeder processes,
 source files, the network, or real-world actuators.**
+
+## Perceptual Metabolism and Sensory Homeostasis
+
+Prompts 41-45 gave Solaris a plural sensorium fed by external organs. But a
+passive recorder that ingests every event forever is not an organism. Prompt 46
+adds a regulatory layer -- `src/solaris_ai_nn/perceptual_metabolism/` -- that sits
+between the sensory field and the rest of the spine and decides *how much* to
+attend, *what* to revisit, and *when* to digest rather than ingest. The flow is:
+outside world -> external feeders -> plural sensorium -> receptor states ->
+sensory field pressure -> **perceptual metabolism** -> attention allocation ->
+homeostatic regulation -> memory / proto-symbol / world-model adaptation ->
+changed future perception.
+
+**Needs are operational regulatory pressures, not feelings.** The
+`PerceptualNeedModel` derives ten pressures (stimulation, novelty, rest, balance,
+coherence, consolidation, recovery, diversity, contact, quiet) from the field
+state and receptors. Every need carries the note that it is "an operational
+pressure, not a feeling"; the safety validator blocks feeling/emotion/life/
+consciousness language; and the evaluation metrics pin `needs_are_feelings=False`
+and `biological_life=False`. Metabolism here is computational regulation, not
+biological life.
+
+**Attention and energy are finite and explainable.** The `PerceptualEnergyBudget`
+allocates a bounded compute budget priority-first (receptor update, sensory-field
+update, absence detection always come first) and degrades gracefully when starved.
+The `AttentionEconomy` distributes a finite attention budget across modalities,
+receptors, absence windows, rhythm/invariant/cross-modal candidates, hypothesis
+gaps, LOGOS tensions, memory traces and proto-symbol candidates -- always reserving
+a slice to recover *neglected* modalities, and only ever shifting internal polling/
+processing priority (never starting a sensor or modifying a source).
+
+**Homeostasis, overload and deprivation keep the field in band.** The
+`SensoryHomeostasisRegulator` compares field pressures against set-points and
+recommends lowering/raising novelty appetite, restoring neglected modalities,
+consolidating, or flagging corrupt/silent sources for operator review. The
+`OverloadDetector` recognises event floods, saturation, receptor fatigue, noise
+storms, and proto-symbol/hypothesis/tension explosions, and responds by throttling
+internally -- **it never deletes evidence.** The `DeprivationDetector` treats
+*silence as stimulus*: no active receptors, no novelty, silent receptors, or all
+sources silent each become a recognised deprivation signal.
+
+**Diet, novelty and consolidation are measured, not hidden.** The
+`NoveltyAppetiteRegulator` prevents Solaris from chasing noise forever (recurring
+"novelty" converges to invariants). The `SourceDietAnalyzer` measures diet
+diversity (normalised entropy), modality dominance, human-label dominance, and
+non-human contribution -- dominance is always measured, never concealed -- so a
+human-text-heavy diet is visible rather than silently shaping perception. The
+`ConsolidationPressureEstimator` weighs ingest-vs-digest signals and emits a
+bounded latent-replay *recommendation* only (nothing sleeps forever, and
+consolidation erases no evidence).
+
+**It stays internal and bounded.** The `PerceptualMetabolismRuntime` reads the
+plural-sensorium state (and, optionally, live-field source health and a feeder-SDK
+monitor snapshot), runs one bounded metabolic tick, emits milestones and
+internal-only recommendation dicts, and refuses to run unbounded. It polls no
+hardware, starts no feeder, modifies no source, and actuates nothing. The layer
+integrates with the Conscience spine (the `perceptual_metabolism_update` phase runs
+after the sensory-field update and before stimulus ingestion, with six bounded
+scenario profiles), the Inner MAP (a `perceptual_metabolism` field plus state-graph
+nodes), the operator console / communication query router (overload, deprivation,
+needs, diet, consolidation, and an explicit "are these feelings?" answer),
+research/evaluation (metrics plus protocols for metabolism, overload, deprivation,
+attention economy, source diet, consolidation, and safety), and the developmental,
+latent-replay and auto-regeneration layers (milestones, bounded replay
+recommendations, and hygiene warnings that never delete raw evidence). **Perceptual
+metabolism makes Solaris regulate continuous sensory exposure like a sensory
+metabolism -- finite, homeostatic, and honest -- while keeping needs as operational
+pressures rather than feelings and regulation as computation rather than life.**

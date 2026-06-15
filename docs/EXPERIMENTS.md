@@ -2439,3 +2439,40 @@ consumable by the Live Field. Simulated fixtures, NOT real sensors.
 `feeder_sdk_replay`, `feeder_sdk_safety`). Six protocols measure the external
 feeder SDK; Solaris reads feeder output read-only and controls no feeder or
 hardware.
+
+## 264. Perceptual Metabolism Demo ✅ (implemented)
+
+**Run:** `python examples/run_perceptual_metabolism_demo.py --state-dir .solaris_ai_nn_metabolism/demo`
+Feeds a bounded fixture sensorium into the `PerceptualMetabolismRuntime` and shows
+one metabolic tick: perceptual need pressures, finite energy/attention allocation,
+homeostatic recommendations, source diet, and consolidation pressure. Needs are
+reported as operational pressures, not feelings; the runtime starts no feeder,
+touches no hardware, and deletes no evidence.
+
+## 265. Sensory Overload Demo ✅ (implemented)
+
+**Run:** `python examples/run_sensory_overload_demo.py --state-dir .solaris_ai_nn_metabolism/overload`
+Drives a high event count past the overload threshold and shows the
+`OverloadDetector` throttling internally (and recommending auto-regeneration
+hygiene) while **deleting no raw evidence**.
+
+## 266. Sensory Deprivation Demo ✅ (implemented)
+
+**Run:** `python examples/run_sensory_deprivation_demo.py --state-dir .solaris_ai_nn_metabolism/deprivation`
+Runs the metabolism over an empty/silent sensorium so the `DeprivationDetector`
+treats *silence as stimulus*: starvation, no-novelty, and all-sources-silent each
+become recognised deprivation signals.
+
+## 267. Source Diet Demo ✅ (implemented)
+
+**Run:** `python examples/run_source_diet_demo.py --state-dir .solaris_ai_nn_metabolism/diet`
+Analyses the perceptual source diet across human-like and non-human modalities:
+diet diversity, modality dominance, human-label dominance, and dominant class.
+Dominance is measured, never hidden, and human labels are never ground truth.
+
+## 268. Consolidation Pressure Demo ✅ (implemented)
+
+**Run:** `python examples/run_consolidation_pressure_demo.py --state-dir .solaris_ai_nn_metabolism/consolidation`
+Estimates ingest-vs-digest consolidation pressure and emits a bounded latent-replay
+*recommendation* only -- nothing sleeps forever and consolidation erases no
+evidence.

@@ -1610,3 +1610,51 @@ def feeder_sdk_metrics(feeder: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "note": "feeders are outside Solaris; Solaris reads their output "
                 "read-only and controls no feeder or hardware",
     }
+
+
+def perceptual_metabolism_metrics(met: Optional[Dict[str, Any]],
+                                  ) -> Dict[str, Any]:
+    """Objective perceptual-metabolism metrics (sensory-regulation layer).
+
+    These describe how Solaris regulates continuous sensory exposure: perceptual
+    need pressures, overload/deprivation events, attention reallocation, source
+    diet diversity and dominance, novelty appetite, consolidation pressure, and
+    receptor recovery. Needs are operational pressures, not feelings; metabolism
+    is computational regulation, not biological life.
+    """
+    if not met:
+        return {"present": False}
+    return {
+        "present": True,
+        "perceptual_need_count": int(met.get("perceptual_need_count", 0) or 0),
+        "dominant_perceptual_need_pressure": float(
+            met.get("dominant_need_pressure", 0.0) or 0.0),
+        "sensory_overload_event_count": int(
+            met.get("overload_event_count", 0) or 0),
+        "sensory_deprivation_event_count": int(
+            met.get("deprivation_event_count", 0) or 0),
+        "attention_reallocation_count": int(
+            met.get("attention_reallocation_count", 0) or 0),
+        "source_diet_diversity": float(
+            met.get("source_diet_diversity", 0.0) or 0.0),
+        "modality_dominance_score": float(
+            met.get("modality_dominance_score", 0.0) or 0.0),
+        "human_label_dominance_score": float(
+            met.get("human_label_dominance_score", 0.0) or 0.0),
+        "novelty_appetite_pressure": float(
+            met.get("novelty_appetite_pressure", 0.0) or 0.0),
+        "consolidation_pressure_score": float(
+            met.get("consolidation_pressure_score", 0.0) or 0.0),
+        "receptor_recovery_count": int(
+            met.get("receptor_recovery_count", 0) or 0),
+        "overload_recovery_success_rate": float(
+            met.get("overload_recovery_success_rate", 0.0) or 0.0),
+        "deprivation_integration_count": int(
+            met.get("deprivation_integration_count", 0) or 0),
+        "metabolism_changed_perception_delta": float(
+            met.get("metabolism_changed_perception_delta", 0.0) or 0.0),
+        "needs_are_feelings": False,
+        "biological_life": False,
+        "note": "operational sensory regulation; needs are not feelings and "
+                "metabolism is not biological life",
+    }

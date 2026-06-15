@@ -20,6 +20,7 @@ class SpinePhase:
     READ_ONLY_SENSORY_POLL = "read_only_sensory_poll"
     PLURAL_SENSORIUM_POLL = "plural_sensorium_poll"
     SENSORY_FIELD_UPDATE = "sensory_field_update"
+    PERCEPTUAL_METABOLISM_UPDATE = "perceptual_metabolism_update"
     STIMULUS_INGESTION = "stimulus_ingestion"
     PUSH_GENERATION = "push_generation"
     DESIRE_SYNTHESIS = "desire_synthesis"
@@ -41,7 +42,7 @@ class SpinePhase:
 
     # The canonical order in which phases run each step.
     ORDER = (HEARTBEAT, READ_ONLY_SENSORY_POLL, PLURAL_SENSORIUM_POLL,
-             SENSORY_FIELD_UPDATE,
+             SENSORY_FIELD_UPDATE, PERCEPTUAL_METABOLISM_UPDATE,
              STIMULUS_INGESTION, PUSH_GENERATION, DESIRE_SYNTHESIS,
              ACTION_CANDIDATE_GENERATION, EXECUTIVE_ARBITRATION,
              SAFETY_GOVERNANCE_VALIDATION, MOTOR_ACTION_FIREWALL,

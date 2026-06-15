@@ -1519,4 +1519,29 @@ def build_default_state_graph() -> StateGraph:
                "privacy flags are assigned to feeder envelopes")
     g.add_edge("FeederMonitor", "inner_map",
                "feeder output health feeds Inner MAP")
+
+    # Perceptual metabolism (Prompt 46): regulate continuous sensory exposure.
+    # Needs are operational pressures (not feelings); regulation is internal.
+    for name, role in [
+        ("PerceptualNeedModel", "operational perceptual pressures, not feelings"),
+        ("PerceptualEnergyBudget", "finite compute/attention budget; degrades"),
+        ("SensoryHomeostasisRegulator", "keep the field within set-points"),
+        ("AttentionEconomy", "finite, explainable attention allocation"),
+        ("OverloadDetector", "throttle on overload; never delete evidence"),
+        ("DeprivationDetector", "silence is stimulus; absence is structure"),
+        ("NoveltyAppetiteRegulator", "want the new without chasing noise"),
+        ("SourceDietAnalyzer", "what mix of sources is consumed; dominance seen"),
+        ("ConsolidationPressureEstimator", "when to digest vs keep ingesting"),
+        ("PerceptualMetabolismRuntime", "bounded internal regulation loop"),
+        ("PerceptualMetabolismSafetyValidator", "internal-only; no actuation"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("SensoryField", "PerceptualMetabolismRuntime",
+               "sensory field pressure feeds perceptual metabolism")
+    g.add_edge("Receptor", "PerceptualNeedModel",
+               "receptor states feed perceptual needs")
+    g.add_edge("PerceptualMetabolismRuntime", "AttentionEconomy",
+               "metabolism allocates the attention economy (internal only)")
+    g.add_edge("PerceptualMetabolismRuntime", "inner_map",
+               "perceptual metabolism state feeds Inner MAP")
     return g

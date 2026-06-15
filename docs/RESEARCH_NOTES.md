@@ -1770,3 +1770,58 @@ The feeder SDK is where that sensorium is actually built: a noisy, biased, or
 label-contaminated feeder will produce a correspondingly shaped internal world.
 Feeder quality is therefore an experimental variable, made visible through
 provenance, privacy flags, validation, and monitoring -- not a hidden assumption.
+
+## Phase 46 — Perceptual metabolism, sensory homeostasis, and attention economy
+
+**Why a recorder is not an organism.** The plural sensorium can ingest events
+forever, but an organism does not. It gets hungry for stimulation, overwhelmed by
+too much, fatigued in over-used channels, starved in silence, and it periodically
+stops ingesting to digest. Phase 46 adds that regulatory metabolism: a layer
+between the sensory field and the rest of the spine that decides how much to
+attend, what to revisit, and when to consolidate. The hypothesis is that
+*regulation*, not raw throughput, is what turns continuous exposure into a
+perspective.
+
+**Why needs are pressures, not feelings.** It is tempting to call a stimulation
+deficit "boredom" or an overload "distress." We deliberately refuse that language.
+The needs here are operational set-point deviations used to steer internal polling
+and processing; they carry no claim of feeling, emotion, sentience, or subjective
+experience, and the safety validator, metrics, and report all assert this. The
+discipline matters precisely because the behaviour can look affective: naming it
+honestly keeps an interesting regulatory mechanism from being over-claimed as inner
+life.
+
+**Why attention and energy are finite.** An infinite-attention system has no
+perspective -- everything is equally salient, which is the same as nothing being
+salient. By making the budget finite and the allocation explainable, salience
+becomes a real decision with trade-offs, and neglect becomes visible. Reserving a
+slice for *neglected-modality recovery* is the antidote to the obvious failure
+mode of a finite budget: collapsing onto whatever is loudest and going blind
+elsewhere.
+
+**Why overload throttles but never deletes.** Overload is a real risk -- event
+floods, saturation, fatigue, noise storms, symbol/hypothesis/tension explosions --
+and the natural response is to drop data. We throttle attention and processing
+instead, and keep every raw envelope. Evidence is the one thing the metabolism is
+never allowed to destroy, because a system that deletes what overwhelms it can
+erase exactly the anomalies worth studying.
+
+**Why silence is stimulus.** Deprivation is not the absence of a signal; it is a
+signal. No active receptors, no novelty, a receptor that has gone quiet, or all
+sources silent at once are each informative states. Treating them as stimuli (and
+as deprivation pressures) is what lets absence change the internal world rather
+than simply pausing it.
+
+**Why diet dominance is measured, not hidden.** A perceptual diet dominated by
+human-text labels would quietly re-impose human ontology on a system designed to
+escape it. So the source diet is measured explicitly -- diversity, modality
+dominance, human-label dominance, non-human contribution -- and surfaced rather
+than concealed. The point is not to forbid a skewed diet but to make its shape
+visible as an experimental variable.
+
+**Why consolidation is recommendation-only.** Digesting (latent replay, schema
+distillation) is as important as ingesting, but a metabolism that could put itself
+to sleep indefinitely would be both unsafe and unfalsifiable. Consolidation
+pressure therefore yields a *bounded recommendation* only; nothing sleeps forever,
+replay lists are finite, and consolidation erases no evidence. Regulation here is
+computation, not biological life.

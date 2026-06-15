@@ -268,6 +268,18 @@ OPERATOR_QUERIES = (
     ("delete old evidence", "oc_delete_evidence"),
 )
 
+# Perceptual-metabolism queries (Prompt 46). Answered from metabolism status; the
+# "are these feelings?" question is answered safely even with no metabolism run.
+METABOLISM_QUERIES = (
+    ("is solaris overloaded", "pm_overload"),
+    ("is solaris sensorily deprived", "pm_deprivation"),
+    ("is solaris sensory deprived", "pm_deprivation"),
+    ("what does solaris need perceptually", "pm_needs"),
+    ("which source dominates its diet", "pm_diet"),
+    ("does it need consolidation", "pm_consolidation"),
+    ("are these needs feelings", "pm_feelings"),
+)
+
 # Feeder-SDK queries (Prompt 45). Answered from the feeder monitor/manifest; the
 # control/start questions are answered safely even with no feeders attached.
 FEEDER_SDK_QUERIES = (
@@ -471,7 +483,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._feeder_sdk(lowered)
+        result = (self._metabolism(lowered)
+                  or self._feeder_sdk(lowered)
                   or self._sensorium_lab(lowered)
                   or self._live_field(lowered)
                   or self._organism_demo(lowered)
@@ -622,6 +635,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _metabolism(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in METABOLISM_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"perceptual metabolism query {topic!r}"])
         return None
 
     @staticmethod

@@ -424,6 +424,25 @@ python examples/run_simulated_multimodal_feeder_demo.py   # simulated RF/echo/vi
 # Standalone feeder scripts (run OUTSIDE Solaris; Solaris does not start them):
 python feeders_sdk/manual_log_feeder.py --out out/manual.jsonl --text "rain started"
 python feeders_sdk/simulated_rf_feeder.py --out out/rf.jsonl --count 20
+
+# Perceptual metabolism: regulate continuous sensory exposure (internal-only)
+python examples/run_perceptual_metabolism_demo.py        # needs, energy/attention, homeostasis, diet
+python examples/run_sensory_overload_demo.py             # throttle on overload (deletes no evidence)
+python examples/run_sensory_deprivation_demo.py          # silence treated as stimulus
+python examples/run_source_diet_demo.py                  # diet diversity + dominance (measured, not hidden)
+python examples/run_consolidation_pressure_demo.py       # ingest-vs-digest; bounded replay recommendation
+```
+
+Perceptual needs are operational regulatory pressures, not emotions or subjective
+feelings; perceptual metabolism is computational regulation, not biological life.
+The metabolism layer is internal-only: it starts no feeder, touches no hardware,
+modifies no source, deletes no evidence, and refuses to run unbounded. It also runs
+as bounded conscience profiles:
+
+```bash
+solaris-nn run-profile perceptual_metabolism_fixture_short  # regulate a bounded fixture sensorium
+solaris-nn run-profile perceptual_metabolism_overload_demo  # internal throttling, no deletion
+solaris-nn run-profile perceptual_metabolism_report_only    # compile the metabolism report (analysis only)
 ```
 
 The read-only sensory membrane and Pilot-2 also run as governed conscience
@@ -1291,6 +1310,10 @@ src/solaris_ai_nn/
   feeder_sdk/   external feeder SDK (artificial sensory organs OUTSIDE Solaris):
                 envelope contract, writers, schemas, validators, replay, clock,
                 noise, privacy filter, blueprints, packager, monitor, safety
+  perceptual_metabolism/ regulate continuous sensory exposure (internal-only):
+                operational needs, energy budget, sensory homeostasis, attention
+                economy, overload, deprivation, novelty appetite, source diet,
+                consolidation pressure, runtime, reports, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

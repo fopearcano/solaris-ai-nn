@@ -932,6 +932,44 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["run_step_count"],
             max_runtime_s=60.0))
 
+    # -- Perceptual metabolism profiles (Prompt 46) ---------------------------
+    # Regulate continuous sensory exposure: needs, energy budget, homeostasis,
+    # attention economy, overload/deprivation, source diet, consolidation. All
+    # regulation is internal; no profile starts feeders or hardware.
+    _metabolism_modules = ["bridge", "ecology", "governance", "ops", "inner_map",
+                          "plural_sensorium", "perceptual_metabolism"]
+    for pid, desc, plan_only in (
+            ("perceptual_metabolism_fixture_short",
+             "Regulate a bounded fixture sensorium (metabolism on).", False),
+            ("perceptual_metabolism_overload_demo",
+             "Drive overload and show internal throttling (no deletion).",
+             False),
+            ("perceptual_metabolism_deprivation_demo",
+             "Drive deprivation and treat silence as stimulus.", False),
+            ("perceptual_metabolism_source_diet_demo",
+             "Analyse the perceptual source diet (dominance measured).", False),
+            ("perceptual_metabolism_live_report_only",
+             "Analyse existing live artifacts (analysis only).", True),
+            ("perceptual_metabolism_report_only",
+             "Compile the perceptual metabolism report (analysis only).",
+             True)):
+        if plan_only:
+            run_ctx = _ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                           max_duration_s=None)
+        else:
+            run_ctx = _ctx(RunMode.SHORT_DEMO, max_steps=120)
+        add(ScenarioProfile(
+            profile_id=pid, description=desc, run_context=run_ctx,
+            enabled_modules=list(_metabolism_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "internal regulation only; no hardware/feeder control",
+                "needs are operational pressures, not feelings",
+                "metabolism is computational regulation, not biological life"],
+            governance_requirements=["enable_plural_sensorium_fixture"],
+            expected_artifacts=["PERCEPTUAL_METABOLISM_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=60.0))
+
     return profiles
 
 

@@ -301,6 +301,9 @@ class ConscienceOrchestrator:
         if "plural_sensorium" in self.components:
             h[SpinePhase.PLURAL_SENSORIUM_POLL] = self._phase_plural_sensorium
             h[SpinePhase.SENSORY_FIELD_UPDATE] = self._phase_sensory_field
+        if "perceptual_metabolism" in self.components:
+            h[SpinePhase.PERCEPTUAL_METABOLISM_UPDATE] = \
+                self._phase_perceptual_metabolism
         if "motor_membrane" in self.components:
             h[SpinePhase.MOTOR_ACTION_FIREWALL] = self._phase_motor_firewall
         if "ecology" in self.components or "signals" in self.components:
@@ -396,6 +399,16 @@ class ConscienceOrchestrator:
         if sensorium is None:
             return PhaseStatus.SKIPPED
         self._count("sensory_field_update")
+        return PhaseStatus.RAN
+
+    def _phase_perceptual_metabolism(self, step: int) -> str:
+        """Regulate continuous exposure (internal-only; no actuation)."""
+        metabolism = self.components.get("perceptual_metabolism")
+        if metabolism is None:
+            return PhaseStatus.SKIPPED
+        if hasattr(metabolism, "update"):
+            metabolism.update(tick=step)
+        self._count("perceptual_metabolism_update")
         return PhaseStatus.RAN
 
     def _phase_stimulus(self, step: int) -> str:

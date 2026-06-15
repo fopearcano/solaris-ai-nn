@@ -112,6 +112,8 @@ def _source_package(profile_id: str) -> str:
         return "live_field"
     if pid.startswith("sensorium_lab") or pid.startswith("sensorium_study"):
         return "sensorium_lab"
+    if pid.startswith("perceptual_metabolism"):
+        return "perceptual_metabolism"
     return "conscience"
 
 

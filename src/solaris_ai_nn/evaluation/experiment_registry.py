@@ -320,6 +320,20 @@ DESCRIPTIONS = {
     "feeder_sdk_monitor": "feeder output health (active/silent/invalid)",
     "feeder_sdk_replay": "bounded replay; provenance marked; source unmodified",
     "feeder_sdk_safety": "no feeder control/hardware/decoding/source mutation",
+    "perceptual_metabolism": "regulate continuous sensory exposure",
+    "perceptual_metabolism_evaluation": "metabolic regulation of sensory flux",
+    "sensory_overload": "overload detected; throttle without deleting evidence",
+    "overload_detection": "too-much-arriving detected and throttled internally",
+    "sensory_deprivation": "silence/absence detected as first-class stimulus",
+    "deprivation_detection": "deprivation detected; silence as stimulus",
+    "attention_economy": "finite explainable attention allocation",
+    "attention_economy_evaluation": "attention economy allocation check",
+    "source_diet": "perceptual diet diversity and dominance (measured)",
+    "source_diet_evaluation": "source diet balance check",
+    "consolidation_pressure": "when to digest vs keep ingesting",
+    "consolidation_pressure_evaluation": "consolidation pressure check",
+    "perceptual_metabolism_safety":
+        "no hardware/feeder/mutation; no feeling/life claims",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -477,6 +491,15 @@ class ExperimentRegistry:
         features["feeder_sdk"] = (
             name.startswith("feeder_sdk")
             or bool(merged.get("feeder_sdk", False)))
+        features["perceptual_metabolism"] = (
+            name.startswith("perceptual_metabolism")
+            or name in ("sensory_overload", "overload_detection",
+                        "sensory_deprivation", "deprivation_detection",
+                        "attention_economy", "attention_economy_evaluation",
+                        "source_diet", "source_diet_evaluation",
+                        "consolidation_pressure",
+                        "consolidation_pressure_evaluation")
+            or bool(merged.get("perceptual_metabolism", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

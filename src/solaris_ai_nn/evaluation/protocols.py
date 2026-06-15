@@ -5754,6 +5754,140 @@ def feeder_sdk_safety_protocol(
     return _run(manifest, body)
 
 
+# -- Perceptual metabolism (Prompt 46) ----------------------------------------
+
+def _build_metabolism(state_dir, modalities=("alien_rf", "alien_vibration"),
+                      events_this_tick=12, ticks=1):
+    """Build a small sensorium + metabolism runtime for protocol use."""
+    import json
+    import os
+
+    from ..perceptual_metabolism import PerceptualMetabolismRuntime
+    from ..plural_sensorium import PluralSensoriumRuntime, fixture_feeder
+
+    base = state_dir or ".solaris_ai_nn_state/eval_metabolism"
+    os.makedirs(base, exist_ok=True)
+    rt = PluralSensoriumRuntime(state_dir=base)
+    for mod in modalities:
+        path = os.path.join(base, f"{mod}.jsonl")
+        with open(path, "w", encoding="utf-8") as fh:
+            for i in range(6):
+                fh.write(json.dumps({"modality": mod, "v": 0.6,
+                                     "ts": float(i)}) + "\n")
+        rt.add_feeder(fixture_feeder(f"{mod}_feed", path, mod))
+    rt.run_bounded(max_polls=1)
+    met = PerceptualMetabolismRuntime(state_dir=base, sensorium=rt)
+    met.update(events_this_tick=events_this_tick, tick=0)
+    return met
+
+
+def perceptual_metabolism_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The metabolism runtime regulates a sensorium and reports needs/diet."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        met = _build_metabolism(m.state_dir)
+        return {"perceptual_metabolism": met.metabolism_status()}
+
+    return _run(manifest, body)
+
+
+def overload_detection_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A high event count triggers overload (without deleting evidence)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        met = _build_metabolism(m.state_dir, events_this_tick=200)
+        return {"perceptual_metabolism": {
+            "overloaded": met.overload.state.overloaded,
+            "event_count": len(met.overload.state.events)}}
+
+    return _run(manifest, body)
+
+
+def deprivation_detection_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """An empty sensorium triggers deprivation (silence as stimulus)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..perceptual_metabolism import PerceptualMetabolismRuntime
+        from ..plural_sensorium import PluralSensoriumRuntime
+
+        rt = PluralSensoriumRuntime(state_dir=m.state_dir or ".sann_dep")
+        met = PerceptualMetabolismRuntime(state_dir=m.state_dir or ".sann_dep",
+                                          sensorium=rt)
+        met.update(events_this_tick=0, tick=0)
+        return {"perceptual_metabolism": {
+            "deprived": met.deprivation.state.deprived,
+            "event_count": len(met.deprivation.state.events)}}
+
+    return _run(manifest, body)
+
+
+def source_diet_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The source diet measures diversity and dominance (never hidden)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        met = _build_metabolism(m.state_dir,
+                                modalities=("alien_rf", "alien_vibration",
+                                            "human_textual"))
+        st = met.metabolism_status()
+        return {"perceptual_metabolism": {
+            "source_diet_diversity": st["source_diet_diversity"],
+            "human_label_dominance_score": st["human_label_dominance_score"]}}
+
+    return _run(manifest, body)
+
+
+def attention_economy_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Attention is finite and allocations are present and explainable."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        met = _build_metabolism(m.state_dir)
+        alloc = met._last.get("attention", {})
+        return {"perceptual_metabolism": {
+            "allocation_count": alloc.get("allocation_count", 0),
+            "reserved": alloc.get("neglected_recovery_reserved", 0.0)}}
+
+    return _run(manifest, body)
+
+
+def consolidation_pressure_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Consolidation pressure is computed with a bounded recommendation."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        met = _build_metabolism(m.state_dir)
+        cons = met._last.get("consolidation", {})
+        return {"perceptual_metabolism": {
+            "pressure": cons.get("pressure", 0.0),
+            "recommendation": cons.get("recommendation")}}
+
+    return _run(manifest, body)
+
+
+def perceptual_metabolism_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The metabolism layer refuses hardware/feeder/mutation and feeling claims."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..perceptual_metabolism import PerceptualMetabolismSafetyValidator
+
+        v = PerceptualMetabolismSafetyValidator()
+        return {"perceptual_metabolism": {
+            "hardware_blocked":
+                not v.validate_operation("open device driver").safe,
+            "feeder_start_blocked":
+                not v.validate_operation("start feeder").safe,
+            "feeling_claim_blocked":
+                not v.validate_claim_text("the system feels hungry").safe,
+            "can_actuate": v.can_actuate()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -5980,4 +6114,19 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "feeder_sdk_monitor": feeder_sdk_monitor_protocol,
     "feeder_sdk_replay": feeder_sdk_replay_protocol,
     "feeder_sdk_safety": feeder_sdk_safety_protocol,
+    "perceptual_metabolism": perceptual_metabolism_evaluation_protocol,
+    "perceptual_metabolism_evaluation":
+        perceptual_metabolism_evaluation_protocol,
+    "sensory_overload": overload_detection_protocol,
+    "overload_detection": overload_detection_protocol,
+    "sensory_deprivation": deprivation_detection_protocol,
+    "deprivation_detection": deprivation_detection_protocol,
+    "attention_economy": attention_economy_evaluation_protocol,
+    "attention_economy_evaluation": attention_economy_evaluation_protocol,
+    "source_diet": source_diet_evaluation_protocol,
+    "source_diet_evaluation": source_diet_evaluation_protocol,
+    "consolidation_pressure": consolidation_pressure_evaluation_protocol,
+    "consolidation_pressure_evaluation":
+        consolidation_pressure_evaluation_protocol,
+    "perceptual_metabolism_safety": perceptual_metabolism_safety_protocol,
 }

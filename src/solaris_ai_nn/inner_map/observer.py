@@ -84,6 +84,7 @@ class InnerMapObserver:
     live_field: Any = None  # optional dict/object of live-field status
     sensorium_lab: Any = None  # optional dict/object of sensorium-lab status
     feeder_sdk: Any = None  # optional dict/object of feeder-SDK status
+    perceptual_metabolism: Any = None  # optional dict/object of metabolism status
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -725,6 +726,17 @@ class InnerMapObserver:
                 model.feeder_sdk = feeder.feeder_sdk_status()
             elif hasattr(feeder, "snapshot"):
                 model.feeder_sdk = feeder.snapshot()
+        metabolism = self.perceptual_metabolism
+        if metabolism is None and self.runner is not None:
+            metabolism = getattr(self.runner, "perceptual_metabolism", None)
+        if metabolism is not None:
+            # Perceptual-metabolism status (internal regulation view).
+            if isinstance(metabolism, dict):
+                model.perceptual_metabolism = dict(metabolism)
+            elif hasattr(metabolism, "metabolism_status"):
+                model.perceptual_metabolism = metabolism.metabolism_status()
+            elif hasattr(metabolism, "snapshot"):
+                model.perceptual_metabolism = metabolism.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder
