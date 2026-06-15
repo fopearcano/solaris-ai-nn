@@ -2549,3 +2549,41 @@ recommendation. Drift is made visible, not automatically bad.
 Builds a feature-grounded sign and a human-label contaminated sign, generates
 approximate debug glosses, and runs the contamination analyzer. Gloss is approximate
 and never ground truth; contaminated signs remain usable but are marked.
+
+## 279. Sensorium Cognition Demo ✅ (implemented)
+
+**Run:** `python examples/run_sensorium_cognition_demo.py --state-dir .solaris_ai_nn_cognition/test_cognition`
+Feeds a fixture sensorium through ontogenesis and semiogenesis into the cognition
+runtime, which runs bounded cognitive moves, predictions, anticipation, question
+pressure, simulations, and synthesis, then writes the report. Cognitive moves are
+operations over signs, NOT human-language reasoning.
+
+## 280. Prediction Failure Demo ✅ (implemented)
+
+**Run:** `python examples/run_prediction_failure_demo.py --state-dir .solaris_ai_nn_cognition/test_prediction_failure`
+Generates a next-sign prediction, resolves it against observed targets that do NOT
+contain the predicted sign (so it fails), and shows the preserved failed prediction
+and the resulting LOGOS tension. Failed predictions are useful evidence, never
+hidden.
+
+## 281. Question Pressure Demo ✅ (implemented)
+
+**Run:** `python examples/run_question_pressure_demo.py --state-dir .solaris_ai_nn_cognition/test_question_pressure`
+Anticipates a sign that is then not observed, generating an operational question
+pressure and an attention recommendation. Question pressure is pressure to inspect/
+compare/wait/simulate -- NOT human verbal questioning.
+
+## 282. Internal Simulation Demo ✅ (implemented)
+
+**Run:** `python examples/run_internal_simulation_demo.py --state-dir .solaris_ai_nn_cognition/test_internal_simulation`
+Runs a bounded internal simulation over a sign sequence and a counterfactual, and
+shows that every result is marked simulated / non-real and is never a live
+observation.
+
+## 283. Cognitive Synthesis Demo ✅ (implemented)
+
+**Run:** `python examples/run_cognitive_synthesis_demo.py --state-dir .solaris_ai_nn_cognition/test_cognitive_synthesis`
+Runs the synthesis engine over signs and inferred relations: a cross-modal-unity
+inference seeds a merge, an ambiguous sign seeds a split, and a contradiction is
+preserved as a LOGOS tension. Fragments are preserved and contradiction stays
+visible.

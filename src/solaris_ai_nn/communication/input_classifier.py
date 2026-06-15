@@ -307,6 +307,17 @@ SEMIOGENESIS_QUERIES = (
     ("are these words", "sg_words"),
 )
 
+# Sensorium-cognition queries (Prompt 49). Answered from the cognition status;
+# the "what is solaris thinking?" / "is this human language reasoning?" questions
+# are answered safely even with no cognition run.
+COGNITION_QUERIES = (
+    ("what is solaris thinking", "cg_thinking"),
+    ("what did solaris predict", "cg_predict"),
+    ("what did solaris get wrong", "cg_wrong"),
+    ("what questions does solaris have", "cg_questions"),
+    ("is this human language reasoning", "cg_human_language"),
+)
+
 # Feeder-SDK queries (Prompt 45). Answered from the feeder monitor/manifest; the
 # control/start questions are answered safely even with no feeders attached.
 FEEDER_SDK_QUERIES = (
@@ -510,7 +521,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._semiogenesis(lowered)
+        result = (self._cognition(lowered)
+                  or self._semiogenesis(lowered)
                   or self._ontogenesis(lowered)
                   or self._metabolism(lowered)
                   or self._feeder_sdk(lowered)
@@ -664,6 +676,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _cognition(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in COGNITION_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"sensorium cognition query {topic!r}"])
         return None
 
     @staticmethod

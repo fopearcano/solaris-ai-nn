@@ -31,8 +31,53 @@ EVIDENCE_SOURCES = (
     "pilot2_report", "pilot3_report", "safety_invariant_report",
     "assurance_case", "ops_incident", "auto_regeneration_repair",
     "inner_map_snapshot", "perceptual_ontogenesis_report",
-    "semiogenesis_report",
+    "semiogenesis_report", "sensorium_cognition_report",
 )
+
+
+def cognition_revision_proposals(cog_status: Dict[str, Any],
+                                 ) -> List[Dict[str, Any]]:
+    """Turn a sensorium-cognition status into architecture *proposals* only.
+
+    Proposals are advisory: nothing here rewrites code or actuates anything. They
+    suggest sign-reasoning revision, prediction/simulation threshold changes,
+    question-pressure tuning, LOGOS-tension handling, or synthesis/fragment
+    preservation changes based on observed cognition.
+    """
+    proposals: List[Dict[str, Any]] = []
+    success = float(cog_status.get("prediction_success_rate", 0.0) or 0.0)
+    preds = int(cog_status.get("prediction_count", 0) or 0)
+    if preds > 0 and success < 0.3:
+        proposals.append({
+            "target": "prediction_threshold",
+            "proposal": "raise prediction confidence threshold; low success",
+            "reason": f"prediction_success_rate {success}",
+            "advisory_only": True})
+    if int(cog_status.get("cognition_overload_event_count", 0) or 0) > 0:
+        proposals.append({
+            "target": "simulation_limit",
+            "proposal": "lower max_moves/simulations per tick; overload seen",
+            "reason": "cognition overload events observed",
+            "advisory_only": True})
+    if int(cog_status.get("question_pressure_count", 0) or 0) > 20:
+        proposals.append({
+            "target": "question_pressure_tuning",
+            "proposal": "tune question-pressure generation; high volume",
+            "reason": "many active question pressures",
+            "advisory_only": True})
+    if int(cog_status.get("unresolved_tension_count", 0) or 0) > 0:
+        proposals.append({
+            "target": "logos_tension_handling",
+            "proposal": "review preserved-contradiction handling",
+            "reason": "unresolved tensions present",
+            "advisory_only": True})
+    if int(cog_status.get("analogy_failure_count", 0) or 0) > 0:
+        proposals.append({
+            "target": "sign_reasoning_revision",
+            "proposal": "review analogy thresholds; contradicted analogies",
+            "reason": "contradicted analogies recorded",
+            "advisory_only": True})
+    return proposals
 
 
 def semiogenesis_revision_proposals(sem_status: Dict[str, Any],

@@ -1602,4 +1602,31 @@ def build_default_state_graph() -> StateGraph:
                "syntax patterns compose internal utterances")
     g.add_edge("SemiogenesisRuntime", "inner_map",
                "semiogenesis state feeds Inner MAP")
+
+    # Sensorium-native cognition (Prompt 49): sign-based thought, not language.
+    # Cognitive moves are operations over signs/concepts; simulation is non-real.
+    for name, role in [
+        ("SensoriumCognitiveState", "operational cognition state, not a mind"),
+        ("CognitiveMove", "bounded operation over signs; internal-only"),
+        ("SignReasoner", "provisional sign relations; correlation != causation"),
+        ("PredictionEngine", "sign-grounded predictions; failures preserved"),
+        ("AnticipationEngine", "operational expectation; feeds probes"),
+        ("QuestionPressureEngine", "pressure to inspect, not verbal questioning"),
+        ("InternalSimulation", "bounded internal what-if; marked non-real"),
+        ("CounterfactualEngine", "non-real probes; never overwrite real traces"),
+        ("AnalogyEngine", "structural analogy, not semantic by default"),
+        ("SynthesisEngine", "merge/split; fragments + contradiction preserved"),
+        ("CognitiveMemoryStore", "append-only traces; failures preserved"),
+        ("SensoriumCognitionRuntime", "bounded sign-based cognition loop"),
+        ("SensoriumCognitionSafetyValidator", "no LLM/human-default; internal"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("InternalSign", "CognitiveMove",
+               "signs are the substrate of cognitive moves")
+    g.add_edge("SemiogenesisRuntime", "SensoriumCognitionRuntime",
+               "signs/patterns feed sign-based cognition (internal only)")
+    g.add_edge("PredictionEngine", "InternalSimulation",
+               "predictions seed bounded internal simulations (non-real)")
+    g.add_edge("SensoriumCognitionRuntime", "inner_map",
+               "sensorium cognition state feeds Inner MAP")
     return g

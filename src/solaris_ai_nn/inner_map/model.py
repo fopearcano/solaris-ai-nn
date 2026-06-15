@@ -431,6 +431,13 @@ class InnerMapModel:
     # latest_semiogenesis_report_path. Signs are operational markers, not human
     # words; private syntax is internal relation structure, not human grammar.
     semiogenesis: Optional[Dict[str, Any]] = None
+    # Sensorium-cognition status (Prompt 49); None when not attached. Keys:
+    # sensorium_cognition_enabled, cognitive_move_count, prediction_count,
+    # failed_prediction_count, question_pressure_count, internal_simulation_count,
+    # counterfactual_count, synthesis_count, unresolved_tension_count,
+    # latest_cognition_report_path. Cognitive moves are operations over signs/
+    # concepts, not human-language thought; simulation is not real observation.
+    sensorium_cognition: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

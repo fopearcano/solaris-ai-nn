@@ -363,6 +363,24 @@ DESCRIPTIONS = {
     "sign_contamination_evaluation": "sign contamination check",
     "semiogenesis_safety":
         "no LLM/human-default/gloss-as-truth; no language-understanding claims",
+    "sensorium_cognition": "sign-based cognitive moves over signs/concepts",
+    "sensorium_cognition_evaluation": "sign-based cognition check",
+    "sign_reasoning": "provisional sign-relation inference",
+    "prediction": "sign-grounded prediction; failures preserved",
+    "prediction_evaluation": "prediction check",
+    "anticipation": "operational expectation feeding probes",
+    "anticipation_evaluation": "anticipation check",
+    "question_pressure": "operational pressure to inspect (not verbal)",
+    "question_pressure_evaluation": "question pressure check",
+    "internal_simulation": "bounded internal simulation (marked non-real)",
+    "simulation_evaluation": "internal simulation check",
+    "counterfactual": "non-real counterfactual probes",
+    "analogy": "structural analogy across modalities",
+    "analogy_evaluation": "analogy check",
+    "synthesis": "sign synthesis preserving fragments/contradiction",
+    "synthesis_evaluation": "synthesis check",
+    "sensorium_cognition_safety":
+        "no LLM/human-default/simulated-as-real; no understanding claims",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -540,6 +558,15 @@ class ExperimentRegistry:
             or name.startswith("sign_")
             or name in ("private_syntax", "private_syntax_evaluation")
             or bool(merged.get("semiogenesis", False)))
+        features["sensorium_cognition"] = (
+            name.startswith("sensorium_cognition")
+            or name in ("sign_reasoning", "prediction", "prediction_evaluation",
+                        "anticipation_evaluation",
+                        "question_pressure", "question_pressure_evaluation",
+                        "internal_simulation", "simulation_evaluation",
+                        "counterfactual", "analogy", "analogy_evaluation",
+                        "synthesis", "synthesis_evaluation")
+            or bool(merged.get("sensorium_cognition", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

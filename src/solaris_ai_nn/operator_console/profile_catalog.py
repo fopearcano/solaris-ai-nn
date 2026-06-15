@@ -118,6 +118,8 @@ def _source_package(profile_id: str) -> str:
         return "perceptual_ontogenesis"
     if pid.startswith("semiogenesis"):
         return "semiogenesis"
+    if pid.startswith("sensorium_cognition") or pid.startswith("cognition"):
+        return "sensorium_cognition"
     return "conscience"
 
 

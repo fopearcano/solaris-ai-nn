@@ -1917,3 +1917,47 @@ word used as a code, a text stream dominating formation, a gloss replacing a
 low-grounding sign) and marked, with a gloss-dependence score. Contaminated signs
 stay usable -- but visibly so, so that human language never silently becomes the
 private language by default.
+
+## Phase 49 — Sensorium-native cognition: sign-based thought and simulation
+
+**Sign-based cognition.** Having signs is not yet thinking. The question this phase
+asks is whether useful *operations* over signs -- predicting the next sign,
+retrieving a related one, testing a relation, simulating a sequence -- can do real
+cognitive work (compression, anticipation, attention guidance) without ever
+becoming human-language reasoning. A cognitive move is defined as an operation over
+signs, concepts, relations, memory, hypotheses, and tensions, and the empirical
+test is whether those moves improve prediction and changed future perception.
+
+**Anticipation without human language.** Anticipation here is operational
+expectation: a structured bet about which signs/absences/rhythms will follow,
+expressed as expected targets that feed changed-perception probes. We deliberately
+avoid calling it imagination or expectation-as-experience. It is a forward model
+over signs, nothing more -- and that is enough to be useful and to be falsified.
+
+**Question pressure.** Curiosity, operationally, is pressure to inspect rather than
+a verbal question. Missing expected signs, contradictions, failed predictions,
+ambiguity, and low grounding each raise a pressure with a recommended internal
+response (inspect / compare / wait / simulate / preserve-unknown). Modelling
+questioning as pressure -- not as sentences -- keeps it sign-native and keeps it
+from being mistaken for inner speech.
+
+**Internal simulation vs observation.** The most important discipline of this layer
+is the wall between simulation and observation. Internal simulations and
+counterfactuals are bounded, marked non-real, never written over real traces, and
+never counted as evidence; they may only *seed* hypotheses. A system that confused
+its simulations with observations would hallucinate a world; keeping the boundary
+explicit is what lets simulation be useful without being dangerous.
+
+**Analogy as structural relation.** Analogy is treated as structural similarity
+(same kind across different modalities), not semantic likeness. An RF rhythm and a
+vibration rhythm can be analogous as *structures* without any shared human meaning,
+and a bad analogy is kept and marked when later contradicted -- analogies are
+provisional, not assertions.
+
+**Why this does not prove understanding.** Predicting, anticipating, simulating,
+and synthesizing over signs are operational transformations. They can be measured
+(prediction success, question-pressure resolution, simulation usefulness) and they
+change future perception, but none of that is evidence of understanding,
+consciousness, sentience, or subjective experience. Failed predictions are kept,
+human-readable summaries are marked as debug glosses, and the claims stop at what
+the structures actually show.

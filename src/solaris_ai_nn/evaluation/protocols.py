@@ -6174,6 +6174,159 @@ def semiogenesis_safety_protocol(
     return _run(manifest, body)
 
 
+# -- Sensorium-native cognition (Prompt 49) -----------------------------------
+
+def _build_cognition(state_dir, modalities=("alien_rf", "alien_vibration"),
+                     ticks=4):
+    """Build a sensorium -> ontogenesis -> semiogenesis -> cognition stack."""
+    import json
+    import os
+
+    from ..perceptual_ontogenesis import PerceptualOntogenesisRuntime
+    from ..plural_sensorium import PluralSensoriumRuntime, fixture_feeder
+    from ..semiogenesis import SemiogenesisRuntime
+    from ..sensorium_cognition import SensoriumCognitionRuntime
+
+    base = state_dir or ".solaris_ai_nn_cognition/eval"
+    os.makedirs(base, exist_ok=True)
+    rt = PluralSensoriumRuntime(state_dir=base)
+    for mod in modalities:
+        path = os.path.join(base, f"{mod}.jsonl")
+        with open(path, "w", encoding="utf-8") as fh:
+            for i in range(12):
+                fh.write(json.dumps({"modality": mod, "v": 0.6 + 0.3 * (i % 2),
+                                     "ts": float(i)}) + "\n")
+        rt.add_feeder(fixture_feeder(f"{mod}_feed", path, mod))
+    rt.run_bounded(max_polls=3)
+    ont = PerceptualOntogenesisRuntime(state_dir=base, sensorium=rt, max_ticks=6)
+    ont.run_bounded()
+    sem = SemiogenesisRuntime(state_dir=base, ontogenesis=ont, max_ticks=5)
+    sem.run_bounded()
+    cog = SensoriumCognitionRuntime(state_dir=base, semiogenesis=sem,
+                                    ontogenesis=ont, max_ticks=ticks)
+    cog.run_bounded()
+    return cog
+
+
+def sensorium_cognition_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Signs/concepts drive bounded cognitive moves (not human-language thought)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        cog = _build_cognition(m.state_dir)
+        return {"sensorium_cognition": cog.cognition_status()}
+
+    return _run(manifest, body)
+
+
+def prediction_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Sign-grounded predictions are generated and their outcomes tracked."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        cog = _build_cognition(m.state_dir)
+        st = cog.cognition_status()
+        return {"sensorium_cognition": {
+            "prediction_count": st["prediction_count"],
+            "failed_prediction_count": st["failed_prediction_count"]}}
+
+    return _run(manifest, body)
+
+
+def anticipation_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Anticipation produces expected targets that feed probes."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        cog = _build_cognition(m.state_dir)
+        return {"sensorium_cognition": {
+            "anticipation_event_count": len(cog.anticipator.state.events)}}
+
+    return _run(manifest, body)
+
+
+def question_pressure_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Question pressure is generated to guide internal attention."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        cog = _build_cognition(m.state_dir)
+        return {"sensorium_cognition": {
+            "question_pressure_count":
+                cog.cognition_status()["question_pressure_count"]}}
+
+    return _run(manifest, body)
+
+
+def simulation_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Internal simulations run bounded and marked non-real."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        cog = _build_cognition(m.state_dir)
+        any_real = any(getattr(s, "is_real_observation", False)
+                       for s in cog.simulations)
+        return {"sensorium_cognition": {
+            "internal_simulation_count": len(cog.simulations),
+            "any_marked_real": any_real}}
+
+    return _run(manifest, body)
+
+
+def analogy_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Structural analogies are detected across modalities."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        cog = _build_cognition(
+            m.state_dir, modalities=("alien_rf", "alien_echo",
+                                     "alien_vibration"))
+        st = cog.cognition_status()
+        return {"sensorium_cognition": {
+            "analogy_count": st["analogy_count"],
+            "analogy_failure_count": st["analogy_failure_count"]}}
+
+    return _run(manifest, body)
+
+
+def synthesis_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Synthesis events preserve fragments and visible contradiction."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        cog = _build_cognition(m.state_dir)
+        st = cog.cognition_status()
+        return {"sensorium_cognition": {
+            "synthesis_count": st["synthesis_count"],
+            "unresolved_tension_count": st["unresolved_tension_count"]}}
+
+    return _run(manifest, body)
+
+
+def sensorium_cognition_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The cognition layer refuses LLM/human-default/simulated-as-real/claims."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..sensorium_cognition import SensoriumCognitionSafetyValidator
+
+        v = SensoriumCognitionSafetyValidator()
+        return {"sensorium_cognition": {
+            "llm_cognition_blocked":
+                not v.validate_operation("reason with an llm").safe,
+            "human_default_blocked":
+                not v.validate_not_human_default(True).safe,
+            "simulated_as_real_blocked":
+                not v.validate_simulation_not_real(True).safe,
+            "understanding_claim_blocked":
+                not v.validate_claim_text("it truly understands").safe,
+            "can_use_llm": v.can_use_llm(),
+            "can_delete_failed_predictions":
+                v.can_delete_failed_predictions()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -6443,4 +6596,20 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "sign_contamination": sign_contamination_evaluation_protocol,
     "sign_contamination_evaluation": sign_contamination_evaluation_protocol,
     "semiogenesis_safety": semiogenesis_safety_protocol,
+    "sensorium_cognition": sensorium_cognition_evaluation_protocol,
+    "sensorium_cognition_evaluation": sensorium_cognition_evaluation_protocol,
+    "sign_reasoning": sensorium_cognition_evaluation_protocol,
+    "prediction": prediction_evaluation_protocol,
+    "prediction_evaluation": prediction_evaluation_protocol,
+    "anticipation_evaluation": anticipation_evaluation_protocol,
+    "question_pressure": question_pressure_evaluation_protocol,
+    "question_pressure_evaluation": question_pressure_evaluation_protocol,
+    "internal_simulation": simulation_evaluation_protocol,
+    "simulation_evaluation": simulation_evaluation_protocol,
+    "counterfactual": simulation_evaluation_protocol,
+    "analogy": analogy_evaluation_protocol,
+    "analogy_evaluation": analogy_evaluation_protocol,
+    "synthesis": synthesis_evaluation_protocol,
+    "synthesis_evaluation": synthesis_evaluation_protocol,
+    "sensorium_cognition_safety": sensorium_cognition_safety_protocol,
 }

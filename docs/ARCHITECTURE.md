@@ -3007,3 +3007,69 @@ private system of internal signs from its peculiar perception -- grounded,
 drift-aware, contamination-honest -- while keeping the distinction between
 proto-concept, sign, utterance, and gloss, and making no claim of language
 understanding, consciousness, sentience, life, or subjective experience.**
+
+## Sensorium-Native Cognition
+
+Prompts 47-48 gave Solaris sensorium-native proto-concepts and internal signs.
+Prompt 49 adds *cognition* grounded in those structures rather than human language
+-- `src/solaris_ai_nn/sensorium_cognition/`:
+
+    sensory field -> proto-concepts -> internal signs -> sign relations ->
+    cognitive moves -> anticipation/prediction/simulation -> tension/uncertainty/
+    question pressure -> attention and internal-action recommendations ->
+    memory consolidation -> changed future perception
+
+**Cognition operates over signs, not human language.** A `CognitiveMove` is an
+operation over signs, proto-concepts, relations, memory traces, hypotheses, and
+LOGOS tensions -- never a sentence. There is no LLM, no chain-of-thought text as
+the cognitive substrate, and no human language as the internal default. The
+`SensoriumCognitiveState` is an *operational* snapshot (active signs/concepts/
+tensions and bounded pressures), explicitly not a subjective mind-state; any
+human-readable summary is a debug gloss.
+
+**Predictions and failed predictions are stored.** The `PredictionEngine` makes
+sign-grounded predictions (next sign, missing sign, source silence, overload/
+deprivation risk, ...); each prediction's outcome is resolved against observed
+targets and recorded. Failed predictions are useful evidence and are preserved,
+never hidden. The `AnticipationEngine` turns predictions into operational
+expectations that feed changed-perception probes -- expectation, not imagination.
+
+**Question pressure is operational, not verbal questioning.** The
+`QuestionPressureEngine` produces pressure to inspect, compare, wait, simulate, or
+preserve an unknown (missing expected sign, contradiction, failed prediction,
+ambiguity, low grounding, unresolved tension). It is not a human verbal question;
+it may be rendered as debug text but the pressure itself is structural, and it
+drives internal attention recommendations.
+
+**Internal simulation is marked non-real.** The `InternalSimulation` and
+`CounterfactualEngine` run bounded "what if" probes over signs/absences/relations.
+Every result is marked simulated / counterfactual and is never treated as a live
+observation or mixed with real traces; they may seed hypotheses but create no
+external evidence. The `AnalogyEngine` finds *structural* analogies across
+modalities (not semantic ones), recording an analogy as contradicted if later
+evidence opposes it. The `SynthesisEngine` merges/splits signs and either resolves
+a weak contradiction or preserves an irreducible one as a LOGOS tension -- always
+preserving the synthesized fragments.
+
+**It stays internal and bounded.** The `SensoriumCognitionRuntime` reads the
+semiogenesis signs/patterns (and optional ontogenesis concepts, metabolism state,
+and LOGOS tensions), runs bounded ticks under per-tick move/prediction/simulation
+caps (throttled further under metabolic overload), writes append-only cognitive
+memory (failed predictions preserved), and produces a ClaimGuard-scanned report.
+It uses no LLM and touches no hardware/feeder/source/action. The layer integrates
+with the world model (predictions and simulation summaries as trace nodes, with
+simulated items marked separately and never mixed with observation), the
+hypothesis engine (failed predictions, counterfactuals, and analogies as seeds),
+LOGOS (prediction-vs-failure, simulation-vs-observation, analogy-vs-difference,
+question-pressure-vs-no-data tensions), perceptual metabolism (overload/pressure
+signals that throttle cognition), memory/latent replay, the research lab and
+evaluation (metrics plus protocols for cognition, prediction, anticipation,
+question pressure, simulation, analogy, synthesis, and safety), the sensorium
+differentiation lab (world signatures gain a cognitive-move/prediction/question/
+simulation/analogy/synthesis profile), the architecture evolution layer (advisory
+proposals only), the operator console, and Inner MAP. **Sensorium-native cognition
+lets Solaris think over its own peculiar signs and proto-concepts -- predicting,
+anticipating, questioning, simulating, and synthesizing -- while preserving the
+distinction between sign-based cognition, debug gloss, simulation, and real
+observation, and making no claim of understanding, consciousness, sentience, life,
+or subjective experience.**

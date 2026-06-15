@@ -124,6 +124,9 @@ AVAILABLE_QUERIES = (
     "what is Solaris' private language?", "can you translate its signs?",
     "did human labels contaminate signs?",
     "does this prove language understanding?",
+    "what is Solaris thinking?", "what did Solaris predict?",
+    "what did Solaris get wrong?", "what questions does Solaris have?",
+    "is this human language reasoning?",
 )
 
 
@@ -184,6 +187,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("cg_"):
+            return self._cognition(topic)
         if topic.startswith("sg_"):
             return self._semiogenesis(topic)
         if topic.startswith("po_"):
@@ -541,6 +546,51 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _cognition(self, topic: str) -> CommunicationResponse:
+        """Answer sensorium-cognition queries (sign-based moves, not language).
+
+        The "what is Solaris thinking?" / "is this human language reasoning?"
+        questions are answered safely even with no cognition attached.
+        """
+        if topic == "cg_thinking":
+            return self.builder.status_response(
+                "Solaris is not represented as human verbal thought. The console "
+                "can show operational cognitive moves over internal signs, "
+                "predictions, question pressures, simulations, and tensions.",
+                ["policy:cognition_is_sign_based_not_verbal"])
+        if topic == "cg_human_language":
+            return self.builder.status_response(
+                "No. Cognition operates over internal signs and proto-concepts. "
+                "It is not human-language reasoning, and any human-readable "
+                "summary is a debug gloss.",
+                ["policy:cognition_is_not_human_language"])
+        component = self.components.get("sensorium_cognition")
+        if component is None:
+            return self.builder.missing_component_response(
+                "sensorium_cognition")
+        status = (component.cognition_status()
+                  if hasattr(component, "cognition_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:sensorium_cognition"]
+        if topic == "cg_predict":
+            text = (f"predictions: {status.get('prediction_count', 0)} "
+                    f"(success rate {status.get('prediction_success_rate', 0.0)})"
+                    "; predictions are over internal signs, not words")
+        elif topic == "cg_wrong":
+            text = (f"failed predictions: "
+                    f"{status.get('failed_prediction_count', 0)} -- preserved as "
+                    "useful evidence, never hidden")
+        elif topic == "cg_questions":
+            text = (f"active question pressures: "
+                    f"{status.get('question_pressure_count', 0)}; these are "
+                    "operational pressures to inspect/compare/wait, not verbal "
+                    "questions")
+        else:
+            text = ("sensorium cognition runs bounded operational moves over "
+                    "signs and proto-concepts; not human-language thought")
         return self.builder.status_response(text, refs)
 
     def _semiogenesis(self, topic: str) -> CommunicationResponse:

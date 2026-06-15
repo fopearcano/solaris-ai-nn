@@ -445,7 +445,23 @@ python examples/run_sign_birth_utility_demo.py           # stable concept -> use
 python examples/run_private_syntax_demo.py               # recurring sequence + absence relation -> utterance
 python examples/run_sign_drift_demo.py                   # source/modality drift made visible; LOGOS recommendation
 python examples/run_gloss_contamination_demo.py          # approximate gloss + human-label contaminated sign
+
+# Sensorium-native cognition: sign-based thought, prediction, simulation
+python examples/run_sensorium_cognition_demo.py          # signs/concepts -> cognitive moves -> report
+python examples/run_prediction_failure_demo.py           # prediction, failed prediction (kept), LOGOS tension
+python examples/run_question_pressure_demo.py            # missing expected sign -> question pressure -> attention
+python examples/run_internal_simulation_demo.py          # simulated sequence + counterfactual, marked non-real
+python examples/run_cognitive_synthesis_demo.py          # merge/split signs; fragments + contradiction preserved
 ```
+
+Solaris cognition is represented as bounded operational moves over internal signs
+and proto-concepts, not as hidden human-language thought. Cognitive moves are
+operations over signs/concepts/relations/memory/hypotheses/tensions (not sentences);
+internal simulation is marked non-real and is never a live observation; failed
+predictions are preserved. The cognition layer is internal-only: it uses no LLM,
+makes no human language the default, treats no gloss as the cognitive substrate,
+touches no hardware/feeder/source/action, and refuses to run unbounded. It does not
+prove understanding, consciousness, sentience, or subjective experience.
 
 Internal signs are operational markers grounded in perceptual structures.
 Human-readable translations are approximate debug glosses, not the signs
@@ -1352,6 +1368,10 @@ src/solaris_ai_nn/
                 signs, sign birth, sign memory, sign families, private syntax,
                 internal utterances, translation gloss, sign utility, drift,
                 contamination, runtime, reports, safety
+  sensorium_cognition/ sign-based thought, anticipation, internal simulation:
+                cognitive state/moves, sign reasoning, prediction, anticipation,
+                question pressure, internal simulation, counterfactuals, analogy,
+                synthesis, cognitive memory, runtime, reports, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

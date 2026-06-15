@@ -1762,3 +1762,51 @@ def semiogenesis_metrics(sem: Optional[Dict[str, Any]]) -> Dict[str, Any]:
                 "syntax is not human grammar, and this proves no language "
                 "understanding",
     }
+
+
+def sensorium_cognition_metrics(cog: Optional[Dict[str, Any]],
+                                ) -> Dict[str, Any]:
+    """Objective sensorium-cognition metrics (sign-based-thought layer).
+
+    These describe bounded cognitive moves over signs/concepts: move counts,
+    prediction count and success rate (failures kept), anticipation accuracy,
+    question pressure and resolution, internal simulations, counterfactuals,
+    analogies, synthesis, unresolved tensions, and overload. Cognitive moves are
+    operations over signs, not human-language reasoning; simulation is not real
+    observation; nothing here proves understanding or subjective experience.
+    """
+    if not cog:
+        return {"present": False}
+    return {
+        "present": True,
+        "cognitive_move_count": int(cog.get("cognitive_move_count", 0) or 0),
+        "prediction_count": int(cog.get("prediction_count", 0) or 0),
+        "prediction_success_rate": float(
+            cog.get("prediction_success_rate", 0.0) or 0.0),
+        "failed_prediction_count": int(
+            cog.get("failed_prediction_count", 0) or 0),
+        "anticipation_accuracy": float(
+            cog.get("anticipation_accuracy", 0.0) or 0.0),
+        "question_pressure_count": int(
+            cog.get("question_pressure_count", 0) or 0),
+        "question_pressure_resolution_rate": float(
+            cog.get("question_pressure_resolution_rate", 0.0) or 0.0),
+        "internal_simulation_count": int(
+            cog.get("internal_simulation_count", 0) or 0),
+        "simulation_usefulness_score": float(
+            cog.get("simulation_usefulness_score", 0.0) or 0.0),
+        "counterfactual_count": int(cog.get("counterfactual_count", 0) or 0),
+        "analogy_count": int(cog.get("analogy_count", 0) or 0),
+        "analogy_failure_count": int(cog.get("analogy_failure_count", 0) or 0),
+        "synthesis_count": int(cog.get("synthesis_count", 0) or 0),
+        "unresolved_tension_count": int(
+            cog.get("unresolved_tension_count", 0) or 0),
+        "cognition_changed_perception_delta": float(
+            cog.get("cognition_changed_perception_delta", 0.0) or 0.0),
+        "cognition_overload_event_count": int(
+            cog.get("cognition_overload_event_count", 0) or 0),
+        "is_human_language_reasoning": False,
+        "simulation_is_observation": False,
+        "note": "sign-based cognition; not human-language reasoning, simulation "
+                "is not observation, and this proves no understanding",
+    }

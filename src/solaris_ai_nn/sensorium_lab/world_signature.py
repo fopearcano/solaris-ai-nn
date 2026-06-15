@@ -53,6 +53,14 @@ class SensoriumWorldSignature:
     contaminated_sign_ratio: float = 0.0
     private_syntax_density: float = 0.0
     gloss_dependence_score: float = 0.0
+    # Sensorium-cognition profile (Prompt 49); empty/zero when not attached.
+    cognitive_move_distribution: Dict[str, int] = field(default_factory=dict)
+    prediction_profile: Dict[str, Any] = field(default_factory=dict)
+    failed_prediction_profile: Dict[str, Any] = field(default_factory=dict)
+    question_pressure_profile: Dict[str, Any] = field(default_factory=dict)
+    simulation_profile: Dict[str, Any] = field(default_factory=dict)
+    analogy_profile: Dict[str, Any] = field(default_factory=dict)
+    synthesis_profile: Dict[str, Any] = field(default_factory=dict)
     limitations: List[str] = field(default_factory=lambda: [
         "An observable structural fingerprint, not subjective experience.",
         "Not qualia; this does not describe what Solaris feels.",
@@ -98,6 +106,14 @@ class SensoriumWorldSignature:
             "contaminated_sign_ratio": self.contaminated_sign_ratio,
             "private_syntax_density": self.private_syntax_density,
             "gloss_dependence_score": self.gloss_dependence_score,
+            "cognitive_move_distribution": dict(
+                self.cognitive_move_distribution),
+            "prediction_profile": dict(self.prediction_profile),
+            "failed_prediction_profile": dict(self.failed_prediction_profile),
+            "question_pressure_profile": dict(self.question_pressure_profile),
+            "simulation_profile": dict(self.simulation_profile),
+            "analogy_profile": dict(self.analogy_profile),
+            "synthesis_profile": dict(self.synthesis_profile),
             "limitations": list(self.limitations),
             "note": "observable structural fingerprint; not subjective "
                     "experience, not qualia",
@@ -111,7 +127,8 @@ class WorldSignatureBuilder:
     def build(self, arm_id: str, condition: str, runtime: Any, *,
               probe_result: Any = None,
               ontogenesis: Any = None,
-              semiogenesis: Any = None) -> SensoriumWorldSignature:
+              semiogenesis: Any = None,
+              cognition: Any = None) -> SensoriumWorldSignature:
         rt = runtime
         if rt is None:
             return SensoriumWorldSignature(arm_id=arm_id, condition=condition)
@@ -216,6 +233,38 @@ class WorldSignatureBuilder:
                     min(1.0, patterns / (signs * (signs - 1) / 2)), 4)
             gloss_dependence = sem_status.get("gloss_dependence_score", 0.0)
 
+        # Sensorium-cognition profile (optional).
+        move_distribution: Dict[str, int] = {}
+        prediction_profile: Dict[str, Any] = {}
+        failed_prediction_profile: Dict[str, Any] = {}
+        question_pressure_profile: Dict[str, Any] = {}
+        simulation_profile: Dict[str, Any] = {}
+        analogy_profile: Dict[str, Any] = {}
+        synthesis_profile: Dict[str, Any] = {}
+        if cognition is not None:
+            cog_status = (cognition.cognition_status()
+                          if hasattr(cognition, "cognition_status")
+                          else cognition if isinstance(cognition, dict)
+                          else {})
+            if hasattr(cognition, "moves"):
+                for mv in cognition.moves:
+                    mt = getattr(mv, "move_type", "unknown")
+                    move_distribution[mt] = move_distribution.get(mt, 0) + 1
+            prediction_profile = {
+                "count": cog_status.get("prediction_count", 0),
+                "success_rate": cog_status.get("prediction_success_rate", 0.0)}
+            failed_prediction_profile = {
+                "count": cog_status.get("failed_prediction_count", 0)}
+            question_pressure_profile = {
+                "count": cog_status.get("question_pressure_count", 0)}
+            simulation_profile = {
+                "count": cog_status.get("internal_simulation_count", 0)}
+            analogy_profile = {
+                "count": cog_status.get("analogy_count", 0),
+                "failures": cog_status.get("analogy_failure_count", 0)}
+            synthesis_profile = {
+                "count": cog_status.get("synthesis_count", 0)}
+
         return SensoriumWorldSignature(
             arm_id=arm_id, condition=condition,
             modality_distribution=modality_dist,
@@ -248,7 +297,14 @@ class WorldSignatureBuilder:
             absence_sign_ratio=sign_absence_ratio,
             contaminated_sign_ratio=sign_contaminated_ratio,
             private_syntax_density=syntax_density,
-            gloss_dependence_score=gloss_dependence)
+            gloss_dependence_score=gloss_dependence,
+            cognitive_move_distribution=move_distribution,
+            prediction_profile=prediction_profile,
+            failed_prediction_profile=failed_prediction_profile,
+            question_pressure_profile=question_pressure_profile,
+            simulation_profile=simulation_profile,
+            analogy_profile=analogy_profile,
+            synthesis_profile=synthesis_profile)
 
 
 @dataclass
