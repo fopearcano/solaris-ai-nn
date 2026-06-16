@@ -4085,3 +4085,72 @@ contact reviewers, call GitHub or external services, run Git, execute commands o
 experiments, run external agents, modify artifacts, or make any claim of
 consciousness, sentience, biological life, personhood, agency, free will, emotion,
 feeling, understanding, self-awareness, or subjective experience.**
+
+## Reviewer Feedback Assimilation
+
+**Reviewer feedback is research evidence, not training data.** Prompt 63 prepared a
+local independent review pack and a response ledger. The `review_assimilation`
+package (Prompt 64) assimilates the *results* of that review back into the
+scientific and experimental cycle. It ingests local reviewer objections, the
+response ledger, adversarial findings, audit-matrix blockers, reproduction
+outcomes, sanitizer findings, the review-readiness report, reviewer notes, and
+proposed reviewer experiments, and turns them into structured research evidence.
+This is explicitly *not* a Human Feedback / Teaching Loop, *not* RLHF, *not* model
+training, and *not* public peer-review automation -- reviewer feedback is stored
+and reasoned about as evidence, and the model is never updated from it.
+
+**Objections are classified and preserved, never dismissed.** The
+`ReviewerObjectionClassifier` assigns each objection a category, a severity, and a
+validity status; objections are never dismissed by default, "invalid with
+evidence" requires evidence refs, and a critical open objection blocks the relevant
+claim and readiness status. The `ReviewerReproductionOutcomeIngestor` records the
+outcome of a reviewer running a reproducibility challenge: failed and partial
+reproduction are evidence, successful reproduction proves nothing about
+consciousness/life/agency, and a missing artifact is the project's limitation
+rather than reviewer failure. Reproduction outcomes impact claim strength.
+
+**Impact and gaps become proposals and next-cycle tasks.** The
+`ClaimImpactAssessor` maps objections and reproduction outcomes to per-claim impact
+(strengthen / weaken / downgrade / mark unsupported / contradicted / falsified /
+forbidden / require more evidence / require rewording), where falsification
+downgrades or blocks and a forbidden-claim risk blocks publication readiness. The
+`TheoryImpactAssessor` maps theory-level objections to theory impact, preserving
+prior statements and preferring narrowing over hype. The
+`ReviewEvidenceGapMapBuilder` derives the evidence gaps a review exposed and maps
+them to claims or blockers; critical gaps block readiness, and every gap becomes a
+next-cycle experiment or documentation task. The
+`ReviewDrivenExperimentRecommender` turns gaps and objections into recommended
+experiments (passive-parser / ablation / shuffled-order / random-label controls,
+live comparison, longer soak, replication, falsification, metric/documentation
+improvements) -- instructions only, never executed, suitable as Architecture
+Evolution and Experiment Compiler inputs.
+
+**Claim revisions are proposed, not silently applied; critical objections can
+block publication.** The `ClaimRevisionProposer` produces structured revision
+proposals (downgrade strength, narrow scope, add limitation/counterevidence, mark
+inconclusive/unsupported/falsified/forbidden, rewrite safe wording, remove public
+claim, request more evidence) that do not edit the claim registry; unsafe proposed
+wording is blocked by ClaimGuard and safe wording still includes limitations. The
+`PublicationReadinessReviser` revises the advisory publication readiness, blocking
+it on forbidden claims, unresolved critical objections, failed reproductions, or
+critical missing evidence. The `ReviewAssimilationQueue` holds the next-cycle tasks
+as local metadata that executes nothing and preserves unresolved items. The bounded
+`ReviewerFeedbackAssimilationRuntime` assembles all of this and feeds structured
+proposals to Scientific Claims, evidence gaps and the queue to the Research Cycle,
+experiment recommendations to Architecture Evolution and the Experiment Compiler,
+and status to the Operator Console (with the mandated safe answers for "did
+reviewer feedback train the model?", "did Solaris contact reviewers?", and "can we
+publish after this review?"), Inner MAP, and Evaluation. The
+`ReviewerFeedbackAssimilationSafetyValidator` blocks publishing, upload, reviewer
+contact, external API and Git/GitHub calls, branch/tag/release/PR creation,
+experiment or command execution, external-agent runs, hardware/feeder/network/shell
+access, any Human Feedback / Teaching Loop or training from feedback, unsupported
+claims, the deletion of negative/falsified/inconclusive evidence, the hiding of
+unresolved objections, and publication readiness while critical objections are
+unresolved or forbidden claims are asserted. **Reviewer Feedback Assimilation turns
+local reviewer objections and reproduction outcomes into claim revisions, evidence
+gaps, and future experiment recommendations. It does not train models, contact
+reviewers, publish artifacts, run experiments, or execute external services, and it
+makes no claim of consciousness, sentience, biological life, personhood, agency,
+free will, emotion, feeling, understanding, self-awareness, or subjective
+experience.**

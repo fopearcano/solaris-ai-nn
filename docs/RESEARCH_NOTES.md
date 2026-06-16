@@ -2572,3 +2572,52 @@ response must cite evidence or admit it has none. The system is structurally
 forbidden from declaring victory over a reviewer by default -- an unanswered
 objection stays open. Treating objections as a queue to be cleared, rather than as
 findings to be preserved, would defeat the entire purpose of preparing for review.
+
+## Notes on Reviewer Feedback Assimilation
+
+**Why objections are valuable.** An objection is a free, targeted experiment design:
+it points at exactly the place where the evidence is thinnest and says what would
+have to be true for the claim to fail. The assimilation layer treats every
+objection as a first-class research input -- it is classified by category and
+severity, mapped to the specific claims it touches, and turned into a claim impact,
+an evidence gap, and (where applicable) a recommended experiment. The objection a
+hostile reviewer raises today is the ablation the next cycle runs; throwing it away
+would mean re-discovering the same weakness later, more expensively.
+
+**Why failed reproduction is evidence.** When a reviewer cannot reproduce a result,
+the naive reading is "the reviewer made a mistake". The disciplined reading is "the
+result is not yet reproducible, which is itself a finding". The layer records failed
+and partial reproductions as evidence that downgrades claim strength, and it treats
+a missing artifact as the *project's* limitation, not the reviewer's failure --
+because if a stranger cannot run the demo from the documented commands, the
+documentation is the thing that is broken. Successful reproduction, conversely, is
+recorded as support but proves nothing about consciousness, life, or agency; it
+proves only that the bounded demo runs as described.
+
+**Why reviewer feedback is not a Human Feedback / Teaching Loop.** The single most
+important boundary in this layer is that reviewer feedback is *evidence about the
+claims*, never *training signal for the model*. There is no gradient, no reward
+model, no RLHF, no fine-tuning, and no teaching loop. Feedback changes what the
+research ledger says about a claim's strength and what experiments are queued; it
+never changes the model's weights or behaviour. Collapsing the two would turn
+reviewers into an unaccountable optimization target and would make every claim a
+moving goalpost -- the opposite of what review is for.
+
+**Why claim revision must be explicit.** It would be easy, and wrong, to let the
+assimilation layer quietly rewrite the claim registry the moment an objection
+arrived. Instead it emits *proposals*: structured, ClaimGuard-checked revision
+suggestions that the Scientific Claim Registry remains free to accept, modify, or
+reject. The registry stays the single source of truth; unsafe proposed wording is
+blocked outright; and proposed safe wording always carries the limitations forward.
+Silent revision would erase the audit trail that makes the difference between a
+claim that survived scrutiny and one that was edited until no one objected.
+
+**How hostile objections become future experiments.** The pipeline is deliberately
+one-directional and inert: objection -> classification -> evidence gap ->
+experiment recommendation -> review queue item -> (eventually, by an operator
+decision) an Experiment Compiler or Architecture Evolution input. Nothing along
+that path executes anything. A "passive parser?" objection becomes a recommended
+passive-parser control; a "log accumulation?" objection becomes a shuffled-order
+test; a "fixture overfit?" objection becomes a live-read-only comparison. The
+hostile question is not rebutted with words; it is converted into the experiment
+that would actually settle it -- which the operator may then choose to run.

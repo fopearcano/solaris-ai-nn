@@ -2420,3 +2420,57 @@ def independent_review_metrics(ir: Optional[Dict[str, Any]]) -> Dict[str, Any]:
                 "nothing, calls no Git/GitHub, executes nothing, and proves "
                 "nothing about consciousness/life/agency",
     }
+
+
+def review_assimilation_metrics(ra: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective review-assimilation metrics (reviewer feedback as evidence).
+
+    These describe *feedback assimilation*: feedback artifacts, objections (valid/
+    partial/unresolved/critical), reproduction success/failure, claim downgrades/
+    falsifications, theory revisions, evidence gaps, reviewer-driven experiments,
+    and publication-readiness blockers. The layer never trains on feedback,
+    publishes nothing, contacts no reviewer, and makes no consciousness/life/
+    agency claim.
+    """
+    if not ra:
+        return {"present": False}
+    return {
+        "present": True,
+        "reviewer_feedback_artifact_count": int(
+            ra.get("reviewer_feedback_artifact_count", 0) or 0),
+        "reviewer_objection_count": int(
+            ra.get("reviewer_objection_count", 0) or 0),
+        "valid_objection_count": int(ra.get("valid_objection_count", 0) or 0),
+        "partially_valid_objection_count": int(
+            ra.get("partially_valid_objection_count", 0) or 0),
+        "unresolved_objection_count": int(
+            ra.get("unresolved_objection_count", 0) or 0),
+        "critical_objection_count": int(
+            ra.get("critical_objection_count", 0) or 0),
+        "unresolved_critical_objection_count": int(
+            ra.get("unresolved_critical_objection_count", 0) or 0),
+        "reproduction_success_count": int(
+            ra.get("reproduction_success_count", 0) or 0),
+        "reproduction_failure_count": int(
+            ra.get("reproduction_failure_count", 0) or 0),
+        "claim_downgrade_count": int(ra.get("claim_downgrade_count", 0) or 0),
+        "claim_falsification_count": int(
+            ra.get("claim_falsification_count", 0) or 0),
+        "theory_revision_count": int(ra.get("theory_revision_count", 0) or 0),
+        "evidence_gap_count": int(ra.get("evidence_gap_count", 0) or 0),
+        "critical_evidence_gap_count": int(
+            ra.get("critical_evidence_gap_count", 0) or 0),
+        "reviewer_driven_experiment_count": int(
+            ra.get("reviewer_driven_experiment_count", 0) or 0),
+        "publication_readiness_blocker_count": int(
+            ra.get("publication_readiness_blocker_count", 0) or 0),
+        "review_assimilation_safety_block_count": int(
+            ra.get("review_assimilation_safety_block_count", 0) or 0),
+        "publication_readiness_impact": ra.get("publication_readiness_impact"),
+        "trains_model": False, "published": False, "contacted_reviewers": False,
+        "runs_git": False, "calls_github": False,
+        "is_consciousness_or_personhood": False,
+        "note": "reviewer-feedback-as-evidence metrics; never trains on "
+                "feedback, publishes nothing, contacts no reviewer, and proves "
+                "nothing about consciousness/life/agency",
+    }

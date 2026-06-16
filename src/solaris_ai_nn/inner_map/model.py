@@ -546,6 +546,16 @@ class InnerMapModel:
     # review_readiness_status, latest_independent_review_report_path. It prepares
     # a local offline review package; it publishes nothing and executes nothing.
     independent_review: Optional[Dict[str, Any]] = None
+    # Review-assimilation status (Prompt 64); None when not attached. Keys:
+    # review_assimilation_enabled, reviewer_feedback_artifact_count,
+    # reviewer_objection_count, valid_objection_count, critical_objection_count,
+    # reproduction_failure_count, claim_downgrade_count, theory_impact_count,
+    # evidence_gap_count, reviewer_driven_experiment_count,
+    # claim_revision_proposal_count, unresolved_critical_objection_count,
+    # publication_readiness_impact, latest_review_assimilation_report_path. It
+    # assimilates reviewer feedback as research evidence -- never model training;
+    # it publishes nothing and contacts no one.
+    review_assimilation: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

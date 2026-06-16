@@ -179,6 +179,10 @@ AVAILABLE_QUERIES = (
     "what are the strongest objections?", "what review artifacts are missing?",
     "what claims are not reviewable?", "what do we need to redact?",
     "did Solaris publish anything?", "did Solaris contact reviewers?",
+    "what did reviewers object to?", "which objections are valid?",
+    "what claims must be revised?",
+    "what experiments should we run because of the review?",
+    "did reviewer feedback train the model?", "can we publish after this review?",
 )
 
 
@@ -239,6 +243,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("ra_"):
+            return self._review_assimilation(topic)
         if topic.startswith("ir_"):
             return self._independent_review(topic)
         if topic.startswith("sci_"):
@@ -624,6 +630,72 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _review_assimilation(self, topic: str) -> CommunicationResponse:
+        """Answer review-assimilation queries (reviewer feedback as evidence).
+
+        The "did reviewer feedback train the model?", "did Solaris contact
+        reviewers?", and "can we publish after this review?" questions are
+        answered safely even with no assimilation state present.
+        """
+        if topic == "ra_train":
+            return self.builder.status_response(
+                "No. Reviewer feedback is stored as research evidence and used to "
+                "propose claim revisions or future experiments. It is not used as "
+                "Human Feedback / Teaching Loop, RLHF, or model training.",
+                ["policy:review_assimilation_no_training"])
+        if topic == "ra_contact":
+            return self.builder.status_response(
+                "No. Reviewer Feedback Assimilation reads local review artifacts "
+                "only. It does not contact reviewers, upload files, publish "
+                "anything, or call external services.",
+                ["policy:review_assimilation_no_contact"])
+        if topic == "ra_publish":
+            return self.builder.status_response(
+                "Only if the Publication Readiness Revision and Scientific Claim "
+                "Registry show no critical blockers, forbidden claims, missing "
+                "required evidence, or unresolved critical objections. The system "
+                "does not publish automatically.",
+                ["policy:review_assimilation_publish_conditional"])
+        component = self.components.get("review_assimilation")
+        if component is None:
+            return self.builder.missing_component_response("review_assimilation")
+        status = (component.review_assimilation_status()
+                  if hasattr(component, "review_assimilation_status")
+                  else component.snapshot()
+                  if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:review_assimilation"]
+        if topic == "ra_objections":
+            text = (f"reviewers raised {status.get('reviewer_objection_count', 0)} "
+                    f"objection(s) ({status.get('critical_objection_count', 0)} "
+                    f"critical, {status.get('unresolved_objection_count', 0)} "
+                    "unresolved); see OBJECTION_CLASSIFICATION.md")
+        elif topic == "ra_valid":
+            text = (f"valid objections: {status.get('valid_objection_count', 0)} "
+                    f"(partially valid {status.get('partially_valid_objection_count', 0)}); "
+                    "objections are never dismissed by default -- see the "
+                    "classification report")
+        elif topic == "ra_revise":
+            text = (f"claim revision proposals: "
+                    f"{status.get('claim_revision_proposal_count', 0)} "
+                    f"(downgrades {status.get('claim_downgrade_count', 0)}, "
+                    f"falsifications {status.get('claim_falsification_count', 0)}); "
+                    "these are proposals for the Scientific Claim Registry, not "
+                    "direct edits -- see CLAIM_REVISION_PROPOSALS.md")
+        elif topic == "ra_experiments":
+            text = (f"reviewer-driven experiment recommendations: "
+                    f"{status.get('reviewer_driven_experiment_count', 0)} "
+                    "(controls, ablations, replication, falsification); these are "
+                    "instructions only and feed Architecture Evolution / the "
+                    "Experiment Compiler -- see EXPERIMENT_RECOMMENDATIONS.md")
+        else:
+            text = (f"review assimilation: "
+                    f"{status.get('reviewer_objection_count', 0)} objection(s), "
+                    f"publication readiness "
+                    f"{status.get('publication_readiness_impact')}. Reviewer "
+                    "feedback is research evidence, not model training")
         return self.builder.status_response(text, refs)
 
     def _independent_review(self, topic: str) -> CommunicationResponse:

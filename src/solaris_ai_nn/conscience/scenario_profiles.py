@@ -1415,6 +1415,46 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["run_step_count"],
             max_runtime_s=60.0))
 
+    # -- Review assimilation profiles (Prompt 64) -----------------------------
+    # Assimilates local reviewer feedback as research evidence: classifies
+    # objections, records reproduction outcomes, assesses claim/theory impact,
+    # maps evidence gaps, and proposes reviewer-driven experiments and claim
+    # revisions. Reads local artifacts and writes reports only: it never trains
+    # on feedback, publishes nothing, contacts no reviewer, calls no Git/GitHub
+    # or external API, executes nothing, and makes no consciousness/life/agency
+    # claim.
+    _assim_modules = ["bridge", "governance", "ops", "inner_map",
+                      "independent_review", "review_assimilation"]
+    for pid, desc in (
+            ("review_assimilation_status",
+             "Assimilate reviewer feedback into the research ledger."),
+            ("review_assimilation_objections",
+             "Classify reviewer objections (never dismissed by default)."),
+            ("review_assimilation_reproduction",
+             "Record reviewer reproduction outcomes as evidence."),
+            ("review_assimilation_claim_impact",
+             "Assess claim impact and propose claim revisions."),
+            ("review_assimilation_experiments",
+             "Generate reviewer-driven experiment recommendations."),
+            ("review_assimilation_publication_readiness",
+             "Revise publication readiness from review feedback.")):
+        add(ScenarioProfile(
+            profile_id=pid, description=desc,
+            run_context=_ctx(RunMode.SHORT_DEMO, max_steps=120),
+            enabled_modules=list(_assim_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "reviewer feedback is research evidence, never model training",
+                "no publish/upload/reviewer-contact; no Git/GitHub/external API",
+                "no command/experiment execution; no external agent",
+                "objections are never dismissed; unresolved ones are preserved",
+                "claim revisions are proposals; the registry stays source of "
+                "truth",
+                "no claim of consciousness/life/agency/subjective experience"],
+            governance_requirements=["enable_plural_sensorium_fixture"],
+            expected_artifacts=["REVIEW_ASSIMILATION_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=60.0))
+
     return profiles
 
 

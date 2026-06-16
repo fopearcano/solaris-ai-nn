@@ -1982,4 +1982,36 @@ def build_default_state_graph() -> StateGraph:
                "alternative explanations populate the audit matrix")
     g.add_edge("IndependentReviewRuntime", "inner_map",
                "independent review state feeds Inner MAP")
+
+    # Reviewer feedback assimilation (Prompt 64): review feedback as research
+    # evidence. Reads local artifacts and writes reports only; never trains,
+    # publishes, or contacts reviewers.
+    for name, role in [
+        ("ReviewerFeedbackManifest", "indexes local feedback; negatives kept"),
+        ("ReviewerObjectionClassification", "objections classified; never dropped"),
+        ("ReviewerReproductionOutcome", "reproduction result is evidence"),
+        ("ClaimImpactAssessment", "per-claim impact; proposal, not edit"),
+        ("TheoryImpactAssessment", "theory impact; prior statements preserved"),
+        ("ReviewEvidenceGapMap", "review gaps become next-cycle tasks"),
+        ("ReviewDrivenExperimentRecommendation",
+         "reviewer-driven experiments; instructions only"),
+        ("ClaimRevisionProposal", "structured revision proposals; unsafe blocked"),
+        ("PublicationReadinessRevision", "advisory; critical objections block"),
+        ("ReviewAssimilationQueue", "next-cycle tasks; executes nothing"),
+        ("ReviewerFeedbackAssimilationRuntime",
+         "bounded offline assimilator; no training/publish/contact"),
+        ("ReviewerFeedbackAssimilationSafetyValidator",
+         "no publish/upload/contact/Git/experiment/training"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("ReviewerResponseLedger", "ReviewerObjectionClassification",
+               "reviewer objections are classified for assimilation")
+    g.add_edge("ReviewerObjectionClassification", "ClaimImpactAssessment",
+               "objections drive per-claim impact assessments")
+    g.add_edge("ReviewEvidenceGapMap", "ReviewDrivenExperimentRecommendation",
+               "evidence gaps become experiment recommendations")
+    g.add_edge("ClaimImpactAssessment", "ScientificClaimRuntime",
+               "claim impacts are proposed to the Scientific Claim Registry")
+    g.add_edge("ReviewerFeedbackAssimilationRuntime", "inner_map",
+               "review assimilation state feeds Inner MAP")
     return g

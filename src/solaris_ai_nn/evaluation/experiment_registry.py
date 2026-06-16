@@ -649,6 +649,39 @@ DESCRIPTIONS = {
         "no publish/upload/external/Git/experiment/command execution",
     "independent_review_safety_protocol":
         "no publish/upload/external/Git/experiment/command execution",
+    "review_assimilation": "reviewer feedback assimilation (evidence, not training)",
+    "review_assimilation_protocol":
+        "review feedback assimilation (no training/publish/contact)",
+    "review_assimilation_evaluation": "review assimilation state check",
+    "feedback_manifest_protocol":
+        "feedback manifest (local feedback; negatives kept)",
+    "feedback_manifest_evaluation": "feedback manifest check",
+    "objection_classifier_protocol":
+        "objection classifier (never dismissed; critical blocks)",
+    "objection_classifier_evaluation": "objection classifier check",
+    "reproduction_outcome_protocol":
+        "reproduction outcomes (failure is evidence)",
+    "reproduction_outcome_evaluation": "reproduction outcome check",
+    "claim_impact_protocol": "claim impact (falsification downgrades/blocks)",
+    "claim_impact_evaluation": "claim impact check",
+    "theory_impact_protocol": "theory impact (prior statements preserved)",
+    "theory_impact_evaluation": "theory impact check",
+    "evidence_gap_map_protocol": "evidence gap map (critical gaps block)",
+    "evidence_gap_map_evaluation": "evidence gap map check",
+    "review_driven_experiment_protocol":
+        "reviewer-driven experiments (instructions only)",
+    "review_driven_experiment_evaluation": "review-driven experiment check",
+    "claim_revision_protocol":
+        "claim revision proposals (no direct registry edit)",
+    "claim_revision_evaluation": "claim revision check",
+    "publication_readiness_revision_protocol":
+        "publication readiness revision (critical objections block)",
+    "publication_readiness_revision_evaluation":
+        "publication readiness revision check",
+    "review_assimilation_safety":
+        "no publish/upload/contact/training/Git/experiment execution",
+    "review_assimilation_safety_protocol":
+        "no publish/upload/contact/training/Git/experiment execution",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -992,6 +1025,24 @@ class ExperimentRegistry:
                         "response_ledger_evaluation", "review_readiness_protocol",
                         "review_readiness_evaluation")
             or bool(merged.get("independent_review", False)))
+        features["review_assimilation"] = (
+            name.startswith("review_assimilation")
+            or name in ("feedback_manifest_protocol",
+                        "feedback_manifest_evaluation",
+                        "objection_classifier_protocol",
+                        "objection_classifier_evaluation",
+                        "reproduction_outcome_protocol",
+                        "reproduction_outcome_evaluation",
+                        "claim_impact_protocol", "claim_impact_evaluation",
+                        "theory_impact_protocol", "theory_impact_evaluation",
+                        "evidence_gap_map_protocol",
+                        "evidence_gap_map_evaluation",
+                        "review_driven_experiment_protocol",
+                        "review_driven_experiment_evaluation",
+                        "claim_revision_protocol", "claim_revision_evaluation",
+                        "publication_readiness_revision_protocol",
+                        "publication_readiness_revision_evaluation")
+            or bool(merged.get("review_assimilation", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

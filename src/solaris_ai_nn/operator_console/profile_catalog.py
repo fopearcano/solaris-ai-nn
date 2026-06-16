@@ -100,6 +100,10 @@ def _source_package(profile_id: str) -> str:
     if pid.startswith("safety") or pid.startswith("red_team") \
             or pid.startswith("assurance"):
         return "safety_invariants"
+    if pid.startswith("review_assimilation") or pid.startswith("assimilation_") \
+            or pid.startswith("objection_") or pid.startswith("reproduction_") \
+            or pid.startswith("claim_revision"):
+        return "review_assimilation"
     if pid.startswith("independent_review") or pid.startswith("review_") \
             or pid.startswith("reviewer_") or pid.startswith("reproducibility_") \
             or pid.startswith("adversarial_"):

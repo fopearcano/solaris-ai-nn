@@ -440,6 +440,33 @@ POST_MERGE_QUERIES = (
 # Research-baseline queries (Prompt 60). Answered from the research-baseline
 # status; the "is this a release / did Solaris create a Git tag / does this prove
 # consciousness?" questions are answered safely even with no baseline built.
+# Review-assimilation queries (Prompt 64). Answered from the review-assimilation
+# layer; the "did reviewer feedback train the model?", "did Solaris contact
+# reviewers?", and "can we publish after this review?" questions are answered
+# safely even with no assimilation state present.
+REVIEW_ASSIMILATION_QUERIES = (
+    ("what did reviewers object to", "ra_objections"),
+    ("what did the reviewers object to", "ra_objections"),
+    ("which objections are valid", "ra_valid"),
+    ("which objections were valid", "ra_valid"),
+    ("what claims must be revised", "ra_revise"),
+    ("which claims must be revised", "ra_revise"),
+    ("what claims need revision", "ra_revise"),
+    ("what experiments should we run because of the review", "ra_experiments"),
+    ("what experiments should we run because of review", "ra_experiments"),
+    ("what experiments does the review require", "ra_experiments"),
+    ("did reviewer feedback train the model", "ra_train"),
+    ("did review feedback train the model", "ra_train"),
+    ("did feedback train the model", "ra_train"),
+    ("did reviewer feedback train", "ra_train"),
+    ("did solaris contact reviewers", "ra_contact"),
+    ("did solaris contact any reviewer", "ra_contact"),
+    ("did you contact reviewers", "ra_contact"),
+    ("can we publish after this review", "ra_publish"),
+    ("can we publish after the review", "ra_publish"),
+    ("can we publish now", "ra_publish"),
+)
+
 # Independent-review queries (Prompt 63). Answered from the independent review
 # layer; the "did Solaris publish anything?" and "did Solaris contact reviewers?"
 # questions are answered safely even with no review state present.
@@ -737,7 +764,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._independent_review(lowered)
+        result = (self._review_assimilation(lowered)
+                  or self._independent_review(lowered)
                   or self._scientific_claims(lowered)
                   or self._research_cycle(lowered)
                   or self._research_baseline(lowered)
@@ -905,6 +933,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _review_assimilation(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in REVIEW_ASSIMILATION_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"review assimilation query {topic!r}"])
         return None
 
     @staticmethod

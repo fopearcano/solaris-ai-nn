@@ -3067,3 +3067,42 @@ Records three reviewer objections and responds: one partially answered (citing
 evidence), one accepted as a limitation, and one left unresolved. The ledger is
 append-only -- objections cannot be deleted, accepted limitations stay visible, and
 the system cannot declare victory over a reviewer by default.
+
+## 349. Review Assimilation Demo ✅ (implemented)
+
+**Run:** `python examples/run_review_assimilation_demo.py --state-dir .solaris_ai_nn_review_assimilation/test_assimilation`
+Assimilates local reviewer feedback (a fixture-overfit objection, a failed
+reproduction, and a forbidden-claim-risk objection) into the research ledger:
+classifies objections, assesses claim impact, recommends experiments, and revises
+publication readiness (blocked). Reviewer feedback is research evidence, not model
+training; nothing is published, uploaded, or contacted.
+
+## 350. Objection Classifier Demo ✅ (implemented)
+
+**Run:** `python examples/run_objection_classifier_demo.py --state-dir .solaris_ai_nn_review_assimilation/test_objection_classifier`
+Classifies a missing-evidence, fixture-overfit, unsupported-claim, and failed-
+reproduction objection by category, severity, and validity. Objections are never
+dismissed by default; a critical open objection blocks the relevant status.
+
+## 351. Reproduction Outcome Demo ✅ (implemented)
+
+**Run:** `python examples/run_reproduction_outcome_demo.py --state-dir .solaris_ai_nn_review_assimilation/test_reproduction_outcome`
+Ingests a reproduced, not-reproduced, blocked-by-missing-artifact, and inconclusive
+outcome. Failed/partial reproduction is evidence; a missing artifact is a project
+limitation, not reviewer failure; successful reproduction proves nothing about
+consciousness/life/agency.
+
+## 352. Claim Revision Demo ✅ (implemented)
+
+**Run:** `python examples/run_claim_revision_demo.py --state-dir .solaris_ai_nn_review_assimilation/test_claim_revision`
+Turns claim impacts into structured revision proposals: a strength downgrade, an
+inconclusive mark, an unsupported mark, and a forbidden mark whose unsafe wording is
+blocked by ClaimGuard. A proposal never edits the claim registry; safe wording still
+includes limitations.
+
+## 353. Review-Driven Experiment Demo ✅ (implemented)
+
+**Run:** `python examples/run_review_driven_experiment_demo.py --state-dir .solaris_ai_nn_review_assimilation/test_review_driven_experiment`
+Turns reviewer objections into experiment recommendations: a passive-parser control,
+a shuffled-event-order test, and a live-read-only comparison. Recommendations are
+instructions only -- nothing is executed and no branch is created.

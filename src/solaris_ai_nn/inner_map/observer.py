@@ -101,6 +101,7 @@ class InnerMapObserver:
     research_cycle: Any = None  # optional dict/object of research-cycle status
     scientific_claims: Any = None  # optional dict/object of scientific-claims
     independent_review: Any = None  # optional dict/object of independent-review
+    review_assimilation: Any = None  # optional dict/object of review-assimilation
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -931,6 +932,18 @@ class InnerMapObserver:
                 model.independent_review = review.independent_review_status()
             elif hasattr(review, "snapshot"):
                 model.independent_review = review.snapshot()
+        assimilation = self.review_assimilation
+        if assimilation is None and self.runner is not None:
+            assimilation = getattr(self.runner, "review_assimilation", None)
+        if assimilation is not None:
+            # Review-assimilation status (reviewer feedback as research evidence).
+            if isinstance(assimilation, dict):
+                model.review_assimilation = dict(assimilation)
+            elif hasattr(assimilation, "review_assimilation_status"):
+                model.review_assimilation = \
+                    assimilation.review_assimilation_status()
+            elif hasattr(assimilation, "snapshot"):
+                model.review_assimilation = assimilation.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

@@ -543,7 +543,30 @@ python examples/run_artifact_sanitizer_demo.py                 # local path warn
 python examples/run_reproducibility_challenge_demo.py          # fixture/falsification challenges; missing prereq unavailable
 python examples/run_adversarial_review_demo.py                 # fixture-overfit / passive-parser / missing-replication alternatives
 python examples/run_response_ledger_demo.py                    # objection, partial answer, accepted limitation, unresolved
+
+# Review assimilation: turn reviewer feedback into claim revisions + experiments
+python examples/run_review_assimilation_demo.py                # objection -> claim impact -> experiment recommendation
+python examples/run_objection_classifier_demo.py               # category / severity / validity; critical blocks
+python examples/run_reproduction_outcome_demo.py               # reproduced / not reproduced / blocked / inconclusive
+python examples/run_claim_revision_demo.py                     # downgrade / mark unsupported / block unsafe wording
+python examples/run_review_driven_experiment_demo.py           # passive-parser / shuffled-order / live comparison
 ```
+
+Reviewer Feedback Assimilation turns local reviewer objections and reproduction
+outcomes into claim revisions, evidence gaps, and future experiment
+recommendations. It does not train models, contact reviewers, publish artifacts,
+run experiments, or execute external services. Reviewer feedback is stored and
+reasoned about as research evidence -- never as a Human Feedback / Teaching Loop,
+RLHF, or model training. Objections are classified by category, severity, and
+validity (never dismissed by default; a critical open objection blocks the relevant
+status); reproduction outcomes impact claim strength (failed reproduction is
+evidence; a missing artifact is the project's limitation); claim and theory impacts
+become proposals, not silent edits (the Scientific Claim Registry stays the source
+of truth, unsafe wording is blocked); evidence gaps become next-cycle tasks; and
+publication readiness is revised and blocked on forbidden claims or unresolved
+critical objections. It makes no claim of consciousness, sentience, biological life,
+personhood, agency, free will, emotion, feeling, understanding, self-awareness, or
+subjective experience.
 
 The Independent Review layer generates local reviewer packs, reproducibility
 challenges, audit matrices, and response ledgers. It does not publish, upload,
@@ -1690,6 +1713,13 @@ src/solaris_ai_nn/
                 readiness, runtime, reports, safety (prepares a local review
                 package; publishes/uploads nothing; contacts no reviewer; calls no
                 Git/GitHub/external API; executes nothing)
+  review_assimilation/ reviewer feedback assimilation + objection-driven planning:
+                feedback manifest, objection classifier, reproduction outcomes,
+                claim impact, theory impact, evidence gap map, experiment
+                recommendations, claim revision, publication readiness revision,
+                review queue, runtime, reports, safety (reviewer feedback as
+                research evidence; never trains/publishes/contacts; proposes claim
+                revisions and experiments; executes nothing)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

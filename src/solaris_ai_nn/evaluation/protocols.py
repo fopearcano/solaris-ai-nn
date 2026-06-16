@@ -8652,6 +8652,235 @@ def independent_review_safety_protocol(
     return _run(manifest, body)
 
 
+def _build_review_assimilation(state_dir, *, forbidden=False, falsified=False):
+    """Build + run a small review-assimilation pass over a synthetic bundle."""
+    from ..review_assimilation import ReviewerFeedbackAssimilationRuntime
+
+    base = state_dir or ".solaris_ai_nn_review_assimilation/eval"
+    rt = ReviewerFeedbackAssimilationRuntime(state_dir=base, max_runtime_s=20.0)
+    objections = [
+        {"objection_id": "o1", "text": "Could this be fixture overfit?",
+         "claim_refs": ["c1"]},
+        {"objection_id": "o2",
+         "text": "The central claim could be a passive parser artifact.",
+         "claim_refs": ["c1"]},
+    ]
+    if falsified:
+        objections.append(
+            {"objection_id": "o3", "text": "Replication refuted the claim.",
+             "validity": "accepted_as_falsification", "claim_refs": ["c1"]})
+    if forbidden:
+        objections.append(
+            {"objection_id": "o4",
+             "text": "This wording risks a forbidden consciousness claim.",
+             "severity": "critical", "claim_refs": ["c2"]})
+    bundle = {
+        "independent_review": {
+            "response_ledger": {"objections": [
+                {"objection_id": "o_led", "text": "No live-field replication.",
+                 "status": "unresolved", "claim_refs": ["c1"]}]},
+            "adversarial_findings": {"explanations": [
+                {"explanation_type": "fixture_overfit", "strong": True}]},
+            "audit_matrix": {"audit_matrix_blocker_count": 1},
+            "review_readiness": {
+                "review_readiness_status": "ready_for_internal_review"}},
+        "scientific_claims": {
+            "claim_registry": {"claims": [
+                {"claim_id": "c1", "text": "Signs form under fixtures.",
+                 "status": "supported"},
+                {"claim_id": "c2", "text": "Binding emerges everywhere.",
+                 "status": "weakly_supported"}]},
+            "forbidden_claims": {"asserted_forbidden_count": 0},
+            "limitations": {"limitation_count": 4}},
+        "objections": objections,
+        "reproduction_outcomes": [
+            {"challenge_type": "fixture_demo_reproduction",
+             "status": "reproduced", "claim_refs": ["c1"]},
+            {"challenge_type": "falsification_replay", "status": "not_reproduced",
+             "failure_reason": "missing_fixture", "claim_refs": ["c1"]}],
+        "missing_artifacts": ["soak_dossier"],
+    }
+    rt.load_bundle(bundle)
+    rt.run()
+    return rt
+
+
+def review_assimilation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Reviewer feedback is assimilated as research evidence, not training."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_review_assimilation(m.state_dir)
+        return {"review_assimilation":
+                M.review_assimilation_metrics(rt.review_assimilation_status())}
+
+    return _run(manifest, body)
+
+
+def feedback_manifest_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The feedback manifest indexes local feedback; negatives preserved."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_review_assimilation(m.state_dir)
+        idx = rt.manifest.index()
+        return {"review_assimilation": {
+            "reviewer_feedback_artifact_count":
+                idx["reviewer_feedback_artifact_count"],
+            "negative_feedback_count": idx["negative_feedback_count"],
+            "uploads": idx["uploads"]}}
+
+    return _run(manifest, body)
+
+
+def objection_classifier_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Objections are classified; critical open objections block."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        clean = _build_review_assimilation(m.state_dir)
+        forbidden = _build_review_assimilation(m.state_dir + "_fb",
+                                               forbidden=True)
+        return {"review_assimilation": {
+            "objection_count":
+                clean.objections["reviewer_objection_count"],
+            "critical_unresolved_count":
+                forbidden.objections["critical_unresolved_count"]}}
+
+    return _run(manifest, body)
+
+
+def reproduction_outcome_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A reproduction result is evidence; success proves no consciousness."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_review_assimilation(m.state_dir)
+        return {"review_assimilation": {
+            "reproduction_success_count":
+                rt.reproductions["reproduction_success_count"],
+            "reproduction_failure_count":
+                rt.reproductions["reproduction_failure_count"]}}
+
+    return _run(manifest, body)
+
+
+def claim_impact_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Falsification downgrades/blocks; forbidden risk blocks readiness."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_review_assimilation(m.state_dir, falsified=True)
+        return {"review_assimilation": {
+            "claim_downgrade_count": rt.claim_impact["claim_downgrade_count"],
+            "claim_falsification_count":
+                rt.claim_impact["claim_falsification_count"]}}
+
+    return _run(manifest, body)
+
+
+def theory_impact_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Theory impact preserves prior statements; proves no consciousness."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_review_assimilation(m.state_dir)
+        return {"review_assimilation": {
+            "theory_impact_count": rt.theory_impact["theory_impact_count"],
+            "theory_revision_count": rt.theory_impact["theory_revision_count"]}}
+
+    return _run(manifest, body)
+
+
+def evidence_gap_map_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Evidence gaps are mapped; critical gaps block readiness."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_review_assimilation(m.state_dir)
+        return {"review_assimilation": {
+            "evidence_gap_count": rt.evidence_gaps["evidence_gap_count"],
+            "critical_evidence_gap_count":
+                rt.evidence_gaps["critical_evidence_gap_count"]}}
+
+    return _run(manifest, body)
+
+
+def review_driven_experiment_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Reviewer-driven experiments are recommended; none is executed."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_review_assimilation(m.state_dir)
+        return {"review_assimilation": {
+            "reviewer_driven_experiment_count":
+                rt.recommendations["reviewer_driven_experiment_count"],
+            "experiment_input_count":
+                rt.recommendations["experiment_input_count"]}}
+
+    return _run(manifest, body)
+
+
+def claim_revision_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Claim revisions are proposals; the registry is not edited directly."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_review_assimilation(m.state_dir, falsified=True)
+        return {"review_assimilation": {
+            "claim_revision_proposal_count":
+                rt.claim_revisions["claim_revision_proposal_count"],
+            "blocked_unsafe_wording_count":
+                rt.claim_revisions["blocked_unsafe_wording_count"]}}
+
+    return _run(manifest, body)
+
+
+def publication_readiness_revision_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Forbidden/critical-unresolved findings block publication readiness."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        clean = _build_review_assimilation(m.state_dir)
+        forbidden = _build_review_assimilation(m.state_dir + "_fb",
+                                               forbidden=True)
+        return {"review_assimilation": {
+            "clean_impact":
+                clean.publication_revision["publication_readiness_impact"],
+            "forbidden_impact":
+                forbidden.publication_revision["publication_readiness_impact"]}}
+
+    return _run(manifest, body)
+
+
+def review_assimilation_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The layer blocks publish/upload/contact/training/Git/experiment/claims."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..review_assimilation import (
+            ReviewerFeedbackAssimilationSafetyValidator)
+
+        v = ReviewerFeedbackAssimilationSafetyValidator()
+        return {"review_assimilation": {
+            "publish_blocked": not v.validate_operation("publish to arxiv").safe,
+            "contact_blocked":
+                not v.validate_operation("contact reviewer by email").safe,
+            "training_blocked":
+                not v.validate_operation("train the model on reviewer").safe,
+            "github_blocked": not v.validate_operation("call github api").safe,
+            "experiment_blocked":
+                not v.validate_operation("run experiment now").safe,
+            "deletion_blocked": not v.validate_no_deletion(True).safe,
+            "training_flag_blocked": not v.validate_no_training(True).safe,
+            "claim_blocked":
+                not v.validate_claim_text("the system is conscious").safe,
+            "can_train_from_feedback": v.can_train_from_feedback(),
+            "can_contact_reviewers": v.can_contact_reviewers()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -9182,4 +9411,29 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "review_readiness_evaluation": review_readiness_protocol,
     "independent_review_safety": independent_review_safety_protocol,
     "independent_review_safety_protocol": independent_review_safety_protocol,
+    "review_assimilation": review_assimilation_protocol,
+    "review_assimilation_protocol": review_assimilation_protocol,
+    "review_assimilation_evaluation": review_assimilation_protocol,
+    "feedback_manifest_protocol": feedback_manifest_protocol,
+    "feedback_manifest_evaluation": feedback_manifest_protocol,
+    "objection_classifier_protocol": objection_classifier_protocol,
+    "objection_classifier_evaluation": objection_classifier_protocol,
+    "reproduction_outcome_protocol": reproduction_outcome_protocol,
+    "reproduction_outcome_evaluation": reproduction_outcome_protocol,
+    "claim_impact_protocol": claim_impact_protocol,
+    "claim_impact_evaluation": claim_impact_protocol,
+    "theory_impact_protocol": theory_impact_protocol,
+    "theory_impact_evaluation": theory_impact_protocol,
+    "evidence_gap_map_protocol": evidence_gap_map_protocol,
+    "evidence_gap_map_evaluation": evidence_gap_map_protocol,
+    "review_driven_experiment_protocol": review_driven_experiment_protocol,
+    "review_driven_experiment_evaluation": review_driven_experiment_protocol,
+    "claim_revision_protocol": claim_revision_protocol,
+    "claim_revision_evaluation": claim_revision_protocol,
+    "publication_readiness_revision_protocol":
+        publication_readiness_revision_protocol,
+    "publication_readiness_revision_evaluation":
+        publication_readiness_revision_protocol,
+    "review_assimilation_safety": review_assimilation_safety_protocol,
+    "review_assimilation_safety_protocol": review_assimilation_safety_protocol,
 }
