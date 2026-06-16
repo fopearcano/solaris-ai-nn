@@ -476,6 +476,15 @@ class InnerMapModel:
     # latest_soak_report_path. The soak protocol studies structural
     # development; it is not biological life, consciousness, or agency.
     developmental_soak: Optional[Dict[str, Any]] = None
+    # Developmental-replication status (Prompt 55); None when not attached. Keys:
+    # developmental_replication_enabled, registered_run_count, lineage_count,
+    # replication_matrix_path, replicated_claim_count, diverged_claim_count,
+    # falsified_claim_count, inconclusive_claim_count,
+    # strongest_structural_similarity, strongest_divergence_reason,
+    # latest_replication_report_path. Replication compares observable structures
+    # across runs; a lineage is experimental provenance, not biological
+    # ancestry, and this is not consciousness or life.
+    developmental_replication: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

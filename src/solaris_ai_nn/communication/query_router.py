@@ -145,6 +145,10 @@ AVAILABLE_QUERIES = (
     "what happened today in the soak?", "what changed this week?",
     "did Solaris develop?", "did the controls differ?", "did safety hold?",
     "does this prove consciousness or life?",
+    "did the result replicate?", "which structures replicated?",
+    "which claims were falsified?", "did live flux matter?",
+    "did labels contaminate development?", "was this just fixture overfit?",
+    "which run diverged and why?", "does replication prove consciousness?",
 )
 
 
@@ -205,6 +209,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("rp_"):
+            return self._developmental_replication(topic)
         if topic.startswith("sk_"):
             return self._developmental_soak(topic)
         if topic.startswith("dl_"):
@@ -574,6 +580,66 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _developmental_replication(self, topic: str) -> CommunicationResponse:
+        """Answer cross-run replication queries (observable structures, not life).
+
+        The "does replication prove consciousness?" question is answered safely
+        even with no replication run.
+        """
+        if topic == "rp_consciousness":
+            return self.builder.status_response(
+                "No. Replication compares observable structures across runs. It "
+                "does not prove consciousness, sentience, biological life, "
+                "personhood, agency, free will, emotion, feeling, "
+                "understanding, or subjective experience.",
+                ["policy:replication_does_not_prove_consciousness"])
+        component = self.components.get("developmental_replication")
+        if component is None:
+            return self.builder.missing_component_response(
+                "developmental_replication")
+        status = (component.replication_status()
+                  if hasattr(component, "replication_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:developmental_replication"]
+        if topic == "rp_replicate":
+            text = (f"replicated claims: {status.get('replicated_claim_count', 0)}"
+                    f", diverged {status.get('diverged_claim_count', 0)}, "
+                    f"falsified {status.get('falsified_claim_count', 0)}, "
+                    f"inconclusive {status.get('inconclusive_claim_count', 0)}; "
+                    "replication compares observable structures only")
+        elif topic == "rp_which":
+            text = (f"{status.get('replicated_claim_count', 0)} structural "
+                    f"claim(s) replicated (similarity mean "
+                    f"{status.get('structural_similarity_mean', 0.0)})")
+        elif topic == "rp_falsified":
+            text = (f"falsified claims: {status.get('falsified_claim_count', 0)}"
+                    f" of {status.get('falsification_test_count', 0)} "
+                    "falsification test(s); falsified claims are preserved and "
+                    "made prominent")
+        elif topic == "rp_live":
+            text = ("live flux is compared only when a governed live read-only "
+                    "arm is available; otherwise it is inconclusive, not assumed")
+        elif topic == "rp_labels":
+            text = (f"human-label dependency score: "
+                    f"{status.get('human_label_dependency_score', 0.0)}; "
+                    "human-label dependence is tested, never assumed safe")
+        elif topic == "rp_overfit":
+            text = (f"fixture-overfit score: "
+                    f"{status.get('fixture_overfit_score', 0.0)}; high cross-run "
+                    "similarity on fixtures may be robust development OR fixture "
+                    "overfit -- both are considered")
+        elif topic == "rp_diverged":
+            text = (f"diverged claims: {status.get('diverged_claim_count', 0)}; "
+                    f"strongest divergence reason: "
+                    f"{status.get('strongest_divergence_reason')}; divergence is "
+                    "not failure by itself")
+        else:
+            text = ("replication compares observable developmental structures "
+                    "across independent runs; not biological ancestry, life, or "
+                    "consciousness")
         return self.builder.status_response(text, refs)
 
     def _developmental_soak(self, topic: str) -> CommunicationResponse:

@@ -1759,4 +1759,32 @@ def build_default_state_graph() -> StateGraph:
                "the dossier feeds the post-run autopsy")
     g.add_edge("DevelopmentalSoakRuntime", "inner_map",
                "developmental soak state feeds Inner MAP")
+
+    # Cross-run replication and falsification lab (Prompt 55): one run is not
+    # evidence enough. Compares observable structures; not biological ancestry.
+    for name, role in [
+        ("ReplicationPlan", "which conditions to compare, by arm"),
+        ("DevelopmentalRunRegistry", "catalogues runs; reads only, never runs"),
+        ("DevelopmentalLineage", "experimental provenance, not ancestry"),
+        ("CrossRunAlignment", "line up comparable structures across runs"),
+        ("StructuralSimilarity", "structural, not subjective; overfit caveats"),
+        ("DevelopmentalDivergence", "divergence explained conservatively"),
+        ("EnvironmentalDependencyAnalyzer", "fixture/human-label deps flagged"),
+        ("FalsificationTest", "would the claim survive a null condition?"),
+        ("ReplicationMatrix", "conservative grid; falsified claims prominent"),
+        ("DevelopmentalReplicationRuntime", "bounded cross-run study manager"),
+        ("DevelopmentalReplicationSafetyValidator",
+         "no unbounded/ancestry/life claims"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("DevelopmentalSoakRuntime", "DevelopmentalReplicationRuntime",
+               "soak evidence from many runs is compared and falsified")
+    g.add_edge("DevelopmentalRunRegistry", "CrossRunAlignment",
+               "registered runs are aligned pairwise")
+    g.add_edge("StructuralSimilarity", "ReplicationMatrix",
+               "similarity + divergence + falsification fill the matrix")
+    g.add_edge("FalsificationTest", "ReplicationMatrix",
+               "falsified claims are made prominent in the matrix")
+    g.add_edge("DevelopmentalReplicationRuntime", "inner_map",
+               "replication state feeds Inner MAP")
     return g

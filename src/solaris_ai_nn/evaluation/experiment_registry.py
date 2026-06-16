@@ -461,6 +461,28 @@ DESCRIPTIONS = {
         "no daemon/actuation/teaching/life; negatives preserved",
     "developmental_soak_safety_protocol":
         "no daemon/actuation/teaching/life; negatives preserved",
+    "developmental_replication": "compare independent runs structurally",
+    "developmental_replication_protocol":
+        "cross-run developmental replication study",
+    "developmental_replication_evaluation": "developmental-replication check",
+    "run_registry_evaluation": "developmental run registry catalogues runs",
+    "lineage_evaluation": "experimental provenance lineages (not ancestry)",
+    "cross_run_alignment_protocol": "align run structures pairwise",
+    "alignment_evaluation": "cross-run alignment check",
+    "structural_similarity_protocol": "conservative structural similarity",
+    "similarity_evaluation": "structural similarity check",
+    "divergence_analysis_protocol": "conservative divergence explanation",
+    "divergence_evaluation": "divergence analysis check",
+    "environmental_dependency_protocol": "fixture/human-label dependency flags",
+    "dependency_evaluation": "environmental dependency check",
+    "falsification_lab_protocol": "bounded falsification of developmental claims",
+    "falsification_evaluation": "falsification lab check",
+    "replication_matrix_protocol": "conservative replication matrix",
+    "replication_matrix_evaluation": "replication matrix check",
+    "developmental_replication_safety":
+        "no unbounded/actuation/teaching/ancestry/life; failures visible",
+    "developmental_replication_safety_protocol":
+        "no unbounded/actuation/teaching/ancestry/life; failures visible",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -694,6 +716,19 @@ class ExperimentRegistry:
                         "post_run_autopsy_protocol",
                         "post_run_autopsy_evaluation")
             or bool(merged.get("developmental_soak", False)))
+        features["developmental_replication"] = (
+            name.startswith("developmental_replication")
+            or name in ("run_registry_evaluation", "lineage_evaluation",
+                        "cross_run_alignment_protocol", "alignment_evaluation",
+                        "structural_similarity_protocol",
+                        "similarity_evaluation", "divergence_analysis_protocol",
+                        "divergence_evaluation",
+                        "environmental_dependency_protocol",
+                        "dependency_evaluation", "falsification_lab_protocol",
+                        "falsification_evaluation",
+                        "replication_matrix_protocol",
+                        "replication_matrix_evaluation")
+            or bool(merged.get("developmental_replication", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

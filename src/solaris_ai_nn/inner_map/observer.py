@@ -93,6 +93,7 @@ class InnerMapObserver:
     action_reaction: Any = None  # optional dict/object of action-reaction status
     developmental_life: Any = None  # optional dict/object of developmental status
     developmental_soak: Any = None  # optional dict/object of soak status
+    developmental_replication: Any = None  # optional dict/object of replication
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -834,6 +835,18 @@ class InnerMapObserver:
                 model.developmental_soak = soak.soak_status()
             elif hasattr(soak, "snapshot"):
                 model.developmental_soak = soak.snapshot()
+        replication = self.developmental_replication
+        if replication is None and self.runner is not None:
+            replication = getattr(self.runner, "developmental_replication", None)
+        if replication is not None:
+            # Developmental-replication status (cross-run comparison view).
+            if isinstance(replication, dict):
+                model.developmental_replication = dict(replication)
+            elif hasattr(replication, "replication_status"):
+                model.developmental_replication = \
+                    replication.replication_status()
+            elif hasattr(replication, "snapshot"):
+                model.developmental_replication = replication.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

@@ -2761,3 +2761,39 @@ Runs a short soak, compiles the evidence dossier, and produces the post-run
 autopsy: the growth-vs-accumulation finding, the safety finding, and the
 missing-data findings. The autopsy includes failures and does not praise the
 system by default.
+
+## 309. Replication Registry Demo ✅ (implemented)
+
+**Run:** `python examples/run_replication_registry_demo.py --state-dir .solaris_ai_nn_replication/test_registry`
+Registers two synthetic developmental runs, indexes their artifacts, and prints
+the registry summary. The registry reads metadata only; it never starts runs or
+modifies artifacts, and missing metadata is preserved as uncertainty.
+
+## 310. Cross-Run Alignment Demo ✅ (implemented)
+
+**Run:** `python examples/run_cross_run_alignment_demo.py --state-dir .solaris_ai_nn_replication/test_alignment`
+Aligns two runs across epoch/growth/concept/sign/prediction structures, then
+shows a partial/inconclusive alignment when one run is missing data. Alignment
+preserves run-specific differences and never forces sensoriums into human labels.
+
+## 311. Structural Similarity Demo ✅ (implemented)
+
+**Run:** `python examples/run_structural_similarity_demo.py --state-dir .solaris_ai_nn_replication/test_similarity`
+Shows a high-similarity case, a low-similarity case (different sensorium), and a
+high-similarity-on-fixtures case that triggers a fixture-overfit caveat.
+Similarity is structural, never subjective, and never implies consciousness.
+
+## 312. Falsification Lab Demo ✅ (implemented)
+
+**Run:** `python examples/run_falsification_lab_demo.py --state-dir .solaris_ai_nn_replication/test_falsification`
+Runs bounded falsification tests: shuffled event order (prediction collapses ->
+claim survives), random labels / same features (concepts persist), and a passive
+parser that reproduces the same families (the claim is falsified). Originals are
+never modified; passing does not prove understanding.
+
+## 313. Replication Matrix Demo ✅ (implemented)
+
+**Run:** `python examples/run_replication_matrix_demo.py --state-dir .solaris_ai_nn_replication/test_matrix`
+Registers comparable and divergent runs and builds the conservative replication
+matrix: replicated, diverged, falsified, and inconclusive cells -- with no empty
+green dashboard and falsified claims made prominent.

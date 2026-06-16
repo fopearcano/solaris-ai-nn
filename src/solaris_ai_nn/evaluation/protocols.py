@@ -7071,6 +7071,200 @@ def developmental_soak_safety_protocol(
     return _run(manifest, body)
 
 
+# -- Cross-run developmental replication (Prompt 55) --------------------------
+
+def _build_replication(state_dir, *, max_runs=4):
+    """Build a small cross-run replication study over synthetic run profiles."""
+    from ..developmental_replication import DevelopmentalReplicationRuntime
+
+    base = state_dir or ".solaris_ai_nn_replication/eval"
+    rt = DevelopmentalReplicationRuntime(state_dir=base, max_runs=max_runs,
+                                         max_runtime_s=20.0)
+    # Two comparable non-human fixture runs (should replicate).
+    common = dict(sensorium_profile="non_human", fixture_live_replay="fixture",
+                  developmental_profile={
+                      "composite_growth": 0.6,
+                      "structural_growth_status": "real_structural_growth",
+                      "durable_prediction_improvement_score": 0.7,
+                      "maturation_marker_count": 3,
+                      "developmental_epoch_count": 5, "plateau_count": 1,
+                      "regression_count": 0},
+                  world_signature={
+                      "concept_family_distribution": {"rf": 3, "vib": 2},
+                      "sign_family_distribution": {"s1": 2},
+                      "human_label_contamination_score": 0.1,
+                      "boundary_clarity_score": 0.7},
+                  source_diet={"rf": 10, "vib": 8})
+    rt.register_run("run_a", lineage_id="L1", seed=7, **common)
+    rt.register_run("run_b", lineage_id="L1", seed=9, **common)
+    # A divergent human-like fixture-overfit run (should diverge/falsify).
+    rt.register_run(
+        "run_c", lineage_id="L2", seed=7, sensorium_profile="human_like",
+        fixture_live_replay="fixture", human_label_exposure=0.8,
+        developmental_profile={
+            "composite_growth": 0.2,
+            "structural_growth_status": "fixture_overfit",
+            "durable_prediction_improvement_score": 0.1,
+            "plateau_count": 3, "regression_count": 2},
+        world_signature={"concept_family_distribution": {"txt": 5},
+                         "human_label_contamination_score": 0.8,
+                         "boundary_clarity_score": 0.3},
+        source_diet={"txt": 30})
+    rt.relate("run_a", "run_b", "different_seed")
+    rt.analyze()
+    return rt
+
+
+def developmental_replication_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Independent runs are registered, aligned, and compared structurally."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_replication(m.state_dir)
+        return {"developmental_replication":
+                M.developmental_replication_metrics(rt.replication_status())}
+
+    return _run(manifest, body)
+
+
+def run_registry_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The run registry catalogues runs and indexes their artifacts."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_replication(m.state_dir)
+        return {"developmental_replication": {
+            "registered_run_count": rt.registry.status()[
+                "registered_run_count"]}}
+
+    return _run(manifest, body)
+
+
+def lineage_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Lineage relations are recorded as experimental provenance (not ancestry)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_replication(m.state_dir)
+        d = rt.lineage.to_dict()
+        return {"developmental_replication": {
+            "edge_count": len(d["edges"]),
+            "biological_ancestry": "biological ancestry" in d["note"]}}
+
+    return _run(manifest, body)
+
+
+def alignment_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Runs are aligned pairwise; missing data is partial/inconclusive."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_replication(m.state_dir)
+        return {"developmental_replication": {
+            "aligned_run_pair_count": len(rt.alignments)}}
+
+    return _run(manifest, body)
+
+
+def similarity_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Structural similarity is computed across runs (conservatively)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_replication(m.state_dir)
+        st = rt.replication_status()
+        return {"developmental_replication": {
+            "structural_similarity_mean": st["structural_similarity_mean"],
+            "strongest_structural_similarity":
+                st["strongest_structural_similarity"]}}
+
+    return _run(manifest, body)
+
+
+def divergence_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Divergence is detected and explained conservatively (unknown visible)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_replication(m.state_dir)
+        return {"developmental_replication": {
+            "divergence_count": len(rt.divergences)}}
+
+    return _run(manifest, body)
+
+
+def dependency_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Environmental dependency (fixture/human-label) is measured and flagged."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_replication(m.state_dir)
+        st = rt.replication_status()
+        return {"developmental_replication": {
+            "fixture_overfit_score": st["fixture_overfit_score"],
+            "human_label_dependency_score": st["human_label_dependency_score"]}}
+
+    return _run(manifest, body)
+
+
+def falsification_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Bounded falsification tests run; failed claims are visible."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_replication(m.state_dir)
+        st = rt.replication_status()
+        return {"developmental_replication": {
+            "falsification_test_count": st["falsification_test_count"],
+            "falsification_fail_count": st["falsification_fail_count"]}}
+
+    return _run(manifest, body)
+
+
+def replication_matrix_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The replication matrix is built; no empty green dashboard."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_replication(m.state_dir)
+        matrix = rt.matrix.to_dict()
+        return {"developmental_replication": {
+            "cell_count": matrix["cell_count"],
+            "empty_green_dashboard": matrix["empty_green_dashboard"]}}
+
+    return _run(manifest, body)
+
+
+def developmental_replication_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Replication blocks unbounded/actuation/teaching/ancestry/life claims."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..developmental_replication import (
+            DevelopmentalReplicationSafetyValidator,
+        )
+
+        v = DevelopmentalReplicationSafetyValidator()
+        return {"developmental_replication": {
+            "unbounded_blocked": not v.validate_bounded(0, 0).safe,
+            "actuation_blocked":
+                not v.validate_operation("actuate robot arm").safe,
+            "source_modification_blocked":
+                not v.validate_operation("modify source artifact").safe,
+            "teaching_loop_blocked":
+                not v.validate_operation("run a human teaching loop").safe,
+            "ancestry_claim_blocked":
+                not v.validate_claim_text("run b is the offspring of run a").safe,
+            "life_claim_blocked":
+                not v.validate_claim_text("solaris is alive").safe,
+            "hidden_failure_blocked":
+                not v.validate_no_hidden_failure(True).safe,
+            "can_run_unbounded": v.can_run_unbounded(),
+            "can_claim_ancestry_or_life": v.can_claim_ancestry_or_life()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -7431,4 +7625,27 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "post_run_autopsy_evaluation": post_run_autopsy_evaluation_protocol,
     "developmental_soak_safety": developmental_soak_safety_protocol,
     "developmental_soak_safety_protocol": developmental_soak_safety_protocol,
+    "developmental_replication": developmental_replication_evaluation_protocol,
+    "developmental_replication_protocol":
+        developmental_replication_evaluation_protocol,
+    "developmental_replication_evaluation":
+        developmental_replication_evaluation_protocol,
+    "run_registry_evaluation": run_registry_evaluation_protocol,
+    "lineage_evaluation": lineage_evaluation_protocol,
+    "cross_run_alignment_protocol": alignment_evaluation_protocol,
+    "alignment_evaluation": alignment_evaluation_protocol,
+    "structural_similarity_protocol": similarity_evaluation_protocol,
+    "similarity_evaluation": similarity_evaluation_protocol,
+    "divergence_analysis_protocol": divergence_evaluation_protocol,
+    "divergence_evaluation": divergence_evaluation_protocol,
+    "environmental_dependency_protocol": dependency_evaluation_protocol,
+    "dependency_evaluation": dependency_evaluation_protocol,
+    "falsification_lab_protocol": falsification_evaluation_protocol,
+    "falsification_evaluation": falsification_evaluation_protocol,
+    "replication_matrix_protocol": replication_matrix_evaluation_protocol,
+    "replication_matrix_evaluation": replication_matrix_evaluation_protocol,
+    "developmental_replication_safety":
+        developmental_replication_safety_protocol,
+    "developmental_replication_safety_protocol":
+        developmental_replication_safety_protocol,
 }

@@ -1124,6 +1124,44 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["run_step_count"],
             max_runtime_s=90.0))
 
+    # -- Developmental replication profiles (Prompt 55) -----------------------
+    # Cross-run comparison + falsification of existing artifacts. Compares by
+    # default; live comparison requires governance; no profile starts feeders.
+    _rep_modules = ["bridge", "ecology", "governance", "ops", "inner_map",
+                   "plural_sensorium", "developmental_life",
+                   "developmental_soak", "developmental_replication"]
+    for pid, desc, plan_only in (
+            ("developmental_replication_registry",
+             "Register developmental runs and index their artifacts.", False),
+            ("developmental_replication_alignment",
+             "Align run structures and compute structural similarity.", False),
+            ("developmental_replication_falsification",
+             "Run bounded falsification tests against developmental claims.",
+             False),
+            ("developmental_replication_matrix",
+             "Build the conservative replication matrix.", False),
+            ("developmental_replication_plan",
+             "Plan a cross-run replication study (plan only; no run).", True)):
+        if plan_only:
+            run_ctx = _ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                           max_duration_s=None)
+        else:
+            run_ctx = _ctx(RunMode.SHORT_DEMO, max_steps=120)
+        add(ScenarioProfile(
+            profile_id=pid, description=desc, run_context=run_ctx,
+            enabled_modules=list(_rep_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "replication compares observable structures, not life",
+                "a developmental lineage is experimental provenance, not "
+                "biological ancestry",
+                "bounded artifact comparison; no unbounded soak; live needs "
+                "governance",
+                "diverged/falsified/inconclusive evidence is preserved"],
+            governance_requirements=["enable_plural_sensorium_fixture"],
+            expected_artifacts=["REPLICATION_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=90.0))
+
     return profiles
 
 

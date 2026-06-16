@@ -2170,3 +2170,61 @@ and even then it proves only structural development -- never biological life,
 consciousness, sentience, personhood, agency, free will, emotion, feeling,
 understanding, or subjective experience. The soak makes structural development
 *measurable*; it deliberately makes the larger claims *impossible*.
+
+## Phase 55 — Cross-run replication, developmental lineages, falsification lab
+
+**Why replication matters.** One soak, however careful, is an anecdote. A
+structure that appears in a single run might be a property of the architecture, or
+it might be a property of one seed, one fixture, or one lucky ordering of events.
+The only way to tell is to run independent runs and ask whether comparable
+sensorium conditions produce comparable structural development, and different
+conditions produce different development. Phase 55 builds the lab that asks this:
+register many runs, align their structures, score similarity, and see what
+actually recurs. Replication is what turns a developmental observation into a
+developmental claim.
+
+**Why divergence matters.** Divergence is not the failure mode it looks like; it
+is often the signal. If two runs under *different* sensorium diets diverge, that is
+evidence the development is driven by the sensorium rather than by an artifact. If
+two runs under the *same* conditions diverge, that is a warning about seed
+sensitivity or noise. The detector therefore explains divergence conservatively
+and -- importantly -- keeps an explicit "unknown" reason visible rather than
+inventing a tidy story. A divergence we cannot explain is more honest than a
+divergence we rationalize.
+
+**Why fixture overfit is dangerous.** The most seductive failure in this whole
+program is a beautiful, highly replicable structure that is really an artifact of
+one fixture. High cross-run similarity feels like strong evidence, but on shared
+fixtures it can equally mean the runs all overfit the same synthetic regularities.
+The similarity scorer refuses to treat high similarity as automatically good: on
+fixtures it raises a fixture-overfit caveat, and the environmental-dependency
+analyzer flags fixture dependence explicitly. Robust development and fixture
+overfit must both remain live hypotheses until a broadened source diet or live
+read-only exposure can separate them.
+
+**Why human-label dependence must be tested.** Solaris is supposed to develop from
+its own sensorium-native flux, not from human glosses. If its concepts or signs
+turn out to track human labels, the whole "native development" claim collapses --
+quietly, unless someone checks. So human-label dependence is a first-class probe:
+the random-labels/same-features falsification test asks whether concepts survive
+when labels are scrambled, and the dependency analyzer flags human-label reliance
+as a risk, never as a convenience.
+
+**Why falsification is stronger than flattering reports.** A report that lists what
+worked is marketing; a report that survived a serious attempt to break it is
+evidence. The falsification lab is deliberately adversarial: it shuffles time to
+see if prediction was ever temporal, swaps a passive parser in to see if the stack
+added anything, and removes recurrence to see if growth was ever more than logging.
+Crucially, passing these tests proves only that the claim survived a specific
+challenge -- never understanding, never consciousness. A failed claim is made
+prominent precisely because the temptation is to bury it.
+
+**How to interpret inconclusive replication.** Inconclusive is the honest default,
+not a defect. Bounded comparisons of a few synthetic runs will frequently report
+"insufficient evidence", "missing data", or "few measurable dimensions", and the
+matrix is built so that such cells stay inconclusive rather than collapsing into a
+green dashboard. A replication claim earns the word "replicated" only when
+comparable conditions produce comparable structure across runs, the divergences are
+explained, the falsification probes are survived, and the result is not better
+explained by fixture overfit or human-label dependence. Even then it proves only
+structural replication -- not biological ancestry, not life, and not consciousness.

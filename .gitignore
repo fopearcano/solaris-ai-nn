@@ -81,3 +81,5 @@ artifacts/
 .sann_development/
 .solaris_ai_nn_soak/
 .sann_soak/
+.solaris_ai_nn_replication/
+.sann_replication/

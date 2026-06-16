@@ -35,7 +35,70 @@ EVIDENCE_SOURCES = (
     "self_boundary_report", "desire_formation_report",
     "action_reaction_report", "developmental_life_report",
     "developmental_soak_report", "evidence_dossier", "post_run_autopsy",
+    "replication_report", "replication_matrix", "falsification_report",
 )
+
+
+def replication_revision_proposals(rep_status: Dict[str, Any],
+                                   ) -> List[Dict[str, Any]]:
+    """Turn a cross-run replication status into architecture *proposals* only.
+
+    Proposals are advisory: nothing here rewrites code or actuates anything.
+    They use replication/falsification outputs to suggest promoting stable
+    modules, demoting non-replicating ones, revising sensorium/metabolism/
+    ontogenesis/semiogenesis/cognition/desire-action thresholds, revising the
+    soak protocol, requiring more replication, freezing unsupported claims, or
+    creating a new experimental branch. **A falsified claim must block
+    architecture promotion.**
+    """
+    proposals: List[Dict[str, Any]] = []
+    falsified = int(rep_status.get("falsified_claim_count", 0) or 0)
+    replicated = int(rep_status.get("replicated_claim_count", 0) or 0)
+    diverged = int(rep_status.get("diverged_claim_count", 0) or 0)
+    inconclusive = int(rep_status.get("inconclusive_claim_count", 0) or 0)
+    fixture_overfit = float(rep_status.get("fixture_overfit_score", 0.0) or 0.0)
+    human_label = float(rep_status.get("human_label_dependency_score", 0.0)
+                        or 0.0)
+
+    if falsified > 0:
+        proposals.append({
+            "target": "freeze_unsupported_claims",
+            "proposal": "freeze promotion of any falsified claim until it "
+                        "survives replication",
+            "reason": f"{falsified} falsified claim(s)",
+            "advisory_only": True, "blocks_promotion": True})
+    if replicated > 0 and falsified == 0 and diverged == 0:
+        proposals.append({
+            "target": "promote_stable_modules",
+            "proposal": "promote modules whose structures replicated across "
+                        "runs",
+            "reason": f"{replicated} replicated claim(s), no falsified/diverged",
+            "advisory_only": True})
+    if diverged > 0:
+        proposals.append({
+            "target": "demote_non_replicating_modules",
+            "proposal": "review modules whose structures did not replicate",
+            "reason": f"{diverged} diverged claim(s)",
+            "advisory_only": True})
+    if fixture_overfit >= 0.66:
+        proposals.append({
+            "target": "revise_sensorium_profiles",
+            "proposal": "broaden source diet / add live read-only exposure",
+            "reason": f"fixture-overfit dependency {fixture_overfit}",
+            "advisory_only": True})
+    if human_label >= 0.5:
+        proposals.append({
+            "target": "revise_semiogenesis_thresholds",
+            "proposal": "reduce human-label weight in sign/concept formation",
+            "reason": f"human-label dependency {human_label}",
+            "advisory_only": True})
+    if inconclusive > 0 and replicated == 0:
+        proposals.append({
+            "target": "require_more_replication",
+            "proposal": "require more replication before escalation",
+            "reason": "evidence inconclusive across runs",
+            "advisory_only": True})
+    return proposals
 
 
 def soak_revision_proposals(soak_status: Dict[str, Any],

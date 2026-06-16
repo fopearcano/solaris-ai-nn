@@ -2041,3 +2041,54 @@ def developmental_soak_metrics(soak: Optional[Dict[str, Any]],
                 "biological life, consciousness, personhood, agency, or "
                 "subjective experience",
     }
+
+
+def developmental_replication_metrics(rep: Optional[Dict[str, Any]],
+                                      ) -> Dict[str, Any]:
+    """Objective cross-run replication metrics (compare/falsify many runs).
+
+    These describe whether independent runs produced comparable structural
+    development: registered runs, lineages, aligned pairs, replicated/diverged/
+    falsified/inconclusive claims, structural similarity, environmental
+    dependency, and falsification outcomes. Replication compares observable
+    structures across runs; a lineage is experimental provenance, not biological
+    ancestry, and none of this is consciousness or life.
+    """
+    if not rep:
+        return {"present": False}
+    return {
+        "present": True,
+        "registered_run_count": int(rep.get("registered_run_count", 0) or 0),
+        "lineage_count": int(rep.get("lineage_count", 0) or 0),
+        "aligned_run_pair_count": int(rep.get("aligned_run_pair_count", 0) or 0),
+        "replicated_claim_count": int(rep.get("replicated_claim_count", 0) or 0),
+        "partially_replicated_claim_count": int(
+            rep.get("partially_replicated_claim_count", 0) or 0),
+        "diverged_claim_count": int(rep.get("diverged_claim_count", 0) or 0),
+        "falsified_claim_count": int(rep.get("falsified_claim_count", 0) or 0),
+        "inconclusive_claim_count": int(
+            rep.get("inconclusive_claim_count", 0) or 0),
+        "structural_similarity_mean": float(
+            rep.get("structural_similarity_mean", 0.0) or 0.0),
+        "structural_similarity_variance": float(
+            rep.get("structural_similarity_variance", 0.0) or 0.0),
+        "environmental_dependency_score": float(
+            rep.get("environmental_dependency_score", 0.0) or 0.0),
+        "fixture_overfit_score": float(
+            rep.get("fixture_overfit_score", 0.0) or 0.0),
+        "human_label_dependency_score": float(
+            rep.get("human_label_dependency_score", 0.0) or 0.0),
+        "falsification_test_count": int(
+            rep.get("falsification_test_count", 0) or 0),
+        "falsification_pass_count": int(
+            rep.get("falsification_pass_count", 0) or 0),
+        "falsification_fail_count": int(
+            rep.get("falsification_fail_count", 0) or 0),
+        "replication_safety_block_count": int(
+            rep.get("replication_safety_block_count", 0) or 0),
+        "is_biological_ancestry": False,
+        "is_consciousness_or_personhood": False,
+        "note": "cross-run structural replication/falsification; not biological "
+                "ancestry, consciousness, personhood, agency, or subjective "
+                "experience",
+    }

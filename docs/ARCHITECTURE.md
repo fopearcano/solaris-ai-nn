@@ -3450,3 +3450,88 @@ consciousness, and the evidence dossier does not prove sentience, personhood,
 agency, free will, emotion, feeling, understanding, or subjective experience -- no
 real-world actuation, no feeder/hardware/source control, and no human teaching loop
 ever occurred.**
+
+## Cross-Run Replication and Falsification
+
+One soak is not evidence enough. A single developmental run -- however long and
+well-instrumented -- cannot tell robust structural development from a lucky seed, a
+fixture artifact, or a flattering report. Prompt 55 adds the cross-run replication
+and falsification lab -- `src/solaris_ai_nn/developmental_replication/`:
+
+    register runs -> build experimental lineages -> align run structures ->
+    structural similarity -> divergence -> environmental dependency ->
+    bounded falsification tests -> replication matrix -> conservative reports
+
+The central question is: *do independent Solaris runs produce comparable structural
+development under comparable sensorium conditions, and meaningfully different
+development under different sensorium conditions?* -- not "did it become conscious /
+alive / understand / become an agent?".
+
+**Replication compares multiple developmental lineages.** The
+`DevelopmentalRunRegistry` catalogues independent runs (seed, architecture version,
+sensorium/feeder profile, fixture/live/replay status, source diet, soak/developmental
+report paths, metrics snapshot) -- it reads metadata and reports only; it never
+starts runs and never modifies a source artifact, and missing metadata is preserved
+as explicit uncertainty. The `DevelopmentalLineage` records how runs relate as
+*experiments* (same/different seed, same/different sensorium, fixture->live,
+control/ablation, restart continuation, branch from a checkpoint). A lineage is
+experimental provenance, NOT biological ancestry; nothing is a parent, child, or
+offspring in any living sense.
+
+**Similarity and divergence are structural.** `CrossRunAlignment` lines up the
+comparable structures of two runs (epochs, growth dimensions, maturation markers,
+phase transitions, proto-concept/sign families, private syntax, prediction/
+action-effect/habit/boundary/source-diet/contamination profiles, plateau/regression
+events, safety blocks), preserving run-specific differences and never forcing
+different sensoriums into human labels (missing data is partial/inconclusive).
+`StructuralSimilarity` scores per-dimension similarity conservatively: low similarity
+may be real divergence, noise, or insufficient evidence; high similarity may be
+robust development OR fixture overfit -- both are flagged as caveats.
+`DivergenceDetector` explains low similarity (different diet/seed, live flux, source
+silence/corruption, overload/deprivation, contamination, fixture overfit, action
+policy, habit rigidity, boundary confusion, restart discontinuity, or an explicit
+unknown). Divergence is not failure by default, and unknown divergence stays visible.
+`EnvironmentalDependencyAnalyzer` estimates dependence on fixtures, live rhythms,
+human labels, feature-only modalities, source-diet balance, seed, and checkpoint
+history -- flagging fixture and human-label dependence and requiring evidence for
+live dependence.
+
+**Falsification probes challenge the claims.** The falsification lab asks whether a
+claimed structure would survive a null condition: shuffled event order (does shuffled
+time destroy prediction?), random labels / same features (do concepts form from
+features, not labels?), same labels / random features, no-recurrence stream (does
+growth disappear without recurrence?), silent-source control, passive-parser
+comparison (does passive parsing reproduce the report?), pure log-accumulation null,
+fixture- and human-label-overfit probes, simulation-as-observation probe, and
+module-ablation controls. It uses existing artifacts or synthetic fixtures, never
+modifies the original evidence, makes failed claims visible, and -- crucially --
+passing a falsification test does not prove understanding. The controls include the
+passive parser, no-metabolism, no-ontogenesis, no-semiogenesis, no-cognition, and
+no-action-reaction arms.
+
+**The replication matrix is conservative.** `ReplicationMatrixBuilder` assembles the
+findings into a grid whose cells are replicated / partially_replicated / diverged /
+inconclusive / failed / unavailable / falsified / not_applicable. There is no empty
+green dashboard, inconclusive is a valid status, and falsified claims are made
+prominent.
+
+**It integrates and stays safe.** The replication lab consumes soak dossiers/
+autopsies/control-arms and the Long-Horizon Developmental Runtime's epochs/growth/
+phase-transitions/growth-vs-accumulation, and the Sensorium Differentiation Lab's
+world signatures (to check whether sensorium differences reliably produce different
+world signatures). It feeds the research lab and evaluation (metrics + protocols for
+replication, registry, lineage, alignment, similarity, divergence, dependency,
+falsification, and the matrix), architecture evolution (advisory
+`replication_revision_proposals` only -- and **a falsified claim blocks architecture
+promotion**), the operator console (replication matrix + falsified claims + the
+mandated safe answer for "does replication prove consciousness?"), and Inner MAP. The
+`DevelopmentalReplicationSafetyValidator` blocks unbounded runs, hardware/feeder/
+network/shell/OS, source-artifact modification, real-world actuation, the human
+teaching loop, sensory-text-as-command, human-label-as-ground-truth, ancestry/life
+claims, and any deletion or hiding of diverged/falsified/inconclusive evidence.
+**Replication compares observable developmental structures across independent runs:
+it does not prove consciousness, sentience, biological life, personhood, agency, free
+will, emotion, feeling, understanding, or subjective experience; a developmental
+lineage is experimental provenance, not biological ancestry; cross-run similarity
+does not prove consciousness; divergence does not prove failure; and passing a
+falsification test does not prove understanding.**

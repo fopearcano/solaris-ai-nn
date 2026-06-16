@@ -487,7 +487,28 @@ python examples/run_developmental_soak_short_demo.py        # short bounded stag
 python examples/run_weekly_review_demo.py                   # weekly review: continue vs accumulation warning
 python examples/run_soak_control_arms_demo.py               # full stack vs controls (conservative)
 python examples/run_post_run_autopsy_demo.py                # growth-vs-accumulation + safety + autopsy
+
+# Cross-run replication and falsification lab: one soak is not evidence enough
+python examples/run_replication_registry_demo.py           # register runs; index artifacts
+python examples/run_cross_run_alignment_demo.py            # align epochs/concepts/signs; partial on missing data
+python examples/run_structural_similarity_demo.py          # high/low similarity; fixture-overfit caveat
+python examples/run_falsification_lab_demo.py              # shuffled order / random labels / passive parser
+python examples/run_replication_matrix_demo.py             # replicated/diverged/falsified/inconclusive matrix
 ```
+
+Replication compares observable developmental structures across independent runs. It
+does not prove consciousness, sentience, biological life, personhood, agency, free
+will, emotion, feeling, understanding, or subjective experience. One soak is not
+evidence enough: the replication lab registers multiple runs, builds experimental
+lineages (provenance, NOT biological ancestry), aligns their structures, scores
+structural similarity (high similarity on fixtures may be robust development OR
+fixture overfit -- both flagged), explains divergence conservatively (unknown stays
+visible), analyzes environmental dependency (fixture and human-label dependence
+flagged), and runs bounded falsification tests (shuffled time, random labels,
+passive parser, no-recurrence, ablations) whose failed claims are made prominent.
+The replication matrix is conservative -- no empty green dashboard, inconclusive is
+valid -- and a falsified claim blocks architecture promotion. Passing a falsification
+test does not prove understanding; divergence does not prove failure by itself.
 
 The soak protocol studies structural development through repeated bounded runs. It
 does not prove life, consciousness, sentience, personhood, agency, free will,
@@ -1470,6 +1491,10 @@ src/solaris_ai_nn/
                 phases, checkpointing, daily packets, weekly reviews, restart
                 drills, control arms, evidence dossier, post-run autopsy,
                 soak runtime, reports, safety
+  developmental_replication/ cross-run replication + falsification lab:
+                replication plan, run registry, lineages, cross-run alignment,
+                structural similarity, divergence, environmental dependency,
+                falsification, replication matrix, runtime, reports, safety
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

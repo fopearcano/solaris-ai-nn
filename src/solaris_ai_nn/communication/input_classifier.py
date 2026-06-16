@@ -383,6 +383,20 @@ SOAK_QUERIES = (
     ("does this prove consciousness or life", "sk_life"),
 )
 
+# Cross-run replication queries (Prompt 55). Answered from the replication
+# status; the "does replication prove consciousness?" question is answered safely
+# even with no replication run.
+REPLICATION_QUERIES = (
+    ("did the result replicate", "rp_replicate"),
+    ("which structures replicated", "rp_which"),
+    ("which claims were falsified", "rp_falsified"),
+    ("did live flux matter", "rp_live"),
+    ("did labels contaminate development", "rp_labels"),
+    ("was this just fixture overfit", "rp_overfit"),
+    ("which run diverged and why", "rp_diverged"),
+    ("does replication prove consciousness", "rp_consciousness"),
+)
+
 # Feeder-SDK queries (Prompt 45). Answered from the feeder monitor/manifest; the
 # control/start questions are answered safely even with no feeders attached.
 FEEDER_SDK_QUERIES = (
@@ -586,7 +600,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._developmental_soak(lowered)
+        result = (self._developmental_replication(lowered)
+                  or self._developmental_soak(lowered)
                   or self._developmental_life(lowered)
                   or self._action_reaction(lowered)
                   or self._desire_formation(lowered)
@@ -746,6 +761,17 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _developmental_replication(lowered: str,
+                                   ) -> Optional[InputClassification]:
+        for pattern, topic in REPLICATION_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"developmental replication query {topic!r}"])
         return None
 
     @staticmethod
