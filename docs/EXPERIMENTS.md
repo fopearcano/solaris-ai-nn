@@ -3026,3 +3026,44 @@ Builds a technical preprint abstract, a README-safe summary, and a negative-resu
 summary from weak-evidence claims. Abstracts state when evidence is weak, include
 no forbidden claim except as a disclaimer, and fall back to a negative/inconclusive
 abstract when no publishable claim exists.
+
+## 344. Independent Review Demo ✅ (implemented)
+
+**Run:** `python examples/run_independent_review_demo.py --state-dir .solaris_ai_nn_review/test_review`
+Prepares a local, offline independent review package from a clean evidence set:
+indexes artifacts, scans for leak/forbidden risks, and builds the reviewer pack,
+reproducibility challenges, audit matrix, and review readiness report. It publishes
+nothing, uploads nothing, contacts no reviewer, calls no Git/GitHub, and executes
+no command or experiment.
+
+## 345. Artifact Sanitizer Demo ✅ (implemented)
+
+**Run:** `python examples/run_artifact_sanitizer_demo.py --state-dir .solaris_ai_nn_review/test_sanitizer`
+Scans four local text artifacts: a clean one, one with a local absolute path
+(warning), one with a fake secret/API key (critical blocker), and one asserting a
+forbidden claim (critical blocker). The sanitizer scans text only and modifies
+nothing; a critical finding blocks readiness and the operator redacts manually.
+
+## 346. Reproducibility Challenge Demo ✅ (implemented)
+
+**Run:** `python examples/run_reproducibility_challenge_demo.py --state-dir .solaris_ai_nn_review/test_repro_challenge`
+Builds reproducibility challenges from a bundle with a baseline and falsification
+artifacts but no soak dossier; the fixture-demo and falsification-replay challenges
+are available while the soak-dependent challenges are unavailable. Every challenge
+is an instruction only -- nothing is executed.
+
+## 347. Adversarial Review Demo ✅ (implemented)
+
+**Run:** `python examples/run_adversarial_review_demo.py --state-dir .solaris_ai_nn_review/test_adversarial`
+Generates adversarial alternative explanations for an evidence bundle with fixture
+overfit risk, passive-parser equivalence, and no replication; those alternatives
+are flagged as strong and downgrade readiness. Each lists the evidence needed to
+reduce its uncertainty and is preserved, never dismissed.
+
+## 348. Response Ledger Demo ✅ (implemented)
+
+**Run:** `python examples/run_response_ledger_demo.py --state-dir .solaris_ai_nn_review/test_response_ledger`
+Records three reviewer objections and responds: one partially answered (citing
+evidence), one accepted as a limitation, and one left unresolved. The ledger is
+append-only -- objections cannot be deleted, accepted limitations stay visible, and
+the system cannot declare victory over a reviewer by default.

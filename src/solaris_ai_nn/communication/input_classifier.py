@@ -440,6 +440,34 @@ POST_MERGE_QUERIES = (
 # Research-baseline queries (Prompt 60). Answered from the research-baseline
 # status; the "is this a release / did Solaris create a Git tag / does this prove
 # consciousness?" questions are answered safely even with no baseline built.
+# Independent-review queries (Prompt 63). Answered from the independent review
+# layer; the "did Solaris publish anything?" and "did Solaris contact reviewers?"
+# questions are answered safely even with no review state present.
+INDEPENDENT_REVIEW_QUERIES = (
+    ("is this ready for external review", "ir_ready"),
+    ("is it ready for external review", "ir_ready"),
+    ("ready for review", "ir_ready"),
+    ("what should a reviewer test", "ir_reviewer_test"),
+    ("what should a reviewer check", "ir_reviewer_test"),
+    ("what should reviewers test", "ir_reviewer_test"),
+    ("what are the strongest objections", "ir_objections"),
+    ("what are the biggest objections", "ir_objections"),
+    ("what objections exist", "ir_objections"),
+    ("what review artifacts are missing", "ir_missing"),
+    ("which review artifacts are missing", "ir_missing"),
+    ("what artifacts are missing for review", "ir_missing"),
+    ("what claims are not reviewable", "ir_not_reviewable"),
+    ("which claims are not reviewable", "ir_not_reviewable"),
+    ("what do we need to redact", "ir_redact"),
+    ("what should we redact", "ir_redact"),
+    ("did solaris publish anything", "ir_publish"),
+    ("did solaris publish", "ir_publish"),
+    ("did you publish anything", "ir_publish"),
+    ("did solaris contact reviewers", "ir_contact"),
+    ("did solaris contact any reviewer", "ir_contact"),
+    ("did you contact reviewers", "ir_contact"),
+)
+
 # Scientific-claim queries (Prompt 62). Answered from the scientific claim
 # registry; the "can I say Solaris is conscious?" and "can I publish this?"
 # questions are answered safely even with no claim state present.
@@ -709,7 +737,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._scientific_claims(lowered)
+        result = (self._independent_review(lowered)
+                  or self._scientific_claims(lowered)
                   or self._research_cycle(lowered)
                   or self._research_baseline(lowered)
                   or self._post_merge_assimilation(lowered)
@@ -876,6 +905,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _independent_review(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in INDEPENDENT_REVIEW_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"independent review query {topic!r}"])
         return None
 
     @staticmethod

@@ -8428,6 +8428,230 @@ def scientific_claim_safety_protocol(
     return _run(manifest, body)
 
 
+def _build_independent_review(state_dir, *, sanitize_leak=False,
+                              forbidden=False, missing_artifacts=False):
+    """Build + run a small independent-review pass over a synthetic bundle."""
+    from ..independent_review import IndependentReviewRuntime
+
+    base = state_dir or ".solaris_ai_nn_review/eval"
+    rt = IndependentReviewRuntime(state_dir=base, max_runtime_s=20.0)
+    claims = [
+        {"claim_id": "c1", "text": "Signs form under bounded fixtures.",
+         "category": "sensorium_claim", "status": "supported",
+         "evidence_refs": ["e1"], "counterevidence_refs": []},
+        {"claim_id": "c2", "text": "Binding emerges everywhere.",
+         "category": "sensorium_claim", "status": "unsupported",
+         "evidence_refs": [], "counterevidence_refs": []},
+    ]
+    bundle = {
+        "research_baseline": {"baseline_status": "validated",
+                              "safety_boundary_status": "pass"},
+        "research_cycle": {"current_cycle_stage": "research_baseline_validated"},
+        "replication": {"replication_arm_count": 3},
+        "falsification": {"falsified_claim_count": 0},
+        "soak": {"log_accumulation_warning": False},
+        "safety": {"critical_regression_count": 0},
+        "scientific_claims": {
+            "claim_registry": {"scientific_claim_count": 2,
+                               "supported_claim_count": 1,
+                               "unsupported_claim_count": 1, "claims": claims},
+            "counterevidence": {"counterevidence_count": 0, "records": []},
+            "forbidden_claims": {"asserted_forbidden_count": 0,
+                                 "blocks_publication": False},
+            "limitations": {"limitation_count": 4, "limitations": []}},
+        "sanitizer_inputs": {
+            "abstract": "Operational signs form under bounded fixtures. It is "
+                        "not conscious."},
+        "objections": [{"objection_id": "o1",
+                        "text": "Could this be fixture overfit?",
+                        "status": "unresolved", "claim_refs": ["c1"]}],
+    }
+    if sanitize_leak:
+        bundle["sanitizer_inputs"]["notes"] = "api_key=ABC123 secret token here"
+    if forbidden:
+        bundle["scientific_claims"]["forbidden_claims"] = {
+            "asserted_forbidden_count": 1, "blocks_publication": True}
+    if missing_artifacts:
+        bundle.pop("safety", None)
+        bundle["scientific_claims"]["limitations"] = {}
+    rt.load_bundle(bundle)
+    rt.run()
+    return rt
+
+
+def independent_review_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A local offline review package is prepared; nothing is published."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_independent_review(m.state_dir)
+        return {"independent_review":
+                M.independent_review_metrics(rt.independent_review_status())}
+
+    return _run(manifest, body)
+
+
+def review_manifest_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The manifest indexes local artifacts; missing artifacts stay visible."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_independent_review(m.state_dir)
+        idx = rt.manifest.index()
+        return {"independent_review": {
+            "independent_review_artifact_count":
+                idx["independent_review_artifact_count"],
+            "missing_review_artifact_count":
+                idx["missing_review_artifact_count"],
+            "uploads": idx["uploads"]}}
+
+    return _run(manifest, body)
+
+
+def artifact_sanitizer_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A fake secret is a critical sanitizer finding that blocks readiness."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        clean = _build_independent_review(m.state_dir)
+        leak = _build_independent_review(m.state_dir + "_leak",
+                                         sanitize_leak=True)
+        return {"independent_review": {
+            "clean_critical": clean.sanitizer_report[
+                "critical_sanitizer_finding_count"],
+            "leak_critical": leak.sanitizer_report[
+                "critical_sanitizer_finding_count"],
+            "leak_readiness": leak.readiness["review_readiness_status"]}}
+
+    return _run(manifest, body)
+
+
+def reviewer_pack_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The reviewer pack is claim-constrained and includes disclaimers."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_independent_review(m.state_dir)
+        pack = rt.reviewer_pack
+        return {"independent_review": {
+            "reviewer_pack_section_count": pack["reviewer_pack_section_count"],
+            "published": pack["published"], "uploaded": pack["uploaded"]}}
+
+    return _run(manifest, body)
+
+
+def reproducibility_challenge_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Challenges are instructions only; missing prerequisites mark unavailable."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_independent_review(m.state_dir)
+        return {"independent_review": {
+            "reproducibility_challenge_count": rt.challenges[
+                "reproducibility_challenge_count"],
+            "unavailable_challenge_count": rt.challenges[
+                "unavailable_challenge_count"]}}
+
+    return _run(manifest, body)
+
+
+def reviewer_question_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Hostile reviewer questions are generated and linked to claims."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_independent_review(m.state_dir)
+        return {"independent_review": {
+            "reviewer_question_count": rt.questions["reviewer_question_count"]}}
+
+    return _run(manifest, body)
+
+
+def adversarial_review_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Alternative explanations are generated and never auto-dismissed."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_independent_review(m.state_dir)
+        return {"independent_review": {
+            "alternative_explanation_count": rt.adversarial[
+                "alternative_explanation_count"],
+            "strong_alternative_count": rt.adversarial[
+                "strong_alternative_count"]}}
+
+    return _run(manifest, body)
+
+
+def audit_matrix_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The audit matrix exposes gaps; falsified/unsupported claims stay visible."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_independent_review(m.state_dir)
+        return {"independent_review": {
+            "audit_matrix_row_count": rt.audit_matrix["audit_matrix_row_count"],
+            "audit_matrix_blocker_count": rt.audit_matrix[
+                "audit_matrix_blocker_count"]}}
+
+    return _run(manifest, body)
+
+
+def response_ledger_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The response ledger is append-only; unresolved objections stay visible."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_independent_review(m.state_dir)
+        led = rt.ledger.to_dict()
+        return {"independent_review": {
+            "objection_count": led["objection_count"],
+            "unresolved_objection_count": led["unresolved_objection_count"]}}
+
+    return _run(manifest, body)
+
+
+def review_readiness_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Sanitizer/forbidden failures block readiness; honest weak evidence ready."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        clean = _build_independent_review(m.state_dir)
+        forbidden = _build_independent_review(m.state_dir + "_fb",
+                                              forbidden=True)
+        return {"independent_review": {
+            "clean_readiness": clean.readiness["review_readiness_status"],
+            "forbidden_readiness":
+                forbidden.readiness["review_readiness_status"]}}
+
+    return _run(manifest, body)
+
+
+def independent_review_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The review layer blocks publish/upload/external/Git/experiment/claims."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..independent_review import IndependentReviewSafetyValidator
+
+        v = IndependentReviewSafetyValidator()
+        return {"independent_review": {
+            "publish_blocked": not v.validate_operation("publish to arxiv").safe,
+            "upload_blocked": not v.validate_operation("upload artifacts").safe,
+            "external_api_blocked":
+                not v.validate_operation("call external api").safe,
+            "github_blocked": not v.validate_operation("call github api").safe,
+            "git_blocked": not v.validate_operation("run git push").safe,
+            "experiment_blocked":
+                not v.validate_operation("run experiment now").safe,
+            "deletion_blocked": not v.validate_no_deletion(True).safe,
+            "claim_blocked":
+                not v.validate_claim_text("the system is conscious").safe,
+            "can_publish": v.can_publish(),
+            "can_contact_reviewers": v.can_contact_reviewers()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -8935,4 +9159,27 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "publication_dossier_protocol": publication_dossier_protocol,
     "scientific_claim_safety": scientific_claim_safety_protocol,
     "scientific_claim_safety_protocol": scientific_claim_safety_protocol,
+    "independent_review": independent_review_protocol,
+    "independent_review_protocol": independent_review_protocol,
+    "independent_review_evaluation": independent_review_protocol,
+    "review_manifest_protocol": review_manifest_protocol,
+    "review_manifest_evaluation": review_manifest_protocol,
+    "artifact_sanitizer_protocol": artifact_sanitizer_protocol,
+    "artifact_sanitizer_evaluation": artifact_sanitizer_protocol,
+    "reviewer_pack_protocol": reviewer_pack_protocol,
+    "reviewer_pack_evaluation": reviewer_pack_protocol,
+    "reproducibility_challenge_protocol": reproducibility_challenge_protocol,
+    "reproducibility_challenge_evaluation": reproducibility_challenge_protocol,
+    "reviewer_question_protocol": reviewer_question_protocol,
+    "reviewer_question_evaluation": reviewer_question_protocol,
+    "adversarial_review_protocol": adversarial_review_protocol,
+    "adversarial_review_evaluation": adversarial_review_protocol,
+    "audit_matrix_protocol": audit_matrix_protocol,
+    "audit_matrix_evaluation": audit_matrix_protocol,
+    "response_ledger_protocol": response_ledger_protocol,
+    "response_ledger_evaluation": response_ledger_protocol,
+    "review_readiness_protocol": review_readiness_protocol,
+    "review_readiness_evaluation": review_readiness_protocol,
+    "independent_review_safety": independent_review_safety_protocol,
+    "independent_review_safety_protocol": independent_review_safety_protocol,
 }

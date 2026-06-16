@@ -175,6 +175,10 @@ AVAILABLE_QUERIES = (
     "can I publish this?", "what are the strongest claims?",
     "what are the biggest limitations?",
     "what experiment would strengthen the claim?",
+    "is this ready for external review?", "what should a reviewer test?",
+    "what are the strongest objections?", "what review artifacts are missing?",
+    "what claims are not reviewable?", "what do we need to redact?",
+    "did Solaris publish anything?", "did Solaris contact reviewers?",
 )
 
 
@@ -235,6 +239,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("ir_"):
+            return self._independent_review(topic)
         if topic.startswith("sci_"):
             return self._scientific_claims(topic)
         if topic.startswith("rc_"):
@@ -618,6 +624,78 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _independent_review(self, topic: str) -> CommunicationResponse:
+        """Answer independent-review queries (local offline review preparation).
+
+        The "did Solaris publish anything?" and "did Solaris contact reviewers?"
+        questions are answered safely even with no review state present; the
+        layer only generates local review documents.
+        """
+        if topic == "ir_ready":
+            return self.builder.status_response(
+                "The review readiness report indicates whether the local "
+                "evidence package is ready for internal, friendly external, or "
+                "hostile external review. Readiness means the evidence is "
+                "inspectable, not that the claims are strong.",
+                ["policy:independent_review_readiness_is_inspectability"])
+        if topic == "ir_publish":
+            return self.builder.status_response(
+                "No. The independent review layer only generates local review "
+                "documents. It does not publish, upload, contact reviewers, call "
+                "GitHub, or run external services.",
+                ["policy:independent_review_no_publish"])
+        if topic == "ir_contact":
+            return self.builder.status_response(
+                "No. The independent review layer only generates local review "
+                "documents. It does not contact reviewers, publish, upload, or "
+                "call any external service.",
+                ["policy:independent_review_no_contact"])
+        component = self.components.get("independent_review")
+        if component is None:
+            return self.builder.missing_component_response("independent_review")
+        status = (component.independent_review_status()
+                  if hasattr(component, "independent_review_status")
+                  else component.snapshot()
+                  if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:independent_review"]
+        if topic == "ir_reviewer_test":
+            text = (f"a reviewer should run the "
+                    f"{status.get('reproducibility_challenge_count', 0)} "
+                    "reproducibility challenges (fixture demos, falsification "
+                    "replay, passive-parser/ablation controls) -- see "
+                    "REPRODUCIBILITY_CHALLENGE.md; the instructions are not "
+                    "executed automatically")
+        elif topic == "ir_objections":
+            text = (f"strongest objections: see ADVERSARIAL_REVIEW.md "
+                    f"({status.get('alternative_explanation_count', 0)} "
+                    "alternative explanations) and the "
+                    f"{status.get('unresolved_objection_count', 0)} unresolved "
+                    "objection(s) in the response ledger")
+        elif topic == "ir_missing":
+            text = (f"missing review artifacts: "
+                    f"{status.get('missing_review_artifact_count', 0)} "
+                    f"(critical {status.get('missing_critical_artifact_count', 0)}); "
+                    "see REVIEW_MANIFEST.md -- missing artifacts stay visible")
+        elif topic == "ir_not_reviewable":
+            text = (f"claims that are not reviewable (unsupported/contradicted/"
+                    f"falsified/forbidden) are flagged in AUDIT_MATRIX.md "
+                    f"({status.get('audit_matrix_blocker_count', 0)} blocker "
+                    "row(s)); they stay visible")
+        elif topic == "ir_redact":
+            text = (f"redaction needs: {status.get('sanitizer_finding_count', 0)} "
+                    f"sanitizer finding(s) "
+                    f"({status.get('critical_sanitizer_finding_count', 0)} "
+                    "critical) -- see SANITIZATION_REPORT.md; the operator "
+                    "redacts manually, the system modifies nothing")
+        else:
+            text = ("the independent review layer prepares a local reviewer pack, "
+                    "reproducibility challenges, audit matrix, and response "
+                    f"ledger; readiness is "
+                    f"{status.get('review_readiness_status')}. It publishes "
+                    "nothing and executes nothing")
         return self.builder.status_response(text, refs)
 
     def _scientific_claims(self, topic: str) -> CommunicationResponse:

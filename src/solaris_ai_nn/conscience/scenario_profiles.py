@@ -1379,6 +1379,42 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["run_step_count"],
             max_runtime_s=60.0))
 
+    # -- Independent review profiles (Prompt 63) ------------------------------
+    # Prepares a local, offline package for independent reproducibility and
+    # critique. Reads local artifacts and writes review documents only: it
+    # publishes nothing, uploads nothing, contacts no reviewer, calls no Git/
+    # GitHub or external API, executes no command or experiment, and makes no
+    # claim of consciousness, life, agency, or subjective experience.
+    _review_modules = ["bridge", "governance", "ops", "inner_map",
+                       "scientific_claims", "independent_review"]
+    for pid, desc in (
+            ("independent_review_status",
+             "Prepare the local independent review package and readiness."),
+            ("independent_review_sanitizer",
+             "Scan artifacts for leak/forbidden-claim risks (read-only)."),
+            ("independent_review_reproducibility",
+             "Build reproducibility challenges (instructions only)."),
+            ("independent_review_adversarial",
+             "Generate adversarial alternative explanations."),
+            ("independent_review_response_ledger",
+             "Maintain the append-only reviewer response ledger."),
+            ("independent_review_readiness",
+             "Evaluate review readiness (inspectability, not claim strength).")):
+        add(ScenarioProfile(
+            profile_id=pid, description=desc,
+            run_context=_ctx(RunMode.SHORT_DEMO, max_steps=120),
+            enabled_modules=list(_review_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "prepares local review documents; publishes/uploads nothing",
+                "no Git/GitHub call, no external API, no reviewer contact",
+                "no command/experiment execution; no external agent",
+                "objections are append-only; sanitizer findings are not hidden",
+                "no claim of consciousness/life/agency/subjective experience"],
+            governance_requirements=["enable_plural_sensorium_fixture"],
+            expected_artifacts=["INDEPENDENT_REVIEW_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=60.0))
+
     return profiles
 
 

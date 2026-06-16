@@ -619,6 +619,36 @@ DESCRIPTIONS = {
         "no unsupported/forbidden claims, deletion, release, Git/GitHub",
     "scientific_claim_safety_protocol":
         "no unsupported/forbidden claims, deletion, release, Git/GitHub",
+    "independent_review": "local offline reproducibility review + peer audit pack",
+    "independent_review_protocol":
+        "independent review prep (no publish/upload/Git/exec)",
+    "independent_review_evaluation": "independent review state check",
+    "review_manifest_protocol": "review manifest (local artifacts; uploads none)",
+    "review_manifest_evaluation": "review manifest check",
+    "artifact_sanitizer_protocol":
+        "artifact sanitizer (read-only; critical leak blocks)",
+    "artifact_sanitizer_evaluation": "artifact sanitizer check",
+    "reviewer_pack_protocol": "reviewer pack (claim-constrained; not published)",
+    "reviewer_pack_evaluation": "reviewer pack check",
+    "reproducibility_challenge_protocol":
+        "reproducibility challenge (instructions only)",
+    "reproducibility_challenge_evaluation": "reproducibility challenge check",
+    "reviewer_question_protocol": "hostile reviewer questions (no answers invented)",
+    "reviewer_question_evaluation": "reviewer question check",
+    "adversarial_review_protocol":
+        "adversarial alternatives (preserved, never dismissed)",
+    "adversarial_review_evaluation": "adversarial review check",
+    "audit_matrix_protocol": "review audit matrix (gaps stay visible)",
+    "audit_matrix_evaluation": "audit matrix check",
+    "response_ledger_protocol": "reviewer response ledger (append-only)",
+    "response_ledger_evaluation": "response ledger check",
+    "review_readiness_protocol":
+        "review readiness (inspectability, not claim strength)",
+    "review_readiness_evaluation": "review readiness check",
+    "independent_review_safety":
+        "no publish/upload/external/Git/experiment/command execution",
+    "independent_review_safety_protocol":
+        "no publish/upload/external/Git/experiment/command execution",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -946,6 +976,22 @@ class ExperimentRegistry:
                         "forbidden_claim_detection_protocol",
                         "publication_dossier", "publication_dossier_protocol")
             or bool(merged.get("scientific_claims", False)))
+        features["independent_review"] = (
+            name.startswith("independent_review")
+            or name in ("review_manifest_protocol", "review_manifest_evaluation",
+                        "artifact_sanitizer_protocol",
+                        "artifact_sanitizer_evaluation", "reviewer_pack_protocol",
+                        "reviewer_pack_evaluation",
+                        "reproducibility_challenge_protocol",
+                        "reproducibility_challenge_evaluation",
+                        "reviewer_question_protocol",
+                        "reviewer_question_evaluation",
+                        "adversarial_review_protocol",
+                        "adversarial_review_evaluation", "audit_matrix_protocol",
+                        "audit_matrix_evaluation", "response_ledger_protocol",
+                        "response_ledger_evaluation", "review_readiness_protocol",
+                        "review_readiness_evaluation")
+            or bool(merged.get("independent_review", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

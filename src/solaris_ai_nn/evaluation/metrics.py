@@ -2373,3 +2373,50 @@ def scientific_claims_metrics(sc: Optional[Dict[str, Any]]) -> Dict[str, Any]:
                 "blocks unsupported/forbidden claims, creates no release, and "
                 "proves nothing about consciousness/life/agency",
     }
+
+
+def independent_review_metrics(ir: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective independent-review metrics (local offline review-prep layer).
+
+    These describe *review preparation*: artifacts indexed/missing, sanitizer
+    findings, reproducibility challenges, reviewer questions, adversarial
+    alternatives, audit-matrix blockers, unresolved objections, and review
+    readiness. The layer publishes nothing, uploads nothing, calls no Git/
+    GitHub, executes nothing, and makes no consciousness/life/agency claim.
+    """
+    if not ir:
+        return {"present": False}
+    return {
+        "present": True,
+        "independent_review_artifact_count": int(
+            ir.get("independent_review_artifact_count", 0) or 0),
+        "missing_review_artifact_count": int(
+            ir.get("missing_review_artifact_count", 0) or 0),
+        "sanitizer_finding_count": int(ir.get("sanitizer_finding_count", 0) or 0),
+        "critical_sanitizer_finding_count": int(
+            ir.get("critical_sanitizer_finding_count", 0) or 0),
+        "reproducibility_challenge_count": int(
+            ir.get("reproducibility_challenge_count", 0) or 0),
+        "unavailable_challenge_count": int(
+            ir.get("unavailable_challenge_count", 0) or 0),
+        "reviewer_question_count": int(ir.get("reviewer_question_count", 0) or 0),
+        "adversarial_finding_count": int(
+            ir.get("adversarial_finding_count", 0) or 0),
+        "alternative_explanation_count": int(
+            ir.get("alternative_explanation_count", 0) or 0),
+        "audit_matrix_blocker_count": int(
+            ir.get("audit_matrix_blocker_count", 0) or 0),
+        "unresolved_objection_count": int(
+            ir.get("unresolved_objection_count", 0) or 0),
+        "review_readiness_blocker_count": int(
+            ir.get("review_readiness_blocker_count", 0) or 0),
+        "independent_review_safety_block_count": int(
+            ir.get("independent_review_safety_block_count", 0) or 0),
+        "review_readiness_status": ir.get("review_readiness_status"),
+        "published": False, "uploaded": False, "contacted_reviewers": False,
+        "runs_git": False, "calls_github": False,
+        "is_consciousness_or_personhood": False,
+        "note": "local offline review-prep metrics; publishes nothing, uploads "
+                "nothing, calls no Git/GitHub, executes nothing, and proves "
+                "nothing about consciousness/life/agency",
+    }

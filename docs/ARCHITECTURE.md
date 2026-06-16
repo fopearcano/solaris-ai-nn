@@ -4003,3 +4003,85 @@ artifacts and writes reports only; the publication dossier is a draft evidence
 compilation, not a release; and it proves nothing about consciousness, sentience,
 biological life, personhood, agency, free will, emotion, feeling, understanding,
 self-awareness, or subjective experience.**
+
+## Independent Reproducibility Review and Peer Audit Pack
+
+**The independent review layer prepares a local, offline package for external
+inspection -- without ever going outside.** Prompt 62 produced a scientific claim
+registry and a draft publication dossier. The `independent_review` package
+(Prompt 63) prepares the artifacts an external reviewer would need to inspect,
+reproduce, and attack the work *locally*. It answers: *what evidence can a reviewer
+inspect, what commands would reproduce the bounded demos, what artifacts are
+required or missing, what claims are reviewable or blocked, what falsification
+tests and controls should a reviewer run, what questions should a hostile reviewer
+ask, what objections have been raised, what responses exist, and what remains
+unresolved?* It is a local preparation layer for independent reproducibility and
+critique -- not publishing, not external submission, not a marketing kit, and not
+an automatic peer-review system.
+
+**It indexes and sanitizes artifacts without modifying them.** The
+`IndependentReviewManifest` indexes the local artifacts a reviewer could inspect
+(baseline, reproducibility bundle, claim/theory/evidence/counterevidence/
+limitations reports, soak/replication/falsification reports, cycle/architecture/
+intake/post-merge/safety/evaluation reports, fixtures, synthetic examples, operator
+notes); it indexes local artifacts only, uploads nothing, keeps missing artifacts
+visible, and always includes negative, falsified, and inconclusive evidence. The
+`ReviewArtifactSanitizer` scans local text for leak risks (local absolute paths,
+private notes, secrets/tokens/API keys, personal emails, machine paths, private
+URLs, credentials, forbidden-claim wording, ambiguous hype, large-binary
+references, missing license/readme); it scans text only, modifies nothing
+automatically, and a critical finding (a secret, an API key, a credential, an
+asserted forbidden claim) blocks review readiness -- the operator decides what to
+redact.
+
+**It builds reviewer packs, reproducibility challenges, and hostile questions.**
+The `ReviewerPackBuilder` assembles a claim-constrained reviewer pack (scope, what
+is and is not being claimed, the baseline under review, the artifact list, required
+and optional commands, fixture/replay instructions, safety boundaries, claim /
+counterevidence / limitations tables, falsification tests, control comparisons,
+expected outputs, common failure modes, a reviewer checklist, and unresolved
+questions) that includes forbidden-claim disclaimers and hides no negative
+evidence. The `ReproducibilityChallengeBuilder` generates the challenges a reviewer
+would run (fixture demo, claim-report and safe-abstract reproduction, falsification
+replay, passive-parser / no-metabolism / no-semiogenesis controls, shuffled order,
+random labels, growth-vs-accumulation, ClaimGuard scan, safety invariant scan) as
+instructions only -- nothing is executed, every challenge lists expected artifacts
+and how to read a failure, and a missing prerequisite marks a challenge
+unavailable. The `ReviewerQuestionGenerator` produces hostile-but-useful questions
+linked to claims; the `AdversarialReviewEngine` generates deflationary alternative
+explanations (log accumulation, fixture overfit, label leakage, passive-parser
+artifact, seed artifact, reporting bias, missing control, insufficient runtime/
+replication, cherry-picking, confirmation bias, ClaimGuard blind spot, measurement/
+source-diet/safety-boundary artifacts), preserved and never auto-dismissed, each
+with the evidence needed to reduce its uncertainty; a strong alternative downgrades
+readiness.
+
+**It preserves objections and reports readiness honestly.** The
+`IndependentReviewAuditMatrix` builds one row per claim (supporting evidence,
+counterevidence, required artifacts, reproduction challenge, control, falsification
+test, safety boundary, limitation, reviewer question, status, blocker flag) and
+exposes gaps -- there is no empty green dashboard, and falsified/unsupported claims
+stay visible. The `ReviewerResponseLedger` is an append-only record of objections
+and responses: objections cannot be deleted, accepted limitations and
+falsifications stay visible, responses cite evidence refs or admit missing
+evidence, and the system cannot declare victory over a reviewer by default. The
+`IndependentReviewReadinessEvaluator` decides whether the package is ready for
+internal, friendly external, or hostile external review; hostile-review readiness
+requires strong documentation, not strong claims, a weak or negative result can
+still be review-ready if documented honestly, and an asserted forbidden claim
+blocks readiness. The bounded `IndependentReviewRuntime` assembles all of this,
+feeds Architecture Evolution / Experiment Compiler (unresolved objections and
+strong alternatives become future experiment inputs), the Operator Console (with
+the mandated safe answers for "is this ready for external review?" and "did Solaris
+publish anything?"), Inner MAP, and Evaluation. The
+`IndependentReviewSafetyValidator` blocks publishing, upload, external API and
+Git/GitHub calls, branch/tag/release/PR creation, experiment or command execution,
+external-agent runs, hardware/feeder/network/shell access, unsupported claims, the
+deletion of negative/falsified/inconclusive evidence, the hiding of sanitizer
+failures, and hostile-review readiness when forbidden claims are asserted. **The
+independent review layer generates local reviewer packs, reproducibility
+challenges, audit matrices, and response ledgers. It does not publish, upload,
+contact reviewers, call GitHub or external services, run Git, execute commands or
+experiments, run external agents, modify artifacts, or make any claim of
+consciousness, sentience, biological life, personhood, agency, free will, emotion,
+feeling, understanding, self-awareness, or subjective experience.**

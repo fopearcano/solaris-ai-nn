@@ -100,6 +100,7 @@ class InnerMapObserver:
     research_baseline: Any = None  # optional dict/object of research baseline
     research_cycle: Any = None  # optional dict/object of research-cycle status
     scientific_claims: Any = None  # optional dict/object of scientific-claims
+    independent_review: Any = None  # optional dict/object of independent-review
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -919,6 +920,17 @@ class InnerMapObserver:
                 model.scientific_claims = claims.scientific_claims_status()
             elif hasattr(claims, "snapshot"):
                 model.scientific_claims = claims.snapshot()
+        review = self.independent_review
+        if review is None and self.runner is not None:
+            review = getattr(self.runner, "independent_review", None)
+        if review is not None:
+            # Independent-review status (local offline review-prep view).
+            if isinstance(review, dict):
+                model.independent_review = dict(review)
+            elif hasattr(review, "independent_review_status"):
+                model.independent_review = review.independent_review_status()
+            elif hasattr(review, "snapshot"):
+                model.independent_review = review.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

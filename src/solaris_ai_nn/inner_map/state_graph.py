@@ -1954,4 +1954,32 @@ def build_default_state_graph() -> StateGraph:
                "asserted forbidden claims block publication readiness")
     g.add_edge("ScientificClaimRuntime", "inner_map",
                "scientific claim state feeds Inner MAP")
+
+    # Independent reproducibility review (Prompt 63): prepares a local offline
+    # review package. Reads local artifacts and writes review documents only;
+    # publishes nothing, executes nothing.
+    for name, role in [
+        ("IndependentReviewManifest", "indexes local artifacts; uploads none"),
+        ("ReviewArtifactSanitizer", "flags leak/forbidden risks; modifies none"),
+        ("IndependentReviewerPack", "claim-constrained local review package"),
+        ("ReproducibilityChallenge", "reviewer instructions; never executed"),
+        ("IndependentReviewProtocol", "review stages; advisory only"),
+        ("ReviewerQuestionGenerator", "hostile-but-useful reviewer questions"),
+        ("AdversarialReviewEngine", "alternative explanations; never dismissed"),
+        ("IndependentReviewAuditMatrix", "per-claim gaps; no green dashboard"),
+        ("ReviewerResponseLedger", "append-only objections; never deleted"),
+        ("IndependentReviewReadiness", "inspectability, not claim strength"),
+        ("IndependentReviewRuntime", "bounded offline review-prep engine"),
+        ("IndependentReviewSafetyValidator",
+         "no publish/upload/Git/GitHub/external/command/experiment"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("ScientificClaimRuntime", "IndependentReviewManifest",
+               "claim artifacts become review artifacts")
+    g.add_edge("ReviewArtifactSanitizer", "IndependentReviewReadiness",
+               "critical sanitizer findings block review readiness")
+    g.add_edge("AdversarialReviewEngine", "IndependentReviewAuditMatrix",
+               "alternative explanations populate the audit matrix")
+    g.add_edge("IndependentReviewRuntime", "inner_map",
+               "independent review state feeds Inner MAP")
     return g

@@ -537,6 +537,15 @@ class InnerMapModel:
     # unsupported/forbidden claims; it proves nothing about consciousness, life,
     # agency, or subjective experience.
     scientific_claims: Optional[Dict[str, Any]] = None
+    # Independent-review status (Prompt 63); None when not attached. Keys:
+    # independent_review_enabled, independent_review_artifact_count,
+    # missing_review_artifact_count, sanitizer_finding_count,
+    # critical_sanitizer_finding_count, reproducibility_challenge_count,
+    # reviewer_question_count, adversarial_finding_count,
+    # audit_matrix_blocker_count, unresolved_objection_count,
+    # review_readiness_status, latest_independent_review_report_path. It prepares
+    # a local offline review package; it publishes nothing and executes nothing.
+    independent_review: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

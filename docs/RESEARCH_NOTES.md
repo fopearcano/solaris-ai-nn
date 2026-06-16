@@ -2524,3 +2524,51 @@ intact? A forbidden assertion, a failed safety boundary, or blocking counterevid
 makes a dossier *not ready* no matter how interesting the underlying work is. The
 dossier is a draft evidence compilation, never a release, and the decision to do
 anything with it remains the human operator's.
+
+## Notes on Independent Reproducibility Review
+
+**Why independent review matters.** A project can convince itself of almost
+anything. Internal review shares the internal assumptions, the internal vocabulary,
+and the internal hopes; it is structurally unable to see the gaps it was built
+around. Independent review -- a stranger, ideally a hostile one, with the artifacts
+and the commands -- is the only check that does not inherit those blind spots. The
+independent review layer does not perform that review (no machine can review on a
+human's behalf); it prepares the package so that a real external reviewer *could*,
+locally and offline, without anything being published or uploaded.
+
+**Why reproducibility challenges are stronger than summaries.** A summary asks the
+reader to trust the author's reading of the evidence; a reproducibility challenge
+asks the reader to run the demo and read the evidence themselves. The difference is
+the difference between "we observed X" and "here is the command; run it and see
+whether you observe X". So the reviewer pack leads with challenges -- fixture
+demos, falsification replays, passive-parser and ablation controls, shuffled-order
+and random-label tests -- each with the expected artifact and an explicit reading
+of what a failure means. A challenge whose prerequisite artifact is missing is
+marked *unavailable*, never quietly skipped, because an un-runnable check is itself
+information about the state of the evidence.
+
+**Why adversarial alternatives must be preserved.** For every apparent result there
+is a deflationary explanation: it was log accumulation, fixture overfit, label
+leakage, a lucky seed, a passive parser. The temptation is to rebut these once and
+move on. The adversarial engine instead keeps every alternative on the record, each
+with the specific evidence that would reduce its uncertainty, and lets a strong
+unaddressed alternative downgrade review readiness. An alternative explanation is
+not an insult to the work; it is a map of what the work has not yet ruled out.
+
+**Why external review readiness is not claim strength.** A weak or even negative
+result can be perfectly ready for hostile external review -- if its artifacts are
+present, its claims map to evidence, its counterevidence is visible, its
+limitations are specific, and its commands reproduce. Conversely, a strong-sounding
+result with missing artifacts, a critical sanitizer leak, or an asserted forbidden
+claim is *not* ready, however exciting it sounds. Readiness measures whether the
+evidence is inspectable, not whether the conclusion is impressive. Conflating the
+two is exactly how hype enters a review pipeline.
+
+**Why reviewer objections are evidence, not annoyance.** An objection records a way
+the evidence might be wrong, and that is the most useful thing a reviewer produces.
+The response ledger is append-only: objections cannot be deleted, an objection
+accepted as a limitation or a falsification stays permanently visible, and a
+response must cite evidence or admit it has none. The system is structurally
+forbidden from declaring victory over a reviewer by default -- an unanswered
+objection stays open. Treating objections as a queue to be cleared, rather than as
+findings to be preserved, would defeat the entire purpose of preparing for review.

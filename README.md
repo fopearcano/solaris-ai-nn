@@ -536,7 +536,31 @@ python examples/run_theory_ledger_demo.py                      # working hypothe
 python examples/run_counterevidence_demo.py                    # fixture overfit, passive-parser equivalence, missing live
 python examples/run_publication_dossier_demo.py                # draft dossier; forbidden-claim rejection
 python examples/run_safe_abstract_demo.py                      # claim-constrained preprint / README / negative-result abstracts
+
+# Independent review: prepare a local, offline peer-audit package
+python examples/run_independent_review_demo.py                 # manifest, reviewer pack, readiness report
+python examples/run_artifact_sanitizer_demo.py                 # local path warning, fake-secret + forbidden-claim blockers
+python examples/run_reproducibility_challenge_demo.py          # fixture/falsification challenges; missing prereq unavailable
+python examples/run_adversarial_review_demo.py                 # fixture-overfit / passive-parser / missing-replication alternatives
+python examples/run_response_ledger_demo.py                    # objection, partial answer, accepted limitation, unresolved
 ```
+
+The Independent Review layer generates local reviewer packs, reproducibility
+challenges, audit matrices, and response ledgers. It does not publish, upload,
+contact reviewers, call GitHub, run external services, execute commands, or make
+unsupported claims. It indexes local review artifacts (missing ones stay visible),
+scans them for sanitization and forbidden-claim risks without modifying them
+(a secret, API key, credential, or asserted forbidden claim blocks review
+readiness; the operator redacts manually), builds a claim-constrained reviewer pack
+and reproducibility challenges (instructions only -- nothing is executed),
+generates hostile reviewer questions and adversarial alternative explanations
+(preserved, never auto-dismissed), maintains an append-only reviewer response
+ledger (objections cannot be deleted and the system cannot declare victory by
+default), and reports a review-readiness tier (internal / friendly-external /
+hostile-external) where readiness means the evidence is inspectable, not that the
+claims are strong. It makes no claim of consciousness, sentience, biological life,
+personhood, agency, free will, emotion, feeling, understanding, self-awareness, or
+subjective experience.
 
 The Scientific Claim Registry maps evidence to claims and blocks unsupported or
 forbidden claims. It does not prove consciousness, sentience, biological life,
@@ -1659,6 +1683,13 @@ src/solaris_ai_nn/
                 safety (maps evidence to claims; blocks unsupported/forbidden
                 claims; draft dossier only; no release/Git/GitHub; proves nothing
                 about consciousness/life/agency)
+  independent_review/ local offline reproducibility review + peer audit pack:
+                review manifest, artifact sanitizer, reviewer pack,
+                reproducibility challenge, review protocol, reviewer questions,
+                adversarial review, audit matrix, response ledger, review
+                readiness, runtime, reports, safety (prepares a local review
+                package; publishes/uploads nothing; contacts no reviewer; calls no
+                Git/GitHub/external API; executes nothing)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging
