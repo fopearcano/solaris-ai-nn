@@ -3106,3 +3106,40 @@ includes limitations.
 Turns reviewer objections into experiment recommendations: a passive-parser control,
 a shuffled-event-order test, and a live-read-only comparison. Recommendations are
 instructions only -- nothing is executed and no branch is created.
+
+## 354. Alpha End-to-End Demo ✅ (implemented)
+
+**Run:** `python examples/run_alpha_e2e_demo.py --state-dir .solaris_ai_nn_alpha/test_e2e --max-ticks 25`
+Runs one bounded, fixture-only research path: initialize state, build the module
+registry, run doctor, execute the fixture demo (organismic passes + claim/review/
+cycle summaries), and write the alpha report, artifact index, and operator runbook.
+Completes quickly, shows skipped modules honestly, controls no feeders/hardware,
+calls no Git/GitHub, and makes no consciousness/life/agency claim.
+
+## 355. Alpha Doctor Demo ✅ (implemented)
+
+**Run:** `python examples/run_alpha_doctor_demo.py --state-dir .solaris_ai_nn_alpha/test_doctor`
+Runs the read-only Alpha doctor and prints each pass/warning/blocker result, then
+illustrates how strict mode treats a (synthetic) missing required module. The doctor
+executes nothing and requires no live mode, network, or Git/GitHub.
+
+## 356. Alpha Module Registry Demo ✅ (implemented)
+
+**Run:** `python examples/run_alpha_module_registry_demo.py --state-dir .solaris_ai_nn_alpha/test_registry`
+Builds the module registry (import-spec only) and illustrates the available,
+missing, optional-missing, and blocked statuses. A missing required module blocks
+the specific command, not the whole CLI; missing optional modules warn.
+
+## 357. Alpha Cycle Status Demo ✅ (implemented)
+
+**Run:** `python examples/run_alpha_cycle_status_demo.py --state-dir .solaris_ai_nn_alpha/test_cycle_status`
+Shows the descriptive alpha cycle status for initialized, demo-completed-with-
+warnings, and blocked cases plus the advisory next action. Cycle status is
+descriptive only -- it never executes the next action.
+
+## 358. Alpha Report Demo ✅ (implemented)
+
+**Run:** `python examples/run_alpha_report_demo.py --state-dir .solaris_ai_nn_alpha/test_report`
+Builds the alpha report set, prints ClaimGuard availability (a warning if
+unavailable), and prints the safety boundary statement. The report shows skipped
+modules and blockers honestly and makes no consciousness/life/agency claim.

@@ -682,6 +682,24 @@ DESCRIPTIONS = {
         "no publish/upload/contact/training/Git/experiment execution",
     "review_assimilation_safety_protocol":
         "no publish/upload/contact/training/Git/experiment execution",
+    "alpha_research_system": "unified local fixture-only alpha assembly",
+    "alpha_research_system_protocol":
+        "alpha assembly (bounded, local, no Git/GitHub/publish)",
+    "alpha_research_system_evaluation": "alpha system state check",
+    "alpha_profile_protocol": "alpha profile (fixture-only, bounded)",
+    "alpha_profile_evaluation": "alpha profile check",
+    "alpha_module_registry_protocol": "alpha module registry (no crash)",
+    "alpha_module_registry_evaluation": "alpha module registry check",
+    "alpha_system_check_protocol": "alpha doctor (read-only checks)",
+    "alpha_system_check_evaluation": "alpha doctor check",
+    "alpha_demo_plan_protocol": "alpha demo plan (bounded; honest skips)",
+    "alpha_demo_plan_evaluation": "alpha demo plan check",
+    "alpha_artifact_index_protocol": "alpha artifact index (local; markers)",
+    "alpha_artifact_index_evaluation": "alpha artifact index check",
+    "alpha_cycle_status_protocol": "alpha cycle status (descriptive)",
+    "alpha_cycle_status_evaluation": "alpha cycle status check",
+    "alpha_safety": "no actuation/feeders/Git/GitHub/publish/claims",
+    "alpha_safety_protocol": "no actuation/feeders/Git/GitHub/publish/claims",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -1043,6 +1061,10 @@ class ExperimentRegistry:
                         "publication_readiness_revision_protocol",
                         "publication_readiness_revision_evaluation")
             or bool(merged.get("review_assimilation", False)))
+        features["alpha_system"] = (
+            name.startswith("alpha_")
+            or name in ("alpha_research_system",)
+            or bool(merged.get("alpha_system", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

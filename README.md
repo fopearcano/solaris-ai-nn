@@ -106,6 +106,33 @@ python -m pytest
 
 (`pyproject.toml` sets `pythonpath = ["src"]`, so tests run without installing.)
 
+## Alpha Research System (unified local CLI)
+
+The Alpha Research System is the unified local operator entry point that assembles
+the organismic, scientific, claim-governance, and review-governance modules into
+one bounded, fixture-only research run. From a single command an operator can
+initialize state, inspect modules, run a bounded end-to-end fixture demo, generate
+reports, inspect artifacts, and see the next action:
+
+```bash
+python -m solaris_ai_nn doctor --state-dir .solaris_ai_nn_alpha
+python -m solaris_ai_nn init --state-dir .solaris_ai_nn_alpha
+python -m solaris_ai_nn modules --state-dir .solaris_ai_nn_alpha
+python -m solaris_ai_nn run-demo --state-dir .solaris_ai_nn_alpha --max-ticks 25
+python -m solaris_ai_nn cycle-status --state-dir .solaris_ai_nn_alpha
+# also: artifact-index, build-runbook, build-report (and the `alpha <cmd>` group)
+python examples/run_alpha_e2e_demo.py --state-dir .solaris_ai_nn_alpha/test_e2e --max-ticks 25
+```
+
+The Alpha Research System is a local fixture-only research orchestration layer. It
+does not call GitHub, run Git, publish artifacts, upload files, create branches,
+control feeders/hardware, execute external agents, or prove consciousness,
+sentience, biological life, personhood, agency, free will, emotion, feeling,
+understanding, self-awareness, or subjective experience. The default profile is
+fixture-only and bounded; missing optional modules are skipped honestly and shown
+in the report; live read-only profiles stay blocked unless governance artifacts
+exist. Alpha is not a product release.
+
 ## Run the minimal experiment
 
 ```bash
@@ -1720,6 +1747,14 @@ src/solaris_ai_nn/
                 review queue, runtime, reports, safety (reviewer feedback as
                 research evidence; never trains/publishes/contacts; proposes claim
                 revisions and experiments; executes nothing)
+  alpha_system/ unified local Alpha Research System assembly + CLI:
+                alpha profile, module registry, state layout, system check
+                (doctor), demo plan, orchestrator, artifact index, cycle status,
+                operator runbook, reports, safety (bounded fixture-only local
+                orchestration; no Git/GitHub/publish/feeders/hardware; honest
+                about skipped modules; proves nothing about consciousness/life/
+                agency)
+  cli.py        unified `python -m solaris_ai_nn` Alpha CLI (local-only, bounded)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

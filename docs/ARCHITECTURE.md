@@ -4154,3 +4154,61 @@ reviewers, publish artifacts, run experiments, or execute external services, and
 makes no claim of consciousness, sentience, biological life, personhood, agency,
 free will, emotion, feeling, understanding, self-awareness, or subjective
 experience.**
+
+## Alpha Research System Assembly
+
+**The Alpha Research System is the unified local operator entry point.** Prompts
+41-64 produced many organismic, scientific, governance, review, and claim-control
+layers. The `alpha_system` package (Prompt 65) does not add another theory layer --
+it assembles those modules into a coherent, operable, bounded local research run so
+an operator can issue one bounded command and watch Solaris-AI-NN move from fixture
+sensorium input to an alpha report, scientific claims, review readiness, and a next
+action. It is reached through the unified CLI (`python -m solaris_ai_nn ...`) and
+the matching `examples/run_alpha_e2e_demo.py`.
+
+**It is fixture-only by default, and honest about what is missing.** The
+`AlphaResearchProfile` (default `alpha_fixture_e2e_v0`) is fixture-only: it requires
+no live feeders, no network, and no Git/GitHub, and it never runs unbounded. Live
+read-only profiles exist only as metadata and are blocked unless governance
+artifacts exist. The `AlphaModuleRegistry` records, by import-spec only (no module
+is executed), whether each of the Prompt 41-64 modules is available; it never
+crashes on a missing module, missing optional modules warn, and a missing
+required-alpha module blocks the specific command rather than the whole CLI. The
+`AlphaStateLayout` creates the local state tree under one chosen root, reusing
+existing directories and never deleting state, and writes an
+`ALPHA_STATE_MANIFEST.json`.
+
+**It checks, runs, and reports a bounded fixture path.** The `AlphaSystemCheck`
+(doctor) runs read-only checks -- package importable, state writable, profile
+valid, registry built, safety validator and ClaimGuard available, no live mode by
+default, no network/Git/GitHub requirement, no feeder auto-start, no unbounded
+runtime, no unsupported claim text -- each as a pass/info/warning/blocker. The
+`AlphaDemoPlan` lays out the bounded fixture path (initialize state, load/create the
+fixture stream, run the organismic passes, generate the evidence/claim/review/cycle
+summaries, and write the alpha report); every step is bounded, a missing optional
+module is skipped honestly (never faked), and a missing required foundation blocks
+the demo. The `AlphaResearchOrchestrator` drives all of this: it records present
+organismic modules as a clearly-labelled alpha fallback (the module's full
+scientific run is not invoked here) and absent ones as skipped markers, and it calls
+the Scientific Claims, Independent Review, and Research Cycle modules in demo-safe
+report-only mode when available (with safe placeholders otherwise). The
+`AlphaArtifactIndex` indexes the run's artifacts and its missing/skipped markers
+(per run id; stale artifacts are never deleted); the `AlphaCycleStatus` reports the
+descriptive stage and an advisory next action (never executed); the
+`AlphaOperatorRunbook` gives the operator the command sequence, stop conditions, and
+forbidden interpretations; and the `AlphaResearchReportBuilder` writes the alpha
+report set (ClaimGuard-scanned, with skipped modules and blockers always shown).
+
+**It stays local, bounded, and claim-constrained.** The
+`AlphaResearchSafetyValidator` blocks real-world actuation, hardware/feeder control
+and auto-start, network/shell/browser/OS access, Git/GitHub calls,
+branch/tag/release/PR creation, upload, publishing, external-agent execution,
+runtime validation-command execution, unbounded loops, source self-rewrite,
+sensory-text-as-command, human-label-as-ground-truth, unsupported consciousness/
+life/agency claims, and the hiding of skipped modules, missing artifacts, or failed
+checks. The alpha state feeds Inner MAP and Evaluation. **The Alpha Research System
+is a local fixture-only research orchestration layer. It does not call GitHub, run
+Git, publish artifacts, upload files, create branches, control feeders/hardware,
+execute external agents, or prove consciousness, sentience, biological life,
+personhood, agency, free will, emotion, feeling, understanding, self-awareness, or
+subjective experience. Alpha is not a product release.**

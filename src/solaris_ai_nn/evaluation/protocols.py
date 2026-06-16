@@ -8881,6 +8881,149 @@ def review_assimilation_safety_protocol(
     return _run(manifest, body)
 
 
+def _build_alpha_system(state_dir):
+    """Build + run a small bounded alpha assembly over the fixture demo."""
+    from ..alpha_system import AlphaResearchOrchestrator
+
+    base = state_dir or ".solaris_ai_nn_alpha/eval"
+    orch = AlphaResearchOrchestrator(state_dir=base, max_runtime_s=20.0,
+                                     max_ticks=25)
+    orch.run()
+    return orch
+
+
+def alpha_research_system_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A bounded, local, fixture-only alpha assembly runs end to end."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        orch = _build_alpha_system(m.state_dir)
+        return {"alpha_system": M.alpha_system_metrics(orch.alpha_status())}
+
+    return _run(manifest, body)
+
+
+def alpha_profile_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The default alpha profile is fixture-only and bounded."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..alpha_system import default_alpha_profile
+
+        p = default_alpha_profile()
+        return {"alpha_system": {"alpha_profile_id": p.profile_id,
+                                 "is_fixture_only": p.is_fixture_only,
+                                 "bounded": p.max_runtime_s > 0,
+                                 "live_blocked_without_governance":
+                                     p.live_blocked(governance_present=False)}}
+
+    return _run(manifest, body)
+
+
+def alpha_module_registry_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The module registry builds without crashing on missing modules."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..alpha_system import AlphaModuleRegistry
+
+        idx = AlphaModuleRegistry.build().index()
+        return {"alpha_system": {
+            "alpha_module_count": idx["alpha_module_count"],
+            "alpha_available_module_count": idx["alpha_available_module_count"],
+            "alpha_blocked_module_count": idx["alpha_blocked_module_count"]}}
+
+    return _run(manifest, body)
+
+
+def alpha_system_check_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The doctor runs read-only checks and reports blockers honestly."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        orch = _build_alpha_system(m.state_dir)
+        return {"alpha_system": {
+            "check_count": orch.check.get("check_count", 0),
+            "blocker_count": orch.check.get("blocker_count", 0),
+            "passed": orch.check.get("passed", False)}}
+
+    return _run(manifest, body)
+
+
+def alpha_demo_plan_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The bounded demo plan completes or skips steps honestly."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        orch = _build_alpha_system(m.state_dir)
+        plan = orch.plan.summary() if orch.plan else {}
+        return {"alpha_system": {
+            "alpha_demo_step_count": plan.get("alpha_demo_step_count", 0),
+            "alpha_demo_step_completed_count": plan.get(
+                "alpha_demo_step_completed_count", 0),
+            "alpha_demo_step_skipped_count": plan.get(
+                "alpha_demo_step_skipped_count", 0)}}
+
+    return _run(manifest, body)
+
+
+def alpha_artifact_index_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The artifact index records local artifacts and markers."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        orch = _build_alpha_system(m.state_dir)
+        idx = orch.artifact_index.index() if orch.artifact_index else {}
+        return {"alpha_system": {
+            "alpha_artifact_count": idx.get("alpha_artifact_count", 0),
+            "present_artifact_count": idx.get("present_artifact_count", 0)}}
+
+    return _run(manifest, body)
+
+
+def alpha_cycle_status_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The alpha cycle status is descriptive and recommends a next action."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        orch = _build_alpha_system(m.state_dir)
+        return {"alpha_system": {
+            "alpha_cycle_stage": orch.cycle.get("stage"),
+            "alpha_next_action": orch.cycle.get("next_action"),
+            "executes_next_action": orch.cycle.get("executes_next_action",
+                                                    False)}}
+
+    return _run(manifest, body)
+
+
+def alpha_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The alpha layer blocks actuation/feeders/Git/GitHub/publish/claims."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..alpha_system import AlphaResearchSafetyValidator
+
+        v = AlphaResearchSafetyValidator()
+        return {"alpha_system": {
+            "feeder_start_blocked":
+                not v.validate_operation("start the feeder now").safe,
+            "network_blocked":
+                not v.validate_operation("open url over network").safe,
+            "git_blocked": not v.validate_operation("run git push").safe,
+            "github_blocked": not v.validate_operation("call github api").safe,
+            "publish_blocked": not v.validate_operation("publish artifacts").safe,
+            "source_rewrite_blocked":
+                not v.validate_operation("rewrite source file").safe,
+            "claim_blocked":
+                not v.validate_claim_text("the system is conscious").safe,
+            "hidden_modules_blocked":
+                not v.validate_no_hidden_modules(True).safe,
+            "can_start_feeders": v.can_start_feeders(),
+            "can_call_github": v.can_call_github()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -9436,4 +9579,21 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
         publication_readiness_revision_protocol,
     "review_assimilation_safety": review_assimilation_safety_protocol,
     "review_assimilation_safety_protocol": review_assimilation_safety_protocol,
+    "alpha_research_system": alpha_research_system_protocol,
+    "alpha_research_system_protocol": alpha_research_system_protocol,
+    "alpha_research_system_evaluation": alpha_research_system_protocol,
+    "alpha_profile_protocol": alpha_profile_protocol,
+    "alpha_profile_evaluation": alpha_profile_protocol,
+    "alpha_module_registry_protocol": alpha_module_registry_protocol,
+    "alpha_module_registry_evaluation": alpha_module_registry_protocol,
+    "alpha_system_check_protocol": alpha_system_check_protocol,
+    "alpha_system_check_evaluation": alpha_system_check_protocol,
+    "alpha_demo_plan_protocol": alpha_demo_plan_protocol,
+    "alpha_demo_plan_evaluation": alpha_demo_plan_protocol,
+    "alpha_artifact_index_protocol": alpha_artifact_index_protocol,
+    "alpha_artifact_index_evaluation": alpha_artifact_index_protocol,
+    "alpha_cycle_status_protocol": alpha_cycle_status_protocol,
+    "alpha_cycle_status_evaluation": alpha_cycle_status_protocol,
+    "alpha_safety": alpha_safety_protocol,
+    "alpha_safety_protocol": alpha_safety_protocol,
 }

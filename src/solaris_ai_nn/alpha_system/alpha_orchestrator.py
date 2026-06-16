@@ -1,0 +1,494 @@
+"""Alpha research orchestrator -- the bounded, local assembly runtime.
+
+:class:`AlphaResearchOrchestrator` loads the alpha profile, initializes the state
+layout, runs the system check, builds the module registry, executes the bounded
+fixture demo plan, builds the artifact index, generates the cycle status, the alpha
+report, and the operator runbook, and exposes a status for Inner MAP / Evaluation.
+
+It is bounded and local-only: it executes no shell command, calls no Git/GitHub,
+publishes/uploads nothing, runs no external agent, controls no hardware/feeders,
+never hides skipped or missing modules, and writes honest reports. Optional
+organismic modules are recorded as a labelled alpha fallback when present (the
+module's full scientific run is not invoked here) and as skipped markers when
+absent; the claim/review/cycle modules are called in demo-safe report-only mode
+when available, with safe placeholders otherwise.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import time
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
+
+from .alpha_profile import AlphaResearchProfile, get_alpha_profile
+from .artifact_index import AlphaArtifactIndex, AlphaArtifactKind
+from .cycle_status import determine_cycle_status
+from .demo_plan import AlphaDemoPlan, AlphaDemoStepStatus
+from .module_registry import AlphaModuleRegistry
+from .operator_runbook import AlphaRunbookBuilder
+from .safety import AlphaResearchSafetyValidator
+from .state_layout import AlphaStateLayout
+from .system_check import AlphaCheckSeverity, AlphaSystemCheck
+
+# demo step -> (module key, artifact kind) for the organismic fallback steps.
+_ORGANISMIC_STEPS = {
+    "sensorium_pass": ("organismic_demo", AlphaArtifactKind.ORGANISM_REPORT),
+    "metabolism_pass": ("perceptual_metabolism",
+                        AlphaArtifactKind.METABOLISM_REPORT),
+    "ontogenesis_pass": ("perceptual_ontogenesis",
+                         AlphaArtifactKind.CONCEPT_REPORT),
+    "semiogenesis_pass": ("semiogenesis", AlphaArtifactKind.SIGN_REPORT),
+    "cognition_pass": ("sensorium_cognition", AlphaArtifactKind.COGNITION_REPORT),
+    "self_boundary_pass": ("self_boundary",
+                           AlphaArtifactKind.SELF_BOUNDARY_REPORT),
+    "desire_action_pass": ("action_reaction",
+                           AlphaArtifactKind.DESIRE_ACTION_REPORT),
+    "developmental_pass": ("developmental_life",
+                           AlphaArtifactKind.DEVELOPMENTAL_REPORT),
+}
+
+
+@dataclass
+class AlphaResearchOrchestrator:
+    """Bounded, local Alpha Research System assembly runtime."""
+
+    state_dir: str = ".solaris_ai_nn_alpha"
+    profile: Optional[str] = None
+    max_runtime_s: float = 60.0
+    max_ticks: int = 50
+    fixture_mode: bool = True
+    report_only: bool = False
+    dry_run: bool = False
+    skip_optional: bool = False
+    strict: bool = False
+    require_claimguard: bool = False
+
+    safety: AlphaResearchSafetyValidator = field(
+        default_factory=AlphaResearchSafetyValidator, init=False)
+    alpha_profile: Any = field(default=None, init=False)
+    layout: Any = field(default=None, init=False)
+    registry: Any = field(default=None, init=False)
+    check: Dict[str, Any] = field(default_factory=dict, init=False)
+    plan: Any = field(default=None, init=False)
+    artifact_index: Any = field(default=None, init=False)
+    cycle: Dict[str, Any] = field(default_factory=dict, init=False)
+    runbook: Any = field(default=None, init=False)
+    run_id: str = field(default="", init=False)
+    _refused: bool = field(default=False, init=False)
+
+    def __post_init__(self) -> None:
+        self.alpha_profile = get_alpha_profile(self.profile)
+        # The profile's bound caps the requested runtime.
+        if not self.max_runtime_s:
+            self._refused = True
+        self.run_id = f"alpha_run_{int(time.time())}"
+
+    # -- public entry points -------------------------------------------------
+
+    def initialize(self) -> Dict[str, Any]:
+        self.layout = AlphaStateLayout(state_root=self.state_dir)
+        return self.layout.initialize()
+
+    def run_doctor(self) -> Dict[str, Any]:
+        if self.layout is None:
+            self.layout = AlphaStateLayout(state_root=self.state_dir)
+        if self.registry is None:
+            self.registry = AlphaModuleRegistry.build()
+        checker = AlphaSystemCheck()
+        checker.run(state_root=self.state_dir, profile=self.alpha_profile,
+                    registry=self.registry,
+                    require_claimguard=self.require_claimguard)
+        self.check = checker.summary()
+        return self.check
+
+    def build_registry(self) -> Dict[str, Any]:
+        self.registry = AlphaModuleRegistry.build()
+        return self.registry.to_dict()
+
+    def run(self) -> Dict[str, Any]:
+        """Run the full bounded alpha assembly (init -> demo -> reports)."""
+        if self._refused:
+            return {"refused": True, "reason": "unbounded runtime"}
+        bounded = self.safety.validate_bounded(self.max_runtime_s)
+        if not bounded.safe:
+            return {"refused": True, "reason": "unbounded runtime"}
+
+        self.initialize()
+        self.build_registry()
+        self.run_doctor()
+        self.artifact_index = AlphaArtifactIndex(state_root=self.state_dir,
+                                                 run_id=self.run_id)
+        self.artifact_index.add(AlphaArtifactKind.STATE_MANIFEST,
+                                ref=self.layout.manifest_path)
+        self.artifact_index.add(AlphaArtifactKind.MODULE_REGISTRY,
+                                ref="module_registry")
+        self.artifact_index.add(AlphaArtifactKind.SYSTEM_CHECK,
+                                ref="system_check")
+
+        doctor_blocked = self.check.get("blocker_count", 0) > 0
+        if doctor_blocked and self.strict:
+            self.plan = AlphaDemoPlan.build()
+            self._finalize(demo_completed=False, doctor_blocked=True)
+            return self._result(demo_completed=False, doctor_blocked=True)
+
+        if not self.report_only:
+            self._execute_demo()
+        else:
+            self.plan = AlphaDemoPlan.build()
+        warnings = self._warning_count()
+        self._finalize(demo_completed=not self.report_only,
+                       doctor_blocked=doctor_blocked)
+        return self._result(demo_completed=not self.report_only,
+                            doctor_blocked=doctor_blocked)
+
+    # -- demo execution ------------------------------------------------------
+
+    def _execute_demo(self) -> None:
+        self.plan = AlphaDemoPlan.build()
+        for step in self.plan.steps:
+            if step.step_id in ("init_state", "load_fixture",
+                                "evidence_summary", "alpha_report"):
+                self._run_foundation_step(step)
+            elif step.step_id in _ORGANISMIC_STEPS:
+                self._run_organismic_step(step)
+            elif step.step_id == "claim_summary":
+                self._run_claims_step(step)
+            elif step.step_id == "review_pack":
+                self._run_review_step(step)
+            elif step.step_id == "cycle_status":
+                self._run_cycle_step(step)
+
+    def _run_foundation_step(self, step) -> None:
+        if step.step_id == "load_fixture":
+            ref = self._ensure_fixture()
+            step.artifact_ref = ref
+            self.artifact_index.add(AlphaArtifactKind.FIXTURE_INPUT, ref=ref)
+        if step.step_id == "evidence_summary":
+            ref = self._write_artifact("alpha_evidence_summary.json", {
+                "fixture_events_indexed": True,
+                "note": "local fixture-derived evidence summary; not a claim"})
+            step.artifact_ref = ref
+            self.artifact_index.add(AlphaArtifactKind.DEMO_STEP_OUTPUT, ref=ref)
+        step.status = AlphaDemoStepStatus.COMPLETED
+        step.detail = "bounded foundation step completed locally"
+
+    def _run_organismic_step(self, step) -> None:
+        module_key, kind = _ORGANISMIC_STEPS[step.step_id]
+        available = self.registry.is_available(module_key)
+        if not available or self.skip_optional:
+            step.status = AlphaDemoStepStatus.SKIPPED
+            step.detail = (f"optional module {module_key!r} "
+                           + ("skipped by request" if self.skip_optional
+                              else "not available"))
+            self.artifact_index.add_skipped_module(module_key, step.detail)
+            return
+        # The module is present, but the Alpha demo records a clearly labelled
+        # fallback summary rather than invoking the module's full scientific run.
+        ref = self._write_artifact(f"{step.step_id}_alpha_fallback.json", {
+            "module": module_key, "output_kind": "alpha_fallback_summary",
+            "is_real_module_output": False,
+            "detail": ("module is available; the alpha demo records a bounded "
+                       "fallback summary, not the module's full output"),
+            "note": "no consciousness/life/agency claim is made"})
+        step.status = AlphaDemoStepStatus.COMPLETED_FALLBACK
+        step.artifact_ref = ref
+        step.detail = f"module {module_key!r} available; alpha fallback recorded"
+        self.artifact_index.add(kind, ref=ref, detail="alpha fallback summary")
+
+    def _run_claims_step(self, step) -> None:
+        if not self.registry.is_available("scientific_claims"):
+            self._placeholder(step, "scientific_claims",
+                              AlphaArtifactKind.CLAIM_REPORT,
+                              "Scientific Claims module unavailable; no "
+                              "scientific claim generated.")
+            return
+        try:
+            from ..scientific_claims import ScientificClaimRuntime
+
+            claims_dir = self.layout.subdir("claims")
+            rt = ScientificClaimRuntime(state_dir=claims_dir,
+                                        max_runtime_s=self.max_runtime_s)
+            rt.load_bundle(self._claims_bundle())
+            rt.run()
+            status = rt.scientific_claims_status()
+            ref = self._write_artifact("alpha_claim_summary.json", {
+                "scientific_claim_count": status.get("scientific_claim_count", 0),
+                "supported_claim_count": status.get("supported_claim_count", 0),
+                "forbidden_claim_count": status.get("forbidden_claim_count", 0),
+                "is_real_module_output": True,
+                "note": "demo-safe scientific claim summary; proves nothing "
+                        "about consciousness/life/agency"})
+            step.status = AlphaDemoStepStatus.COMPLETED
+            step.artifact_ref = ref
+            step.detail = "scientific claim summary generated (demo-safe)"
+            self.artifact_index.add(AlphaArtifactKind.CLAIM_REPORT, ref=ref,
+                                    detail="real module output")
+        except Exception as exc:
+            self._placeholder(step, "scientific_claims",
+                              AlphaArtifactKind.CLAIM_REPORT,
+                              f"Scientific Claims call failed safely: {exc}")
+
+    def _run_review_step(self, step) -> None:
+        if not self.registry.is_available("independent_review"):
+            self._placeholder(step, "independent_review",
+                              AlphaArtifactKind.REVIEW_REPORT,
+                              "Independent Review module unavailable; no review "
+                              "pack generated.")
+            return
+        try:
+            from ..independent_review import IndependentReviewRuntime
+
+            review_dir = self.layout.subdir("review")
+            rt = IndependentReviewRuntime(state_dir=review_dir,
+                                          max_runtime_s=self.max_runtime_s)
+            rt.load_bundle(self._review_bundle())
+            rt.run()
+            status = rt.independent_review_status()
+            ref = self._write_artifact("alpha_review_summary.json", {
+                "review_readiness_status": status.get(
+                    "review_readiness_status"),
+                "reviewer_question_count": status.get(
+                    "reviewer_question_count", 0),
+                "is_real_module_output": True,
+                "note": "demo-safe review mini-pack summary; nothing published "
+                        "or uploaded"})
+            step.status = AlphaDemoStepStatus.COMPLETED
+            step.artifact_ref = ref
+            step.detail = "independent review mini-pack generated (demo-safe)"
+            self.artifact_index.add(AlphaArtifactKind.REVIEW_REPORT, ref=ref,
+                                    detail="real module output")
+        except Exception as exc:
+            self._placeholder(step, "independent_review",
+                              AlphaArtifactKind.REVIEW_REPORT,
+                              f"Independent Review call failed safely: {exc}")
+
+    def _run_cycle_step(self, step) -> None:
+        if not self.registry.is_available("research_cycle"):
+            ref = self._write_artifact("alpha_cycle_summary.json", {
+                "source": "alpha_fallback_cycle_status",
+                "is_real_module_output": False,
+                "note": "Research Cycle module unavailable; using alpha fallback "
+                        "cycle status"})
+            step.status = AlphaDemoStepStatus.WARNING
+            step.artifact_ref = ref
+            step.detail = "research cycle unavailable; alpha fallback used"
+            self.artifact_index.add(AlphaArtifactKind.CYCLE_REPORT, ref=ref,
+                                    detail="alpha fallback")
+            return
+        try:
+            from ..research_cycle import ResearchCycleRuntime
+
+            cycle_dir = self.layout.subdir("cycle")
+            rt = ResearchCycleRuntime(state_dir=cycle_dir,
+                                      max_runtime_s=self.max_runtime_s)
+            rt.load_bundle(self._cycle_bundle())
+            rt.run()
+            status = rt.research_cycle_status()
+            ref = self._write_artifact("alpha_cycle_summary.json", {
+                "current_cycle_stage": status.get("current_cycle_stage"),
+                "next_action_count": status.get("next_action_count", 0),
+                "is_real_module_output": True,
+                "note": "demo-safe research cycle status"})
+            step.status = AlphaDemoStepStatus.COMPLETED
+            step.artifact_ref = ref
+            step.detail = "research cycle status generated (demo-safe)"
+            self.artifact_index.add(AlphaArtifactKind.CYCLE_REPORT, ref=ref,
+                                    detail="real module output")
+        except Exception as exc:
+            ref = self._write_artifact("alpha_cycle_summary.json", {
+                "source": "alpha_fallback_cycle_status",
+                "is_real_module_output": False, "detail": str(exc)})
+            step.status = AlphaDemoStepStatus.WARNING
+            step.artifact_ref = ref
+            step.detail = f"research cycle call failed safely: {exc}"
+            self.artifact_index.add(AlphaArtifactKind.CYCLE_REPORT, ref=ref,
+                                    detail="alpha fallback")
+
+    def _placeholder(self, step, module_key: str, kind: str,
+                     message: str) -> None:
+        ref = self._write_artifact(f"{step.step_id}_placeholder.json", {
+            "module": module_key, "is_real_module_output": False,
+            "placeholder": message, "note": "module unavailable; safe placeholder"})
+        step.status = AlphaDemoStepStatus.SKIPPED
+        step.artifact_ref = ref
+        step.detail = message
+        self.artifact_index.add_skipped_module(module_key, message)
+
+    # -- bundles for demo-safe module calls ---------------------------------
+
+    def _claims_bundle(self) -> Dict[str, Any]:
+        return {
+            "research_baseline": {"baseline_status": "validated",
+                                  "safety_boundary_status": "pass"},
+            "claims": [{
+                "claim_id": "alpha_c1",
+                "text": "The fixture sensorium pass produced bounded local "
+                        "structure under the alpha demo.",
+                "category": "architecture_claim",
+                "evidence": [{"evidence_id": "alpha_fixture",
+                              "source": "evaluation", "role": "weakly_supports"}],
+                "factors": {"direct_evidence": True}}]}
+
+    def _review_bundle(self) -> Dict[str, Any]:
+        return {
+            "research_baseline": {"baseline_status": "validated",
+                                  "safety_boundary_status": "pass"},
+            "safety": {"critical_regression_count": 0},
+            "scientific_claims": {
+                "claim_registry": {"scientific_claim_count": 1,
+                                   "claims": [{"claim_id": "alpha_c1",
+                                               "text": "bounded local structure",
+                                               "status": "weakly_supported",
+                                               "evidence_refs": ["alpha_fixture"],
+                                               "counterevidence_refs": []}]},
+                "counterevidence": {"counterevidence_count": 0, "records": []},
+                "forbidden_claims": {"asserted_forbidden_count": 0,
+                                     "blocks_publication": False},
+                "limitations": {"limitation_count": 4, "limitations": []}},
+            "sanitizer_inputs": {"abstract": "Bounded local structure. It is "
+                                 "not conscious."}}
+
+    def _cycle_bundle(self) -> Dict[str, Any]:
+        return {
+            "cycle_manifest": {"cycle_id": "alpha_cycle_1"},
+            "research_baseline": {"baseline_status": "validated",
+                                  "safety_boundary_status": "pass"}}
+
+    # -- fixture + artifact helpers -----------------------------------------
+
+    def _ensure_fixture(self) -> str:
+        """Use the bundled fixture if present, else write a synthetic fallback."""
+        bundled = self._bundled_fixture_path()
+        target = os.path.join(self.layout.subdir("fixtures"),
+                              "alpha_fixture_stream.jsonl")
+        if bundled and os.path.isfile(bundled):
+            return bundled
+        # Synthetic fallback fixture (bounded, command-free, no secrets).
+        events = [
+            {"t": 0, "kind": "change", "features": [0.1, 0.2, 0.0],
+             "debug_gloss": "DEBUG ONLY: a small change"},
+            {"t": 1, "kind": "absence", "features": [0.0, 0.0, 0.0],
+             "debug_gloss": "DEBUG ONLY: silence"},
+            {"t": 2, "kind": "repeat", "features": [0.1, 0.2, 0.0],
+             "debug_gloss": "DEBUG ONLY: repeated pattern"},
+            {"t": 3, "kind": "noise", "features": [0.9, -0.3, 0.5],
+             "debug_gloss": "DEBUG ONLY: noisy event"},
+            {"t": 4, "kind": "contradiction", "features": [0.1, -0.2, 0.0],
+             "debug_gloss": "DEBUG ONLY: contradictory event"},
+        ]
+        with open(target, "w", encoding="utf-8") as fh:
+            for e in events:
+                fh.write(json.dumps(e) + "\n")
+        return target
+
+    def _bundled_fixture_path(self) -> Optional[str]:
+        here = os.path.dirname(os.path.abspath(__file__))
+        root = os.path.abspath(os.path.join(here, "..", "..", ".."))
+        path = os.path.join(root, "examples", "fixtures",
+                            "alpha_fixture_stream.jsonl")
+        return path if os.path.isfile(path) else None
+
+    def _write_artifact(self, filename: str, payload: Dict[str, Any]) -> str:
+        path = os.path.join(self.layout.subdir("artifacts"), filename)
+        with open(path, "w", encoding="utf-8") as fh:
+            json.dump(payload, fh, indent=2, default=str)
+        return path
+
+    # -- finalization --------------------------------------------------------
+
+    def _warning_count(self) -> int:
+        warnings = self.check.get("warning_count", 0)
+        if self.plan is not None:
+            warnings += self.plan.summary()["alpha_demo_step_skipped_count"]
+        return warnings
+
+    def _finalize(self, *, demo_completed: bool, doctor_blocked: bool) -> None:
+        warnings = self._warning_count()
+        blockers = [r["name"] for r in self.check.get("results", [])
+                    if r.get("is_blocker")]
+        blockers += [r.label for r in self.registry.blocking_alpha()]
+        self.cycle = determine_cycle_status(
+            initialized=True, doctor_blocked=doctor_blocked,
+            demo_completed=demo_completed, warnings=warnings,
+            blockers=blockers,
+            claims_generated=self._step_done("claim_summary"),
+            review_generated=self._step_done("review_pack")).to_dict()
+        self.runbook = AlphaRunbookBuilder().build(self.state_dir)
+        self.artifact_index.add(AlphaArtifactKind.CYCLE_REPORT,
+                                ref="alpha_cycle_status")
+        self.artifact_index.add(AlphaArtifactKind.RUNBOOK,
+                                ref="ALPHA_OPERATOR_RUNBOOK.md")
+        self.artifact_index.add(AlphaArtifactKind.SAFETY_REPORT,
+                                ref="alpha_safety")
+        self.artifact_index.add(AlphaArtifactKind.ALPHA_REPORT,
+                                ref="ALPHA_RESEARCH_SYSTEM_REPORT.md")
+        if not self.dry_run:
+            self.artifact_index.write()
+            self.write_artifacts()
+
+    def _step_done(self, step_id: str) -> bool:
+        if self.plan is None:
+            return False
+        s = self.plan.get(step_id)
+        return bool(s and s.completed)
+
+    def _result(self, *, demo_completed: bool, doctor_blocked: bool,
+                ) -> Dict[str, Any]:
+        return {
+            "refused": False, "run_id": self.run_id,
+            "demo_completed": demo_completed, "doctor_blocked": doctor_blocked,
+            "stage": self.cycle.get("stage"),
+            "next_action": self.cycle.get("next_action"),
+            "blocker_count": self.cycle.get("blocker_count", 0),
+            "warning_count": self.cycle.get("warning_count", 0),
+        }
+
+    # -- integration views --------------------------------------------------
+
+    def alpha_status(self) -> Dict[str, Any]:
+        reg = self.registry.index() if self.registry else {}
+        plan = self.plan.summary() if self.plan else {}
+        return {
+            "alpha_research_system_enabled": True,
+            "alpha_profile_id": self.alpha_profile.profile_id,
+            "alpha_profile_count": 1,
+            "alpha_module_count": reg.get("alpha_module_count", 0),
+            "alpha_available_module_count": reg.get(
+                "alpha_available_module_count", 0),
+            "alpha_missing_module_count": reg.get(
+                "alpha_missing_module_count", 0),
+            "alpha_blocked_module_count": reg.get(
+                "alpha_blocked_module_count", 0),
+            "alpha_demo_step_count": plan.get("alpha_demo_step_count", 0),
+            "alpha_demo_step_completed_count": plan.get(
+                "alpha_demo_step_completed_count", 0),
+            "alpha_demo_step_skipped_count": plan.get(
+                "alpha_demo_step_skipped_count", 0),
+            "alpha_blocker_count": self.cycle.get("blocker_count", 0),
+            "alpha_warning_count": self.cycle.get("warning_count", 0),
+            "alpha_artifact_count": (self.artifact_index.index()[
+                "alpha_artifact_count"] if self.artifact_index else 0),
+            "alpha_safety_block_count": self.safety.rejected_count,
+            "alpha_cycle_stage": self.cycle.get("stage"),
+            "alpha_next_action": self.cycle.get("next_action"),
+            "latest_alpha_report_path": self._report_path(),
+            "modifies_source": False, "runs_git": False, "calls_github": False,
+            "controls_feeders": False, "publishes": False,
+        }
+
+    def _report_path(self) -> Optional[str]:
+        if self.layout is None:
+            return None
+        path = os.path.join(self.layout.subdir("reports"),
+                            "ALPHA_RESEARCH_SYSTEM_REPORT.md")
+        return path if os.path.isfile(path) else None
+
+    def snapshot(self) -> Dict[str, Any]:
+        return self.alpha_status()
+
+    def write_artifacts(self) -> Dict[str, Any]:
+        from .reports import AlphaResearchReportBuilder
+
+        return AlphaResearchReportBuilder(self).write()

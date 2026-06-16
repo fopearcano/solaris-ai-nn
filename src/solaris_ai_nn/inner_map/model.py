@@ -556,6 +556,14 @@ class InnerMapModel:
     # assimilates reviewer feedback as research evidence -- never model training;
     # it publishes nothing and contacts no one.
     review_assimilation: Optional[Dict[str, Any]] = None
+    # Alpha-system status (Prompt 65); None when not attached. Keys:
+    # alpha_research_system_enabled, alpha_profile_id, alpha_module_count,
+    # alpha_available_module_count, alpha_demo_step_count, alpha_blocker_count,
+    # alpha_warning_count, alpha_artifact_count, alpha_cycle_stage,
+    # latest_alpha_report_path. It is local, bounded, fixture-only research
+    # orchestration; it actuates nothing, controls no hardware/feeders, calls no
+    # Git/GitHub, and makes no consciousness/life/agency claim.
+    alpha_system: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

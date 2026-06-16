@@ -99,3 +99,5 @@ artifacts/
 .sann_review/
 .solaris_ai_nn_review_assimilation/
 .sann_review_assimilation/
+.solaris_ai_nn_alpha/
+.sann_alpha/

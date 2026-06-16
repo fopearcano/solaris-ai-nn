@@ -2014,4 +2014,29 @@ def build_default_state_graph() -> StateGraph:
                "claim impacts are proposed to the Scientific Claim Registry")
     g.add_edge("ReviewerFeedbackAssimilationRuntime", "inner_map",
                "review assimilation state feeds Inner MAP")
+
+    # Alpha Research System (Prompt 65): unified local fixture-only assembly.
+    # Bounded and local-only; actuates nothing, calls no Git/GitHub, publishes
+    # nothing, controls no hardware/feeders.
+    for name, role in [
+        ("AlphaResearchProfile", "bounded fixture-only run profile"),
+        ("AlphaModuleRegistry", "module presence; missing shown honestly"),
+        ("AlphaStateLayout", "local state tree; reuse, never delete"),
+        ("AlphaSystemCheck", "read-only doctor; blockers explicit"),
+        ("AlphaDemoPlan", "bounded fixture demo path"),
+        ("AlphaArtifactIndex", "per-run artifact index; markers for missing"),
+        ("AlphaCycleStatus", "descriptive stage + next action"),
+        ("AlphaOperatorRunbook", "operator instructions; never executed"),
+        ("AlphaResearchOrchestrator",
+         "bounded local assembly; no Git/GitHub/publish/feeders"),
+        ("AlphaResearchSafetyValidator",
+         "no actuation/feeders/network/Git/GitHub/publish/claims"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("AlphaModuleRegistry", "AlphaDemoPlan",
+               "module availability drives which demo steps run vs skip")
+    g.add_edge("AlphaDemoPlan", "AlphaArtifactIndex",
+               "demo steps produce indexed artifacts and skip markers")
+    g.add_edge("AlphaResearchOrchestrator", "inner_map",
+               "alpha system state feeds Inner MAP")
     return g

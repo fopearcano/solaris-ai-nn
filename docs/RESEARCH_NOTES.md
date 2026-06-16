@@ -2621,3 +2621,53 @@ passive-parser control; a "log accumulation?" objection becomes a shuffled-order
 test; a "fixture overfit?" objection becomes a live-read-only comparison. The
 hostile question is not rebutted with words; it is converted into the experiment
 that would actually settle it -- which the operator may then choose to run.
+
+## Notes on the Alpha Research System
+
+**Why a unified alpha spine is necessary.** By Prompt 64 the project had dozens of
+capable but separate layers -- sensorium, metabolism, semiogenesis, cognition,
+self-boundary, action-reaction, soak, replication, baselines, cycles, claims,
+review, assimilation. Each was individually runnable, but there was no single
+bounded command that walked the whole path end to end. A research system that
+cannot be run as a whole cannot be inspected, reproduced, or critiqued as a whole.
+The alpha spine exists to make the assembled system *operable*: one command, one
+state directory, one honest report. It deliberately adds no new cognition theory --
+its only job is coherence.
+
+**Why skipped modules must be explicit.** The easy failure mode for an assembly
+layer is to paper over gaps: to print "all systems go" whether or not the modules
+behind the dashboard actually ran. The alpha layer does the opposite. The module
+registry checks presence by import-spec only and reports missing/optional-missing/
+blocked statuses verbatim; the demo plan records skipped steps as skipped (never as
+fake successes); the artifact index writes missing-artifact and skipped-module
+markers; and the report shows skipped modules and blockers before anything else. A
+green dashboard that hides a missing module is worse than a red one that shows it.
+
+**Why fixture-only alpha is safer than live-first alpha.** The default alpha
+profile reads a tiny synthetic fixture stream, not a live feed. This is a
+deliberate ordering: prove the assembled pipeline is bounded, local, reproducible,
+and honest *before* any real-world input is involved. A live-first alpha would
+couple the first end-to-end run to network access, feeders, and data whose
+provenance and safety are harder to reason about. Fixture-first means the operator
+can run the whole chain offline, on any machine, with no external dependency, and
+see exactly what the system does before deciding whether a governed live read-only
+run is warranted. Live read-only profiles therefore exist only as metadata and stay
+blocked until governance artifacts are present.
+
+**How alpha differs from a product release.** A product release implies a claim:
+that something is finished, validated, and fit to ship. Alpha makes the opposite
+claim -- that this is a bounded research orchestration, with missing modules,
+limitations, and blockers all on display. Alpha creates no Git tag, no GitHub
+release, no branch, no PR; it uploads nothing and publishes nothing; it controls no
+hardware or feeders; and it proves nothing about consciousness, life, or agency.
+The alpha report says all of this in its own "what this does not do" section so the
+distinction cannot be quietly lost.
+
+**How alpha prepares Prompt 66 and later real research runs.** With the spine in
+place, later work has a stable entry point: a profile to extend, a registry to
+populate, a doctor to satisfy, a demo plan to lengthen, and a report format that is
+already claim-constrained and honest about gaps. A future governed live read-only
+run, or a longer real research cycle, plugs into the same orchestrator rather than
+inventing a parallel one. Alpha is the scaffold the real runs stand on -- bounded
+now precisely so that what comes next can be trusted to have started from a known,
+inspectable, safe baseline.

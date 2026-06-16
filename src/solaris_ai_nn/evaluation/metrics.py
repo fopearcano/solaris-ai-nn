@@ -2474,3 +2474,44 @@ def review_assimilation_metrics(ra: Optional[Dict[str, Any]]) -> Dict[str, Any]:
                 "feedback, publishes nothing, contacts no reviewer, and proves "
                 "nothing about consciousness/life/agency",
     }
+
+
+def alpha_system_metrics(al: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective alpha-system metrics (unified local assembly layer).
+
+    These describe *assembly*: profiles, module availability, demo steps
+    (completed/skipped), blockers/warnings, artifacts, and safety blocks. The
+    alpha runtime is local-only and bounded: it actuates nothing, controls no
+    hardware/feeders, calls no Git/GitHub, publishes nothing, and makes no
+    consciousness/life/agency claim.
+    """
+    if not al:
+        return {"present": False}
+    return {
+        "present": True,
+        "alpha_profile_count": int(al.get("alpha_profile_count", 0) or 0),
+        "alpha_module_count": int(al.get("alpha_module_count", 0) or 0),
+        "alpha_available_module_count": int(
+            al.get("alpha_available_module_count", 0) or 0),
+        "alpha_missing_module_count": int(
+            al.get("alpha_missing_module_count", 0) or 0),
+        "alpha_blocked_module_count": int(
+            al.get("alpha_blocked_module_count", 0) or 0),
+        "alpha_demo_step_count": int(al.get("alpha_demo_step_count", 0) or 0),
+        "alpha_demo_step_completed_count": int(
+            al.get("alpha_demo_step_completed_count", 0) or 0),
+        "alpha_demo_step_skipped_count": int(
+            al.get("alpha_demo_step_skipped_count", 0) or 0),
+        "alpha_blocker_count": int(al.get("alpha_blocker_count", 0) or 0),
+        "alpha_warning_count": int(al.get("alpha_warning_count", 0) or 0),
+        "alpha_artifact_count": int(al.get("alpha_artifact_count", 0) or 0),
+        "alpha_safety_block_count": int(
+            al.get("alpha_safety_block_count", 0) or 0),
+        "alpha_cycle_stage": al.get("alpha_cycle_stage"),
+        "modifies_source": False, "runs_git": False, "calls_github": False,
+        "controls_feeders": False, "publishes": False,
+        "is_consciousness_or_personhood": False,
+        "note": "alpha assembly metrics; local-only and bounded; no actuation, "
+                "hardware/feeder control, Git/GitHub, publishing, or "
+                "consciousness/life/agency claim",
+    }
