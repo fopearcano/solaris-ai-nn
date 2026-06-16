@@ -2326,3 +2326,47 @@ loop starts from an honest record rather than a flattering one. None of this
 proves consciousness, life, agency, or understanding; it is ordinary,
 conservative review hygiene applied to the step where an external implementation
 re-enters the codebase.
+
+## Phase 59 — Post-merge evidence assimilation, baseline registry, regression watch
+
+**Why merge is not the end of evidence.** It is tempting to treat a merged PR as a
+finished result -- the change passed review, it is in the tree, done. But a merge
+is a decision, not a measurement. The interesting question begins *after* the
+merge: what did this change actually do to the experimental architecture's
+behavior? Post-merge assimilation exists because the research record must continue
+past the merge boundary, ingesting the validation evidence a human gathered and
+turning a code event into a measured baseline.
+
+**Why a new baseline must be watched.** Each accepted change creates a new
+baseline, and a baseline that is never compared to its parent is just a hope. The
+registry is append-only and every candidate is compared dimension-by-dimension to
+the baseline it descends from, so a regression introduced by an otherwise-welcome
+change cannot hide. Watching the new baseline -- rather than assuming it inherited
+the parent's good properties -- is how silent drift is caught early instead of
+discovered three baselines later.
+
+**Why safety regression dominates improvements.** A change can improve a dozen
+metrics and break one safety boundary, and the naive aggregate would call it a net
+win. That arithmetic is exactly wrong for this system. The comparison and
+regression watch are built so that a safety regression dominates every positive
+metric: a single critical regression blocks baseline validation regardless of how
+much else improved. Safety is not a term in a weighted sum; it is a gate.
+
+**Why follow-up soak/replication matters after merge.** A validated baseline is a
+hypothesis, not a conclusion. The follow-up queue therefore recommends a mini
+soak, a falsification replay, and a replication-registry entry for every validated
+baseline, so the post-merge state re-enters the same conservative evidence loop the
+rest of the program uses. A merge that is never soaked or replicated is an
+unconfirmed claim; the queue makes the confirmation work explicit (without
+executing it).
+
+**Why post-merge assimilation preserves human authority.** The single most
+important property is what this layer cannot do. A human merged the change; Solaris
+only reads the local evidence that human provided. It runs no Git, calls no GitHub,
+creates/approves/merges no pull request, modifies no source, and executes no
+validation command -- it writes advisory reports and an append-only ledger. The
+recommendations (validate, regression-watch, rollback) are metadata for a human to
+act on, and a critical safety failure or missing critical evidence blocks
+validation outright. The merge decision, the rollback decision, and the validation
+runs all remain human acts; the ledger only makes their consequences measurable.
+None of this proves consciousness, life, agency, or understanding.

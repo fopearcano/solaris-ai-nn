@@ -502,6 +502,15 @@ class InnerMapModel:
     # writes advisory reports only: no source change, no merge, no PR, no
     # GitHub, no consciousness/life/agency claim.
     implementation_intake: Optional[Dict[str, Any]] = None
+    # Post-merge-assimilation status (Prompt 59); None when not attached. Keys:
+    # post_merge_assimilation_enabled, baseline_record_count,
+    # current_baseline_id, candidate_baseline_status, regression_watch_count,
+    # critical_regression_count, module_status_recommendation_count,
+    # rollback_recommendation_status, followup_queue_count,
+    # latest_post_merge_report_path. The ledger ingests local operator evidence
+    # after an external merge; it runs no Git, calls no GitHub, merges nothing,
+    # and makes no consciousness/life/agency claim.
+    post_merge_assimilation: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

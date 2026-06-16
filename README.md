@@ -508,7 +508,28 @@ python examples/run_diff_audit_demo.py                    # expected / unexpecte
 python examples/run_spec_compliance_demo.py               # satisfied / partial / missing requirements
 python examples/run_safety_regression_audit_demo.py       # safe vs network/claim regression (critical blocks)
 python examples/run_merge_recommendation_demo.py          # recommend / revisions / block-safety / block-tests
+
+# Post-merge assimilation: research ledger after an external human merge
+python examples/run_post_merge_assimilation_demo.py            # ingest evidence -> candidate baseline -> report
+python examples/run_baseline_registry_demo.py                  # append-only baselines (validated/blocked/warned)
+python examples/run_post_merge_baseline_comparison_demo.py     # improved/regressed; safety regression dominates
+python examples/run_regression_watch_demo.py                   # critical regression -> rollback recommendation
+python examples/run_post_merge_followup_queue_demo.py          # missing validation / mini-soak / replication queue
 ```
+
+Post-Merge Assimilation reads operator-provided local evidence after an external
+human merge and updates research baselines. It does not run Git, call GitHub,
+create branches, approve PRs, merge PRs, modify source code, or execute validation
+commands. It is the research ledger for "a human changed the code externally --
+what did that do to the experimental architecture?": it ingests the merge manifest
+and operator-supplied validation results, registers an append-only candidate
+baseline, assimilates evidence (conflicts and gaps stay visible), compares the
+candidate to its parent (a safety regression dominates every positive metric),
+runs a regression watch (a critical regression blocks validation), and emits
+metadata-only module-status / rollback / follow-up recommendations. Validated
+baselines queue a mini soak, falsification replay, and replication registration;
+blocked baselines queue rollback review and revision. The merge, rollback, and
+validation runs all remain human acts.
 
 Implementation Intake audits local implementation artifacts and produces advisory
 reports only. It does not modify source code, run Git, call GitHub, open pull
@@ -1545,6 +1566,11 @@ src/solaris_ai_nn/
                 safety regression, ClaimGuard audit, coverage matrix, merge +
                 rollback recommendation, post-merge plan, runtime, reports,
                 safety (advisory evidence auditor; reads local artifacts only)
+  post_merge_assimilation/ post-merge evidence ledger after a human merge:
+                merge manifest, baseline registry, evidence assimilation,
+                baseline comparison, regression watch, module status update,
+                validation ingest, rollback watch, follow-up queue, runtime,
+                reports, safety (reads local evidence; no Git/GitHub/merge)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

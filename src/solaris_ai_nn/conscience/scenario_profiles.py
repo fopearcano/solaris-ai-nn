@@ -1234,6 +1234,42 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["run_step_count"],
             max_runtime_s=60.0))
 
+    # -- Post-merge assimilation profiles (Prompt 59) -------------------------
+    # Assimilates operator-provided local evidence after an external human
+    # merge. Reads local artifacts only: no Git, GitHub, merge, or source change.
+    _post_merge_modules = ["bridge", "governance", "ops", "inner_map",
+                          "implementation_intake", "post_merge_assimilation"]
+    for pid, desc, plan_only in (
+            ("post_merge_assimilation_run",
+             "Assimilate post-merge evidence into a candidate baseline.", False),
+            ("post_merge_baseline_registry",
+             "Register baselines (append-only) from post-merge evidence.",
+             False),
+            ("post_merge_baseline_comparison",
+             "Compare a candidate baseline against its parent.", False),
+            ("post_merge_regression_watch",
+             "Run the regression watch over a candidate baseline.", False),
+            ("post_merge_assimilation_plan",
+             "Plan a post-merge assimilation (plan only).", True)):
+        if plan_only:
+            run_ctx = _ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                           max_duration_s=None)
+        else:
+            run_ctx = _ctx(RunMode.SHORT_DEMO, max_steps=120)
+        add(ScenarioProfile(
+            profile_id=pid, description=desc, run_context=run_ctx,
+            enabled_modules=list(_post_merge_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "reads operator-provided local evidence only",
+                "no Git, no GitHub, no PR create/approve/merge",
+                "no source change, no validation command execution",
+                "a safety regression dominates; critical regression blocks "
+                "validation"],
+            governance_requirements=["enable_plural_sensorium_fixture"],
+            expected_artifacts=["POST_MERGE_ASSIMILATION_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=60.0))
+
     return profiles
 
 

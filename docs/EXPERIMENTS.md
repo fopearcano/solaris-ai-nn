@@ -2869,3 +2869,39 @@ passing tests.
 Shows the advisory merge recommendation across four implementations: recommend
 merge, recommend revisions, block due to safety, and block due to tests. The
 recommendation is advisory; the intake layer never merges or approves a PR.
+
+## 324. Post-Merge Assimilation Demo ✅ (implemented)
+
+**Run:** `python examples/run_post_merge_assimilation_demo.py --state-dir .solaris_ai_nn_post_merge/test_assimilation`
+A human merged a change externally and supplied local evidence. This demo ingests
+it, registers a candidate baseline, assimilates evidence, compares to the parent,
+and writes the report. It runs no Git, calls no GitHub, merges nothing, and
+modifies no source.
+
+## 325. Baseline Registry Demo ✅ (implemented)
+
+**Run:** `python examples/run_baseline_registry_demo.py --state-dir .solaris_ai_nn_post_merge/test_registry`
+Registers a parent baseline plus validated, blocked, and validated-with-warnings
+candidates. The registry is append-only; blocked baselines remain visible and a
+status update appends history rather than overwriting.
+
+## 326. Baseline Comparison Demo ✅ (implemented)
+
+**Run:** `python examples/run_post_merge_baseline_comparison_demo.py --state-dir .solaris_ai_nn_post_merge/test_comparison`
+Compares a candidate against its parent: improved/regressed/inconclusive
+dimensions, and a case where a safety regression dominates even large positive
+metrics. (Distinct from the Pilot-1 `run_baseline_comparison_demo.py`.)
+
+## 327. Regression Watch Demo ✅ (implemented)
+
+**Run:** `python examples/run_regression_watch_demo.py --state-dir .solaris_ai_nn_post_merge/test_regression_watch`
+Runs the regression + rollback watch over a candidate that regressed on safety,
+tests, and ClaimGuard. A critical regression blocks validation and drives a
+rollback recommendation; rollback is a recommendation only and is never executed.
+
+## 328. Post-Merge Follow-Up Queue Demo ✅ (implemented)
+
+**Run:** `python examples/run_post_merge_followup_queue_demo.py --state-dir .solaris_ai_nn_post_merge/test_followup`
+Builds the follow-up queue for a baseline with missing validation (queues reruns)
+and a validated baseline (queues mini soak, falsification replay, and replication
+registration). The queue is local metadata; it executes nothing.

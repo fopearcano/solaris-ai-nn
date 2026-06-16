@@ -522,6 +522,26 @@ DESCRIPTIONS = {
         "no source/merge/PR/GitHub/Git/agent; advisory only",
     "implementation_intake_safety_protocol":
         "no source/merge/PR/GitHub/Git/agent; advisory only",
+    "post_merge_assimilation": "assimilate operator post-merge evidence",
+    "post_merge_assimilation_protocol":
+        "post-merge baseline registry + regression watch",
+    "post_merge_assimilation_evaluation": "post-merge assimilation check",
+    "baseline_registry_protocol": "append-only baseline registry",
+    "baseline_registry_evaluation": "baseline registry check",
+    "baseline_comparison_protocol": "candidate vs parent baseline comparison",
+    "baseline_comparison_evaluation": "baseline comparison check",
+    "regression_watch_protocol": "regression watch (critical blocks)",
+    "regression_watch_evaluation": "regression watch check",
+    "module_status_update_protocol": "metadata-only module status recommendation",
+    "module_status_update_evaluation": "module status update check",
+    "rollback_watch_protocol": "rollback watch (recommendation only)",
+    "rollback_watch_evaluation": "rollback watch check",
+    "followup_queue_protocol": "post-merge follow-up queue (executes nothing)",
+    "followup_queue_evaluation": "follow-up queue check",
+    "post_merge_assimilation_safety":
+        "no source/Git/GitHub/merge/validation execution",
+    "post_merge_assimilation_safety_protocol":
+        "no source/Git/GitHub/merge/validation execution",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -794,6 +814,19 @@ class ExperimentRegistry:
                         "merge_recommendation_protocol",
                         "merge_recommendation_evaluation")
             or bool(merged.get("implementation_intake", False)))
+        features["post_merge_assimilation"] = (
+            name.startswith("post_merge_assimilation")
+            or name in ("baseline_registry_protocol",
+                        "baseline_registry_evaluation",
+                        "baseline_comparison_protocol",
+                        "baseline_comparison_evaluation",
+                        "regression_watch_protocol",
+                        "regression_watch_evaluation",
+                        "module_status_update_protocol",
+                        "module_status_update_evaluation",
+                        "rollback_watch_protocol", "rollback_watch_evaluation",
+                        "followup_queue_protocol", "followup_queue_evaluation")
+            or bool(merged.get("post_merge_assimilation", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

@@ -7622,6 +7622,183 @@ def implementation_intake_safety_protocol(
     return _run(manifest, body)
 
 
+# -- Post-merge evidence assimilation (Prompt 59) -----------------------------
+
+def _build_post_merge(state_dir, *, blocked=False):
+    """Build + run a small post-merge assimilation over a synthetic bundle."""
+    from ..post_merge_assimilation import PostMergeAssimilationRuntime
+
+    base = state_dir or ".solaris_ai_nn_post_merge/eval"
+    rt = PostMergeAssimilationRuntime(state_dir=base, candidate_baseline_id="b1",
+                                      max_runtime_s=20.0)
+    rt.register_parent("b0", metrics={"sensorium_metrics": 0.5,
+                                      "cognition_metrics": 0.4,
+                                      "test_pass_fail_status": "pass",
+                                      "safety_regression_status": False})
+    bundle = {
+        "merge_manifest": {"merge_id": "m1",
+                           "confirmation": {"confirmed_by_operator": True,
+                                            "statement": "merged in PR #42"},
+                           "source_experiment_id": "exp_p1",
+                           "merge_source_type": "external_pr_merge",
+                           "external_commit_hash": "abc123"},
+        "implementation_intake": {
+            "merge_recommendation_status": "recommend_merge",
+            "critical_safety_regression_count": 0,
+            "spec_compliance_status": "satisfied", "test_failure_count": 0,
+            "forbidden_file_change_count": 0},
+        "validation_results": {"full_test_run": {"passed": True},
+                               "safety_invariant_run": {"passed": True},
+                               "claimguard_run": {"safe": True},
+                               "mini_soak": {"passed": True},
+                               "falsification_replay": {"passed": True},
+                               "example_run": {"ran": True}},
+        "parent_metrics": {"sensorium_metrics": 0.5, "cognition_metrics": 0.4,
+                           "test_pass_fail_status": "pass",
+                           "safety_regression_status": False},
+        "candidate_metrics": {"sensorium_metrics": 0.6,
+                              "cognition_metrics": 0.45,
+                              "test_pass_fail_status": "pass",
+                              "safety_regression_status": False},
+    }
+    if blocked:
+        bundle["implementation_intake"] = {
+            "merge_recommendation_status": "block_merge_due_to_safety",
+            "critical_safety_regression_count": 2,
+            "forbidden_file_change_count": 1}
+        bundle["validation_results"] = {"full_test_run": {"passed": False}}
+        bundle["candidate_metrics"] = {"safety_regression_status": True,
+                                       "test_pass_fail_status": "fail"}
+    rt.load_bundle(bundle)
+    rt.run()
+    return rt
+
+
+def post_merge_assimilation_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Operator-provided post-merge evidence is assimilated into a baseline."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_post_merge(m.state_dir)
+        return {"post_merge_assimilation":
+                M.post_merge_assimilation_metrics(rt.post_merge_status())}
+
+    return _run(manifest, body)
+
+
+def baseline_registry_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Candidate baselines are registered append-only; blocked stays visible."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_post_merge(m.state_dir, blocked=True)
+        reg = rt.registry.status()
+        return {"post_merge_assimilation": {
+            "baseline_record_count": reg["baseline_record_count"],
+            "blocked_baseline_count": reg["blocked_baseline_count"]}}
+
+    return _run(manifest, body)
+
+
+def baseline_comparison_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Baseline comparison reports improvement/regression conservatively."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_post_merge(m.state_dir)
+        return {"post_merge_assimilation": {
+            "comparison_overall": rt.comparison["overall"],
+            "improved_count": rt.comparison["improved_count"],
+            "empty_green_dashboard": rt.comparison["empty_green_dashboard"]}}
+
+    return _run(manifest, body)
+
+
+def regression_watch_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A critical regression blocks baseline validation."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_post_merge(m.state_dir, blocked=True)
+        return {"post_merge_assimilation": {
+            "critical_regression_count": rt.regression[
+                "critical_regression_count"],
+            "blocks_validation": rt.regression["blocks_validation"]}}
+
+    return _run(manifest, body)
+
+
+def module_status_update_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Module status recommendations are metadata only."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        clean = _build_post_merge(m.state_dir)
+        blocked = _build_post_merge(m.state_dir + "_blocked", blocked=True)
+        return {"post_merge_assimilation": {
+            "clean_recommendation": clean.module_status["update_type"],
+            "blocked_recommendation": blocked.module_status["update_type"],
+            "metadata_only": clean.module_status["metadata_only"]}}
+
+    return _run(manifest, body)
+
+
+def rollback_watch_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Rollback watch recommends but never executes."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_post_merge(m.state_dir, blocked=True)
+        return {"post_merge_assimilation": {
+            "rollback_recommendation": rt.rollback["recommendation"],
+            "rollback_executed": rt.rollback["executed"]}}
+
+    return _run(manifest, body)
+
+
+def followup_queue_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The follow-up queue records tasks but executes nothing."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_post_merge(m.state_dir)
+        return {"post_merge_assimilation": {
+            "followup_item_count": rt.followup["followup_item_count"],
+            "executes_tasks": rt.followup["executes_tasks"]}}
+
+    return _run(manifest, body)
+
+
+def post_merge_assimilation_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The ledger blocks source/Git/GitHub/merge/validation operations."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..post_merge_assimilation import (
+            PostMergeAssimilationSafetyValidator,
+        )
+
+        v = PostMergeAssimilationSafetyValidator()
+        return {"post_merge_assimilation": {
+            "source_modification_blocked":
+                not v.validate_operation("modify source file").safe,
+            "git_blocked": not v.validate_operation("run git merge").safe,
+            "github_blocked": not v.validate_operation("call github api").safe,
+            "merge_blocked":
+                not v.validate_operation("merge pull request").safe,
+            "validation_execution_blocked":
+                not v.validate_operation("run pytest now").safe,
+            "baseline_validation_blocked_on_safety_fail":
+                not v.validate_baseline_validation(
+                    critical_safety_failed=True,
+                    critical_evidence_missing=False).safe,
+            "can_modify_source": v.can_modify_source(),
+            "can_run_git": v.can_run_git(),
+            "can_merge_or_approve_pr": v.can_merge_or_approve_pr()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -8043,4 +8220,25 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "implementation_intake_safety": implementation_intake_safety_protocol,
     "implementation_intake_safety_protocol":
         implementation_intake_safety_protocol,
+    "post_merge_assimilation": post_merge_assimilation_evaluation_protocol,
+    "post_merge_assimilation_protocol":
+        post_merge_assimilation_evaluation_protocol,
+    "post_merge_assimilation_evaluation":
+        post_merge_assimilation_evaluation_protocol,
+    "baseline_registry_protocol": baseline_registry_evaluation_protocol,
+    "baseline_registry_evaluation": baseline_registry_evaluation_protocol,
+    "baseline_comparison_protocol": baseline_comparison_evaluation_protocol,
+    "baseline_comparison_evaluation": baseline_comparison_evaluation_protocol,
+    "regression_watch_protocol": regression_watch_evaluation_protocol,
+    "regression_watch_evaluation": regression_watch_evaluation_protocol,
+    "module_status_update_protocol": module_status_update_evaluation_protocol,
+    "module_status_update_evaluation": module_status_update_evaluation_protocol,
+    "rollback_watch_protocol": rollback_watch_evaluation_protocol,
+    "rollback_watch_evaluation": rollback_watch_evaluation_protocol,
+    "followup_queue_protocol": followup_queue_evaluation_protocol,
+    "followup_queue_evaluation": followup_queue_evaluation_protocol,
+    "post_merge_assimilation_safety":
+        post_merge_assimilation_safety_protocol,
+    "post_merge_assimilation_safety_protocol":
+        post_merge_assimilation_safety_protocol,
 }

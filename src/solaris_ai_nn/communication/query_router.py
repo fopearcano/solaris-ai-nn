@@ -157,6 +157,10 @@ AVAILABLE_QUERIES = (
     "did it satisfy the spec?", "which tests failed?",
     "did it introduce a safety regression?", "did Solaris merge the PR?",
     "did Solaris edit the code?",
+    "what is the current baseline?", "was the merge assimilated?",
+    "did the new baseline regress?", "should I rollback?",
+    "what validation is missing?", "is the new baseline ready for soak?",
+    "did Solaris merge this?", "did Solaris run Git?",
 )
 
 
@@ -217,6 +221,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("pm_"):
+            return self._post_merge_assimilation(topic)
         if topic.startswith("ii_"):
             return self._implementation_intake(topic)
         if topic.startswith("ec_"):
@@ -592,6 +598,71 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _post_merge_assimilation(self, topic: str) -> CommunicationResponse:
+        """Answer post-merge-assimilation queries (read-only ledger; no merge/Git).
+
+        The "did Solaris merge this / run Git?" questions are answered safely
+        even with no assimilation run.
+        """
+        if topic == "pm_merge":
+            return self.builder.status_response(
+                "No. Solaris only ingested local post-merge evidence provided "
+                "by the operator. It did not merge, approve, create, or modify "
+                "any pull request.",
+                ["policy:post_merge_does_not_merge"])
+        if topic == "pm_git":
+            return self.builder.status_response(
+                "No. Post-Merge Assimilation reads local artifacts and writes "
+                "reports only. It does not run Git or call GitHub.",
+                ["policy:post_merge_no_git"])
+        component = self.components.get("post_merge_assimilation")
+        if component is None:
+            return self.builder.missing_component_response(
+                "post_merge_assimilation")
+        status = (component.post_merge_status()
+                  if hasattr(component, "post_merge_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:post_merge_assimilation"]
+        if topic == "pm_baseline":
+            text = (f"current baseline: {status.get('current_baseline_id')}; "
+                    f"candidate {status.get('candidate_baseline_id')} -> "
+                    f"{status.get('candidate_baseline_status')} "
+                    f"({status.get('baseline_record_count', 0)} registered)")
+        elif topic == "pm_assimilated":
+            text = (f"candidate baseline status: "
+                    f"{status.get('candidate_baseline_status')}; "
+                    f"{status.get('validation_artifact_count', 0)} validation "
+                    "artifact(s) assimilated -- evidence, not proof")
+        elif topic == "pm_regress":
+            text = (f"regressions: {status.get('baseline_regression_count', 0)} "
+                    f"(critical {status.get('critical_regression_count', 0)}); a "
+                    "critical regression blocks baseline validation and a safety "
+                    "regression dominates positive metrics")
+        elif topic == "pm_rollback":
+            text = (f"rollback recommendation: "
+                    f"{status.get('rollback_recommendation_status')} "
+                    f"({status.get('rollback_watch_trigger_count', 0)} "
+                    "trigger(s)); rollback is a recommendation only and is never "
+                    "executed")
+        elif topic == "pm_missing":
+            text = (f"missing validation artifacts: "
+                    f"{status.get('missing_validation_artifact_count', 0)}; "
+                    "missing critical evidence blocks baseline validation")
+        elif topic == "pm_soak":
+            ready = status.get("candidate_baseline_status") in (
+                "validated", "validated_with_warnings")
+            text = ("the candidate baseline is "
+                    + ("validated; a mini soak, falsification replay, and "
+                       "replication registration are recommended"
+                       if ready else
+                       "not validated; soak is not recommended until blockers "
+                       "are resolved"))
+        else:
+            text = ("post-merge assimilation reads local operator evidence and "
+                    "writes reports only; it does not merge or run Git")
         return self.builder.status_response(text, refs)
 
     def _implementation_intake(self, topic: str) -> CommunicationResponse:

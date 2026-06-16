@@ -1843,4 +1843,30 @@ def build_default_state_graph() -> StateGraph:
                "a critical safety regression blocks the merge recommendation")
     g.add_edge("ImplementationIntakeRuntime", "inner_map",
                "implementation intake state feeds Inner MAP")
+
+    # Post-merge evidence assimilation + baseline registry (Prompt 59).
+    # After a human merges externally, this ledger assimilates local evidence.
+    for name, role in [
+        ("PostMergeManifest", "local record of an external human merge"),
+        ("BaselineRegistry", "append-only ledger of experimental baselines"),
+        ("PostMergeEvidenceAssimilator", "gathers evidence; hides nothing"),
+        ("BaselineComparison", "candidate vs parent; safety dominates"),
+        ("RegressionWatch", "critical regression blocks validation"),
+        ("ModuleStatusUpdateRecommendation", "metadata only; nothing changed"),
+        ("PostMergeValidationIngest", "reads local results; runs nothing"),
+        ("RollbackWatch", "recommendation only; never executed"),
+        ("PostMergeFollowupQueue", "local metadata; executes nothing"),
+        ("PostMergeAssimilationRuntime", "bounded read-only research ledger"),
+        ("PostMergeAssimilationSafetyValidator",
+         "no source/Git/GitHub/merge/validation execution"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("ImplementationIntakeRuntime", "PostMergeManifest",
+               "the intake report is post-merge evidence after a human merge")
+    g.add_edge("PostMergeEvidenceAssimilator", "BaselineComparison",
+               "assimilated evidence feeds the baseline comparison")
+    g.add_edge("RegressionWatch", "RollbackWatch",
+               "critical regressions drive the rollback recommendation")
+    g.add_edge("PostMergeAssimilationRuntime", "inner_map",
+               "post-merge assimilation state feeds Inner MAP")
     return g

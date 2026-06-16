@@ -423,6 +423,20 @@ IMPLEMENTATION_INTAKE_QUERIES = (
     ("did solaris edit the code", "ii_edit"),
 )
 
+# Post-merge-assimilation queries (Prompt 59). Answered from the post-merge
+# status; the "did Solaris merge this / run Git?" questions are answered safely
+# even with no assimilation run.
+POST_MERGE_QUERIES = (
+    ("what is the current baseline", "pm_baseline"),
+    ("was the merge assimilated", "pm_assimilated"),
+    ("did the new baseline regress", "pm_regress"),
+    ("should i rollback", "pm_rollback"),
+    ("what validation is missing", "pm_missing"),
+    ("is the new baseline ready for soak", "pm_soak"),
+    ("did solaris merge this", "pm_merge"),
+    ("did solaris run git", "pm_git"),
+)
+
 # Feeder-SDK queries (Prompt 45). Answered from the feeder monitor/manifest; the
 # control/start questions are answered safely even with no feeders attached.
 FEEDER_SDK_QUERIES = (
@@ -626,7 +640,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._implementation_intake(lowered)
+        result = (self._post_merge_assimilation(lowered)
+                  or self._implementation_intake(lowered)
                   or self._experiment_compiler(lowered)
                   or self._developmental_replication(lowered)
                   or self._developmental_soak(lowered)
@@ -789,6 +804,17 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _post_merge_assimilation(lowered: str,
+                                 ) -> Optional[InputClassification]:
+        for pattern, topic in POST_MERGE_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"post-merge assimilation query {topic!r}"])
         return None
 
     @staticmethod

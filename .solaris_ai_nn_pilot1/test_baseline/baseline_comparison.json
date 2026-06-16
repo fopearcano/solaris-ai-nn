@@ -1,0 +1,44 @@
+{
+  "before_label": "initial",
+  "after_label": "final",
+  "simulated_mismatch": false,
+  "deltas": {
+    "active_perception_usefulness": 0.0,
+    "ambiguous_symbol_ratio": -0.3,
+    "autoregeneration_event_count": 0.0,
+    "compression_ratio": 0.5,
+    "drift_velocity": 0.0,
+    "governance_block_count": 0.0,
+    "habit_stability": 0.0,
+    "hypothesis_count": 0.0,
+    "logos_tension_count": 0.0,
+    "memory_layer_count": 0.0,
+    "mysterium_pressure": 0.0,
+    "prediction_score": 0.3,
+    "proto_symbol_count": 37.0,
+    "resolved_tension_count": 0.0,
+    "safety_incident_count": 0.0,
+    "stable_symbol_count": 0.0,
+    "stagnation_seconds": 0.0,
+    "structural_change_score": 0.0,
+    "supported_hypothesis_count": 0.0,
+    "world_model_contradiction_count": 0.0,
+    "world_model_edge_count": 0.0,
+    "world_model_node_count": 50.0
+  },
+  "count_only_increases": [
+    "proto_symbol_count",
+    "world_model_node_count"
+  ],
+  "improved_dimensions": [
+    "ambiguous_symbol_ratio",
+    "compression_ratio",
+    "prediction_score"
+  ],
+  "worsened_dimensions": [],
+  "identity_continuous": true,
+  "notes": [
+    "proto_symbol_count increased by 37.0: a count increase is not, by itself, evidence of growth",
+    "world_model_node_count increased by 50.0: a count increase is not, by itself, evidence of growth"
+  ]
+}

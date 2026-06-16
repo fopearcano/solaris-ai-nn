@@ -2180,3 +2180,51 @@ def implementation_intake_metrics(intake: Optional[Dict[str, Any]],
         "note": "advisory implementation-evidence auditor; no source change, "
                 "merge, PR, GitHub call, or external coding-agent execution",
     }
+
+
+def post_merge_assimilation_metrics(pm: Optional[Dict[str, Any]],
+                                    ) -> Dict[str, Any]:
+    """Objective post-merge-assimilation metrics (the research ledger).
+
+    These describe a *read-only ledger* run after an external human merge:
+    manifests, baselines (candidate/validated/blocked), validation artifacts,
+    regressions, module-status recommendations, rollback triggers, and follow-up
+    items. The ledger runs no Git, calls no GitHub, merges nothing, modifies no
+    source, executes no validation, and makes no consciousness/life/agency claim.
+    """
+    if not pm:
+        return {"present": False}
+    return {
+        "present": True,
+        "post_merge_manifest_count": int(
+            pm.get("post_merge_manifest_count", 0) or 0),
+        "baseline_record_count": int(pm.get("baseline_record_count", 0) or 0),
+        "candidate_baseline_count": int(
+            pm.get("candidate_baseline_count", 0) or 0),
+        "validated_baseline_count": int(
+            pm.get("validated_baseline_count", 0) or 0),
+        "blocked_baseline_count": int(pm.get("blocked_baseline_count", 0) or 0),
+        "validation_artifact_count": int(
+            pm.get("validation_artifact_count", 0) or 0),
+        "missing_validation_artifact_count": int(
+            pm.get("missing_validation_artifact_count", 0) or 0),
+        "baseline_regression_count": int(
+            pm.get("baseline_regression_count", 0) or 0),
+        "critical_regression_count": int(
+            pm.get("critical_regression_count", 0) or 0),
+        "module_status_recommendation_count": int(
+            pm.get("module_status_recommendation_count", 0) or 0),
+        "rollback_watch_trigger_count": int(
+            pm.get("rollback_watch_trigger_count", 0) or 0),
+        "followup_item_count": int(pm.get("followup_item_count", 0) or 0),
+        "post_merge_safety_block_count": int(
+            pm.get("post_merge_safety_block_count", 0) or 0),
+        "candidate_baseline_status": pm.get("candidate_baseline_status"),
+        "rollback_recommendation_status": pm.get(
+            "rollback_recommendation_status"),
+        "modifies_source": False, "runs_git": False, "calls_github": False,
+        "merges_pr": False, "runs_validation": False,
+        "is_consciousness_or_personhood": False,
+        "note": "post-merge research ledger; no Git, GitHub, merge, source "
+                "change, or validation execution",
+    }

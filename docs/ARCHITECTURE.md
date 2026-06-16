@@ -3679,3 +3679,82 @@ PRs, approve PRs, merge PRs, call GitHub, run Git, or run external agents -- it
 reads local evidence and writes advisory documents only, and makes no claim of
 consciousness, sentience, life, personhood, agency, free will, emotion, feeling,
 understanding, or subjective experience.**
+
+## Post-Merge Evidence Assimilation and Baseline Registry
+
+Prompt 58 audits an implementation and recommends merge/revision/block; the merge
+itself is a human act outside Solaris. Prompt 59 handles what happens *after* a
+human operator merges or accepts a change externally --
+`src/solaris_ai_nn/post_merge_assimilation/`:
+
+    merge manifest -> ingest validation -> assimilate evidence ->
+    register candidate baseline -> compare to parent -> regression watch ->
+    module status + rollback recommendations -> follow-up queue -> reports
+
+It is the research ledger that answers one question from local operator-provided
+evidence: *a human changed the code externally -- what did that change do to the
+experimental organismic architecture?* It is not a merge bot, a release system, or
+self-modification.
+
+**A human merges; Solaris ingests local evidence.** The `PostMergeManifest`
+records the operator's confirmation that a change was accepted (human-confirmed
+merge, manual update, external PR merge, local branch acceptance, ...), plus the
+local artifacts to assimilate. It is local evidence only: it never calls GitHub to
+verify a PR and never runs Git to verify a commit; a missing commit hash is
+allowed but recorded as uncertainty; and an operator note never overrides a safety
+failure. The `PostMergeValidationIngest` reads the operator-supplied validation
+results (full test run, examples, safety invariants, ClaimGuard, short fixture
+demo, mini soak, falsification replay, replication registration, operator review,
+resource profile) -- it runs no validation itself, and operator-provided
+validation is evidence, not proof.
+
+**Candidate baselines are registered and compared.** The append-only
+`BaselineRegistry` records each candidate baseline with its evidence index, status
+history, and unresolved blockers; old baselines are never deleted and failed/
+blocked ones remain visible. The `PostMergeEvidenceAssimilator` gathers the
+implementation-intake audits and validation results into one bundle, surfacing
+conflicts (e.g. intake recommended merge but post-merge validation failed) and
+missing evidence rather than averaging them away -- safety evidence has priority,
+and negative/inconclusive evidence is preserved. The `BaselineComparison` then
+compares the candidate to its parent across the structural/safety/test dimensions:
+improvement requires evidence, a regression stays visible even amid improvements,
+and a safety regression dominates every positive metric. There is no empty green
+dashboard.
+
+**Regression watch blocks unsafe baselines.** The `RegressionWatch` derives
+regression items (safety, test, ClaimGuard, report, example, source/simulation
+boundary, contamination, fixture overfit, structural-growth/prediction/
+action-effect decreases, habit rigidity, resource blowup, artifact bloat); a
+critical regression blocks baseline validation, a major one requires operator
+review, and regressions are never hidden behind aggregate scores. The
+`ModuleStatusUpdateRecommendation` is metadata only (keep-experimental, validate,
+promote, regression-watch, freeze, rollback, block) -- no module is changed and no
+source is modified, and safety-critical concerns override promotion. The
+`RollbackWatch` recommends (never executes) a rollback when warranted, preserving
+all failed artifacts; and the `PostMergeFollowupQueue` records the follow-up work
+(reruns, mini soak, falsification replay, replication registration, architecture-
+evidence update, operator review / revision prompt) as local metadata that
+executes nothing.
+
+**It integrates and stays read-only.** The `PostMergeAssimilationRuntime` is
+bounded; it consumes the implementation-intake report (treated as advisory
+evidence, never automatic truth -- a Prompt-58 safety block keeps the baseline
+blocked unless the operator supplies separate passing safety evidence) and the
+experiment-compiler artifacts (to check the original requirements). It emits the
+baseline record, module-status recommendations, regression/rollback watches, and
+follow-up queue to the Architecture Evolution Lab; recommends mini-soak /
+falsification / replication registration for validated baselines (and rollback /
+revision / safety review for blocked ones); and feeds the research lab +
+evaluation, the operator console (with the mandated safe answers for "did Solaris
+merge this?" and "did Solaris run Git?"), and Inner MAP. The
+`PostMergeAssimilationSafetyValidator` blocks source modification, Git commands,
+GitHub calls, branch creation, PR creation/approval/merge, validation-command
+execution, external coding-agent execution, shell/network/browser/OS,
+hardware/feeder control, real-world actuation, the human teaching loop, evidence
+deletion, and any baseline validation when critical safety evidence fails or
+critical evidence is missing. **No source was modified, no Git command was run, no
+GitHub call was made, no pull request was created/approved/merged, no validation
+command was executed automatically, no external agent was run -- this is
+post-merge evidence assimilation only, and no claim of consciousness, sentience,
+life, personhood, agency, free will, emotion, feeling, understanding, or
+subjective experience is made.**
