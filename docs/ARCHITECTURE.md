@@ -3851,3 +3851,72 @@ created, no source was modified, no validation command was executed
 automatically, no external agent was run, and no claim of consciousness,
 sentience, life, personhood, agency, free will, emotion, feeling, understanding,
 or subjective experience is made.**
+
+## Closed Research Cycle Orchestrator
+
+**The closed research cycle orchestrator tracks where the research program is in
+its experimental cycle.** Prompt 60 builds a versioned research baseline; the
+`research_cycle` package (Prompt 61) sits above it and answers a single question:
+*where is the research program in its experimental cycle, what evidence supports
+the current state, what is blocked, and what should the human operator do next?*
+It tracks the scientific state across cycles -- Research Baseline -> Next-Cycle
+Roadmap -> Architecture Evolution Proposal -> Experiment Compiler Pack -> External
+Human/Agent Implementation -> Implementation Intake Audit -> Human Merge (outside
+Solaris) -> Post-Merge Assimilation -> New Research Baseline -> Soak / Replication
+/ Falsification -> Next Architecture Evolution. It does not run the system
+autonomously, implement code, approve anything, or execute external tools.
+
+**The cycle state is derived from evidence, never self-asserted.** The
+`ResearchCycleManifest` records the local refs (paths/ids) that constitute one
+cycle (baseline, roadmap, architecture-evolution, experiment-compiler, intake,
+post-merge, research-baseline, soak, replication, falsification, safety, operator
+decisions) and the current cycle state; parent/child cycles are experimental
+provenance, not biological lineage. `determine_state` derives the descriptive
+`ResearchCycleState` (stage + status) from which evidence is present -- the
+furthest stage with evidence wins, missing evidence stays visible, and the state
+can never approve itself. The `CycleTransitionEngine` proposes gate-checked,
+advisory stage transitions; no transition executes an external action or implies
+Solaris changed source.
+
+**Evidence is preserved, gates are advisory, decisions are the operator's.** The
+`EvidenceContinuityLedger` is an append-only record where negative, falsified,
+and missing evidence are preserved and stale evidence is marked superseded, never
+deleted. The `ResearchArtifactGraph` records artifact provenance (derived_from,
+validates, blocks, supersedes, contradicts, supports, requires, missing_for,
+operator_confirmed, safety_blocks, falsifies); contradictions and missing nodes
+stay visible and conflicting evidence is never collapsed into a single score. The
+`ResearchCycleDecisionGate` evaluates the gates between stages: safety failures,
+falsified core claims, and critical regressions block promotion gates; missing
+critical evidence blocks gates; and operator-decision gates report
+`waiting_for_operator` until an explicit local `OperatorDecisionRecord` exists --
+Solaris cannot invent or auto-approve operator approval. The
+`BlockedStateResolver` detects why a cycle is blocked and recommends a resolution
+(recommend-only); a critical safety blocker can never be bypassed. The
+`NextActionPlanner` recommends the next operator action from the stage and
+blockers; next actions are instructions for the operator, none is executed, and
+if the cycle is blocked the next action is blocker resolution.
+
+**It integrates and stays local.** The bounded `ResearchCycleRuntime` loads a
+local evidence bundle, updates the ledger, builds the artifact graph, evaluates
+gates, determines the state, proposes transitions, detects blocked states,
+generates next actions, may archive a cycle only on an explicit operator
+decision, and writes the `RESEARCH_CYCLE_REPORT` plus the cycle-state /
+evidence-ledger / artifact-graph / decision-gates / operator-decisions /
+blocked-states / next-actions / archive documents (ClaimGuard-scanned). It feeds
+the evaluation protocols, the operator console (with the mandated safe answers for
+"what is the next action?", "did Solaris approve itself?", and "did Solaris run
+Git or GitHub?"), the conscience scenario profiles, and Inner MAP. The
+`ResearchCycleArchive` keeps archived cycles visible (artifacts are never deleted;
+an archived cycle can be used as future evidence). The
+`ResearchCycleSafetyValidator` blocks source modification, Git commands, GitHub
+calls, branch/tag/release creation, PR creation/approval/merge, validation-command
+execution, external-agent execution, shell/network/browser/OS, hardware/feeder
+control, actuation, the human teaching loop, sensory-text-as-command,
+human-label-as-ground-truth, evidence deletion, auto-approval of operator
+decisions, and any bypass of a critical safety blocker. **The closed research
+cycle orchestrator tracks the scientific state only: it reads local artifacts and
+writes reports, it modifies no source, runs no Git, calls no GitHub, creates no
+branch/tag/release/PR, opens or merges no PR, executes no validation command, runs
+no external agent, never approves itself, and makes no claim of consciousness,
+sentience, life, personhood, agency, free will, emotion, feeling, understanding,
+or subjective experience.**

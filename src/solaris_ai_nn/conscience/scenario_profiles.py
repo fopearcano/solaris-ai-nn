@@ -1307,6 +1307,42 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["run_step_count"],
             max_runtime_s=60.0))
 
+    # -- Research cycle profiles (Prompt 61) ----------------------------------
+    # Tracks where the research program is in its experimental cycle, what
+    # evidence supports the current state, what is blocked, and what the
+    # operator should do next. Reads local artifacts and writes reports only:
+    # no Git/GitHub, no source change, no external agent, no auto-approval, no
+    # autonomous self-modification.
+    _cycle_modules = ["bridge", "governance", "ops", "inner_map",
+                      "research_baseline", "research_cycle"]
+    for pid, desc in (
+            ("research_cycle_status",
+             "Report the closed research cycle state from local evidence."),
+            ("research_cycle_decision_gate",
+             "Evaluate research cycle decision gates (advisory only)."),
+            ("research_cycle_evidence_ledger",
+             "Build the evidence continuity ledger (append-only)."),
+            ("research_cycle_artifact_graph",
+             "Build the research artifact provenance graph."),
+            ("research_cycle_next_action",
+             "Recommend the next operator action (advisory only)."),
+            ("research_cycle_blocked",
+             "Detect blocked states and resolver recommendations.")):
+        add(ScenarioProfile(
+            profile_id=pid, description=desc,
+            run_context=_ctx(RunMode.SHORT_DEMO, max_steps=120),
+            enabled_modules=list(_cycle_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "tracks cycle state; runs and approves nothing",
+                "no Git/GitHub call, no branch/tag/PR/merge",
+                "no source change, no external coding agent, no self-modification",
+                "operator decisions are operator-owned and never auto-approved",
+                "a critical safety blocker cannot be bypassed"],
+            governance_requirements=["enable_plural_sensorium_fixture"],
+            expected_artifacts=["RESEARCH_CYCLE_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=60.0))
+
     return profiles
 
 

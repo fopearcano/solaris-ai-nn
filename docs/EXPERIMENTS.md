@@ -2942,3 +2942,47 @@ limitation blocks validated status; limitations are kept operator-visible.
 Builds the next-cycle roadmap for a validated baseline (mini soak, replication,
 falsification, architecture evolution) and a blocked baseline (collect evidence /
 improve safety; soak blocked). The roadmap is planning only; it runs nothing.
+
+## 334. Research Cycle Demo ✅ (implemented)
+
+**Run:** `python examples/run_research_cycle_demo.py --state-dir .solaris_ai_nn_research_cycle/test_demo`
+Runs the closed research cycle tracker on a validated cycle (baseline -> roadmap
+-> architecture -> experiment pack -> intake -> post-merge -> validated baseline,
+with operator merge confirmation) and a blocked cycle (a critical safety
+regression at intake). Reports the stage, decision gates, operator decisions
+required, blocked states, evidence-ledger counts, and the next operator action.
+Tracking ONLY: it reads local artifacts and writes reports, runs no Git, calls no
+GitHub, never approves itself.
+
+## 335. Cycle Decision Gate Demo ✅ (implemented)
+
+**Run:** `python examples/run_cycle_decision_gate_demo.py`
+Evaluates the cycle decision gates for a clean cycle waiting on an operator merge
+confirmation, the same cycle once confirmed, and a cycle with a critical safety
+regression. Promotion gates are blocked by safety/falsification/regression;
+operator gates report `waiting_for_operator` until an explicit operator decision
+exists; Solaris never auto-approves an operator gate.
+
+## 336. Evidence Ledger Demo ✅ (implemented)
+
+**Run:** `python examples/run_evidence_ledger_demo.py --state-dir .solaris_ai_nn_research_cycle/test_ledger`
+Records baseline / post-merge / falsified / missing / negative evidence in the
+append-only evidence ledger, then supersedes a stale baseline entry. Negative,
+falsified, and missing evidence are preserved; stale evidence is marked
+superseded, never deleted.
+
+## 337. Artifact Graph Demo ✅ (implemented)
+
+**Run:** `python examples/run_artifact_graph_demo.py`
+Builds the research artifact graph for a clean cycle (full derived_from provenance
+chain) and for a cycle with a critical regression and a falsified claim (missing
+nodes, safety_blocks / falsifies / contradicts edges). Evidence provenance, not
+cognition; contradictions and missing nodes stay visible.
+
+## 338. Next Action Planner Demo ✅ (implemented)
+
+**Run:** `python examples/run_next_action_planner_demo.py`
+Shows the recommended next operator action across several cycle stages, and the
+urgent blocker-resolution action when a critical safety blocker is present. Next
+actions are instructions for the operator; none is executed; a critical safety
+blocker can never be bypassed.

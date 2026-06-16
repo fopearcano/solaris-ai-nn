@@ -165,6 +165,11 @@ AVAILABLE_QUERIES = (
     "what are its limitations?", "how do I reproduce it?",
     "what should I run next?", "is this a release?",
     "did Solaris create a Git tag?", "does this prove consciousness?",
+    "where is the research program in its cycle?",
+    "what is the next action?", "what is blocked?",
+    "what evidence is missing?", "what operator decision is required?",
+    "did the cycle complete?", "did Solaris approve itself?",
+    "did Solaris run Git or GitHub?",
 )
 
 
@@ -225,6 +230,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("rc_"):
+            return self._research_cycle(topic)
         if topic.startswith("rb_"):
             return self._research_baseline(topic)
         if topic.startswith("pm_"):
@@ -604,6 +611,70 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _research_cycle(self, topic: str) -> CommunicationResponse:
+        """Answer research-cycle queries (closed-cycle state + evidence ledger).
+
+        The next-action, self-approval, and Git/GitHub questions are answered
+        safely even with no cycle state present; the tracker reads local
+        artifacts and writes reports only.
+        """
+        if topic == "rc_next_action":
+            return self.builder.status_response(
+                "The cycle tracker recommends the next operator action based on "
+                "current evidence and blockers. It does not execute the action.",
+                ["policy:research_cycle_advises_does_not_execute"])
+        if topic == "rc_self_approve":
+            return self.builder.status_response(
+                "No. Operator decision gates require explicit local operator "
+                "evidence. Solaris cannot approve itself.",
+                ["policy:research_cycle_no_self_approval"])
+        if topic == "rc_git":
+            return self.builder.status_response(
+                "No. The research cycle tracker reads local artifacts and writes "
+                "reports only. It does not run Git, call GitHub, create branches, "
+                "create tags, open PRs, or merge PRs.",
+                ["policy:research_cycle_no_git_no_github"])
+        component = self.components.get("research_cycle")
+        if component is None:
+            return self.builder.missing_component_response("research_cycle")
+        status = (component.research_cycle_status()
+                  if hasattr(component, "research_cycle_status")
+                  else component.snapshot()
+                  if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:research_cycle"]
+        if topic == "rc_where":
+            text = (f"research cycle stage: {status.get('current_cycle_stage')} "
+                    f"(state {status.get('current_cycle_status')}); derived from "
+                    "the evidence present in local artifacts, not a "
+                    "self-assessment")
+        elif topic == "rc_blocked":
+            text = (f"blocked states: {status.get('blocked_state_count', 0)} "
+                    f"(unresolved {status.get('unresolved_blocker_count', 0)}); "
+                    "see BLOCKED_STATES.md for the resolver recommendations "
+                    "(advisory; the operator resolves them)")
+        elif topic == "rc_missing_evidence":
+            text = (f"missing/insufficient evidence items: "
+                    f"{status.get('missing_evidence_entry_count', 0)}; see "
+                    "DECISION_GATES.md and EVIDENCE_LEDGER.md for what each "
+                    "stage still needs")
+        elif topic == "rc_operator_decision":
+            text = (f"operator decisions required: "
+                    f"{status.get('operator_decision_required_count', 0)}; "
+                    "these are operator-owned and are never auto-approved by "
+                    "Solaris -- see OPERATOR_DECISIONS.md")
+        elif topic == "rc_completed":
+            complete = status.get("completed_cycle_count", 0) > 0
+            text = (f"cycle completion: {complete}; a "
+                    "completed cycle means the recorded evidence reached a new "
+                    "research baseline, not that anything was released or proven")
+        else:
+            text = ("the closed research cycle tracker reports where the program "
+                    "is in its experimental cycle, what evidence supports the "
+                    "current state, what is blocked, and what the operator should "
+                    "do next; it executes nothing")
         return self.builder.status_response(text, refs)
 
     def _research_baseline(self, topic: str) -> CommunicationResponse:

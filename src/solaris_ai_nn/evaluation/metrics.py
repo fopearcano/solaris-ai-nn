@@ -2279,3 +2279,52 @@ def research_baseline_metrics(rb: Optional[Dict[str, Any]],
         "note": "local versioned research baseline; not a Git tag, GitHub "
                 "release, product release, or consciousness/life/agency claim",
     }
+
+
+def research_cycle_metrics(rc: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective research-cycle metrics (closed-cycle scientific-state tracker).
+
+    These describe *cycle tracking*: cycles/stages, decision gates (and failed
+    ones), operator decisions required, blocked states, evidence-ledger entries
+    (missing/negative/falsified), artifact-graph nodes/contradictions, and next
+    actions. The tracker runs no Git/GitHub, modifies no source, approves
+    nothing, and makes no consciousness/life/agency claim.
+    """
+    if not rc:
+        return {"present": False}
+    return {
+        "present": True,
+        "research_cycle_count": int(rc.get("research_cycle_count", 0) or 0),
+        "cycle_stage_count": int(rc.get("cycle_stage_count", 0) or 0),
+        "completed_cycle_count": int(rc.get("completed_cycle_count", 0) or 0),
+        "archived_cycle_count": int(rc.get("archived_cycle_count", 0) or 0),
+        "decision_gate_count": int(rc.get("decision_gate_count", 0) or 0),
+        "failed_decision_gate_count": int(
+            rc.get("failed_decision_gate_count", 0) or 0),
+        "operator_decision_required_count": int(
+            rc.get("operator_decision_required_count", 0) or 0),
+        "blocked_state_count": int(rc.get("blocked_state_count", 0) or 0),
+        "unresolved_blocker_count": int(
+            rc.get("unresolved_blocker_count", 0) or 0),
+        "evidence_ledger_entry_count": int(
+            rc.get("evidence_ledger_entry_count", 0) or 0),
+        "missing_evidence_entry_count": int(
+            rc.get("missing_evidence_entry_count", 0) or 0),
+        "negative_evidence_entry_count": int(
+            rc.get("negative_evidence_entry_count", 0) or 0),
+        "falsified_evidence_entry_count": int(
+            rc.get("falsified_evidence_entry_count", 0) or 0),
+        "artifact_graph_node_count": int(
+            rc.get("artifact_graph_node_count", 0) or 0),
+        "artifact_graph_contradiction_count": int(
+            rc.get("artifact_graph_contradiction_count", 0) or 0),
+        "next_action_count": int(rc.get("next_action_count", 0) or 0),
+        "research_cycle_safety_block_count": int(
+            rc.get("research_cycle_safety_block_count", 0) or 0),
+        "current_cycle_stage": rc.get("current_cycle_stage"),
+        "modifies_source": False, "runs_git": False, "calls_github": False,
+        "approves_itself": False,
+        "is_consciousness_or_personhood": False,
+        "note": "closed research-cycle scientific-state tracker; no source "
+                "change, Git, GitHub, validation, or self-approval",
+    }

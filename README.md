@@ -522,7 +522,35 @@ python examples/run_repro_bundle_demo.py                       # snapshot manife
 python examples/run_capability_map_demo.py                     # validated/experimental/missing capabilities
 python examples/run_limitation_registry_demo.py                # warning/major/critical (critical blocks validation)
 python examples/run_next_cycle_roadmap_demo.py                 # next soak/replication + architecture input pack
+
+# Closed research cycle: where is the program, what is blocked, what next
+python examples/run_research_cycle_demo.py                     # validated vs blocked cycle: stage, gates, next action
+python examples/run_cycle_decision_gate_demo.py                # advisory gates; operator gates never auto-approved
+python examples/run_evidence_ledger_demo.py                    # append-only ledger; failures/missing preserved
+python examples/run_artifact_graph_demo.py                     # artifact provenance; contradictions stay visible
+python examples/run_next_action_planner_demo.py                # next operator action; blocker resolution first
 ```
+
+The Closed Research Cycle Orchestrator tracks where the research program is in its
+experimental cycle, what evidence supports the current state, what is blocked, and
+what the operator should do next -- across the loop Research Baseline -> Next-Cycle
+Roadmap -> Architecture Evolution -> Experiment Compiler Pack -> External
+Implementation -> Implementation Intake -> Human Merge -> Post-Merge Assimilation
+-> New Research Baseline -> Soak/Replication/Falsification -> Next Architecture
+Evolution. It does not run the system autonomously, implement code, approve
+anything, or execute external tools. The cycle stage is derived from which evidence
+is actually present (missing evidence stays visible and the state can never approve
+itself); an append-only evidence ledger preserves negative, falsified, and missing
+results; an artifact graph keeps contradictions visible; advisory decision gates
+report `waiting_for_operator` until an explicit local operator decision exists
+(Solaris cannot invent or auto-approve operator approval, and a critical safety
+blocker can never be bypassed); and the next-action planner produces operator
+instructions, never executed. It reads local artifacts and writes reports only: it
+modifies no source, runs no Git, calls no GitHub, creates no branch/tag/release/PR,
+opens or merges no PR, executes no validation command, runs no external agent,
+never approves itself, and makes no claim of consciousness, sentience, life,
+personhood, agency, free will, emotion, feeling, understanding, or subjective
+experience.
 
 A Research Baseline is a local reproducible experimental reference point. It does
 not create Git tags, GitHub releases, branches, PRs, or product releases. It turns
@@ -1595,6 +1623,12 @@ src/solaris_ai_nn/
                 map, limitation registry, safety boundary statement, validation
                 summary, comparison anchors, roadmap reset, operator runbook,
                 runtime, reports, safety (local snapshot; no Git tag/release)
+  research_cycle/ closed research cycle orchestrator + evidence continuity ledger:
+                cycle manifest, cycle state, decision gates, evidence ledger,
+                artifact graph, operator decisions, cycle transitions, blocked
+                states, next action, cycle archive, runtime, reports, safety
+                (tracks state; reads local artifacts, writes reports; no Git/
+                GitHub; never self-approves)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

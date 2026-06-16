@@ -520,6 +520,14 @@ class InnerMapModel:
     # reproducible reference point; it is not a Git tag, GitHub release, product
     # release, or any consciousness/life/agency claim.
     research_baseline: Optional[Dict[str, Any]] = None
+    # Research-cycle status (Prompt 61); None when not attached. Keys:
+    # research_cycle_enabled, current_cycle_id, current_cycle_stage,
+    # current_baseline_id, decision_gate_count, failed_decision_gate_count,
+    # operator_decision_required_count, blocked_state_count,
+    # evidence_ledger_entry_count, artifact_graph_node_count, next_action_count,
+    # latest_research_cycle_report_path. Tracking only; it runs no Git/GitHub,
+    # approves nothing, and makes no consciousness/life/agency claim.
+    research_cycle: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

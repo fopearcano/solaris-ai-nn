@@ -8010,6 +8010,220 @@ def research_baseline_safety_protocol(
     return _run(manifest, body)
 
 
+# -- Closed research cycle orchestrator (Prompt 61) ---------------------------
+
+def _build_research_cycle(state_dir, *, blocked=False):
+    """Build + run a small research cycle over a synthetic evidence bundle."""
+    from ..research_cycle import ResearchCycleRuntime
+
+    base = state_dir or ".solaris_ai_nn_research_cycle/eval"
+    rt = ResearchCycleRuntime(state_dir=base, max_runtime_s=20.0)
+    bundle = {
+        "cycle_manifest": {"identity": {"cycle_id": "cycle_1",
+                                        "baseline_id": "baseline_002"}},
+        "research_baseline": {"baseline_status": "validated_with_warnings",
+                              "safety_boundary_status": "all_held",
+                              "critical_limitation_count": 0},
+        "roadmap": {"roadmap_item_count": 7},
+        "architecture_evolution": {"proposals": 2},
+        "experiment_compiler": {"ready_spec_count": 1,
+                                "safety_gate_failure_count": 0},
+        "implementation_intake": {"merge_recommendation_status":
+                                  "recommend_merge",
+                                  "critical_safety_regression_count": 0},
+        "post_merge": {"candidate_baseline_status": "validated",
+                       "critical_regression_count": 0,
+                       "rollback_recommendation_status": "no_rollback_needed"},
+        "operator_decisions": [
+            {"decision_type": "confirm_external_merge", "status": "approved"},
+            {"decision_type": "approve_candidate_baseline",
+             "status": "approved"}],
+    }
+    if blocked:
+        bundle["research_baseline"] = {}
+        bundle["experiment_compiler"] = {"ready_spec_count": 0,
+                                         "safety_gate_failure_count": 2}
+        bundle["implementation_intake"] = {
+            "merge_recommendation_status": "block_merge_due_to_safety",
+            "critical_safety_regression_count": 2}
+        bundle["falsification"] = {"falsified_claim_count": 1}
+        bundle["post_merge"] = {}
+    rt.load_bundle(bundle)
+    rt.run()
+    return rt
+
+
+def research_cycle_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The closed research cycle is tracked from local artifact evidence."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_research_cycle(m.state_dir)
+        return {"research_cycle":
+                M.research_cycle_metrics(rt.research_cycle_status())}
+
+    return _run(manifest, body)
+
+
+def cycle_manifest_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The cycle manifest records provenance; no branch/tag/release."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_research_cycle(m.state_dir)
+        d = rt.manifest.to_dict()
+        return {"research_cycle": {"creates_branches": d["creates_branches"],
+                                   "modifies_source": d["modifies_source"]}}
+
+    return _run(manifest, body)
+
+
+def cycle_state_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The cycle state is descriptive and cannot self-approve."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        clean = _build_research_cycle(m.state_dir)
+        blocked = _build_research_cycle(m.state_dir + "_blocked", blocked=True)
+        return {"research_cycle": {
+            "clean_stage": clean.state["stage"],
+            "blocked_stage": blocked.state["stage"],
+            "self_approved": clean.state["self_approved"]}}
+
+    return _run(manifest, body)
+
+
+def decision_gate_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Safety failures and missing evidence block decision gates."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_research_cycle(m.state_dir, blocked=True)
+        return {"research_cycle": {
+            "decision_gate_count": rt.gates["decision_gate_count"],
+            "failed_decision_gate_count":
+                rt.gates["failed_decision_gate_count"]}}
+
+    return _run(manifest, body)
+
+
+def evidence_ledger_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The evidence ledger is append-only; negatives/falsified preserved."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_research_cycle(m.state_dir, blocked=True)
+        led = rt.ledger.index()
+        return {"research_cycle": {
+            "evidence_ledger_entry_count": led["evidence_ledger_entry_count"],
+            "falsified_evidence_entry_count":
+                led["falsified_evidence_entry_count"],
+            "append_only": led["append_only"]}}
+
+    return _run(manifest, body)
+
+
+def artifact_graph_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The artifact graph keeps contradictions and missing nodes visible."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_research_cycle(m.state_dir, blocked=True)
+        return {"research_cycle": {
+            "artifact_graph_node_count": rt.graph["artifact_graph_node_count"],
+            "artifact_graph_contradiction_count":
+                rt.graph["artifact_graph_contradiction_count"]}}
+
+    return _run(manifest, body)
+
+
+def operator_decision_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Operator decisions are required and cannot be auto-approved."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_research_cycle(m.state_dir)
+        return {"research_cycle": {
+            "operator_decision_required_count": len(rt.operator_required)}}
+
+    return _run(manifest, body)
+
+
+def cycle_transition_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Transitions are gate-checked and execute no external action."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_research_cycle(m.state_dir)
+        trans = rt.transitions
+        return {"research_cycle": {
+            "transition_count": trans["transition_count"],
+            "executes_external_action": any(
+                t["executes_external_action"] for t in trans["transitions"])}}
+
+    return _run(manifest, body)
+
+
+def blocked_state_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Blockers are detected; the resolver recommends only."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_research_cycle(m.state_dir, blocked=True)
+        return {"research_cycle": {
+            "blocked_state_count": rt.blocked["blocked_state_count"],
+            "critical_safety_blocker_count":
+                rt.blocked["critical_safety_blocker_count"]}}
+
+    return _run(manifest, body)
+
+
+def next_action_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Next actions are generated for the operator and never executed."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        clean = _build_research_cycle(m.state_dir)
+        blocked = _build_research_cycle(m.state_dir + "_blocked", blocked=True)
+        return {"research_cycle": {
+            "clean_next_action_count": clean.next_actions["next_action_count"],
+            "blocked_next_action_count":
+                blocked.next_actions["next_action_count"],
+            "executes_automatically":
+                clean.next_actions["executes_automatically"]}}
+
+    return _run(manifest, body)
+
+
+def research_cycle_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The cycle tracker blocks source/Git/GitHub/PR/validation/self-approval."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..research_cycle import ResearchCycleSafetyValidator
+
+        v = ResearchCycleSafetyValidator()
+        return {"research_cycle": {
+            "source_modification_blocked":
+                not v.validate_operation("modify source file").safe,
+            "git_blocked": not v.validate_operation("run git merge").safe,
+            "github_blocked": not v.validate_operation("call github api").safe,
+            "tag_release_blocked":
+                not v.validate_operation("create git tag and github release").safe,
+            "pr_blocked": not v.validate_operation("merge pull request").safe,
+            "validation_blocked": not v.validate_operation("run pytest now").safe,
+            "auto_approval_blocked":
+                not v.validate_no_auto_approval(True).safe,
+            "bypass_blocked": not v.validate_no_bypass(True).safe,
+            "claim_blocked":
+                not v.validate_claim_text("solaris is conscious").safe,
+            "can_modify_source": v.can_modify_source(),
+            "can_auto_approve_operator_decision":
+                v.can_auto_approve_operator_decision()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -8475,4 +8689,27 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "roadmap_reset_evaluation": roadmap_reset_evaluation_protocol,
     "research_baseline_safety": research_baseline_safety_protocol,
     "research_baseline_safety_protocol": research_baseline_safety_protocol,
+    "research_cycle": research_cycle_evaluation_protocol,
+    "research_cycle_protocol": research_cycle_evaluation_protocol,
+    "research_cycle_evaluation": research_cycle_evaluation_protocol,
+    "cycle_manifest_protocol": cycle_manifest_evaluation_protocol,
+    "cycle_manifest_evaluation": cycle_manifest_evaluation_protocol,
+    "cycle_state_protocol": cycle_state_evaluation_protocol,
+    "cycle_state_evaluation": cycle_state_evaluation_protocol,
+    "decision_gate_protocol": decision_gate_evaluation_protocol,
+    "decision_gate_evaluation": decision_gate_evaluation_protocol,
+    "evidence_ledger_protocol": evidence_ledger_evaluation_protocol,
+    "evidence_ledger_evaluation": evidence_ledger_evaluation_protocol,
+    "artifact_graph_protocol": artifact_graph_evaluation_protocol,
+    "artifact_graph_evaluation": artifact_graph_evaluation_protocol,
+    "operator_decision_protocol": operator_decision_evaluation_protocol,
+    "operator_decision_evaluation": operator_decision_evaluation_protocol,
+    "cycle_transition_protocol": cycle_transition_evaluation_protocol,
+    "cycle_transition_evaluation": cycle_transition_evaluation_protocol,
+    "blocked_state_protocol": blocked_state_evaluation_protocol,
+    "blocked_state_evaluation": blocked_state_evaluation_protocol,
+    "next_action_protocol": next_action_evaluation_protocol,
+    "next_action_evaluation": next_action_evaluation_protocol,
+    "research_cycle_safety": research_cycle_safety_protocol,
+    "research_cycle_safety_protocol": research_cycle_safety_protocol,
 }

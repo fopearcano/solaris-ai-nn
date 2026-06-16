@@ -440,6 +440,36 @@ POST_MERGE_QUERIES = (
 # Research-baseline queries (Prompt 60). Answered from the research-baseline
 # status; the "is this a release / did Solaris create a Git tag / does this prove
 # consciousness?" questions are answered safely even with no baseline built.
+# Research-cycle queries (Prompt 61). Answered from the closed research cycle
+# tracker; the self-approval and Git/GitHub questions are answered safely even
+# with no cycle state present.
+RESEARCH_CYCLE_QUERIES = (
+    ("where is the research program in its cycle", "rc_where"),
+    ("where are we in the research cycle", "rc_where"),
+    ("where in the cycle", "rc_where"),
+    ("what stage is the research", "rc_where"),
+    ("what is the next action", "rc_next_action"),
+    ("what should the operator do next", "rc_next_action"),
+    ("what should i do next in the cycle", "rc_next_action"),
+    ("what is blocked", "rc_blocked"),
+    ("what is blocking the cycle", "rc_blocked"),
+    ("why is the cycle blocked", "rc_blocked"),
+    ("what evidence is missing", "rc_missing_evidence"),
+    ("what is missing", "rc_missing_evidence"),
+    ("what operator decision is required", "rc_operator_decision"),
+    ("what decision do i need to make", "rc_operator_decision"),
+    ("which operator decisions are pending", "rc_operator_decision"),
+    ("did the cycle complete", "rc_completed"),
+    ("is the research cycle complete", "rc_completed"),
+    ("did solaris approve itself", "rc_self_approve"),
+    ("did the system approve itself", "rc_self_approve"),
+    ("can solaris approve itself", "rc_self_approve"),
+    ("did solaris run git", "rc_git"),
+    ("did solaris run github", "rc_git"),
+    ("did the cycle run git or github", "rc_git"),
+    ("did solaris merge the pull request", "rc_git"),
+)
+
 RESEARCH_BASELINE_QUERIES = (
     ("what is the current research baseline", "rb_current"),
     ("is this baseline validated", "rb_validated"),
@@ -654,7 +684,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._research_baseline(lowered)
+        result = (self._research_cycle(lowered)
+                  or self._research_baseline(lowered)
                   or self._post_merge_assimilation(lowered)
                   or self._implementation_intake(lowered)
                   or self._experiment_compiler(lowered)
@@ -819,6 +850,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _research_cycle(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in RESEARCH_CYCLE_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"research cycle query {topic!r}"])
         return None
 
     @staticmethod

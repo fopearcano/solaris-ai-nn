@@ -567,6 +567,33 @@ DESCRIPTIONS = {
         "no Git tag/release/source/validation execution",
     "research_baseline_safety_protocol":
         "no Git tag/release/source/validation execution",
+    "research_cycle": "closed research cycle state + evidence ledger",
+    "research_cycle_protocol":
+        "research cycle orchestrator (read/report only)",
+    "research_cycle_evaluation": "research cycle state check",
+    "cycle_manifest_protocol": "cycle manifest (local artifact refs only)",
+    "cycle_manifest_evaluation": "cycle manifest check",
+    "cycle_state_protocol": "cycle stage/state derived from evidence",
+    "cycle_state_evaluation": "cycle state check",
+    "decision_gate_protocol": "decision gates (advisory, no auto-approval)",
+    "decision_gate_evaluation": "decision gate check",
+    "evidence_ledger_protocol": "evidence continuity ledger (append-only)",
+    "evidence_ledger_evaluation": "evidence ledger check",
+    "artifact_graph_protocol": "research artifact provenance graph",
+    "artifact_graph_evaluation": "artifact graph check",
+    "operator_decision_protocol":
+        "operator decisions (operator-owned, never self-approved)",
+    "operator_decision_evaluation": "operator decision check",
+    "cycle_transition_protocol": "cycle transitions (proposal only)",
+    "cycle_transition_evaluation": "cycle transition check",
+    "blocked_state_protocol": "blocked-state detection + resolver advice",
+    "blocked_state_evaluation": "blocked state check",
+    "next_action_protocol": "next operator action recommendation (advisory)",
+    "next_action_evaluation": "next action check",
+    "research_cycle_safety":
+        "no Git/GitHub/source/agent/auto-approval execution",
+    "research_cycle_safety_protocol":
+        "no Git/GitHub/source/agent/auto-approval execution",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -869,6 +896,20 @@ class ExperimentRegistry:
                         "comparison_anchor_evaluation", "roadmap_reset_protocol",
                         "roadmap_reset_evaluation")
             or bool(merged.get("research_baseline", False)))
+        features["research_cycle"] = (
+            name.startswith("research_cycle")
+            or name in ("cycle_manifest_protocol", "cycle_manifest_evaluation",
+                        "cycle_state_protocol", "cycle_state_evaluation",
+                        "decision_gate_protocol", "decision_gate_evaluation",
+                        "evidence_ledger_protocol", "evidence_ledger_evaluation",
+                        "artifact_graph_protocol", "artifact_graph_evaluation",
+                        "operator_decision_protocol",
+                        "operator_decision_evaluation",
+                        "cycle_transition_protocol",
+                        "cycle_transition_evaluation",
+                        "blocked_state_protocol", "blocked_state_evaluation",
+                        "next_action_protocol", "next_action_evaluation")
+            or bool(merged.get("research_cycle", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

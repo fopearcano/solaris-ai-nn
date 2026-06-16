@@ -2421,3 +2421,48 @@ Lab. Each cycle therefore begins from a named, reproducible, limitation-annotate
 baseline rather than from accumulated, unstated drift. None of this proves
 anything about consciousness or understanding; it is ordinary, conservative
 research bookkeeping applied to the boundary between cycles.
+
+## Notes on the Closed Research Cycle Orchestrator
+
+**Why a closed-cycle tracker, and why it tracks rather than acts.** The project
+has accumulated many stages -- baseline, roadmap, architecture evolution,
+experiment compilation, implementation intake, post-merge assimilation, soak,
+replication, falsification -- each with its own artifacts and its own report. What
+was missing was a single, honest answer to *where are we, what supports it, what
+is blocked, and what should the operator do next?* The research cycle orchestrator
+provides that answer and nothing more. It is deliberately a tracker, not a driver:
+the moment a meta-layer can advance the program it is no longer reporting the
+program's state, it is choosing it -- and the choice of what to run, merge, or
+believe must stay with the human operator. So the orchestrator reads local
+artifacts and writes reports; it executes nothing.
+
+**Why the state is derived from evidence, not asserted.** A stage the system can
+*declare* it has reached is a stage it can lie about. Instead the cycle stage is
+derived from which evidence is actually present: the furthest stage with
+supporting artifacts wins, and every missing artifact stays visible in the state.
+A cycle cannot claim "research baseline validated" without a validated baseline
+report, and it cannot claim "merged" without post-merge evidence. The state is a
+read of the evidence, not a self-assessment, which is exactly why it can never
+approve itself.
+
+**Why the evidence ledger is append-only and preserves failure.** The strongest
+temptation in any research program is to quietly drop the experiments that did not
+work. The evidence continuity ledger makes that impossible: negative, falsified,
+and missing evidence are first-class, preserved entries, and superseding a stale
+result marks it superseded rather than deleting it. A falsified claim from cycle 3
+is still visible in cycle 7. This is what lets the artifact graph keep
+contradictions visible instead of collapsing conflicting results into a single
+score -- the conflict *is* the finding.
+
+**Why operator decisions can never be auto-approved.** The promotion gates
+(merge, research baseline, next cycle) require an explicit local operator decision
+artifact; until one exists, the gate reports `waiting_for_operator`, never
+`pass`. The system cannot invent operator approval, an operator approval cannot
+override a critical safety failure or erase missing evidence, and an operator
+rejection is preserved. This is the structural reason the orchestrator cannot
+bootstrap itself forward: the one thing it most needs to advance -- approval -- is
+the one thing it is forbidden to produce. A critical safety blocker, likewise, can
+never be bypassed by any decision. None of this implies the orchestrator
+understands the program it tracks, decides anything, or is in any sense an agent;
+it is conservative research bookkeeping about the state of, and the gates between,
+experimental cycles.

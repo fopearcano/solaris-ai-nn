@@ -1896,4 +1896,31 @@ def build_default_state_graph() -> StateGraph:
                "the baseline resets the next research cycle's roadmap")
     g.add_edge("ResearchBaselineRuntime", "inner_map",
                "research baseline state feeds Inner MAP")
+
+    # Closed research cycle orchestrator (Prompt 61): tracks the scientific
+    # state across cycles. Tracking only; runs no Git/GitHub, approves nothing.
+    for name, role in [
+        ("ResearchCycleManifest", "local cycle provenance; no branches"),
+        ("ResearchCycleState", "descriptive stage/status; cannot self-approve"),
+        ("ResearchCycleDecisionGate", "advisory gates; operator gates not auto"),
+        ("EvidenceContinuityLedger", "append-only; negatives/falsified kept"),
+        ("ResearchArtifactGraph", "evidence provenance; contradictions visible"),
+        ("OperatorDecisionRecord", "explicit operator decisions; never invented"),
+        ("CycleTransitionEngine", "gate-checked advisory transitions"),
+        ("ResearchCycleBlockedState", "blockers + recommend-only resolutions"),
+        ("ResearchCycleNextAction", "operator instructions; never executed"),
+        ("ResearchCycleArchive", "archived cycles stay visible; no deletion"),
+        ("ResearchCycleRuntime", "bounded read-only closed-cycle tracker"),
+        ("ResearchCycleSafetyValidator",
+         "no source/Git/GitHub/PR/validation/self-approval"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("ResearchBaselineRuntime", "ResearchCycleManifest",
+               "a validated baseline opens / advances a research cycle")
+    g.add_edge("EvidenceContinuityLedger", "ResearchCycleDecisionGate",
+               "ledger evidence informs the gate evaluations")
+    g.add_edge("ResearchCycleBlockedState", "ResearchCycleNextAction",
+               "blockers drive blocker-resolution next actions")
+    g.add_edge("ResearchCycleRuntime", "inner_map",
+               "research cycle state feeds Inner MAP")
     return g
