@@ -25,7 +25,27 @@ from .alpha_system.state_layout import AlphaStateLayout
 
 _ALPHA_COMMANDS = ("doctor", "init", "modules", "run-demo", "artifact-index",
                    "cycle-status", "build-runbook", "build-report",
-                   "build-docs", "docs-index", "whitepaper")
+                   "build-docs", "docs-index", "whitepaper",
+                   "live-init", "live-doctor", "live-birth", "live-quarantine",
+                   "birth-certificate")
+
+
+def _birth_runtime(args: argparse.Namespace):
+    from .live_birth.birth_runtime import LiveReadOnlyBirthRuntime
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_live"
+    return LiveReadOnlyBirthRuntime(
+        state_dir=state_dir, profile=args.profile,
+        max_runtime_s=args.max_runtime_s, max_files=args.max_files,
+        max_events=args.max_events, max_bytes=args.max_bytes,
+        strict=args.strict, dry_run=args.dry_run, report_only=args.report_only,
+        require_governance=args.require_governance,
+        require_feeder_registry=args.require_feeder_registry,
+        allow_operator_pulse=not args.no_operator_pulse,
+        require_claimguard=args.require_claimguard,
+        operator_note=args.operator_note)
 
 
 def _book_runtime(args: argparse.Namespace):
@@ -240,6 +260,105 @@ def cmd_whitepaper(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_live_init(args: argparse.Namespace) -> int:
+    rt = _birth_runtime(args)
+    rt.initialize()
+    paths = rt.write_templates()
+    _print(f"live state initialized at: {rt.state_dir}")
+    _print(f"  governance template: {paths['governance']}")
+    _print(f"  feeder registry template: {paths['feeder_registry']}")
+    _print("  note: governance is SAFE-OFF by default (live_readonly_enabled and "
+           "operator_approved are false); the operator must approve it.")
+    return 0
+
+
+def cmd_live_doctor(args: argparse.Namespace) -> int:
+    rt = _birth_runtime(args)
+    summary = rt.run_doctor()
+    _print("live doctor:")
+    _print(f"  governance: {summary['governance_status']} "
+           f"(passed {summary['governance_passed']})")
+    _print(f"  feeder registry present: {summary['feeder_registry_present']} "
+           f"(blockers {summary['feeder_blocker_count']})")
+    _print(f"  inbox has events: {summary['inbox_has_events']}")
+    for b in summary["blockers"]:
+        _print(f"  blocker: {b}")
+    if summary["blockers"] and args.strict:
+        _print("  STRICT: live safety blockers present -> nonzero exit")
+        return 2
+    return 0
+
+
+def cmd_live_birth(args: argparse.Namespace) -> int:
+    rt = _birth_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"live birth refused: {result.get('reason')}")
+        return 2
+    st = rt.live_birth_status()
+    _print("live read-only birth:")
+    _print(f"  run id: {st['birth_run_id']}")
+    _print(f"  governance: {st['governance_status']} (passed "
+           f"{st['governance_passed']})")
+    _print(f"  blocked: {result['blocked']}")
+    for b in result["blockers"]:
+        _print(f"    blocker: {b}")
+    _print(f"  events: {st['live_event_count']} (accepted "
+           f"{st['live_event_accepted_count']}, quarantined "
+           f"{st['live_event_quarantined_count']})")
+    _print(f"  membrane: {st['membrane_activation_status']}")
+    _print(f"  birth certificate: {st['latest_birth_certificate_path']}")
+    _print(f"  starts feeders / network: {st['starts_feeders']} / "
+           f"{st['accesses_network']}")
+    if result["blocked"] and args.strict:
+        return 2
+    return 0
+
+
+def cmd_live_quarantine(args: argparse.Namespace) -> int:
+    import json as _json
+    import os as _os
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_live"
+    path = _os.path.join(state_dir, "quarantine", "QUARANTINE_INDEX.json")
+    _print("live quarantine summary:")
+    if not _os.path.isfile(path):
+        _print("  (no quarantine index yet; run live-birth first)")
+        return 0
+    with open(path, encoding="utf-8") as fh:
+        data = _json.load(fh)
+    _print(f"  quarantined events: {data.get('quarantined_event_count', 0)}")
+    for reason, count in (data.get("reasons", {}) or {}).items():
+        _print(f"    {reason}: {count}")
+    return 0
+
+
+def cmd_birth_certificate(args: argparse.Namespace) -> int:
+    import os as _os
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_live"
+    cert_dir = _os.path.join(state_dir, "certificates")
+    existing = []
+    if _os.path.isdir(cert_dir):
+        existing = sorted(f for f in _os.listdir(cert_dir)
+                          if f.startswith("BIRTH_CERTIFICATE_")
+                          and f.endswith(".md"))
+    if existing:
+        _print(f"latest birth certificate: "
+               f"{_os.path.join(cert_dir, existing[-1])}")
+        return 0
+    # Generate from a fresh run if none exists.
+    rt = _birth_runtime(args)
+    rt.run()
+    st = rt.live_birth_status()
+    _print(f"birth certificate: {st['latest_birth_certificate_path']}")
+    return 0
+
+
 _HANDLERS = {
     "init": cmd_init,
     "doctor": cmd_doctor,
@@ -252,6 +371,11 @@ _HANDLERS = {
     "build-docs": cmd_build_docs,
     "docs-index": cmd_docs_index,
     "whitepaper": cmd_whitepaper,
+    "live-init": cmd_live_init,
+    "live-doctor": cmd_live_doctor,
+    "live-birth": cmd_live_birth,
+    "live-quarantine": cmd_live_quarantine,
+    "birth-certificate": cmd_birth_certificate,
 }
 
 
@@ -281,6 +405,25 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--require-claimguard", action="store_true",
                         default=False, dest="require_claimguard",
                         help="treat a missing ClaimGuard as a blocker")
+    # Live read-only birth arguments (Prompt 67).
+    parser.add_argument("--max-events", type=int, default=500, dest="max_events",
+                        help="bounded max live events read")
+    parser.add_argument("--max-files", type=int, default=50, dest="max_files",
+                        help="bounded max inbox files read")
+    parser.add_argument("--max-bytes", type=int, default=5_000_000,
+                        dest="max_bytes", help="bounded max bytes read")
+    parser.add_argument("--require-governance", action="store_true",
+                        default=False, dest="require_governance",
+                        help="require approved live governance before birth")
+    parser.add_argument("--require-feeder-registry", action="store_true",
+                        default=False, dest="require_feeder_registry",
+                        help="require a feeder registry before birth")
+    parser.add_argument("--no-operator-pulse", action="store_true",
+                        default=False, dest="no_operator_pulse",
+                        help="exclude the operator_pulse source")
+    parser.add_argument("--operator-note", type=str, default="",
+                        dest="operator_note",
+                        help="optional operator note for the birth certificate")
 
 
 def build_parser() -> argparse.ArgumentParser:

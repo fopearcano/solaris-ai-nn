@@ -572,6 +572,14 @@ class InnerMapModel:
     # local Markdown only; it publishes nothing, calls no Git/GitHub, and makes
     # no consciousness/life/agency claim.
     architecture_book: Optional[Dict[str, Any]] = None
+    # Live read-only birth status (Prompt 67); None when not attached. Keys:
+    # live_birth_enabled, birth_run_id, governance_status, governance_passed,
+    # live_feeder_count, live_event_count, live_event_accepted_count,
+    # live_event_quarantined_count, membrane_activation_status,
+    # latest_birth_certificate_path. Solaris never controls the source; a birth
+    # is operational, not biological, and makes no consciousness/life/agency
+    # claim.
+    live_birth: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

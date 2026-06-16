@@ -4249,3 +4249,56 @@ GitHub, run Git, create releases, execute experiments, run external agents, or
 make any claim of consciousness, sentience, biological life, personhood, agency,
 free will, emotion, feeling, understanding, self-awareness, or subjective
 experience.**
+
+## Live Read-Only Birth Protocol
+
+Prompts 41-66 built and documented a fixture-only research architecture. The
+`live_birth` package (Prompt 67) opens the first safe path from fixture-only Alpha
+to real environmental input -- the "birth" layer. Birth means opening the sensory
+membrane to real environmental event flux through a strict, read-only pipeline:
+real environment -> external read-only feeders -> JSONL inbox spool -> validator ->
+quarantine if unsafe -> sensory membrane -> perceptual metabolism -> alpha/live
+report -> birth certificate.
+
+**Solaris never controls the source.** External feeder scripts (operator-run) write
+JSONL events into a local inbox; Solaris only reads them. The
+`LiveReadOnlyGovernance` manifest is required: a missing, disabled, or unapproved
+governance file blocks birth, any rule granting Solaris control (start/stop feeders,
+control hardware, execute commands, modify sources, access network, treat text as a
+command, treat labels/gloss as ground truth) blocks birth, and a forbidden source
+appearing in `allowed_sources` blocks birth. The `LiveFeederRegistry` describes
+feeders only; Solaris never starts, stops, or edits them, and any feeder claiming
+`solaris_may_control=true` is blocked.
+
+**Unsafe events are quarantined as evidence.** The `LiveEventValidator` checks each
+event against the schema, governance, and feeder registry; events that are invalid,
+not read-only, command-flagged, label/gloss-as-ground-truth, secret/instruction/
+private-flagged, oversized, from a forbidden source, or carrying a raw private
+stream marker are routed to the `QuarantineStore`, which preserves the original
+event and reason and never deletes. Quarantined events never enter the sensory
+membrane. The `LiveInboxSpool` reads a bounded number of local JSONL files and
+events only -- it does not tail forever, watch the filesystem, follow links, open
+remote URLs, delete inbox files, or execute anything from event contents.
+
+**The membrane activation is read-only and a birth certificate is issued.** The
+`EnvironmentalMembraneActivation` normalizes accepted events into the sensory
+membrane format, marks each as `live_readonly`, marks debug gloss and human labels
+as non-ground-truth, and marks operator pulses as stimulus rather than command; it
+hands off to the Plural Sensorium when available and writes a fallback report
+otherwise. The bounded `LiveReadOnlyBirthRuntime` orchestrates the whole path,
+optionally hands accepted-event summaries to Perceptual Metabolism in report-only
+mode, recommends (but never starts) the next phases (live observation, metabolism,
+ontogenesis, semiogenesis, short developmental soak), and issues a
+`BirthCertificate`. The certificate is operational, not biological: it states
+explicitly that it does not imply consciousness, sentience, biological life,
+personhood, agency, free will, emotion, feeling, understanding, self-awareness,
+autonomous self-improvement, or subjective experience. The layer is reached via
+`python -m solaris_ai_nn live-init / live-doctor / live-birth / live-quarantine /
+birth-certificate`, registers a metadata-only `live_readonly_birth_v0` profile in
+the Alpha registry (the default alpha profile stays fixture-only), and feeds Inner
+MAP and Evaluation. **Live Birth never starts or controls feeders, controls
+hardware, accesses the network/shell/browser/OS/camera/microphone, calls Git/
+GitHub, executes commands, treats sensory text as a command, treats human labels as
+ground truth, or makes any claim of consciousness, sentience, biological life,
+personhood, agency, free will, emotion, feeling, understanding, self-awareness, or
+subjective experience.**

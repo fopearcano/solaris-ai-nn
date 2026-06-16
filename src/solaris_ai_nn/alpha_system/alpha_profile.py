@@ -173,6 +173,17 @@ def get_alpha_profile(profile_id: Optional[str] = None) -> AlphaResearchProfile:
     """Return the named profile, defaulting to the fixture-only profile."""
     if not profile_id or profile_id == DEFAULT_PROFILE_ID:
         return default_alpha_profile()
+    if profile_id == LIVE_READONLY_BIRTH_PROFILE_ID:
+        # Live read-only birth is metadata-only here and is owned by the
+        # live_birth package; it is blocked unless governance is present, and
+        # the default alpha profile stays fixture-only. Asking the alpha layer
+        # for it returns the fixture-only default with an explicit note.
+        p = default_alpha_profile()
+        p.limitations.append(
+            "live_readonly_birth_v0 is a separate live read-only profile "
+            "(see the live_birth package); it is blocked unless live governance "
+            "is present and the default alpha profile remains fixture-only")
+        return p
     for mode in AlphaProfileMode.ALL:
         if profile_id in (mode, f"alpha_{mode}_v0"):
             return _profile_for_mode(mode)
@@ -183,5 +194,10 @@ def get_alpha_profile(profile_id: Optional[str] = None) -> AlphaResearchProfile:
     return p
 
 
+# Metadata-only live read-only profile id (owned by the live_birth package).
+LIVE_READONLY_BIRTH_PROFILE_ID = "live_readonly_birth_v0"
+
+
 def available_profiles() -> List[str]:
-    return [DEFAULT_PROFILE_ID] + [f"alpha_{m}_v0" for m in AlphaProfileMode.ALL]
+    return ([DEFAULT_PROFILE_ID] + [f"alpha_{m}_v0" for m in AlphaProfileMode.ALL]
+            + [LIVE_READONLY_BIRTH_PROFILE_ID])

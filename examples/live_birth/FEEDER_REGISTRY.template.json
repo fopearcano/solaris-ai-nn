@@ -1,0 +1,113 @@
+{
+  "feeders": [
+    {
+      "feeder_id": "feeder_chronos_absence",
+      "source_id": "chronos_absence",
+      "modality": "chronos",
+      "channel": "time/absence",
+      "description": "wall-clock ticks and absence/silence events",
+      "writes_to": ".solaris_ai_nn_live/inbox/chronos_absence.jsonl",
+      "read_only": true,
+      "started_externally": true,
+      "solaris_may_control": false,
+      "expected_event_rate": "low",
+      "privacy_level": "low",
+      "trust_level": "operator_trusted",
+      "allowed": true,
+      "limitations": [
+        "read-only; Solaris never starts or controls this feeder"
+      ]
+    },
+    {
+      "feeder_id": "feeder_machine_body",
+      "source_id": "machine_body",
+      "modality": "machine_body",
+      "channel": "scalar",
+      "description": "local machine scalar state (load, uptime) provided read-only",
+      "writes_to": ".solaris_ai_nn_live/inbox/machine_body.jsonl",
+      "read_only": true,
+      "started_externally": true,
+      "solaris_may_control": false,
+      "expected_event_rate": "low",
+      "privacy_level": "low",
+      "trust_level": "operator_trusted",
+      "allowed": true,
+      "limitations": [
+        "read-only; Solaris never starts or controls this feeder"
+      ]
+    },
+    {
+      "feeder_id": "feeder_local_environment_manual",
+      "source_id": "local_environment_manual",
+      "modality": "environment",
+      "channel": "manual",
+      "description": "manually-provided local environment readings",
+      "writes_to": ".solaris_ai_nn_live/inbox/local_environment_manual.jsonl",
+      "read_only": true,
+      "started_externally": true,
+      "solaris_may_control": false,
+      "expected_event_rate": "low",
+      "privacy_level": "low",
+      "trust_level": "operator_trusted",
+      "allowed": true,
+      "limitations": [
+        "read-only; Solaris never starts or controls this feeder"
+      ]
+    },
+    {
+      "feeder_id": "feeder_local_weather_readonly_external",
+      "source_id": "local_weather_readonly_external",
+      "modality": "weather",
+      "channel": "scalar",
+      "description": "operator-provided read-only local weather scalars",
+      "writes_to": ".solaris_ai_nn_live/inbox/local_weather_readonly_external.jsonl",
+      "read_only": true,
+      "started_externally": true,
+      "solaris_may_control": false,
+      "expected_event_rate": "low",
+      "privacy_level": "low",
+      "trust_level": "operator_trusted",
+      "allowed": true,
+      "limitations": [
+        "read-only; Solaris never starts or controls this feeder"
+      ]
+    },
+    {
+      "feeder_id": "feeder_project_artifact_field",
+      "source_id": "project_artifact_field",
+      "modality": "artifact",
+      "channel": "field",
+      "description": "read-only summary of local project artifact counts",
+      "writes_to": ".solaris_ai_nn_live/inbox/project_artifact_field.jsonl",
+      "read_only": true,
+      "started_externally": true,
+      "solaris_may_control": false,
+      "expected_event_rate": "low",
+      "privacy_level": "low",
+      "trust_level": "operator_trusted",
+      "allowed": true,
+      "limitations": [
+        "read-only; Solaris never starts or controls this feeder"
+      ]
+    },
+    {
+      "feeder_id": "feeder_operator_pulse",
+      "source_id": "operator_pulse",
+      "modality": "operator",
+      "channel": "pulse",
+      "description": "operator pulse as a stimulus event, never a command",
+      "writes_to": ".solaris_ai_nn_live/inbox/operator_pulse.jsonl",
+      "read_only": true,
+      "started_externally": true,
+      "solaris_may_control": false,
+      "expected_event_rate": "low",
+      "privacy_level": "low",
+      "trust_level": "operator_trusted",
+      "allowed": true,
+      "limitations": [
+        "read-only; Solaris never starts or controls this feeder"
+      ]
+    }
+  ],
+  "note": "template feeder registry; all feeders are external, read-only, operator-started, and never controlled by Solaris"
+}

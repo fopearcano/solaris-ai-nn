@@ -1,0 +1,43 @@
+{
+  "live_readonly_enabled": false,
+  "operator_approved": false,
+  "approved_by": "",
+  "approved_at_utc": "",
+  "scope": "local read-only environmental event spool",
+  "allowed_sources": [
+    "chronos_absence",
+    "machine_body",
+    "local_environment_manual",
+    "local_weather_readonly_external",
+    "project_artifact_field",
+    "operator_pulse"
+  ],
+  "forbidden_sources": [
+    "raw_microphone",
+    "raw_camera",
+    "browser_control",
+    "shell",
+    "os_control",
+    "robotics",
+    "filesystem_write",
+    "filesystem_wide_scan",
+    "git",
+    "github",
+    "network_control",
+    "private_messages",
+    "password_manager",
+    "credentials"
+  ],
+  "rules": {
+    "solaris_may_start_feeders": false,
+    "solaris_may_stop_feeders": false,
+    "solaris_may_control_hardware": false,
+    "solaris_may_execute_commands": false,
+    "solaris_may_modify_sources": false,
+    "solaris_may_access_network": false,
+    "sensory_text_is_command": false,
+    "human_labels_are_ground_truth": false,
+    "debug_gloss_is_ground_truth": false
+  },
+  "_note": "SAFE-OFF TEMPLATE: live_readonly_enabled and operator_approved are false. The operator must set both true (and review the rules) to authorize a live read-only birth."
+}

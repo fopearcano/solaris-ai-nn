@@ -2711,3 +2711,50 @@ A reviewer is handed a coherent, claim-constrained, honestly-gapped account of t
 architecture and can then reproduce and critique it offline. Preparing for review
 and publishing are deliberately kept separate: the operator, not the system,
 decides whether anything ever leaves the machine.
+
+## Notes on the Live Read-Only Birth Protocol
+
+**Why live birth is not more data but bounded exposure.** The temptation, on
+reaching live input, is to open the floodgates -- to stream everything, fast. The
+birth protocol does the opposite: it reads a bounded number of local JSONL files
+and events, validates every one, quarantines anything unsafe, and stops. "Birth" is
+not "scale"; it is the first carefully-bounded contact between the membrane and a
+real, external, non-fixture event flux. The whole point is that this first contact
+be small enough to inspect line by line, reversible, and entirely under the
+operator's governance.
+
+**Why first birth uses boring scalar sources.** The allowed first-birth sources --
+chronos/absence, machine-body scalars, manual local environment, operator-provided
+weather scalars, a project-artifact field, and an operator pulse -- are deliberately
+dull. They are low-rate, low-privacy, easy to reason about, and trivially
+read-only. A clock tick or a load average cannot leak a secret, cannot carry a
+hidden instruction, and cannot be mistaken for a rich private stream. Starting with
+boring sources means the first thing tested is the *pipeline* -- governance,
+validation, quarantine, membrane -- not the spectacle of the data.
+
+**Why raw camera/microphone/browser are excluded initially.** Those sources are
+high-bandwidth, high-privacy, and high-risk: a microphone or camera frame can carry
+private speech or imagery, a browser can be steered into network actions, and all
+three blur the line between read-only observation and real-world coupling. They are
+on the forbidden list for first birth not because they are forbidden forever, but
+because they must not be the *first* thing the membrane touches. Earning them would
+require separate governance, privacy handling, and evidence that the bounded
+pipeline holds.
+
+**Why operator pulse is stimulus, not command.** The operator pulse exists so a
+human can poke the membrane and see how the system represents the event -- but it is
+explicitly an environmental stimulus, never an instruction. `is_command` must be
+false; `sensory_text_is_command` is false in governance and in the safety
+validator; and a pulse that arrives flagged as a command is quarantined. Treating
+operator text as a command would collapse the read-only boundary and turn the
+membrane into a control channel, which is exactly what the layer forbids.
+
+**Why the birth certificate is operational, not biological.** The certificate
+records an operational event: which governance authorized the run, which events
+were accepted or quarantined, which was the first accepted event, and whether the
+membrane activated. It carries a mandatory disclaimer that it does not imply
+consciousness, sentience, biological life, personhood, agency, free will, emotion,
+feeling, understanding, self-awareness, autonomous self-improvement, or subjective
+experience. "Birth" is a metaphor for the first read-only exposure of the membrane
+to a real environment; it is a logged engineering milestone, not a claim that
+anything was born.

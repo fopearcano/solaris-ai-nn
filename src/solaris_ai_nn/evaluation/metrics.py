@@ -2554,3 +2554,45 @@ def architecture_book_metrics(ab: Optional[Dict[str, Any]]) -> Dict[str, Any]:
                 "only; no publish/upload/Git/GitHub/experiment and no "
                 "consciousness/life/agency claim",
     }
+
+
+def live_birth_metrics(lb: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective live read-only birth metrics (bounded first environmental contact).
+
+    These describe *bounded read-only exposure*: governance pass/block, feeders,
+    inbox files/events, accepted/quarantined events, membrane activation, and
+    the birth certificate. Solaris never starts/controls feeders, accesses the
+    network/shell/Git/GitHub, executes commands, or makes a consciousness/life/
+    agency claim. A birth is an operational event, not a biological one.
+    """
+    if not lb:
+        return {"present": False}
+    gov_pass = bool(lb.get("governance_passed", False))
+    accepted = int(lb.get("live_event_accepted_count", 0) or 0)
+    return {
+        "present": True,
+        "live_birth_run_count": 1,
+        "live_birth_governance_pass_count": 1 if gov_pass else 0,
+        "live_birth_governance_block_count": 0 if gov_pass else 1,
+        "live_feeder_count": int(lb.get("live_feeder_count", 0) or 0),
+        "live_inbox_file_count": int(lb.get("live_inbox_file_count", 0) or 0),
+        "live_event_count": int(lb.get("live_event_count", 0) or 0),
+        "live_event_accepted_count": accepted,
+        "live_event_quarantined_count": int(
+            lb.get("live_event_quarantined_count", 0) or 0),
+        "live_event_blocker_count": int(lb.get("live_birth_blocked", False)
+                                        and 1 or 0),
+        "live_membrane_activation_count": (
+            1 if lb.get("membrane_activation_status") == "activated" else 0),
+        "birth_certificate_count": (
+            1 if lb.get("latest_birth_certificate_path") else 0),
+        "live_birth_safety_block_count": int(
+            lb.get("live_birth_safety_block_count", 0) or 0),
+        "governance_status": lb.get("governance_status"),
+        "starts_feeders": False, "controls_hardware": False,
+        "accesses_network": False, "runs_git": False, "calls_github": False,
+        "is_consciousness_or_personhood": False,
+        "note": "bounded live read-only exposure metrics; Solaris never controls "
+                "the source; a birth is operational, not biological, and proves "
+                "nothing about consciousness/life/agency",
+    }

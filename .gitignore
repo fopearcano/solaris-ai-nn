@@ -103,3 +103,5 @@ artifacts/
 .sann_alpha/
 .solaris_ai_nn_docs/
 .sann_docs/
+.solaris_ai_nn_live/
+.sann_live/

@@ -723,6 +723,32 @@ DESCRIPTIONS = {
         "no publish/upload/Git/GitHub/experiment/forbidden-claim",
     "documentation_safety_protocol":
         "no publish/upload/Git/GitHub/experiment/forbidden-claim",
+    "live_birth": "live read-only birth (bounded first environmental contact)",
+    "live_birth_protocol":
+        "live read-only birth (no feeder/hardware/network control)",
+    "live_birth_evaluation": "live birth state check",
+    "live_governance_protocol": "live governance gate (approval required)",
+    "live_governance_evaluation": "live governance check",
+    "live_feeder_registry_protocol":
+        "feeder registry (describe-only; control blocks)",
+    "live_feeder_registry_evaluation": "feeder registry check",
+    "live_event_schema_protocol": "live event schema (read-only flags)",
+    "live_event_schema_evaluation": "live event schema check",
+    "live_event_validation_protocol":
+        "live event validation (unsafe -> quarantine)",
+    "live_event_validation_evaluation": "live event validation check",
+    "live_quarantine_protocol": "quarantine (preserve originals; evidence)",
+    "live_quarantine_evaluation": "quarantine check",
+    "live_membrane_activation_protocol":
+        "membrane activation (read-only; no command)",
+    "live_membrane_activation_evaluation": "membrane activation check",
+    "birth_certificate_protocol":
+        "birth certificate (operational, not biological)",
+    "birth_certificate_evaluation": "birth certificate check",
+    "live_birth_safety":
+        "no feeder/hardware/network/Git/command control; bounded",
+    "live_birth_safety_protocol":
+        "no feeder/hardware/network/Git/command control; bounded",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -1102,6 +1128,15 @@ class ExperimentRegistry:
                         "glossary_generation_evaluation",
                         "documentation_safety", "documentation_safety_protocol")
             or bool(merged.get("architecture_book", False)))
+        features["live_birth"] = (
+            name.startswith("live_birth")
+            or name.startswith("live_governance")
+            or name.startswith("live_feeder")
+            or name.startswith("live_event")
+            or name.startswith("live_quarantine")
+            or name.startswith("live_membrane")
+            or name.startswith("birth_certificate")
+            or bool(merged.get("live_birth", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

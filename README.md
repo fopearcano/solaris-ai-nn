@@ -153,6 +153,30 @@ life, personhood, agency, free will, emotion, feeling, understanding,
 self-awareness, or subjective experience. Missing modules and missing evidence are
 marked honestly; "organismic" is an architectural metaphor throughout.
 
+## Live Read-Only Birth
+
+The Live Read-Only Birth layer opens the first safe, bounded path from fixture-only
+Alpha to real environmental input. External feeder scripts (operator-run) write
+JSONL events into a local inbox; Solaris only reads them, validates each, quarantines
+anything unsafe, activates a read-only sensory membrane on accepted events, and
+issues a birth certificate. It is governance-gated and reversible.
+
+```bash
+python -m solaris_ai_nn live-init --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn live-doctor --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn live-birth --state-dir .solaris_ai_nn_live --max-events 100 --require-governance
+python -m solaris_ai_nn live-quarantine --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn birth-certificate --state-dir .solaris_ai_nn_live
+```
+
+Live Birth opens a local read-only environmental event membrane. It does not control
+feeders, hardware, network, shell, browser, Git, GitHub, OS devices, or real-world
+systems. It does not imply consciousness, sentience, biological life, personhood,
+agency, free will, emotion, feeling, understanding, self-awareness, or subjective
+experience. Governance is required and SAFE-OFF by default (the operator must
+approve it); unsafe events are quarantined as evidence, never deleted; and the birth
+certificate is operational, not biological.
+
 ## Run the minimal experiment
 
 ```bash
@@ -1780,6 +1804,13 @@ src/solaris_ai_nn/
                 runtime, reports, safety (reconstructs local Markdown docs only;
                 publishes/uploads nothing; calls no Git/GitHub; marks missing
                 modules honestly; makes no consciousness/life/agency claim)
+  live_birth/   live read-only birth protocol + environmental membrane:
+                birth profile, governance, feeder registry, event schema, event
+                validator, inbox spool, quarantine, membrane activation, birth
+                runtime, birth certificate, reports, safety (reads external feeder
+                JSONL only; governance-gated; quarantines unsafe events; never
+                starts/controls feeders, hardware, network, Git/GitHub, shell, or
+                OS; birth is operational, not biological)
   cli.py        unified `python -m solaris_ai_nn` Alpha CLI (local-only, bounded)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo

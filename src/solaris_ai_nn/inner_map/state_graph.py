@@ -2065,4 +2065,35 @@ def build_default_state_graph() -> StateGraph:
                "alpha reports are a documentation source")
     g.add_edge("ArchitectureBookRuntime", "inner_map",
                "documentation build status feeds Inner MAP")
+
+    # Live read-only birth (Prompt 67): the first bounded path from fixture to
+    # real environmental input. Solaris reads external feeder JSONL only; it
+    # never controls the source, network, hardware, Git, or shell.
+    for name, role in [
+        ("LiveBirthProfile", "bounded live read-only profile; governance-gated"),
+        ("LiveReadOnlyGovernance", "operator-approved; control-free; local"),
+        ("LiveFeederRegistry", "describe-only feeders; control-granting blocks"),
+        ("LiveSensoryEvent", "read-only event; not a command; not ground truth"),
+        ("LiveEventValidator", "validates events; unsafe -> quarantine"),
+        ("LiveInboxSpool", "bounded local JSONL read; no tail/watch/delete"),
+        ("QuarantineStore", "preserves unsafe events as evidence; never deletes"),
+        ("EnvironmentalMembraneActivation",
+         "read-only normalization; no feeder control; no command"),
+        ("BirthCertificate", "operational birth record; not biological"),
+        ("LiveReadOnlyBirthRuntime",
+         "bounded read-only birth; no feeder/hardware/network/Git/shell"),
+        ("LiveBirthSafetyValidator",
+         "no feeder/hardware/network/Git/command; bounded; governance required"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("LiveReadOnlyGovernance", "LiveReadOnlyBirthRuntime",
+               "governance gates whether a live birth may proceed")
+    g.add_edge("LiveInboxSpool", "LiveEventValidator",
+               "each inbox event is validated before acceptance")
+    g.add_edge("LiveEventValidator", "QuarantineStore",
+               "invalid/unsafe events are quarantined, not membrane-fed")
+    g.add_edge("EnvironmentalMembraneActivation", "plural_sensorium",
+               "accepted live events are converted to live_readonly stimuli")
+    g.add_edge("LiveReadOnlyBirthRuntime", "inner_map",
+               "live birth status feeds Inner MAP")
     return g

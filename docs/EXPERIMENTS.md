@@ -3180,3 +3180,41 @@ are defined as architectural metaphors.
 Builds the documentation and then the documentation index, showing present and
 missing documents (including optional alpha/claim/review reports). Missing
 documents are listed explicitly and never hidden.
+
+## 364. Live Birth Init Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_birth_init_demo.py --state-dir .solaris_ai_nn_live/test_init`
+Initializes the live state layout and writes the SAFE-OFF governance template and
+the feeder registry template (never over-writing). Governance is disabled and
+unapproved by default; the operator must approve it. Solaris never starts/controls
+feeders, hardware, network, Git/GitHub, shell, browser, or OS.
+
+## 365. Live Birth Doctor Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_birth_doctor_demo.py --state-dir .solaris_ai_nn_live/test_doctor`
+Runs the live doctor for SAFE-OFF governance (blocked), operator-approved
+governance (pass), and a governance placing a forbidden source in allowed_sources
+(blocked). The doctor is read-only.
+
+## 366. Live Event Validation Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_birth_event_validation_demo.py --state-dir .solaris_ai_nn_live/test_validation`
+Copies the bundled safe and unsafe sample events into the inbox and runs the
+bounded runtime under approved governance: safe events are accepted, unsafe events
+(command, read-only false, label-as-ground-truth, secret, forbidden raw_microphone)
+are quarantined as evidence and never enter the membrane.
+
+## 367. Live Birth Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_birth_demo.py --state-dir .solaris_ai_nn_live/test_demo --max-events 50`
+Runs the bounded live read-only birth on the sample inbox under approved
+governance: prints accepted/quarantined counts, membrane activation, first-contact
+markers, the birth certificate path, and the next recommended (not executed)
+phases. Solaris never controls the source.
+
+## 368. Birth Certificate Demo ✅ (implemented)
+
+**Run:** `python examples/run_birth_certificate_demo.py --state-dir .solaris_ai_nn_live/test_certificate`
+Builds a birth certificate from a synthetic accepted-event batch and shows the
+required non-claim disclaimer. The certificate is operational, not biological: it
+does not imply consciousness, life, or agency.
