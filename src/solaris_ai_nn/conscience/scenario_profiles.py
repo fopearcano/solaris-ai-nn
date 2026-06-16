@@ -1270,6 +1270,43 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["run_step_count"],
             max_runtime_s=60.0))
 
+    # -- Research baseline profiles (Prompt 60) -------------------------------
+    # Turns a validated post-merge baseline into a local versioned research
+    # reference. Local metadata only: no Git tag/release/branch/PR, no source
+    # change, no validation execution.
+    _baseline_modules = ["bridge", "governance", "ops", "inner_map",
+                        "post_merge_assimilation", "research_baseline"]
+    for pid, desc, plan_only in (
+            ("research_baseline_build",
+             "Build a versioned research baseline from post-merge evidence.",
+             False),
+            ("research_baseline_repro_bundle",
+             "Build the reproducibility bundle manifest + README.", False),
+            ("research_baseline_capability_map",
+             "Build the baseline capability map.", False),
+            ("research_baseline_roadmap_reset",
+             "Build the next-cycle roadmap reset.", False),
+            ("research_baseline_plan",
+             "Plan a research baseline build (plan only).", True)):
+        if plan_only:
+            run_ctx = _ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                           max_duration_s=None)
+        else:
+            run_ctx = _ctx(RunMode.SHORT_DEMO, max_steps=120)
+        add(ScenarioProfile(
+            profile_id=pid, description=desc, run_context=run_ctx,
+            enabled_modules=list(_baseline_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "local research baseline only; not a product/GitHub release",
+                "no Git tag/release, no branch/PR, no Git/GitHub call",
+                "no source change, no validation command execution",
+                "a critical limitation or failed safety boundary blocks "
+                "validation"],
+            governance_requirements=["enable_plural_sensorium_fixture"],
+            expected_artifacts=["RESEARCH_BASELINE_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=60.0))
+
     return profiles
 
 

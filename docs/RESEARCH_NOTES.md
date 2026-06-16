@@ -2370,3 +2370,54 @@ act on, and a critical safety failure or missing critical evidence blocks
 validation outright. The merge decision, the rollback decision, and the validation
 runs all remain human acts; the ledger only makes their consequences measurable.
 None of this proves consciousness, life, agency, or understanding.
+
+## Phase 60 — Versioned research baseline, reproducibility bundle, roadmap reset
+
+**Why baselines need versioning.** A research program that cannot name the exact
+state it is standing on cannot reason about what changed. After a merge is
+assimilated, "the current code" is ambiguous -- which evidence, which validation,
+which limitations? Versioning a validated baseline turns that ambiguity into a
+named, recorded reference point. Crucially, this versioning is *local metadata*,
+not a Git tag or release: the point is a research bookmark, not a shipped product.
+
+**Why reproducibility matters before new experiments.** The next experimental
+cycle compares against this baseline, so the baseline must be reproducible or the
+comparison is meaningless. The reproducibility bundle indexes exactly what a human
+needs -- Python/dependency requirements, fixtures, state directories, and the
+commands to run -- and distinguishes fixture, replay, live-read-only, and
+operator-provided evidence. It runs nothing itself; it is the documentation that
+lets a human stand the baseline back up deliberately.
+
+**Why limitations are part of the baseline.** A baseline that lists only its
+capabilities invites false confidence. The most honest thing a snapshot can carry
+is its weaknesses: missing replication, untested live data, fixture-overfit risk,
+unresolved regressions. The limitation registry makes these first-class and
+operator-visible, and a critical limitation blocks validated status outright. A
+baseline's limitations are as much a part of its identity as its capabilities.
+
+**Why safety boundaries define the experimental envelope.** Every baseline report
+restates the constitutional envelope -- no actuation, no hardware/feeder/network,
+no source self-rewrite, no Git/GitHub automation, no unsupported claims -- because
+the envelope is what makes the whole program safe to iterate on. The boundaries
+are held by design (the runtime has no capability to cross them), and a supplied
+safety artifact that *fails* downgrades the corresponding boundary and blocks
+validation. The envelope is not assumed; it is stated and checked in every
+snapshot.
+
+**Why a research baseline is not a product release.** This is the phrase repeated
+in every report for a reason: a validated baseline means the implementation and
+evidence boundaries are documented and reproducible enough for the next cycle --
+nothing more. It is not a GitHub release, not a deployment, not a certification of
+intelligence, and not a claim about consciousness, life, or agency. The runtime
+creates no tag, no release, no branch, and no PR; the word "validated" is a
+research-hygiene status, not a marketing claim.
+
+**How baseline resets prevent architecture drift.** Without a reset, each cycle
+quietly inherits the previous cycle's assumptions, and the architecture drifts on
+unexamined ground. The next-cycle roadmap reset establishes the clean starting
+point explicitly -- the version, capability map, limitations, comparison anchors,
+and the prioritized next experiments -- and hands it to the Architecture Evolution
+Lab. Each cycle therefore begins from a named, reproducible, limitation-annotated
+baseline rather than from accumulated, unstated drift. None of this proves
+anything about consciousness or understanding; it is ordinary, conservative
+research bookkeeping applied to the boundary between cycles.

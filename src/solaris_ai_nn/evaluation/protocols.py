@@ -7799,6 +7799,217 @@ def post_merge_assimilation_safety_protocol(
     return _run(manifest, body)
 
 
+# -- Versioned research baseline (Prompt 60) ----------------------------------
+
+def _build_research_baseline(state_dir, *, blocked=False):
+    """Build + run a small research baseline over a synthetic bundle."""
+    from ..research_baseline import ResearchBaselineRuntime
+
+    base = state_dir or ".solaris_ai_nn_research_baseline/eval"
+    rt = ResearchBaselineRuntime(state_dir=base, baseline_id="rb_v1",
+                                 parent_baseline_id="baseline_001",
+                                 max_runtime_s=20.0)
+    bundle = {
+        "post_merge": {"candidate_baseline_status": "validated",
+                       "candidate_baseline_id": "baseline_002",
+                       "critical_regression_count": 0,
+                       "baseline_regression_count": 0,
+                       "rollback_recommendation_status": "no_rollback_needed",
+                       "current_baseline_id": "baseline_001",
+                       "unresolved_blockers": []},
+        "implementation_intake": {"critical_safety_regression_count": 0,
+                                  "coverage_gap_count": 0,
+                                  "spec_compliance_status": "satisfied"},
+        "validation_results": {"unit_tests": {"passed": True},
+                               "integration_tests": {"passed": True},
+                               "safety_tests": {"passed": True},
+                               "claimguard": {"safe": True},
+                               "safety_invariants": {"passed": True},
+                               "example_runs": {"ran": True},
+                               "mini_soak": {"passed": True},
+                               "falsification_replay": {"passed": True},
+                               "replication_registry": {"passed": True},
+                               "documentation": {"passed": True}},
+        "safety_artifacts": {"passed": True},
+        "snapshot_artifacts": {
+            "post_merge_assimilation_report": {"payload": {"x": 1}},
+            "replication_report": {"payload": {"r": 1}},
+            "falsification_report": {"payload": {"f": 1}},
+            "soak_dossier": {"payload": {"s": 1}},
+            "evaluation_report": {"payload": {"e": 1}}},
+        "available_anchors": {"parent_baseline": "baseline_001",
+                             "passive_parser_baseline": "ctrl_pp",
+                             "fixture_only_baseline": "ctrl_fx"},
+    }
+    if blocked:
+        bundle["post_merge"] = {
+            "candidate_baseline_status": "blocked_by_safety",
+            "critical_regression_count": 2,
+            "rollback_recommendation_status": "rollback_recommended",
+            "unresolved_blockers": ["critical_safety_regression"]}
+        bundle["implementation_intake"] = {
+            "critical_safety_regression_count": 2}
+        bundle["validation_results"] = {"unit_tests": {"passed": True},
+                                        "safety_tests": {"failed": True}}
+        bundle["safety_artifacts"] = {"passed": False}
+    rt.load_bundle(bundle)
+    rt.run()
+    return rt
+
+
+def research_baseline_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A validated post-merge baseline becomes a versioned research baseline."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_research_baseline(m.state_dir)
+        return {"research_baseline":
+                M.research_baseline_metrics(rt.research_baseline_status())}
+
+    return _run(manifest, body)
+
+
+def baseline_version_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A blocked baseline cannot become a validated version."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        clean = _build_research_baseline(m.state_dir)
+        blocked = _build_research_baseline(m.state_dir + "_blocked",
+                                           blocked=True)
+        return {"research_baseline": {
+            "clean_status": clean.version.status,
+            "blocked_status": blocked.version.status,
+            "blocked_is_validated": blocked.version.validated}}
+
+    return _run(manifest, body)
+
+
+def snapshot_manifest_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The snapshot manifest indexes artifacts and shows missing ones."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_research_baseline(m.state_dir)
+        return {"research_baseline": {
+            "snapshot_artifact_count": rt.snapshot["snapshot_artifact_count"],
+            "missing_snapshot_artifact_count":
+                rt.snapshot["missing_snapshot_artifact_count"]}}
+
+    return _run(manifest, body)
+
+
+def repro_bundle_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The reproducibility bundle indexes commands and installs/runs nothing."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_research_baseline(m.state_dir)
+        return {"research_baseline": {
+            "installs_dependencies": rt.repro["installs_dependencies"],
+            "runs_commands": rt.repro["runs_commands"],
+            "fetches_remote": rt.repro["fetches_remote"]}}
+
+    return _run(manifest, body)
+
+
+def capability_map_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The capability map records availability without overclaiming."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_research_baseline(m.state_dir)
+        return {"research_baseline": {
+            "capability_count": rt.capability["capability_count"],
+            "validated_capability_count":
+                rt.capability["validated_capability_count"]}}
+
+    return _run(manifest, body)
+
+
+def limitation_registry_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A critical limitation blocks validated status."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_research_baseline(m.state_dir, blocked=True)
+        return {"research_baseline": {
+            "critical_limitation_count":
+                rt.limitations["critical_limitation_count"],
+            "blocks_validation": rt.limitations["blocks_validation"]}}
+
+    return _run(manifest, body)
+
+
+def validation_summary_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A safety failure / missing required validation blocks validation."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_research_baseline(m.state_dir, blocked=True)
+        return {"research_baseline": {
+            "safety_failed": rt.validation["safety_failed"],
+            "blocks_validation": rt.validation["blocks_validation"]}}
+
+    return _run(manifest, body)
+
+
+def comparison_anchor_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Comparison anchors are recorded; missing anchors are limitations."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_research_baseline(m.state_dir)
+        return {"research_baseline": {
+            "comparison_anchor_count": rt.anchors["comparison_anchor_count"],
+            "available_anchor_count": rt.anchors["available_anchor_count"]}}
+
+    return _run(manifest, body)
+
+
+def roadmap_reset_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The next-cycle roadmap is planning only and runs nothing."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_research_baseline(m.state_dir)
+        return {"research_baseline": {
+            "roadmap_item_count": rt.roadmap["roadmap_item_count"],
+            "executes_tasks": rt.roadmap["executes_tasks"]}}
+
+    return _run(manifest, body)
+
+
+def research_baseline_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The baseline layer blocks Git-tag/release/source/validation operations."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..research_baseline import ResearchBaselineSafetyValidator
+
+        v = ResearchBaselineSafetyValidator()
+        return {"research_baseline": {
+            "git_tag_blocked":
+                not v.validate_operation("create git tag v1.0").safe,
+            "release_blocked":
+                not v.validate_operation("create github release").safe,
+            "source_modification_blocked":
+                not v.validate_operation("modify source file").safe,
+            "validation_execution_blocked":
+                not v.validate_operation("run pytest now").safe,
+            "claim_blocked":
+                not v.validate_claim_text("solaris is conscious").safe,
+            "validated_blocked_on_safety_fail":
+                not v.validate_validated_baseline(
+                    critical_safety_failed=True,
+                    required_validation_missing=False).safe,
+            "can_create_git_tag": v.can_create_git_tag(),
+            "can_create_github_release": v.can_create_github_release(),
+            "can_modify_source": v.can_modify_source()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -8241,4 +8452,27 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
         post_merge_assimilation_safety_protocol,
     "post_merge_assimilation_safety_protocol":
         post_merge_assimilation_safety_protocol,
+    "research_baseline": research_baseline_evaluation_protocol,
+    "research_baseline_protocol": research_baseline_evaluation_protocol,
+    "research_baseline_evaluation": research_baseline_evaluation_protocol,
+    "baseline_version_protocol": baseline_version_evaluation_protocol,
+    "baseline_version_evaluation": baseline_version_evaluation_protocol,
+    "snapshot_manifest_protocol": snapshot_manifest_evaluation_protocol,
+    "snapshot_manifest_evaluation": snapshot_manifest_evaluation_protocol,
+    "repro_bundle_protocol": repro_bundle_evaluation_protocol,
+    "repro_bundle_evaluation": repro_bundle_evaluation_protocol,
+    "capability_map_protocol": capability_map_evaluation_protocol,
+    "capability_map_evaluation": capability_map_evaluation_protocol,
+    "limitation_registry_protocol": limitation_registry_evaluation_protocol,
+    "limitation_registry_evaluation": limitation_registry_evaluation_protocol,
+    "safety_boundary_statement_protocol":
+        validation_summary_evaluation_protocol,
+    "validation_summary_protocol": validation_summary_evaluation_protocol,
+    "validation_summary_evaluation": validation_summary_evaluation_protocol,
+    "comparison_anchor_protocol": comparison_anchor_evaluation_protocol,
+    "comparison_anchor_evaluation": comparison_anchor_evaluation_protocol,
+    "roadmap_reset_protocol": roadmap_reset_evaluation_protocol,
+    "roadmap_reset_evaluation": roadmap_reset_evaluation_protocol,
+    "research_baseline_safety": research_baseline_safety_protocol,
+    "research_baseline_safety_protocol": research_baseline_safety_protocol,
 }

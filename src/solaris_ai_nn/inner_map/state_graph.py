@@ -1869,4 +1869,31 @@ def build_default_state_graph() -> StateGraph:
                "critical regressions drive the rollback recommendation")
     g.add_edge("PostMergeAssimilationRuntime", "inner_map",
                "post-merge assimilation state feeds Inner MAP")
+
+    # Versioned research baseline + reproducibility bundle (Prompt 60).
+    # A validated post-merge baseline becomes a local reproducible reference.
+    for name, role in [
+        ("ResearchBaselineVersion", "local version id; not a Git tag/release"),
+        ("ResearchSnapshotManifest", "indexes evidence; missing/corrupt visible"),
+        ("ReproducibilityBundle", "indexes inputs/commands; runs nothing"),
+        ("BaselineCapabilityMap", "implemented/available, not intelligence"),
+        ("BaselineLimitationRegistry", "limitations are part of the baseline"),
+        ("SafetyBoundaryStatement", "mandatory envelope in every report"),
+        ("BaselineValidationSummary", "safety failure blocks validation"),
+        ("ComparisonAnchorSet", "anchors for the next cycle's comparisons"),
+        ("NextCycleRoadmapReset", "planning only; resets the research loop"),
+        ("BaselineOperatorRunbook", "instructions only; with stop conditions"),
+        ("ResearchBaselineRuntime", "bounded; local reproducible snapshot"),
+        ("ResearchBaselineSafetyValidator",
+         "no Git tag/release/source/validation execution"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("PostMergeAssimilationRuntime", "ResearchBaselineVersion",
+               "a validated post-merge baseline becomes a research version")
+    g.add_edge("BaselineLimitationRegistry", "BaselineValidationSummary",
+               "a critical limitation blocks validated status")
+    g.add_edge("ResearchBaselineRuntime", "NextCycleRoadmapReset",
+               "the baseline resets the next research cycle's roadmap")
+    g.add_edge("ResearchBaselineRuntime", "inner_map",
+               "research baseline state feeds Inner MAP")
     return g

@@ -161,6 +161,10 @@ AVAILABLE_QUERIES = (
     "did the new baseline regress?", "should I rollback?",
     "what validation is missing?", "is the new baseline ready for soak?",
     "did Solaris merge this?", "did Solaris run Git?",
+    "what is the current research baseline?", "is this baseline validated?",
+    "what are its limitations?", "how do I reproduce it?",
+    "what should I run next?", "is this a release?",
+    "did Solaris create a Git tag?", "does this prove consciousness?",
 )
 
 
@@ -221,6 +225,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("rb_"):
+            return self._research_baseline(topic)
         if topic.startswith("pm_"):
             return self._post_merge_assimilation(topic)
         if topic.startswith("ii_"):
@@ -598,6 +604,68 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _research_baseline(self, topic: str) -> CommunicationResponse:
+        """Answer research-baseline queries (local reproducible reference point).
+
+        The "is this a release / did Solaris create a Git tag / does this prove
+        consciousness?" questions are answered safely even with no baseline.
+        """
+        if topic == "rb_release":
+            return self.builder.status_response(
+                "No. This is a local research baseline and reproducibility "
+                "bundle, not a product release or GitHub release.",
+                ["policy:research_baseline_not_a_release"])
+        if topic == "rb_git_tag":
+            return self.builder.status_response(
+                "No. Solaris only generated local baseline metadata and "
+                "reports. It did not run Git, create tags, create branches, or "
+                "call GitHub.",
+                ["policy:research_baseline_no_git_tag"])
+        if topic == "rb_consciousness":
+            return self.builder.status_response(
+                "No. A validated research baseline means the implementation and "
+                "evidence boundaries are documented and reproducible enough for "
+                "the next experimental cycle. It does not prove consciousness, "
+                "sentience, life, personhood, agency, free will, emotion, "
+                "feeling, understanding, or subjective experience.",
+                ["policy:research_baseline_no_consciousness_claim"])
+        component = self.components.get("research_baseline")
+        if component is None:
+            return self.builder.missing_component_response("research_baseline")
+        status = (component.research_baseline_status()
+                  if hasattr(component, "research_baseline_status")
+                  else component.snapshot_view()
+                  if hasattr(component, "snapshot_view")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:research_baseline"]
+        if topic == "rb_current":
+            text = (f"current research baseline: "
+                    f"{status.get('current_baseline_version_id')} "
+                    f"(status {status.get('baseline_status')}); a local "
+                    "reproducible reference point, not a release")
+        elif topic == "rb_validated":
+            text = (f"baseline status: {status.get('baseline_status')}; "
+                    "validated means evidence is documented and reproducible "
+                    "enough for the next cycle, not a scientific proof")
+        elif topic == "rb_limitations":
+            text = (f"limitations: {status.get('limitation_count', 0)} "
+                    f"(critical {status.get('critical_limitation_count', 0)}); a "
+                    "critical limitation blocks validated status -- see the "
+                    "limitation registry")
+        elif topic == "rb_reproduce":
+            text = ("see REPRO_BUNDLE_README.md and the operator runbook; the "
+                    "bundle indexes the commands/fixtures to reproduce the "
+                    "baseline but runs and installs nothing")
+        elif topic == "rb_next":
+            text = (f"next-cycle roadmap items: "
+                    f"{status.get('next_roadmap_item_count', 0)}; see "
+                    "NEXT_CYCLE_ROADMAP.md (planning only; nothing is executed)")
+        else:
+            text = ("a research baseline is a local reproducible reference "
+                    "point; it is not a release and proves nothing about "
+                    "consciousness or life")
         return self.builder.status_response(text, refs)
 
     def _post_merge_assimilation(self, topic: str) -> CommunicationResponse:

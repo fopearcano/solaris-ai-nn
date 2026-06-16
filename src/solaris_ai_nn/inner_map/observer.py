@@ -97,6 +97,7 @@ class InnerMapObserver:
     experiment_compiler: Any = None  # optional dict/object of compiler status
     implementation_intake: Any = None  # optional dict/object of intake status
     post_merge_assimilation: Any = None  # optional dict/object of post-merge
+    research_baseline: Any = None  # optional dict/object of research baseline
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -883,6 +884,17 @@ class InnerMapObserver:
                 model.post_merge_assimilation = post_merge.post_merge_status()
             elif hasattr(post_merge, "snapshot"):
                 model.post_merge_assimilation = post_merge.snapshot()
+        baseline = self.research_baseline
+        if baseline is None and self.runner is not None:
+            baseline = getattr(self.runner, "research_baseline", None)
+        if baseline is not None:
+            # Research-baseline status (versioned reproducible-snapshot view).
+            if isinstance(baseline, dict):
+                model.research_baseline = dict(baseline)
+            elif hasattr(baseline, "research_baseline_status"):
+                model.research_baseline = baseline.research_baseline_status()
+            elif hasattr(baseline, "snapshot_view"):
+                model.research_baseline = baseline.snapshot_view()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

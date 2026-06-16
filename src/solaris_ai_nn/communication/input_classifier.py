@@ -437,6 +437,20 @@ POST_MERGE_QUERIES = (
     ("did solaris run git", "pm_git"),
 )
 
+# Research-baseline queries (Prompt 60). Answered from the research-baseline
+# status; the "is this a release / did Solaris create a Git tag / does this prove
+# consciousness?" questions are answered safely even with no baseline built.
+RESEARCH_BASELINE_QUERIES = (
+    ("what is the current research baseline", "rb_current"),
+    ("is this baseline validated", "rb_validated"),
+    ("what are its limitations", "rb_limitations"),
+    ("how do i reproduce it", "rb_reproduce"),
+    ("what should i run next", "rb_next"),
+    ("is this a release", "rb_release"),
+    ("did solaris create a git tag", "rb_git_tag"),
+    ("does this prove consciousness", "rb_consciousness"),
+)
+
 # Feeder-SDK queries (Prompt 45). Answered from the feeder monitor/manifest; the
 # control/start questions are answered safely even with no feeders attached.
 FEEDER_SDK_QUERIES = (
@@ -640,7 +654,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._post_merge_assimilation(lowered)
+        result = (self._research_baseline(lowered)
+                  or self._post_merge_assimilation(lowered)
                   or self._implementation_intake(lowered)
                   or self._experiment_compiler(lowered)
                   or self._developmental_replication(lowered)
@@ -804,6 +819,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _research_baseline(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in RESEARCH_BASELINE_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"research baseline query {topic!r}"])
         return None
 
     @staticmethod

@@ -542,6 +542,31 @@ DESCRIPTIONS = {
         "no source/Git/GitHub/merge/validation execution",
     "post_merge_assimilation_safety_protocol":
         "no source/Git/GitHub/merge/validation execution",
+    "research_baseline": "versioned local research baseline snapshot",
+    "research_baseline_protocol":
+        "research baseline + reproducibility bundle",
+    "research_baseline_evaluation": "research baseline check",
+    "baseline_version_protocol": "local baseline version (no Git tag/release)",
+    "baseline_version_evaluation": "baseline version check",
+    "snapshot_manifest_protocol": "snapshot manifest indexes evidence",
+    "snapshot_manifest_evaluation": "snapshot manifest check",
+    "repro_bundle_protocol": "reproducibility bundle (index only)",
+    "repro_bundle_evaluation": "repro bundle check",
+    "capability_map_protocol": "capability map (available, not intelligence)",
+    "capability_map_evaluation": "capability map check",
+    "limitation_registry_protocol": "limitation registry (critical blocks)",
+    "limitation_registry_evaluation": "limitation registry check",
+    "safety_boundary_statement_protocol": "mandatory safety boundary statement",
+    "validation_summary_protocol": "validation summary (safety failure blocks)",
+    "validation_summary_evaluation": "validation summary check",
+    "comparison_anchor_protocol": "comparison anchors for the next cycle",
+    "comparison_anchor_evaluation": "comparison anchor check",
+    "roadmap_reset_protocol": "next-cycle roadmap reset (planning only)",
+    "roadmap_reset_evaluation": "roadmap reset check",
+    "research_baseline_safety":
+        "no Git tag/release/source/validation execution",
+    "research_baseline_safety_protocol":
+        "no Git tag/release/source/validation execution",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -827,6 +852,23 @@ class ExperimentRegistry:
                         "rollback_watch_protocol", "rollback_watch_evaluation",
                         "followup_queue_protocol", "followup_queue_evaluation")
             or bool(merged.get("post_merge_assimilation", False)))
+        features["research_baseline"] = (
+            name.startswith("research_baseline")
+            or name in ("baseline_version_protocol",
+                        "baseline_version_evaluation",
+                        "snapshot_manifest_protocol",
+                        "snapshot_manifest_evaluation", "repro_bundle_protocol",
+                        "repro_bundle_evaluation", "capability_map_protocol",
+                        "capability_map_evaluation",
+                        "limitation_registry_protocol",
+                        "limitation_registry_evaluation",
+                        "safety_boundary_statement_protocol",
+                        "validation_summary_protocol",
+                        "validation_summary_evaluation",
+                        "comparison_anchor_protocol",
+                        "comparison_anchor_evaluation", "roadmap_reset_protocol",
+                        "roadmap_reset_evaluation")
+            or bool(merged.get("research_baseline", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

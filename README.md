@@ -515,7 +515,26 @@ python examples/run_baseline_registry_demo.py                  # append-only bas
 python examples/run_post_merge_baseline_comparison_demo.py     # improved/regressed; safety regression dominates
 python examples/run_regression_watch_demo.py                   # critical regression -> rollback recommendation
 python examples/run_post_merge_followup_queue_demo.py          # missing validation / mini-soak / replication queue
+
+# Research baseline: a local reproducible experimental reference point
+python examples/run_research_baseline_snapshot_demo.py         # validated baseline -> versioned snapshot + report
+python examples/run_repro_bundle_demo.py                       # snapshot manifest -> repro bundle (index only)
+python examples/run_capability_map_demo.py                     # validated/experimental/missing capabilities
+python examples/run_limitation_registry_demo.py                # warning/major/critical (critical blocks validation)
+python examples/run_next_cycle_roadmap_demo.py                 # next soak/replication + architecture input pack
 ```
+
+A Research Baseline is a local reproducible experimental reference point. It does
+not create Git tags, GitHub releases, branches, PRs, or product releases. It turns
+a validated (or validated-with-warnings) post-merge baseline into a local versioned
+snapshot: a version record, a snapshot manifest + reproducibility bundle (which
+indexes commands/fixtures but installs/runs/fetches nothing), a capability map
+(implemented/available, not intelligence), a limitation registry (a critical
+limitation blocks validation), a mandatory safety boundary statement, a validation
+summary (a safety failure blocks validation), comparison anchors, a next-cycle
+roadmap (planning only), and an operator runbook (instructions only, with stop
+conditions). It answers "what exact experimental baseline are we standing on before
+the next cycle begins?" -- and proves nothing about consciousness, life, or agency.
 
 Post-Merge Assimilation reads operator-provided local evidence after an external
 human merge and updates research baselines. It does not run Git, call GitHub,
@@ -1571,6 +1590,11 @@ src/solaris_ai_nn/
                 baseline comparison, regression watch, module status update,
                 validation ingest, rollback watch, follow-up queue, runtime,
                 reports, safety (reads local evidence; no Git/GitHub/merge)
+  research_baseline/ versioned research baseline + reproducibility bundle:
+                baseline version, snapshot manifest, repro bundle, capability
+                map, limitation registry, safety boundary statement, validation
+                summary, comparison anchors, roadmap reset, operator runbook,
+                runtime, reports, safety (local snapshot; no Git tag/release)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

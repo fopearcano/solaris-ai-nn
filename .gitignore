@@ -89,3 +89,5 @@ artifacts/
 .sann_implementation_intake/
 .solaris_ai_nn_post_merge/
 .sann_post_merge/
+.solaris_ai_nn_research_baseline/
+.sann_research_baseline/

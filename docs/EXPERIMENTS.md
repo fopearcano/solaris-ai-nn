@@ -2905,3 +2905,40 @@ rollback recommendation; rollback is a recommendation only and is never executed
 Builds the follow-up queue for a baseline with missing validation (queues reruns)
 and a validated baseline (queues mini soak, falsification replay, and replication
 registration). The queue is local metadata; it executes nothing.
+
+## 329. Research Baseline Demo ✅ (implemented)
+
+**Run:** `python examples/run_research_baseline_snapshot_demo.py --state-dir .solaris_ai_nn_research_baseline/test_baseline`
+Turns a validated post-merge baseline into a local versioned research baseline:
+version record, validation summary, capability map, limitations, safety boundary
+statement, comparison anchors, next-cycle roadmap, and runbook. A local
+reproducible reference point, NOT a product or GitHub release. (Distinct from the
+research-lab `run_research_baseline_demo.py`.)
+
+## 330. Repro Bundle Demo ✅ (implemented)
+
+**Run:** `python examples/run_repro_bundle_demo.py --state-dir .solaris_ai_nn_research_baseline/test_repro_bundle`
+Indexes a snapshot manifest (with one missing artifact) and builds a
+reproducibility-bundle manifest + README. The bundle installs nothing, runs
+nothing, and fetches nothing.
+
+## 331. Capability Map Demo ✅ (implemented)
+
+**Run:** `python examples/run_capability_map_demo.py --state-dir .solaris_ai_nn_research_baseline/test_capability_map`
+Builds the capability map: a validated capability (with evidence refs), an
+experimental one, and a declared-validated capability without evidence
+(downgraded to available). Capability means implemented/available, not
+intelligence.
+
+## 332. Limitation Registry Demo ✅ (implemented)
+
+**Run:** `python examples/run_limitation_registry_demo.py --state-dir .solaris_ai_nn_research_baseline/test_limitation_registry`
+Builds a registry with a warning, a major, and a critical limitation. A critical
+limitation blocks validated status; limitations are kept operator-visible.
+
+## 333. Next-Cycle Roadmap Demo ✅ (implemented)
+
+**Run:** `python examples/run_next_cycle_roadmap_demo.py --state-dir .solaris_ai_nn_research_baseline/test_roadmap`
+Builds the next-cycle roadmap for a validated baseline (mini soak, replication,
+falsification, architecture evolution) and a blocked baseline (collect evidence /
+improve safety; soak blocked). The roadmap is planning only; it runs nothing.

@@ -2228,3 +2228,54 @@ def post_merge_assimilation_metrics(pm: Optional[Dict[str, Any]],
         "note": "post-merge research ledger; no Git, GitHub, merge, source "
                 "change, or validation execution",
     }
+
+
+def research_baseline_metrics(rb: Optional[Dict[str, Any]],
+                              ) -> Dict[str, Any]:
+    """Objective research-baseline metrics (local reproducible reference point).
+
+    These describe a *local versioned research baseline*: version/validated/
+    blocked counts, snapshot artifacts, capabilities (and validated ones),
+    limitations (and critical ones), safety-boundary pass/fail, validation pass/
+    missing, comparison anchors, and roadmap items. A research baseline is a
+    local reproducible reference -- not a Git tag, GitHub release, product
+    release, or any consciousness/life/agency claim.
+    """
+    if not rb:
+        return {"present": False}
+    return {
+        "present": True,
+        "research_baseline_version_count": int(
+            rb.get("research_baseline_version_count", 0) or 0),
+        "validated_baseline_count": int(
+            rb.get("validated_baseline_count", 0) or 0),
+        "blocked_baseline_count": int(rb.get("blocked_baseline_count", 0) or 0),
+        "snapshot_artifact_count": int(
+            rb.get("snapshot_artifact_count", 0) or 0),
+        "missing_snapshot_artifact_count": int(
+            rb.get("missing_snapshot_artifact_count", 0) or 0),
+        "capability_count": int(rb.get("capability_count", 0) or 0),
+        "validated_capability_count": int(
+            rb.get("validated_capability_count", 0) or 0),
+        "limitation_count": int(rb.get("limitation_count", 0) or 0),
+        "critical_limitation_count": int(
+            rb.get("critical_limitation_count", 0) or 0),
+        "safety_boundary_pass_count": int(
+            rb.get("safety_boundary_pass_count", 0) or 0),
+        "safety_boundary_fail_count": int(
+            rb.get("safety_boundary_fail_count", 0) or 0),
+        "validation_pass_count": int(rb.get("validation_pass_count", 0) or 0),
+        "validation_missing_count": int(
+            rb.get("validation_missing_count", 0) or 0),
+        "comparison_anchor_count": int(
+            rb.get("comparison_anchor_count", 0) or 0),
+        "roadmap_item_count": int(rb.get("roadmap_item_count", 0) or 0),
+        "research_baseline_safety_block_count": int(
+            rb.get("research_baseline_safety_block_count", 0) or 0),
+        "baseline_status": rb.get("baseline_status"),
+        "is_git_tag": False, "is_github_release": False,
+        "is_product_release": False, "modifies_source": False,
+        "is_consciousness_or_personhood": False,
+        "note": "local versioned research baseline; not a Git tag, GitHub "
+                "release, product release, or consciousness/life/agency claim",
+    }

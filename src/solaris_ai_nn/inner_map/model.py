@@ -511,6 +511,15 @@ class InnerMapModel:
     # after an external merge; it runs no Git, calls no GitHub, merges nothing,
     # and makes no consciousness/life/agency claim.
     post_merge_assimilation: Optional[Dict[str, Any]] = None
+    # Research-baseline status (Prompt 60); None when not attached. Keys:
+    # research_baseline_enabled, current_baseline_version_id, baseline_status,
+    # capability_count, validated_capability_count, limitation_count,
+    # critical_limitation_count, safety_boundary_status, validation_status,
+    # comparison_anchor_count, next_roadmap_item_count,
+    # latest_research_baseline_report_path. A research baseline is a local
+    # reproducible reference point; it is not a Git tag, GitHub release, product
+    # release, or any consciousness/life/agency claim.
+    research_baseline: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

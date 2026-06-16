@@ -100,6 +100,10 @@ def _source_package(profile_id: str) -> str:
     if pid.startswith("safety") or pid.startswith("red_team") \
             or pid.startswith("assurance"):
         return "safety_invariants"
+    if pid in ("research_baseline_build", "research_baseline_repro_bundle",
+               "research_baseline_capability_map",
+               "research_baseline_roadmap_reset", "research_baseline_plan"):
+        return "research_baseline"
     if pid.startswith("research"):
         return "research_lab"
     if pid.startswith("architecture"):

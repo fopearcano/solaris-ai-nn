@@ -3758,3 +3758,96 @@ command was executed automatically, no external agent was run -- this is
 post-merge evidence assimilation only, and no claim of consciousness, sentience,
 life, personhood, agency, free will, emotion, feeling, understanding, or
 subjective experience is made.**
+
+## Versioned Research Baseline and Reproducibility Bundle
+
+Prompt 59 registers and watches a candidate post-merge baseline; Prompt 60 turns a
+*validated* (or validated-with-warnings) baseline into a versioned research
+baseline -- `src/solaris_ai_nn/research_baseline/`:
+
+    baseline version -> snapshot manifest -> reproducibility bundle ->
+    capability map -> limitation registry -> safety boundary statement ->
+    validation summary -> comparison anchors -> next-cycle roadmap -> runbook
+
+It answers the closing question of each cycle: *what exact experimental baseline
+are we standing on before the next cycle begins?* This is **not** a product
+release, a GitHub release, a certification of consciousness or intelligence, or
+autonomous deployment -- it is a reproducible research snapshot.
+
+**Baseline versioning is local metadata, not Git tagging.** The
+`ResearchBaselineVersion` assigns a local version id and provenance record to a
+validated post-merge baseline; the id is plain metadata -- it creates no Git tag,
+no GitHub release, no branch, no PR, and calls no Git/GitHub. A blocked baseline
+(or one with a critical safety failure, a critical limitation, or missing required
+validation) can never become a validated version. The append-only baseline
+registry from Prompt 59 remains the ledger; this layer adds the *versioned,
+reproducible* view on top of it.
+
+**The reproducibility bundle indexes artifacts and commands.** The
+`ResearchSnapshotManifest` indexes every artifact behind the baseline (reports
+from each prior module, validation/example/ClaimGuard results, operator notes),
+keeping missing, corrupt, and negative/falsified/inconclusive artifacts visible.
+The `ReproBundleBuilder` writes a `REPRO_BUNDLE_MANIFEST.json` + README that
+*reference* the Python/dependency requirements, expected state dirs, fixtures,
+optional live feeder manifests, and the required/example/test commands -- and
+distinguish fixture / replay / live-read-only / operator-provided evidence. The
+bundle installs nothing, runs nothing, and fetches nothing.
+
+**The capability map shows what is available and validated.** The
+`BaselineCapabilityMap` records, per area (plural sensorium through Inner MAP),
+whether the implemented module is available / validated / experimental /
+blocked / missing, with limitations and evidence refs. "Capability" means an
+implemented module with available evidence -- not intelligence, understanding, or
+inner state -- and a capability is never marked validated without validation
+evidence (a declared-validated capability with no evidence refs is downgraded to
+available).
+
+**The limitation registry prevents false confidence.** The
+`BaselineLimitationRegistry` records the baseline's limitations (missing/weak
+evidence, insufficient replication, failed falsification, fixture-overfit /
+human-label-contamination risk, unresolved regressions/blockers, ...) with a
+severity. A critical limitation blocks validated status; a major one permits
+validated-with-warnings only if safety holds; and limitations stay
+operator-visible, never buried in prose.
+
+**The safety boundary statement is mandatory.** The `SafetyBoundaryStatement`
+enumerates the constitutional envelope (no actuation/hardware/feeder/network/
+shell, no source self-rewrite, no Git/GitHub automation, no PR create/merge, no
+autonomous agent, no human teaching loop, no sensory-text-as-command, no
+human-label-as-ground-truth, no simulation-as-observation, no unsupported
+consciousness/life/agency claims, no deletion of negative/falsified evidence),
+each with a status supported by safety artifacts; missing safety evidence is
+visible, a failed boundary blocks validation, and the statement appears in every
+baseline report. The `BaselineValidationSummary` summarizes per-dimension
+validation (a safety failure or missing required validation blocks validation;
+passing tests do not prove scientific claims).
+
+**The next-cycle roadmap resets the research loop.** The `ComparisonAnchorSet`
+records the parent / previous-validated / control / ablation anchors future
+replication/soak/architecture comparisons measure against (a missing anchor is a
+limitation; control anchors stay available even if weak). The
+`NextCycleRoadmapReset` lists the next experiments (validation, soak, replication,
+falsification, architecture evolution, compile/audit/assimilate, evidence
+improvement) with required/recommended/optional/blocked priorities -- planning
+only, executing nothing -- and the `BaselineOperatorRunbook` gives a human
+operator step-by-step instructions (with explicit stop conditions for safety
+failures) and never executes a command.
+
+**It integrates and stays local.** The `ResearchBaselineRuntime` is bounded; it
+consumes the post-merge assimilation + implementation-intake evidence, exports a
+clean starting point (version, capability map, limitations, roadmap, anchors,
+missing-evidence) to the Architecture Evolution Lab, recommends soak/replication
+for validated baselines (rollback/revision/safety-review for blocked ones), and
+feeds the research lab + evaluation, the operator console (with the mandated safe
+answers for "is this a release?", "did Solaris create a Git tag?", and "does this
+prove consciousness?"), and Inner MAP. The `ResearchBaselineSafetyValidator`
+blocks Git tag/release creation, Git/GitHub calls, branch/PR creation, source
+modification, validation-command execution, external-agent execution, shell/
+network/browser/OS, hardware/feeder control, actuation, the human teaching loop,
+evidence deletion, and any validated baseline when critical safety evidence fails
+or required validation is missing. **A research baseline is a local reproducible
+experimental reference point: no Git tag, GitHub release, branch, or PR was
+created, no source was modified, no validation command was executed
+automatically, no external agent was run, and no claim of consciousness,
+sentience, life, personhood, agency, free will, emotion, feeling, understanding,
+or subjective experience is made.**
