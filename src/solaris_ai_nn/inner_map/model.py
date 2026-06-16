@@ -485,6 +485,14 @@ class InnerMapModel:
     # across runs; a lineage is experimental provenance, not biological
     # ancestry, and this is not consciousness or life.
     developmental_replication: Optional[Dict[str, Any]] = None
+    # Experiment-compiler status (Prompt 57); None when not attached. Keys:
+    # experiment_compiler_enabled, compiler_input_source_count,
+    # compiled_spec_count, prompt_pack_count, branch_spec_count,
+    # blocked_spec_count, ready_spec_count, safety_gate_failure_count,
+    # latest_compiler_report_path. The compiler writes documents only: no source
+    # change, no branch, no PR, no external agent, no consciousness/life/agency
+    # claim.
+    experiment_compiler: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

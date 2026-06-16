@@ -131,6 +131,8 @@ def _source_package(profile_id: str) -> str:
             "habit_formation_demo", "action_inhibition_demo",
             "no_effect_action_demo", "blocked_action_reaction_demo"):
         return "action_reaction"
+    if pid.startswith("experiment_compiler") or pid.startswith("compiler_"):
+        return "experiment_compiler"
     if pid.startswith("developmental_replication") \
             or pid.startswith("replication_"):
         return "developmental_replication"

@@ -2228,3 +2228,52 @@ comparable conditions produce comparable structure across runs, the divergences 
 explained, the falsification probes are survived, and the result is not better
 explained by fixture overfit or human-label dependence. Even then it proves only
 structural replication -- not biological ancestry, not life, and not consciousness.
+
+## Phase 57 — Operator-governed experiment compiler and implementation packs
+
+**Why architecture plans need implementation compilers.** Prompt 56 can say "the
+evidence supports revising the metabolism thresholds"; it cannot say *how* to do
+that safely, what to test, what would falsify it, or how to undo it. A proposal
+and an implementation are different artifacts, and the gap between them is exactly
+where unsafe shortcuts hide. The experiment compiler closes that gap by turning a
+one-line proposal into a full, reviewable pack -- spec, prompt, tests, safety
+gates, rollback, validation -- so that the step from evidence to code is explicit,
+bounded, and inspectable rather than improvised.
+
+**Why branch manifests are safer than automatic mutation.** The tempting design is
+to let the system edit its own source, commit, branch, and open a PR. That design
+removes the human from the one loop where a human must stay. This module
+deliberately stops at *documents*: it emits a suggested branch name, a draft PR
+body, and a step list, but it creates no branch and opens no PR. The branch
+manifest is a proposal an operator executes by hand. The safety win is structural,
+not behavioral: the runtime simply has no capability to mutate source, branch, or
+PR, so no prompt, bug, or adversarial input can make it do so.
+
+**How external coding agents should receive constrained prompts.** An external
+agent (Claude Code, Codex) is powerful and literal; a vague prompt invites scope
+creep and a permissive prompt invites unsafe actions. Every generated prompt pack
+therefore ships with the standing prohibitions inline -- do not modify unrelated
+files, do not bypass safety gates, do not create a branch or open a PR unless the
+operator chooses, do not use the network, do not claim consciousness -- and with
+explicit target files, tests, docs, and a commit message. The prompt is a
+contract, not a suggestion.
+
+**Why safety gates must block prompt readiness.** It is not enough to *list* safety
+constraints in a document; an unsafe spec must be unable to reach the
+"ready_for_external_coding_agent" state at all. Every constitutional gate is
+critical, and a single failure blocks readiness explicitly -- never downgraded to
+a warning that a hurried operator might skim past. A spec that requests source
+self-rewrite, branch creation, actuation, or an unbounded loop is blocked at
+compile time, with the failing gate named.
+
+**Why rollback and validation plans matter.** Shipping a change without a way to
+undo it, or without a staged way to confirm it, is how a research codebase
+accumulates silent breakage. Each pack carries a rollback plan (triggers + manual,
+evidence-preserving steps -- failed artifacts are kept, never deleted) and a staged
+validation plan (static inspection -> tests -> safety -> examples -> mini soak ->
+ablation -> falsification replay -> replication registration, where a safety
+failure blocks continuation). Neither plan executes automatically; both exist so
+that an operator can implement, verify, and -- if needed -- reverse a change with
+the evidence trail intact. None of this proves consciousness, life, agency, or
+understanding; it is ordinary, conservative research hygiene applied to the step
+where evidence becomes code.

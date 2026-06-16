@@ -1162,6 +1162,42 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["run_step_count"],
             max_runtime_s=90.0))
 
+    # -- Experiment compiler profiles (Prompt 57) -----------------------------
+    # Compiles architecture proposals into human-reviewable implementation
+    # documents. Writes documents only: no source change, branch, PR, or agent.
+    _compiler_modules = ["bridge", "governance", "ops", "inner_map",
+                        "architecture_evolution", "experiment_compiler"]
+    for pid, desc, plan_only in (
+            ("experiment_compiler_compile",
+             "Compile architecture proposals into implementation specs.", False),
+            ("experiment_compiler_prompt_pack",
+             "Generate constrained implementation prompt packs.", False),
+            ("experiment_compiler_branch_spec",
+             "Generate PR-ready branch specs (draft only; no Git).", False),
+            ("experiment_compiler_safety_gates",
+             "Evaluate safety gates; block unsafe specs.", False),
+            ("experiment_compiler_review_packet",
+             "Build operator review packets (no self-approval).", False),
+            ("experiment_compiler_plan",
+             "Plan an experiment-compiler run (plan only).", True)):
+        if plan_only:
+            run_ctx = _ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                           max_duration_s=None)
+        else:
+            run_ctx = _ctx(RunMode.SHORT_DEMO, max_steps=120)
+        add(ScenarioProfile(
+            profile_id=pid, description=desc, run_context=run_ctx,
+            enabled_modules=list(_compiler_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "the compiler writes documents only; no source change",
+                "no Git branch creation, no PR, no external coding agent",
+                "no source self-rewrite; operator review is required",
+                "a critical safety gate failure blocks pack readiness"],
+            governance_requirements=["enable_plural_sensorium_fixture"],
+            expected_artifacts=["EXPERIMENT_COMPILER_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=60.0))
+
     return profiles
 
 

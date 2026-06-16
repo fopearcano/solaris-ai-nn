@@ -397,6 +397,19 @@ REPLICATION_QUERIES = (
     ("does replication prove consciousness", "rp_consciousness"),
 )
 
+# Experiment-compiler queries (Prompt 57). Answered from the compiler status;
+# the "did Solaris create a branch / rewrite itself?" questions are answered
+# safely even with no compiler run.
+EXPERIMENT_COMPILER_QUERIES = (
+    ("what implementation prompts are ready", "ec_ready"),
+    ("which experiments are blocked", "ec_blocked"),
+    ("why is this branch spec blocked", "ec_why_blocked"),
+    ("what should i give claude code next", "ec_next"),
+    ("what tests must pass", "ec_tests"),
+    ("did solaris create a branch", "ec_branch"),
+    ("did solaris rewrite itself", "ec_rewrite"),
+)
+
 # Feeder-SDK queries (Prompt 45). Answered from the feeder monitor/manifest; the
 # control/start questions are answered safely even with no feeders attached.
 FEEDER_SDK_QUERIES = (
@@ -600,7 +613,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._developmental_replication(lowered)
+        result = (self._experiment_compiler(lowered)
+                  or self._developmental_replication(lowered)
                   or self._developmental_soak(lowered)
                   or self._developmental_life(lowered)
                   or self._action_reaction(lowered)
@@ -761,6 +775,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _experiment_compiler(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in EXPERIMENT_COMPILER_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"experiment compiler query {topic!r}"])
         return None
 
     @staticmethod

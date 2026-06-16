@@ -494,7 +494,27 @@ python examples/run_cross_run_alignment_demo.py            # align epochs/concep
 python examples/run_structural_similarity_demo.py          # high/low similarity; fixture-overfit caveat
 python examples/run_falsification_lab_demo.py              # shuffled order / random labels / passive parser
 python examples/run_replication_matrix_demo.py             # replicated/diverged/falsified/inconclusive matrix
+
+# Operator-governed experiment compiler: evidence -> implementation documents
+python examples/run_experiment_compiler_demo.py           # proposal -> spec -> prompt pack -> branch spec
+python examples/run_prompt_pack_demo.py                   # constrained implementation prompt (hard prohibitions)
+python examples/run_branch_spec_demo.py                   # PR-ready branch spec (draft only; no Git)
+python examples/run_safety_gate_compiler_demo.py          # safe spec passes; unsafe spec blocked
+python examples/run_operator_review_packet_demo.py        # review questions; no automatic approval
 ```
+
+The Experiment Compiler generates implementation documents only. It does not
+change source code, create Git branches, open pull requests, or run external
+coding agents. It reads evidence-guided architecture proposals, soak/replication/
+falsification evidence, and safety reports, then compiles implementation-ready
+experiment specs, prompt packs (carrying the standing prohibitions inline),
+PR-ready branch specs (suggested name + draft PR title/body only), test matrices
+(safety and ClaimGuard rows blocking), safety gates (every gate critical; a single
+failure blocks readiness explicitly), operator review packets (no self-approval),
+rollback plans, and staged validation plans. Unsafe proposals become blocked
+specs, falsified proposals stay blocked, and inconclusive proposals become
+retest-only -- never implementation packs. Implementation, branching, and PRs
+remain manual, operator-governed steps.
 
 Replication compares observable developmental structures across independent runs. It
 does not prove consciousness, sentience, biological life, personhood, agency, free
@@ -1495,6 +1515,10 @@ src/solaris_ai_nn/
                 replication plan, run registry, lineages, cross-run alignment,
                 structural similarity, divergence, environmental dependency,
                 falsification, replication matrix, runtime, reports, safety
+  experiment_compiler/ operator-governed experiment compiler: input manifest,
+                proposal reader, experiment spec, prompt pack, branch spec,
+                test matrix, safety gates, review packet, rollback plan,
+                validation plan, runtime, reports, safety (documents only)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

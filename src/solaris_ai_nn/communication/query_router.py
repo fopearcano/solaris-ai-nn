@@ -149,6 +149,10 @@ AVAILABLE_QUERIES = (
     "which claims were falsified?", "did live flux matter?",
     "did labels contaminate development?", "was this just fixture overfit?",
     "which run diverged and why?", "does replication prove consciousness?",
+    "what implementation prompts are ready?", "which experiments are blocked?",
+    "why is this branch spec blocked?", "what should I give Claude Code next?",
+    "what tests must pass?", "did Solaris create a branch?",
+    "did Solaris rewrite itself?",
 )
 
 
@@ -209,6 +213,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("ec_"):
+            return self._experiment_compiler(topic)
         if topic.startswith("rp_"):
             return self._developmental_replication(topic)
         if topic.startswith("sk_"):
@@ -580,6 +586,61 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _experiment_compiler(self, topic: str) -> CommunicationResponse:
+        """Answer experiment-compiler queries (documents only; no self-modify).
+
+        The "did Solaris create a branch / rewrite itself?" and "what should I
+        give Claude Code next?" questions are answered safely even with no
+        compiler run.
+        """
+        if topic == "ec_branch":
+            return self.builder.status_response(
+                "No. The compiler generated branch specifications only. It did "
+                "not create Git branches, pull requests, or source changes.",
+                ["policy:compiler_creates_no_branch"])
+        if topic == "ec_rewrite":
+            return self.builder.status_response(
+                "No. The compiler writes implementation documents only. Solaris "
+                "does not rewrite itself, modify source, open pull requests, or "
+                "run external coding agents.",
+                ["policy:compiler_no_self_rewrite"])
+        if topic == "ec_next":
+            return self.builder.status_response(
+                "Use the generated IMPLEMENTATION_PROMPT.md for a spec marked "
+                "ready_for_external_coding_agent, after reviewing the safety "
+                "gates and operator review packet.",
+                ["policy:compiler_next_step"])
+        component = self.components.get("experiment_compiler")
+        if component is None:
+            return self.builder.missing_component_response(
+                "experiment_compiler")
+        status = (component.compiler_status()
+                  if hasattr(component, "compiler_status")
+                  else component.snapshot() if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:experiment_compiler"]
+        if topic == "ec_ready":
+            text = (f"ready specs: {status.get('ready_spec_count', 0)} "
+                    f"(prompt packs {status.get('prompt_pack_count', 0)}); use "
+                    "IMPLEMENTATION_PROMPT.md after operator review")
+        elif topic == "ec_blocked":
+            text = (f"blocked specs: {status.get('blocked_spec_count', 0)}; "
+                    "blocked by safety, falsification, or missing evidence -- "
+                    "all preserved, none hidden")
+        elif topic == "ec_why_blocked":
+            text = ("a branch spec is blocked when a critical safety gate "
+                    "fails, a relevant claim was falsified, or required "
+                    "evidence is missing; see SAFETY_GATES.md and the review "
+                    "packet")
+        elif topic == "ec_tests":
+            text = ("the TEST_MATRIX.md lists required tests; safety and "
+                    "ClaimGuard tests are blocking, and missing required tests "
+                    "block ready status")
+        else:
+            text = ("the experiment compiler writes implementation documents "
+                    "only; it changes no source, branch, or PR")
         return self.builder.status_response(text, refs)
 
     def _developmental_replication(self, topic: str) -> CommunicationResponse:

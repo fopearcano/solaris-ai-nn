@@ -94,6 +94,7 @@ class InnerMapObserver:
     developmental_life: Any = None  # optional dict/object of developmental status
     developmental_soak: Any = None  # optional dict/object of soak status
     developmental_replication: Any = None  # optional dict/object of replication
+    experiment_compiler: Any = None  # optional dict/object of compiler status
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -847,6 +848,17 @@ class InnerMapObserver:
                     replication.replication_status()
             elif hasattr(replication, "snapshot"):
                 model.developmental_replication = replication.snapshot()
+        compiler = self.experiment_compiler
+        if compiler is None and self.runner is not None:
+            compiler = getattr(self.runner, "experiment_compiler", None)
+        if compiler is not None:
+            # Experiment-compiler status (evidence -> implementation docs view).
+            if isinstance(compiler, dict):
+                model.experiment_compiler = dict(compiler)
+            elif hasattr(compiler, "compiler_status"):
+                model.experiment_compiler = compiler.compiler_status()
+            elif hasattr(compiler, "snapshot"):
+                model.experiment_compiler = compiler.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

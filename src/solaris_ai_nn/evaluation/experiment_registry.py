@@ -483,6 +483,26 @@ DESCRIPTIONS = {
         "no unbounded/actuation/teaching/ancestry/life; failures visible",
     "developmental_replication_safety_protocol":
         "no unbounded/actuation/teaching/ancestry/life; failures visible",
+    "experiment_compiler": "compile proposals into implementation documents",
+    "experiment_compiler_protocol": "operator-governed experiment compiler",
+    "experiment_compiler_evaluation": "experiment-compiler check",
+    "compiled_spec_evaluation": "ready vs blocked compiled specs",
+    "prompt_pack_generation_protocol": "constrained implementation prompts",
+    "prompt_pack_evaluation": "prompt pack check",
+    "branch_spec_generation_protocol": "draft PR-ready branch specs (no Git)",
+    "branch_spec_evaluation": "branch spec check",
+    "test_matrix_protocol": "test matrix with blocking safety/ClaimGuard rows",
+    "test_matrix_evaluation": "test matrix check",
+    "safety_gate_protocol": "critical safety gates block readiness",
+    "safety_gate_evaluation": "safety gate check",
+    "operator_review_packet_protocol": "human review packet; no self-approval",
+    "review_packet_evaluation": "review packet check",
+    "validation_plan_protocol": "staged validation plan; not auto-executed",
+    "validation_plan_evaluation": "validation plan check",
+    "experiment_compiler_safety":
+        "no source/branch/PR/agent/self-rewrite; documents only",
+    "experiment_compiler_safety_protocol":
+        "no source/branch/PR/agent/self-rewrite; documents only",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -729,6 +749,19 @@ class ExperimentRegistry:
                         "replication_matrix_protocol",
                         "replication_matrix_evaluation")
             or bool(merged.get("developmental_replication", False)))
+        features["experiment_compiler"] = (
+            name.startswith("experiment_compiler")
+            or name in ("compiled_spec_evaluation",
+                        "prompt_pack_generation_protocol",
+                        "prompt_pack_evaluation",
+                        "branch_spec_generation_protocol",
+                        "branch_spec_evaluation", "test_matrix_protocol",
+                        "test_matrix_evaluation", "safety_gate_protocol",
+                        "safety_gate_evaluation",
+                        "operator_review_packet_protocol",
+                        "review_packet_evaluation", "validation_plan_protocol",
+                        "validation_plan_evaluation")
+            or bool(merged.get("experiment_compiler", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

@@ -2797,3 +2797,38 @@ never modified; passing does not prove understanding.
 Registers comparable and divergent runs and builds the conservative replication
 matrix: replicated, diverged, falsified, and inconclusive cells -- with no empty
 green dashboard and falsified claims made prominent.
+
+## 314. Experiment Compiler Demo ✅ (implemented)
+
+**Run:** `python examples/run_experiment_compiler_demo.py --state-dir .solaris_ai_nn_experiments/test_compiler`
+Compiles a synthetic architecture proposal into a compiled experiment spec, an
+implementation prompt pack, a PR-ready branch spec, and a report. The compiler
+writes documents only: no source change, no Git branch, no PR, no external agent.
+
+## 315. Prompt Pack Demo ✅ (implemented)
+
+**Run:** `python examples/run_prompt_pack_demo.py --state-dir .solaris_ai_nn_experiments/test_prompt_pack`
+Generates a constrained implementation prompt pack from a compiled spec and shows
+that the hard prohibitions (including "do not modify unrelated files" and "do not
+open a PR"), required tests, and docs are included.
+
+## 316. Branch Spec Demo ✅ (implemented)
+
+**Run:** `python examples/run_branch_spec_demo.py --state-dir .solaris_ai_nn_experiments/test_branch_spec`
+Generates a PR-ready branch spec (suggested branch name, draft PR title/body,
+review checklist, merge blockers). No Git branch is created and no pull request is
+opened.
+
+## 317. Safety Gate Compiler Demo ✅ (implemented)
+
+**Run:** `python examples/run_safety_gate_compiler_demo.py --state-dir .solaris_ai_nn_experiments/test_safety_gates`
+Compiles a safe proposal (passes all critical gates -> ready) and an unsafe
+proposal (becomes blocked_by_safety), and shows an explicit critical-gate failure
+for a simulated unsafe request.
+
+## 318. Operator Review Packet Demo ✅ (implemented)
+
+**Run:** `python examples/run_operator_review_packet_demo.py --state-dir .solaris_ai_nn_experiments/test_review_packet`
+Builds an operator review packet with yes/no review questions, a recommended next
+step, and the available decisions. The packet never approves itself; no decision
+is automatic.

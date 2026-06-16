@@ -1787,4 +1787,32 @@ def build_default_state_graph() -> StateGraph:
                "falsified claims are made prominent in the matrix")
     g.add_edge("DevelopmentalReplicationRuntime", "inner_map",
                "replication state feeds Inner MAP")
+
+    # Operator-governed experiment compiler (Prompt 57): evidence -> documents.
+    # Writes implementation docs only; never mutates source/branches/PRs.
+    for name, role in [
+        ("ExperimentCompilerInputManifest", "reads existing artifacts only"),
+        ("ArchitectureProposalReader", "normalizes proposals; blocks unsafe"),
+        ("CompiledExperimentSpec", "document spec; modifies no code"),
+        ("ImplementationPromptPack", "constrained brief for an external agent"),
+        ("PRReadyBranchSpec", "draft branch/PR spec; nothing executed"),
+        ("ExperimentTestMatrix", "required tests; safety/ClaimGuard blocking"),
+        ("ExperimentSafetyGate", "critical gate failure blocks readiness"),
+        ("OperatorReviewPacket", "human decision point; no self-approval"),
+        ("ExperimentRollbackPlan", "documented rollback; never executed"),
+        ("PostImplementationValidationPlan", "staged, gated, not auto-run"),
+        ("ExperimentCompilerRuntime", "evidence -> documents; bounded"),
+        ("ExperimentCompilerSafetyValidator",
+         "no source/branch/PR/agent/self-rewrite"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("DevelopmentalReplicationRuntime",
+               "ExperimentCompilerInputManifest",
+               "replication/falsification evidence feeds the compiler")
+    g.add_edge("ArchitectureProposalReader", "CompiledExperimentSpec",
+               "normalized proposals become document specs")
+    g.add_edge("ExperimentSafetyGate", "OperatorReviewPacket",
+               "gate results inform the operator decision")
+    g.add_edge("ExperimentCompilerRuntime", "inner_map",
+               "experiment compiler state feeds Inner MAP")
     return g

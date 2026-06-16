@@ -2092,3 +2092,42 @@ def developmental_replication_metrics(rep: Optional[Dict[str, Any]],
                 "ancestry, consciousness, personhood, agency, or subjective "
                 "experience",
     }
+
+
+def experiment_compiler_metrics(comp: Optional[Dict[str, Any]],
+                                ) -> Dict[str, Any]:
+    """Objective experiment-compiler metrics (evidence -> implementation docs).
+
+    These describe a *document compiler*: input sources, proposals read,
+    compiled/blocked/ready specs, prompt packs, branch specs, test matrices,
+    safety gates (and failures), review packets, rollback/validation plans, and
+    missing evidence. The compiler writes documents only; it changes no source,
+    creates no branch, opens no PR, and runs no external coding agent.
+    """
+    if not comp:
+        return {"present": False}
+    return {
+        "present": True,
+        "compiler_input_source_count": int(
+            comp.get("compiler_input_source_count", 0) or 0),
+        "proposal_read_count": int(comp.get("proposal_read_count", 0) or 0),
+        "compiled_spec_count": int(comp.get("compiled_spec_count", 0) or 0),
+        "blocked_spec_count": int(comp.get("blocked_spec_count", 0) or 0),
+        "ready_spec_count": int(comp.get("ready_spec_count", 0) or 0),
+        "prompt_pack_count": int(comp.get("prompt_pack_count", 0) or 0),
+        "branch_spec_count": int(comp.get("branch_spec_count", 0) or 0),
+        "test_matrix_count": int(comp.get("test_matrix_count", 0) or 0),
+        "safety_gate_count": int(comp.get("safety_gate_count", 0) or 0),
+        "safety_gate_failure_count": int(
+            comp.get("safety_gate_failure_count", 0) or 0),
+        "review_packet_count": int(comp.get("review_packet_count", 0) or 0),
+        "rollback_plan_count": int(comp.get("rollback_plan_count", 0) or 0),
+        "validation_plan_count": int(comp.get("validation_plan_count", 0) or 0),
+        "missing_evidence_count": int(
+            comp.get("missing_evidence_count", 0) or 0),
+        "modifies_source": False, "creates_branch": False, "opens_pr": False,
+        "runs_external_agent": False,
+        "is_consciousness_or_personhood": False,
+        "note": "evidence-to-implementation document compiler; no source "
+                "change, branch, PR, or external coding-agent execution",
+    }

@@ -3535,3 +3535,78 @@ will, emotion, feeling, understanding, or subjective experience; a developmental
 lineage is experimental provenance, not biological ancestry; cross-run similarity
 does not prove consciousness; divergence does not prove failure; and passing a
 falsification test does not prove understanding.**
+
+## Operator-Governed Experiment Compiler
+
+Prompt 56 produced evidence-guided architecture proposals; a proposal is not an
+implementation. Prompt 57 adds the experiment compiler --
+`src/solaris_ai_nn/experiment_compiler/`:
+
+    input manifest -> read proposals -> compiled experiment specs ->
+    prompt packs + branch specs + test matrices + safety gates ->
+    operator review packets + rollback plans + validation plans -> reports
+
+It converts approved or candidate architecture-evolution proposals into
+human-reviewable implementation packs for a human operator or external coding
+agent. **This is not autonomous coding, not self-improvement, and not source
+mutation.** It is a compiler from research evidence to human-reviewable
+implementation instructions.
+
+**It reads evidence and never mutates anything.** The
+`ExperimentCompilerInputManifest` declares the source artifacts (architecture
+report, branch manifest, experiment queue, module inventory, promotion gate,
+ablation plan, variant proposal, falsification report, replication matrix, soak
+autopsy, safety invariant report, operator note); it reads existing artifacts
+only, treats a missing input as a warning or a blocker by severity, preserves
+falsified evidence, and never lets the operator note override safety evidence.
+The `ArchitectureProposalReader` normalizes each proposal and tags a disposition:
+unsafe proposals become *blocked* read results, falsified proposals are blocked,
+and inconclusive/missing-evidence proposals become *retest* results -- never
+implementation packs.
+
+**It compiles documents, not code.** `compile_spec` turns a normalized proposal
+into a `CompiledExperimentSpec` (title, purpose, target modules, non-goals,
+proposed changes, expected behavior, required tests/examples/docs, safety gates,
+validation/rollback plans, follow-up soak/replication requirements). A spec
+modifies no code, creates no branch, and calls no GitHub API. From a ready spec
+the compiler builds an `ImplementationPromptPack` (a constrained brief for an
+external agent that always carries the hard prohibitions, including "do not
+modify unrelated files unless necessary" and "do not open a PR unless the
+operator explicitly chooses"), a `PRReadyBranchSpec` (a *suggested* branch name +
+draft PR title/body + review checklist + merge blockers -- no Git operation
+performed), an `ExperimentTestMatrix` (unit/integration/safety/example/report/
+ClaimGuard/regression/ablation/soak/replication rows, with safety and ClaimGuard
+rows blocking), a `PostImplementationValidationPlan` (static inspection -> unit ->
+integration -> safety -> example -> short demo -> mini soak -> ablation ->
+falsification replay -> replication registration, gated and never auto-executed),
+and an `ExperimentRollbackPlan` (documented triggers + evidence-preserving steps,
+never executed).
+
+**Safety gates block readiness; the operator decides.** The `SafetyGateEvaluator`
+checks every constitutional gate (no source self-rewrite, no auto branch/PR, no
+external actuation, no hardware/feeder/network/shell, no human-label ground
+truth, no consciousness/life/agency claim, no unbounded loop, preserve negative/
+falsified evidence, ClaimGuard required). Every gate is critical: a single failure
+blocks pack readiness, explicitly and never hidden behind a warning. The
+`OperatorReviewPacket` then presents the evidence, risks, blocked claims, yes/no
+review questions, and a recommended next step to a *human operator* -- it never
+approves itself, and no decision is automatic.
+
+**It integrates and stays document-only.** The `ExperimentCompilerRuntime` is
+bounded and writes documents only; it consumes architecture-evolution proposals
+(without duplicating that logic) and uses soak/replication/falsification evidence
+as source refs. It feeds the research lab and evaluation (metrics + protocols for
+the compiler, compiled specs, prompt packs, branch specs, test matrices, safety
+gates, review packets, and validation plans), the operator console (the compiled
+experiment index, ready/blocked specs, and the mandated safe answers for "what
+should I give Claude Code next?", "did Solaris create a branch?", and "did Solaris
+rewrite itself?"), and Inner MAP. The `ExperimentCompilerSafetyValidator` blocks
+source modification, autonomous code rewrite, automatic branch/PR creation,
+external coding-agent execution, network/shell/browser/OS, hardware/feeder
+control, real-world actuation, the human teaching loop, deletion of negative/
+falsified/inconclusive evidence, and any "ready" mark while a critical gate
+fails. **The compiler writes documents only: no source code was changed, no Git
+branch was created, no pull request was opened, no external coding agent was run,
+no safety gate was bypassed, and no claim of consciousness, sentience, life,
+personhood, agency, free will, emotion, feeling, understanding, or subjective
+experience is made.**
