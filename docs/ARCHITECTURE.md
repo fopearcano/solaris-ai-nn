@@ -3610,3 +3610,72 @@ branch was created, no pull request was opened, no external coding agent was run
 no safety gate was bypassed, and no claim of consciousness, sentience, life,
 personhood, agency, free will, emotion, feeling, understanding, or subjective
 experience is made.**
+
+## Implementation Intake and PR Diff Audit
+
+Prompt 57 generated implementation packs for external coding agents; Prompt 58
+audits the *completed* implementations. The implementation intake layer --
+`src/solaris_ai_nn/implementation_intake/`:
+
+    intake manifest -> read artifacts -> diff audit -> spec compliance ->
+    test audit -> safety regression -> ClaimGuard audit -> coverage matrix ->
+    merge recommendation -> rollback recommendation -> post-merge validation plan
+
+**This is not a merge bot and not a coding agent. It is an evidence auditor.** It
+reads *local* artifacts only -- the compiler's reference artifacts (implementation
+prompt, branch spec, test matrix, safety gates, operator review packet, rollback/
+validation plans) and the implementation's own evidence (summary, diff/patch,
+changed-file list, test/example/ClaimGuard/safety-invariant results, and optional
+local PR metadata) -- and never calls GitHub.
+
+**It audits diff, spec, tests, safety, claims, and coverage.** The `DiffAudit`
+classifies each changed file (expected, unexpected, forbidden path, safety-
+critical, generated, docs, test, example, source) and scans the added patch lines
+for forbidden behavior (network/shell/browser/OS, hardware imports, source
+mutation, human-label-as-ground-truth, unsupported claim text) -- an unexpected
+change warns, forbidden behavior blocks; it runs no Git. The `SpecComplianceAudit`
+compares evidence against the compiled spec (classes/functions, tests, examples,
+docs, safety gates), never marking a requirement satisfied without evidence and
+treating safety requirements as blocking. The `TestResultAudit` reads the test
+artifact (missing safety/ClaimGuard tests block; failed tests block unless
+explicitly non-blocking; test output is evidence, not proof). The
+`SafetyRegressionAudit` scans for regressions (self-rewrite, auto branch/PR,
+agent execution, actuation, hardware/feeder/network/shell, source mutation,
+sensory-text-as-command, human-label-as-ground-truth, simulation-as-observation,
+consciousness/life/agency claims, evidence deletion, unbounded loops) where a
+critical finding blocks and is never hidden by passing tests. The `ClaimGuardAudit`
+flags undisclaimed unsupported claims in generated docs. The
+`ImplementationCoverageMatrix` joins each requirement to its file/test/example/
+docs/report/safety evidence so gaps stay visible -- there is no empty green
+dashboard.
+
+**It recommends advisorily; a human operator decides.** The
+`MergeRecommendationBuilder` aggregates every audit into one of recommend-merge,
+merge-with-warnings, recommend-revisions, or a block (safety / tests / spec /
+missing evidence) -- advisory only, never merging or approving. The
+`RollbackRecommendationBuilder` documents (never executes) a rollback when one is
+warranted, always preserving the failed artifacts as evidence. The
+`PostMergeValidationPlan` lays out the staged, gated post-merge validation (re-run
+tests -> examples -> safety invariants -> ClaimGuard -> short fixture demo -> mini
+soak -> replication registration -> falsification replay -> update architecture
+evidence -> update experiment queue), never auto-executed and marked conditional
+when merge is blocked.
+
+**It integrates and stays read-only.** The `ImplementationIntakeRuntime` is
+bounded; it consumes the experiment-compiler artifacts as the audit reference,
+emits outputs usable as future architecture-evolution evidence (merge
+recommendation, spec compliance, blocked reason, safety-regression findings,
+missing evidence, post-merge plan), and feeds the research lab + evaluation
+(metrics and protocols for the intake, diff audit, spec compliance, test audit,
+safety regression, coverage, and merge recommendation), the operator console (the
+intake report, blockers, and the mandated safe answers for "is this ready to
+merge?", "did Solaris merge the PR?", and "did Solaris edit the code?"), and Inner
+MAP. The `ImplementationIntakeSafetyValidator` blocks source modification, merge
+execution, PR creation/approval, GitHub calls, Git commands, external coding-agent
+execution, shell/network/browser/OS, hardware/feeder control, real-world
+actuation, the human teaching loop, evidence deletion, and any "ready" mark while
+a critical safety gate fails. **It does not edit source, create branches, open
+PRs, approve PRs, merge PRs, call GitHub, run Git, or run external agents -- it
+reads local evidence and writes advisory documents only, and makes no claim of
+consciousness, sentience, life, personhood, agency, free will, emotion, feeling,
+understanding, or subjective experience.**

@@ -410,6 +410,19 @@ EXPERIMENT_COMPILER_QUERIES = (
     ("did solaris rewrite itself", "ec_rewrite"),
 )
 
+# Implementation-intake queries (Prompt 58). Answered from the intake status; the
+# "did Solaris merge the PR / edit the code?" questions are answered safely even
+# with no intake run.
+IMPLEMENTATION_INTAKE_QUERIES = (
+    ("is this implementation ready to merge", "ii_ready"),
+    ("what blocks the merge", "ii_blocks"),
+    ("did it satisfy the spec", "ii_spec"),
+    ("which tests failed", "ii_tests"),
+    ("did it introduce a safety regression", "ii_safety"),
+    ("did solaris merge the pr", "ii_merge"),
+    ("did solaris edit the code", "ii_edit"),
+)
+
 # Feeder-SDK queries (Prompt 45). Answered from the feeder monitor/manifest; the
 # control/start questions are answered safely even with no feeders attached.
 FEEDER_SDK_QUERIES = (
@@ -613,7 +626,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._experiment_compiler(lowered)
+        result = (self._implementation_intake(lowered)
+                  or self._experiment_compiler(lowered)
                   or self._developmental_replication(lowered)
                   or self._developmental_soak(lowered)
                   or self._developmental_life(lowered)
@@ -775,6 +789,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _implementation_intake(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in IMPLEMENTATION_INTAKE_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"implementation intake query {topic!r}"])
         return None
 
     @staticmethod

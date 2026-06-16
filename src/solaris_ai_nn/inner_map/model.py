@@ -493,6 +493,15 @@ class InnerMapModel:
     # change, no branch, no PR, no external agent, no consciousness/life/agency
     # claim.
     experiment_compiler: Optional[Dict[str, Any]] = None
+    # Implementation-intake status (Prompt 58); None when not attached. Keys:
+    # implementation_intake_enabled, implementation_artifact_count,
+    # diff_finding_count, spec_compliance_status, test_failure_count,
+    # safety_regression_count, claimguard_finding_count, coverage_gap_count,
+    # merge_recommendation_status, rollback_recommendation_status,
+    # latest_intake_report_path. The intake layer audits local evidence and
+    # writes advisory reports only: no source change, no merge, no PR, no
+    # GitHub, no consciousness/life/agency claim.
+    implementation_intake: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

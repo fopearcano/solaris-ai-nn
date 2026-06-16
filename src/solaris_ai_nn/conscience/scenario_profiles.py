@@ -1198,6 +1198,42 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["run_step_count"],
             max_runtime_s=60.0))
 
+    # -- Implementation intake profiles (Prompt 58) ---------------------------
+    # Audits completed external implementations against compiler artifacts.
+    # Reads local evidence only: no source change, merge, PR, GitHub, or Git.
+    _intake_modules = ["bridge", "governance", "ops", "inner_map",
+                      "experiment_compiler", "implementation_intake"]
+    for pid, desc, plan_only in (
+            ("implementation_intake_audit",
+             "Audit a completed implementation into advisory reports.", False),
+            ("implementation_intake_diff_audit",
+             "Audit the change set against the declared scope.", False),
+            ("implementation_intake_spec_compliance",
+             "Audit spec compliance against the compiled spec.", False),
+            ("implementation_intake_safety_regression",
+             "Run the safety regression gate over the implementation.", False),
+            ("implementation_intake_merge_recommendation",
+             "Generate an advisory merge recommendation (no merge).", False),
+            ("implementation_intake_plan",
+             "Plan an implementation intake audit (plan only).", True)):
+        if plan_only:
+            run_ctx = _ctx(RunMode.MONTH_SCALE_PLAN, max_steps=None,
+                           max_duration_s=None)
+        else:
+            run_ctx = _ctx(RunMode.SHORT_DEMO, max_steps=120)
+        add(ScenarioProfile(
+            profile_id=pid, description=desc, run_context=run_ctx,
+            enabled_modules=list(_intake_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "reads local artifacts only; no GitHub/Git call",
+                "no source change, no merge, no PR creation/approval",
+                "no external coding agent; advisory reports only",
+                "a critical safety regression blocks the merge recommendation"],
+            governance_requirements=["enable_plural_sensorium_fixture"],
+            expected_artifacts=["IMPLEMENTATION_INTAKE_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=60.0))
+
     return profiles
 
 

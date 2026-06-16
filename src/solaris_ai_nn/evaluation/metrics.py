@@ -2131,3 +2131,52 @@ def experiment_compiler_metrics(comp: Optional[Dict[str, Any]],
         "note": "evidence-to-implementation document compiler; no source "
                 "change, branch, PR, or external coding-agent execution",
     }
+
+
+def implementation_intake_metrics(intake: Optional[Dict[str, Any]],
+                                  ) -> Dict[str, Any]:
+    """Objective implementation-intake metrics (advisory evidence auditor).
+
+    These describe a *read-only auditor*: artifacts, diff/spec/test/safety/
+    ClaimGuard findings, coverage gaps, the advisory merge recommendation, and
+    rollback triggers. The intake layer modifies no source, executes no merge,
+    creates/approves no PR, calls no GitHub, and makes no consciousness/life/
+    agency claim.
+    """
+    if not intake:
+        return {"present": False}
+    return {
+        "present": True,
+        "implementation_artifact_count": int(
+            intake.get("implementation_artifact_count", 0) or 0),
+        "missing_artifact_count": int(
+            intake.get("missing_artifact_count", 0) or 0),
+        "corrupt_artifact_count": int(
+            intake.get("corrupt_artifact_count", 0) or 0),
+        "unexpected_file_change_count": int(
+            intake.get("unexpected_file_change_count", 0) or 0),
+        "forbidden_file_change_count": int(
+            intake.get("forbidden_file_change_count", 0) or 0),
+        "spec_satisfied_count": int(intake.get("spec_satisfied_count", 0) or 0),
+        "spec_unsatisfied_count": int(
+            intake.get("spec_unsatisfied_count", 0) or 0),
+        "test_failure_count": int(intake.get("test_failure_count", 0) or 0),
+        "missing_required_test_count": int(
+            intake.get("missing_required_test_count", 0) or 0),
+        "safety_regression_count": int(
+            intake.get("safety_regression_count", 0) or 0),
+        "critical_safety_regression_count": int(
+            intake.get("critical_safety_regression_count", 0) or 0),
+        "claimguard_finding_count": int(
+            intake.get("claimguard_finding_count", 0) or 0),
+        "coverage_gap_count": int(intake.get("coverage_gap_count", 0) or 0),
+        "merge_blocker_count": int(intake.get("merge_blocker_count", 0) or 0),
+        "rollback_trigger_count": int(
+            intake.get("rollback_trigger_count", 0) or 0),
+        "merge_recommendation_status": intake.get("merge_recommendation_status"),
+        "modifies_source": False, "merges_pr": False, "calls_github": False,
+        "runs_external_agent": False,
+        "is_consciousness_or_personhood": False,
+        "note": "advisory implementation-evidence auditor; no source change, "
+                "merge, PR, GitHub call, or external coding-agent execution",
+    }

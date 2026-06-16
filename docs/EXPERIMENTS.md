@@ -2832,3 +2832,40 @@ for a simulated unsafe request.
 Builds an operator review packet with yes/no review questions, a recommended next
 step, and the available decisions. The packet never approves itself; no decision
 is automatic.
+
+## 319. Implementation Intake Demo ✅ (implemented)
+
+**Run:** `python examples/run_implementation_intake_demo.py --state-dir .solaris_ai_nn_implementation_intake/test_intake`
+Reads a synthetic set of implementation artifacts, runs the full audit (diff,
+spec, tests, safety regression, ClaimGuard, coverage), and writes the intake
+report with an advisory merge recommendation. Reads local evidence only; no
+source change, merge, PR, or GitHub call.
+
+## 320. Diff Audit Demo ✅ (implemented)
+
+**Run:** `python examples/run_diff_audit_demo.py --state-dir .solaris_ai_nn_implementation_intake/test_diff`
+Audits a change set against the declared scope: an expected file is accepted, an
+out-of-scope file warns, a forbidden path (.github/workflows) blocks, and a
+network import in the patch blocks. No Git is run.
+
+## 321. Spec Compliance Demo ✅ (implemented)
+
+**Run:** `python examples/run_spec_compliance_demo.py --state-dir .solaris_ai_nn_implementation_intake/test_spec`
+Audits implementation evidence against a compiled spec: satisfied (file + tests),
+partially satisfied (file, tests not green), and missing (no evidence). Nothing is
+satisfied without evidence; safety requirements are blocking.
+
+## 322. Safety Regression Audit Demo ✅ (implemented)
+
+**Run:** `python examples/run_safety_regression_audit_demo.py --state-dir .solaris_ai_nn_implementation_intake/test_safety_regression`
+Runs the safety regression gate over a safe implementation (no findings), one that
+adds a network/shell call (critical -> blocks), and one asserting an unsupported
+consciousness claim (critical -> blocks). A critical regression is never hidden by
+passing tests.
+
+## 323. Merge Recommendation Demo ✅ (implemented)
+
+**Run:** `python examples/run_merge_recommendation_demo.py --state-dir .solaris_ai_nn_implementation_intake/test_merge_recommendation`
+Shows the advisory merge recommendation across four implementations: recommend
+merge, recommend revisions, block due to safety, and block due to tests. The
+recommendation is advisory; the intake layer never merges or approves a PR.

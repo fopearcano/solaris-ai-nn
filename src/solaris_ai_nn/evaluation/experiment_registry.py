@@ -503,6 +503,25 @@ DESCRIPTIONS = {
         "no source/branch/PR/agent/self-rewrite; documents only",
     "experiment_compiler_safety_protocol":
         "no source/branch/PR/agent/self-rewrite; documents only",
+    "implementation_intake": "audit external implementation evidence",
+    "implementation_intake_protocol":
+        "implementation intake + PR diff audit",
+    "implementation_intake_evaluation": "implementation-intake check",
+    "diff_audit_protocol": "diff audit vs declared scope + prohibitions",
+    "diff_audit_evaluation": "diff audit check",
+    "spec_compliance_protocol": "spec compliance vs compiled spec",
+    "spec_compliance_evaluation": "spec compliance check",
+    "test_result_audit_protocol": "test evidence audit (safety tests block)",
+    "test_result_audit_evaluation": "test result audit check",
+    "safety_regression_protocol": "safety regression gate (critical blocks)",
+    "safety_regression_evaluation": "safety regression check",
+    "coverage_matrix_evaluation": "coverage matrix gaps visible",
+    "merge_recommendation_protocol": "advisory merge recommendation",
+    "merge_recommendation_evaluation": "merge recommendation check",
+    "implementation_intake_safety":
+        "no source/merge/PR/GitHub/Git/agent; advisory only",
+    "implementation_intake_safety_protocol":
+        "no source/merge/PR/GitHub/Git/agent; advisory only",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -762,6 +781,19 @@ class ExperimentRegistry:
                         "review_packet_evaluation", "validation_plan_protocol",
                         "validation_plan_evaluation")
             or bool(merged.get("experiment_compiler", False)))
+        features["implementation_intake"] = (
+            name.startswith("implementation_intake")
+            or name in ("diff_audit_protocol", "diff_audit_evaluation",
+                        "spec_compliance_protocol",
+                        "spec_compliance_evaluation",
+                        "test_result_audit_protocol",
+                        "test_result_audit_evaluation",
+                        "safety_regression_protocol",
+                        "safety_regression_evaluation",
+                        "coverage_matrix_evaluation",
+                        "merge_recommendation_protocol",
+                        "merge_recommendation_evaluation")
+            or bool(merged.get("implementation_intake", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

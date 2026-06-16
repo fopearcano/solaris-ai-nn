@@ -501,7 +501,28 @@ python examples/run_prompt_pack_demo.py                   # constrained implemen
 python examples/run_branch_spec_demo.py                   # PR-ready branch spec (draft only; no Git)
 python examples/run_safety_gate_compiler_demo.py          # safe spec passes; unsafe spec blocked
 python examples/run_operator_review_packet_demo.py        # review questions; no automatic approval
+
+# Implementation intake + PR diff audit: validate completed external work
+python examples/run_implementation_intake_demo.py         # read artifacts -> audit -> advisory recommendation
+python examples/run_diff_audit_demo.py                    # expected / unexpected / forbidden change set
+python examples/run_spec_compliance_demo.py               # satisfied / partial / missing requirements
+python examples/run_safety_regression_audit_demo.py       # safe vs network/claim regression (critical blocks)
+python examples/run_merge_recommendation_demo.py          # recommend / revisions / block-safety / block-tests
 ```
+
+Implementation Intake audits local implementation artifacts and produces advisory
+reports only. It does not modify source code, run Git, call GitHub, open pull
+requests, approve pull requests, or merge changes. It is an evidence auditor (not a
+merge bot, not a coding agent): it reads the compiler's reference artifacts and the
+implementation's diff/tests/ClaimGuard evidence, then audits the change set against
+the declared scope, checks spec compliance, inspects test results, runs a safety
+regression gate (a critical regression -- self-rewrite, auto branch/PR, actuation,
+hardware/network/shell, or an unsupported consciousness claim -- blocks merge and
+is never hidden by passing tests), runs ClaimGuard over generated docs, builds a
+coverage matrix with gaps visible, and emits an advisory merge recommendation
+(recommend / merge-with-warnings / revisions / block), a rollback recommendation,
+and a staged post-merge validation plan. A human operator decides; the runtime
+lacks the capability to merge or edit.
 
 The Experiment Compiler generates implementation documents only. It does not
 change source code, create Git branches, open pull requests, or run external
@@ -1519,6 +1540,11 @@ src/solaris_ai_nn/
                 proposal reader, experiment spec, prompt pack, branch spec,
                 test matrix, safety gates, review packet, rollback plan,
                 validation plan, runtime, reports, safety (documents only)
+  implementation_intake/ implementation intake + PR diff audit: intake manifest,
+                artifact reader, diff audit, spec compliance, test result audit,
+                safety regression, ClaimGuard audit, coverage matrix, merge +
+                rollback recommendation, post-merge plan, runtime, reports,
+                safety (advisory evidence auditor; reads local artifacts only)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

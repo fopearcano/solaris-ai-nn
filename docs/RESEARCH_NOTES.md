@@ -2277,3 +2277,52 @@ that an operator can implement, verify, and -- if needed -- reverse a change wit
 the evidence trail intact. None of this proves consciousness, life, agency, or
 understanding; it is ordinary, conservative research hygiene applied to the step
 where evidence becomes code.
+
+## Phase 58 — Implementation intake, PR diff audit, and the safety regression gate
+
+**Why implementation must be audited against evidence.** A compiler can produce a
+perfect prompt pack and an external agent can return a confident summary, but the
+gap between "the agent says it did X" and "the change set actually does X, safely"
+is exactly where regressions enter. The intake layer closes that gap by auditing
+the *artifacts* -- the diff, the test results, the generated docs -- against the
+compiled spec, rather than trusting a narrative. The summary is a claim; the
+evidence is the diff.
+
+**Why tests are not enough.** A green test suite proves the tests that exist
+passed; it says nothing about the tests that should exist and don't, the files
+that changed outside scope, or the `import socket` quietly added in an unrelated
+module. Test output is evidence, not proof of correctness. So the intake audit
+treats missing safety/ClaimGuard tests as blockers, scans the diff independently
+of the test result, and refuses to let a passing suite vouch for an unaudited
+change.
+
+**Why safety regressions block merge.** Most quality issues are negotiable -- a
+missing doc, a coverage gap, an unknown requirement -- and resolve to
+"recommend revisions". Safety regressions are not negotiable. A change that adds
+source self-rewrite, automatic branching/PRs, external-agent execution,
+actuation, hardware/feeder/network/shell access, or an unsupported consciousness
+claim is a critical finding that blocks the merge recommendation outright, and is
+reported prominently rather than averaged away. Crucially, a safety regression is
+never hidden behind passing tests: the regression scan is independent of the test
+audit.
+
+**Why advisory reports preserve human authority.** The single most important
+property of this layer is what it cannot do. It does not merge, approve, open, or
+create pull requests; it does not call GitHub, run Git, edit source, or run an
+external agent. It writes a recommendation -- recommend / revisions / block -- and
+a human operator decides. This is deliberate: the moment a system can both judge
+an implementation and merge it, the human is out of the loop on the one decision
+that must stay human. The recommendation is advisory by construction, and the
+runtime simply lacks the capability to act on it.
+
+**How failed implementations become architecture evidence.** A blocked
+implementation is not a dead end; it is data. The intake layer emits its merge
+recommendation, spec-compliance status, blocked reason, safety-regression
+findings, and missing-evidence list as structured outputs that the Architecture
+Evolution Lab can later use to revise the experiment queue -- e.g. to require more
+evidence, narrow a spec, or retire a brittle approach. Failed, missing, and
+falsified evidence is preserved, never deleted, so the next compile-implement-audit
+loop starts from an honest record rather than a flattering one. None of this
+proves consciousness, life, agency, or understanding; it is ordinary,
+conservative review hygiene applied to the step where an external implementation
+re-enters the codebase.

@@ -1815,4 +1815,32 @@ def build_default_state_graph() -> StateGraph:
                "gate results inform the operator decision")
     g.add_edge("ExperimentCompilerRuntime", "inner_map",
                "experiment compiler state feeds Inner MAP")
+
+    # Implementation intake + PR diff audit (Prompt 58): an evidence auditor.
+    # Reads local artifacts; writes advisory reports; never merges or mutates.
+    for name, role in [
+        ("ImplementationIntakeManifest", "declares local artifacts; no GitHub"),
+        ("ImplementationArtifactReader", "read-only; corrupt artifacts kept"),
+        ("DiffAudit", "scope + forbidden-behavior audit; no Git run"),
+        ("SpecComplianceAudit", "evidence vs compiled spec; no false satisfied"),
+        ("TestResultAudit", "test evidence; missing safety tests block"),
+        ("SafetyRegressionAudit", "critical regression blocks; tests can't hide"),
+        ("ClaimGuardAudit", "undisclaimed claim blocks readiness"),
+        ("ImplementationCoverageMatrix", "gaps visible; no empty green board"),
+        ("MergeRecommendation", "advisory only; never merges/approves"),
+        ("RollbackRecommendation", "documented; never executed"),
+        ("PostMergeValidationPlan", "staged, gated, not auto-run"),
+        ("ImplementationIntakeRuntime", "bounded read-only auditor"),
+        ("ImplementationIntakeSafetyValidator",
+         "no source/merge/PR/GitHub/Git/agent"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("ExperimentCompilerRuntime", "ImplementationIntakeManifest",
+               "compiler artifacts are the audit reference")
+    g.add_edge("DiffAudit", "MergeRecommendation",
+               "diff/spec/test/safety audits feed the advisory recommendation")
+    g.add_edge("SafetyRegressionAudit", "MergeRecommendation",
+               "a critical safety regression blocks the merge recommendation")
+    g.add_edge("ImplementationIntakeRuntime", "inner_map",
+               "implementation intake state feeds Inner MAP")
     return g

@@ -153,6 +153,10 @@ AVAILABLE_QUERIES = (
     "why is this branch spec blocked?", "what should I give Claude Code next?",
     "what tests must pass?", "did Solaris create a branch?",
     "did Solaris rewrite itself?",
+    "is this implementation ready to merge?", "what blocks the merge?",
+    "did it satisfy the spec?", "which tests failed?",
+    "did it introduce a safety regression?", "did Solaris merge the PR?",
+    "did Solaris edit the code?",
 )
 
 
@@ -213,6 +217,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("ii_"):
+            return self._implementation_intake(topic)
         if topic.startswith("ec_"):
             return self._experiment_compiler(topic)
         if topic.startswith("rp_"):
@@ -587,6 +593,72 @@ class QueryRouter:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
         return self.builder.status_response(text, refs)
+
+    def _implementation_intake(self, topic: str) -> CommunicationResponse:
+        """Answer implementation-intake queries (advisory audit; no merge/edit).
+
+        The "did Solaris merge the PR / edit the code?" and "is this ready to
+        merge?" questions are answered safely even with no intake run.
+        """
+        if topic == "ii_merge":
+            return self.builder.status_response(
+                "No. The intake layer only audits local evidence and writes "
+                "advisory reports. It does not merge, approve, open, or create "
+                "pull requests.",
+                ["policy:intake_does_not_merge"])
+        if topic == "ii_edit":
+            return self.builder.status_response(
+                "No. It reads implementation artifacts and generates audit "
+                "documents only.",
+                ["policy:intake_does_not_edit_code"])
+        if topic == "ii_ready":
+            base = ("The intake audit can recommend merge, merge with warnings, "
+                    "revisions, or blocking. The recommendation is advisory; a "
+                    "human operator must decide.")
+            component = self.components.get("implementation_intake")
+            if component is not None:
+                status = self._intake_status(component)
+                base += (f" Current recommendation: "
+                         f"{status.get('merge_recommendation_status')}.")
+            return self.builder.status_response(
+                base, ["policy:intake_advisory_only"])
+        component = self.components.get("implementation_intake")
+        if component is None:
+            return self.builder.missing_component_response(
+                "implementation_intake")
+        status = self._intake_status(component)
+        refs = ["component:implementation_intake"]
+        if topic == "ii_blocks":
+            text = (f"merge recommendation: "
+                    f"{status.get('merge_recommendation_status')}; blockers: "
+                    f"{status.get('merge_blocker_count', 0)} (safety, tests, "
+                    "spec non-compliance, or missing evidence)")
+        elif topic == "ii_spec":
+            text = (f"spec compliance: {status.get('spec_compliance_status')} "
+                    f"(satisfied {status.get('spec_satisfied_count', 0)}, "
+                    f"unsatisfied {status.get('spec_unsatisfied_count', 0)})")
+        elif topic == "ii_tests":
+            text = (f"test failures: {status.get('test_failure_count', 0)}; "
+                    f"missing required tests: "
+                    f"{status.get('missing_required_test_count', 0)} -- test "
+                    "output is evidence, not proof of correctness")
+        elif topic == "ii_safety":
+            text = (f"safety regressions: "
+                    f"{status.get('safety_regression_count', 0)} (critical "
+                    f"{status.get('critical_safety_regression_count', 0)}); a "
+                    "critical regression blocks the merge recommendation")
+        else:
+            text = ("the intake layer audits local evidence and writes advisory "
+                    "reports only; it does not merge, edit code, or call GitHub")
+        return self.builder.status_response(text, refs)
+
+    @staticmethod
+    def _intake_status(component: Any) -> Dict[str, Any]:
+        if hasattr(component, "intake_status"):
+            return component.intake_status()
+        if hasattr(component, "snapshot"):
+            return component.snapshot()
+        return component if isinstance(component, dict) else {}
 
     def _experiment_compiler(self, topic: str) -> CommunicationResponse:
         """Answer experiment-compiler queries (documents only; no self-modify).

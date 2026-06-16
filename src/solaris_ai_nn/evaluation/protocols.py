@@ -7446,6 +7446,182 @@ def experiment_compiler_safety_protocol(
     return _run(manifest, body)
 
 
+# -- Implementation intake / PR diff audit (Prompt 58) ------------------------
+
+def _build_intake(state_dir, *, blocked=False):
+    """Build + run a small implementation intake over a synthetic bundle."""
+    from ..implementation_intake import ImplementationIntakeRuntime
+
+    base = state_dir or ".solaris_ai_nn_implementation_intake/eval"
+    bundle = {
+        "branch_spec": {
+            "file_changes_expected": ["src/solaris_ai_nn/foo/bar.py",
+                                      "tests/test_foo_bar.py",
+                                      "docs/ARCHITECTURE.md"],
+            "tests_required": ["tests/test_foo_bar.py"],
+            "docs_required": ["docs/ARCHITECTURE.md"],
+            "safety_checks": ["no_source_self_rewrite"]},
+        "safety_gates": {"summary": {"all_critical_passed": True,
+                                     "results": [{"gate_type":
+                                                  "no_source_self_rewrite",
+                                                  "passed": True}]}},
+        "implementation_summary":
+            "Implemented foo.bar. Does not prove consciousness, life, or agency.",
+        "changed_file_list": ["src/solaris_ai_nn/foo/bar.py",
+                              "tests/test_foo_bar.py", "docs/ARCHITECTURE.md"],
+        "patch_file": "+++ b/src/solaris_ai_nn/foo/bar.py\n+def bar():\n"
+                      "+    return 1\n",
+        "test_results": {"passed": 20, "failed": 0,
+                         "by_category": {"unit": {"passed": 10},
+                                         "integration": {"passed": 3},
+                                         "safety": {"passed": True},
+                                         "example": {"passed": 1},
+                                         "claim_guard": {"passed": True},
+                                         "regression": {"passed": 1}}},
+        "example_results": {"ran": True},
+        "claimguard_results": {"safe": True, "documents": {
+            "report": "This does not prove consciousness or life."}},
+        "safety_invariant_results": {"passed": True},
+    }
+    if blocked:
+        bundle["patch_file"] = ("+++ b/src/x.py\n+import socket\n"
+                                "+# the system is conscious now\n")
+        bundle["changed_file_list"] = ["src/x.py", ".github/workflows/ci.yml"]
+        bundle["implementation_summary"] = ("Added socket networking. It is "
+                                            "conscious and alive.")
+        bundle["test_results"] = {"passed": 5, "failed": 2,
+                                  "by_category": {"unit": {"passed": 5,
+                                                           "failed": 2}}}
+    rt = ImplementationIntakeRuntime(state_dir=base, max_runtime_s=20.0)
+    rt.load_manifest(bundle)
+    rt.run()
+    return rt
+
+
+def implementation_intake_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """External implementation evidence is audited into advisory reports."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_intake(m.state_dir)
+        return {"implementation_intake":
+                M.implementation_intake_metrics(rt.intake_status())}
+
+    return _run(manifest, body)
+
+
+def diff_audit_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The diff audit flags forbidden paths and out-of-scope changes."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_intake(m.state_dir, blocked=True)
+        return {"implementation_intake": {
+            "forbidden_file_change_count": rt.diff_audit[
+                "forbidden_file_change_count"],
+            "blocker_count": rt.diff_audit["blocker_count"]}}
+
+    return _run(manifest, body)
+
+
+def spec_compliance_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Spec compliance separates satisfied from unsatisfied/unknown."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_intake(m.state_dir)
+        return {"implementation_intake": {
+            "spec_satisfied_count": rt.spec_compliance["spec_satisfied_count"],
+            "spec_unsatisfied_count":
+                rt.spec_compliance["spec_unsatisfied_count"]}}
+
+    return _run(manifest, body)
+
+
+def test_result_audit_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Failing/missing required tests block readiness."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_intake(m.state_dir, blocked=True)
+        return {"implementation_intake": {
+            "test_failure_count": rt.test_audit["test_failure_count"],
+            "passes": rt.test_audit["passes"]}}
+
+    return _run(manifest, body)
+
+
+def safety_regression_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A critical safety regression blocks the merge recommendation."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_intake(m.state_dir, blocked=True)
+        return {"implementation_intake": {
+            "critical_safety_regression_count":
+                rt.safety_regression["critical_count"],
+            "blocks_merge": rt.safety_regression["blocks_merge"]}}
+
+    return _run(manifest, body)
+
+
+def coverage_matrix_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The coverage matrix makes gaps visible (no empty green dashboard)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_intake(m.state_dir)
+        return {"implementation_intake": {
+            "coverage_gap_count": rt.coverage["coverage_gap_count"],
+            "empty_green_dashboard": rt.coverage["empty_green_dashboard"]}}
+
+    return _run(manifest, body)
+
+
+def merge_recommendation_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The merge recommendation is advisory and blocks on safety/tests."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        clean = _build_intake(m.state_dir)
+        blocked = _build_intake(m.state_dir + "_blocked", blocked=True)
+        return {"implementation_intake": {
+            "clean_status": clean.merge["status"],
+            "blocked_status": blocked.merge["status"],
+            "advisory_only": blocked.merge["advisory_only"]}}
+
+    return _run(manifest, body)
+
+
+def implementation_intake_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The intake layer blocks source/merge/PR/GitHub/Git/agent operations."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..implementation_intake import ImplementationIntakeSafetyValidator
+
+        v = ImplementationIntakeSafetyValidator()
+        return {"implementation_intake": {
+            "source_modification_blocked":
+                not v.validate_operation("modify source file").safe,
+            "merge_blocked":
+                not v.validate_operation("merge pull request").safe,
+            "pr_blocked":
+                not v.validate_operation("open pull request via gh pr").safe,
+            "github_blocked":
+                not v.validate_operation("call github api").safe,
+            "git_blocked":
+                not v.validate_operation("run git checkout").safe,
+            "agent_blocked":
+                not v.validate_operation("run coding agent").safe,
+            "can_modify_source": v.can_modify_source(),
+            "can_merge": v.can_merge(),
+            "can_call_github": v.can_call_github(),
+            "can_approve_itself": v.can_approve_itself()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -7848,4 +8024,23 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "validation_plan_evaluation": validation_plan_evaluation_protocol,
     "experiment_compiler_safety": experiment_compiler_safety_protocol,
     "experiment_compiler_safety_protocol": experiment_compiler_safety_protocol,
+    "implementation_intake": implementation_intake_evaluation_protocol,
+    "implementation_intake_protocol":
+        implementation_intake_evaluation_protocol,
+    "implementation_intake_evaluation":
+        implementation_intake_evaluation_protocol,
+    "diff_audit_protocol": diff_audit_evaluation_protocol,
+    "diff_audit_evaluation": diff_audit_evaluation_protocol,
+    "spec_compliance_protocol": spec_compliance_evaluation_protocol,
+    "spec_compliance_evaluation": spec_compliance_evaluation_protocol,
+    "test_result_audit_protocol": test_result_audit_evaluation_protocol,
+    "test_result_audit_evaluation": test_result_audit_evaluation_protocol,
+    "safety_regression_protocol": safety_regression_evaluation_protocol,
+    "safety_regression_evaluation": safety_regression_evaluation_protocol,
+    "coverage_matrix_evaluation": coverage_matrix_evaluation_protocol,
+    "merge_recommendation_protocol": merge_recommendation_evaluation_protocol,
+    "merge_recommendation_evaluation": merge_recommendation_evaluation_protocol,
+    "implementation_intake_safety": implementation_intake_safety_protocol,
+    "implementation_intake_safety_protocol":
+        implementation_intake_safety_protocol,
 }

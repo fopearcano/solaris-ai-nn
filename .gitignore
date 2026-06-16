@@ -85,3 +85,5 @@ artifacts/
 .sann_replication/
 .solaris_ai_nn_experiments/
 .sann_experiments/
+.solaris_ai_nn_implementation_intake/
+.sann_implementation_intake/
