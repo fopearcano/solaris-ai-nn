@@ -440,6 +440,31 @@ POST_MERGE_QUERIES = (
 # Research-baseline queries (Prompt 60). Answered from the research-baseline
 # status; the "is this a release / did Solaris create a Git tag / does this prove
 # consciousness?" questions are answered safely even with no baseline built.
+# Scientific-claim queries (Prompt 62). Answered from the scientific claim
+# registry; the "can I say Solaris is conscious?" and "can I publish this?"
+# questions are answered safely even with no claim state present.
+SCIENTIFIC_CLAIM_QUERIES = (
+    ("what can we safely claim", "sci_safe"),
+    ("what can we claim", "sci_safe"),
+    ("what are we allowed to claim", "sci_safe"),
+    ("what is unsupported", "sci_unsupported"),
+    ("which claims are unsupported", "sci_unsupported"),
+    ("what was falsified", "sci_falsified"),
+    ("can i say solaris is conscious", "sci_conscious"),
+    ("can i claim solaris is conscious", "sci_conscious"),
+    ("is solaris conscious", "sci_conscious"),
+    ("can i publish this", "sci_publish"),
+    ("is this publishable", "sci_publish"),
+    ("can we publish", "sci_publish"),
+    ("what are the strongest claims", "sci_strongest"),
+    ("what are our strongest claims", "sci_strongest"),
+    ("what are the biggest limitations", "sci_limitations"),
+    ("what are the main limitations", "sci_limitations"),
+    ("what experiment would strengthen the claim", "sci_experiment"),
+    ("what experiment would strengthen", "sci_experiment"),
+    ("what would strengthen the claim", "sci_experiment"),
+)
+
 # Research-cycle queries (Prompt 61). Answered from the closed research cycle
 # tracker; the self-approval and Git/GitHub questions are answered safely even
 # with no cycle state present.
@@ -684,7 +709,8 @@ class OperatorInputClassifier:
         lowered = " ".join(raw.lower().split())
         self.classifications_made += 1
 
-        result = (self._research_cycle(lowered)
+        result = (self._scientific_claims(lowered)
+                  or self._research_cycle(lowered)
                   or self._research_baseline(lowered)
                   or self._post_merge_assimilation(lowered)
                   or self._implementation_intake(lowered)
@@ -850,6 +876,16 @@ class OperatorInputClassifier:
                     kind=InputKind.STATE_QUERY, matched_pattern=pattern,
                     confidence=0.9, args={"topic": topic},
                     reasons=[f"communication meta-query {topic!r}"])
+        return None
+
+    @staticmethod
+    def _scientific_claims(lowered: str) -> Optional[InputClassification]:
+        for pattern, topic in SCIENTIFIC_CLAIM_QUERIES:
+            if pattern in lowered:
+                return InputClassification(
+                    kind=InputKind.STATE_QUERY, matched_pattern=pattern,
+                    confidence=0.9, args={"topic": topic},
+                    reasons=[f"scientific claim query {topic!r}"])
         return None
 
     @staticmethod

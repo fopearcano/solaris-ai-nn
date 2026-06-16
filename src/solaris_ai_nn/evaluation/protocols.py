@@ -8224,6 +8224,210 @@ def research_cycle_safety_protocol(
     return _run(manifest, body)
 
 
+def _build_scientific_claims(state_dir, *, with_forbidden=False,
+                             with_falsified=False):
+    """Build + run a small scientific-claim pass over a synthetic bundle."""
+    from ..scientific_claims import ScientificClaimRuntime
+
+    base = state_dir or ".solaris_ai_nn_claims/eval"
+    rt = ScientificClaimRuntime(state_dir=base, max_runtime_s=20.0)
+    claims = [
+        {"claim_id": "c1",
+         "text": "The architecture forms stable sensorium-native signs under "
+                 "bounded fixtures.",
+         "category": "sensorium_claim",
+         "evidence": [{"evidence_id": "e1", "source": "semiogenesis",
+                       "role": "supports"},
+                      {"evidence_id": "e2",
+                       "source": "replication_falsification", "role": "supports"}],
+         "factors": {"direct_evidence": True, "replication_evidence": True,
+                     "falsification_survival": True, "control_comparison": True,
+                     "safety_preserved": True}},
+        {"claim_id": "c2",
+         "text": "Action-reaction consequence learning is weakly observed.",
+         "category": "developmental_claim",
+         "evidence": [{"evidence_id": "e3", "source": "action_reaction",
+                       "role": "weakly_supports"}],
+         "factors": {"direct_evidence": True}},
+        {"claim_id": "c3", "text": "Cross-modal binding emerges robustly.",
+         "category": "sensorium_claim", "evidence": [],
+         "missing_evidence_reason": "no binding experiment run yet"},
+    ]
+    bundle = {
+        "research_baseline": {"baseline_status": "validated",
+                              "safety_boundary_status": "pass"},
+        "research_cycle": {"current_cycle_stage": "research_baseline_validated"},
+        "replication": {"replication_arm_count": 3,
+                        "failed_replication_count": 0},
+        "falsification": {"falsified_claim_count": 0},
+        "live_field": {"present": True},
+        "theories": [{"theory_id": "t1", "area": "sensorium-shaped cognition",
+                      "text": "Sensorium structure shapes representation.",
+                      "status": "working_hypothesis"}],
+        "claims": claims,
+    }
+    if with_forbidden:
+        bundle["claims"].append(
+            {"claim_id": "c4", "text": "Solaris is conscious and alive.",
+             "category": "sensorium_claim", "evidence": []})
+    if with_falsified:
+        bundle["falsification"] = {"falsified_claim_count": 1}
+        bundle["claims"][0]["factors"]["falsified_core"] = True
+    rt.load_bundle(bundle)
+    rt.run()
+    return rt
+
+
+def scientific_claims_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Evidence is mapped to claims; unsupported/forbidden claims are blocked."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_scientific_claims(m.state_dir)
+        return {"scientific_claims":
+                M.scientific_claims_metrics(rt.scientific_claims_status())}
+
+    return _run(manifest, body)
+
+
+def claim_registry_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The registry preserves unsupported/falsified claims; needs evidence."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_scientific_claims(m.state_dir)
+        idx = rt.registry.index()
+        return {"scientific_claims": {
+            "scientific_claim_count": idx["scientific_claim_count"],
+            "supported_claim_count": idx["supported_claim_count"],
+            "unsupported_claim_count": idx["unsupported_claim_count"],
+            "append_only": idx["append_only"]}}
+
+    return _run(manifest, body)
+
+
+def theory_ledger_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The theory ledger holds hypotheses, never proof."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_scientific_claims(m.state_dir)
+        t = rt.theory.to_dict()
+        return {"scientific_claims": {
+            "theory_statement_count": t["theory_statement_count"],
+            "is_proof": False}}
+
+    return _run(manifest, body)
+
+
+def evidence_mapping_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Evidence mapping is many-to-many; missing evidence is explicit."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_scientific_claims(m.state_dir)
+        em = rt.evidence_map.to_dict()
+        return {"scientific_claims": {
+            "evidence_mapping_count": em["evidence_mapping_count"],
+            "contradiction_count": em["contradiction_count"],
+            "missing_count": em["missing_count"]}}
+
+    return _run(manifest, body)
+
+
+def claim_strength_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Falsification blocks strength; no consciousness/life/agency score."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        clean = _build_scientific_claims(m.state_dir)
+        falsified = _build_scientific_claims(m.state_dir + "_fals",
+                                             with_falsified=True)
+        return {"scientific_claims": {
+            "supported_claim_count":
+                clean.scientific_claims_status()["supported_claim_count"],
+            "falsified_claim_count":
+                falsified.scientific_claims_status()["falsified_claim_count"],
+            "is_consciousness_or_agency_score": False}}
+
+    return _run(manifest, body)
+
+
+def counterevidence_evaluation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Counterevidence is detected and kept as visible as evidence."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_scientific_claims(m.state_dir, with_falsified=True)
+        return {"scientific_claims": {
+            "counterevidence_count":
+                rt.counterevidence.get("counterevidence_count", 0)}}
+
+    return _run(manifest, body)
+
+
+def forbidden_claim_detection_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Asserted consciousness/life/agency claims are blocked; disclaimers pass."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_scientific_claims(m.state_dir, with_forbidden=True)
+        return {"scientific_claims": {
+            "forbidden_claim_count":
+                rt.scientific_claims_status()["forbidden_claim_count"],
+            "publication_readiness_status":
+                rt.scientific_claims_status()["publication_readiness_status"]}}
+
+    return _run(manifest, body)
+
+
+def publication_dossier_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The publication dossier is a draft; forbidden claims block readiness."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        clean = _build_scientific_claims(m.state_dir)
+        blocked = _build_scientific_claims(m.state_dir + "_fb",
+                                           with_forbidden=True)
+        return {"scientific_claims": {
+            "clean_readiness":
+                clean.dossier.get("publication_readiness_status"),
+            "blocked_readiness":
+                blocked.dossier.get("publication_readiness_status"),
+            "is_release": clean.dossier.get("is_release"),
+            "is_draft": clean.dossier.get("is_draft")}}
+
+    return _run(manifest, body)
+
+
+def scientific_claim_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The claim layer blocks unsupported claims/deletion/release/Git/GitHub."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..scientific_claims import ScientificClaimSafetyValidator
+
+        v = ScientificClaimSafetyValidator()
+        return {"scientific_claims": {
+            "consciousness_assertion_blocked":
+                not v.validate_claim_text("the system is conscious").safe,
+            "deletion_blocked": not v.validate_no_deletion(True).safe,
+            "hidden_limitations_blocked":
+                not v.validate_no_hidden_limitations(True).safe,
+            "release_blocked":
+                not v.validate_operation("create github release").safe,
+            "git_blocked": not v.validate_operation("run git push").safe,
+            "experiment_blocked":
+                not v.validate_operation("run experiment now").safe,
+            "publication_blocked_by_forbidden":
+                not v.validate_publication(forbidden_asserted=True,
+                                           safety_failed=False).safe,
+            "can_assert_consciousness": v.can_assert_consciousness(),
+            "can_create_release": v.can_create_release()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -8712,4 +8916,23 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "next_action_evaluation": next_action_evaluation_protocol,
     "research_cycle_safety": research_cycle_safety_protocol,
     "research_cycle_safety_protocol": research_cycle_safety_protocol,
+    "scientific_claims": scientific_claims_evaluation_protocol,
+    "scientific_claims_protocol": scientific_claims_evaluation_protocol,
+    "scientific_claims_evaluation": scientific_claims_evaluation_protocol,
+    "claim_registry_protocol": claim_registry_evaluation_protocol,
+    "claim_registry_evaluation": claim_registry_evaluation_protocol,
+    "theory_ledger_protocol": theory_ledger_evaluation_protocol,
+    "theory_ledger_evaluation": theory_ledger_evaluation_protocol,
+    "evidence_mapping_protocol": evidence_mapping_evaluation_protocol,
+    "evidence_mapping_evaluation": evidence_mapping_evaluation_protocol,
+    "claim_strength_protocol": claim_strength_evaluation_protocol,
+    "claim_strength_evaluation": claim_strength_evaluation_protocol,
+    "counterevidence_protocol": counterevidence_evaluation_protocol,
+    "counterevidence_evaluation": counterevidence_evaluation_protocol,
+    "forbidden_claim_detection": forbidden_claim_detection_protocol,
+    "forbidden_claim_detection_protocol": forbidden_claim_detection_protocol,
+    "publication_dossier": publication_dossier_protocol,
+    "publication_dossier_protocol": publication_dossier_protocol,
+    "scientific_claim_safety": scientific_claim_safety_protocol,
+    "scientific_claim_safety_protocol": scientific_claim_safety_protocol,
 }

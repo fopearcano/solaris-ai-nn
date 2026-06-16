@@ -170,6 +170,11 @@ AVAILABLE_QUERIES = (
     "what evidence is missing?", "what operator decision is required?",
     "did the cycle complete?", "did Solaris approve itself?",
     "did Solaris run Git or GitHub?",
+    "what can we safely claim?", "what is unsupported?",
+    "what was falsified?", "can I say Solaris is conscious?",
+    "can I publish this?", "what are the strongest claims?",
+    "what are the biggest limitations?",
+    "what experiment would strengthen the claim?",
 )
 
 
@@ -230,6 +235,8 @@ class QueryRouter:
         }
         if topic in meta:
             return meta[topic]()
+        if topic.startswith("sci_"):
+            return self._scientific_claims(topic)
         if topic.startswith("rc_"):
             return self._research_cycle(topic)
         if topic.startswith("rb_"):
@@ -611,6 +618,74 @@ class QueryRouter:
         else:
             text = (f"post-pilot growth classification: "
                     f"{status.get('growth_classification', 'inconclusive')}")
+        return self.builder.status_response(text, refs)
+
+    def _scientific_claims(self, topic: str) -> CommunicationResponse:
+        """Answer scientific-claim queries (evidence-to-claim discipline).
+
+        The "can I say Solaris is conscious?" and "can I publish this?" questions
+        are answered safely even with no claim state present; the layer maps
+        evidence to claims and blocks unsupported/forbidden ones.
+        """
+        if topic == "sci_conscious":
+            return self.builder.status_response(
+                "No. Current reports may describe operational structures, "
+                "developmental traces, sensorium-native signs, cognition-like "
+                "transformations, and action-consequence learning if supported "
+                "by evidence. They must not claim consciousness, sentience, "
+                "biological life, personhood, subjective experience, agency, or "
+                "free will.",
+                ["policy:scientific_claims_no_consciousness"])
+        if topic == "sci_publish":
+            return self.builder.status_response(
+                "Only as a draft evidence dossier or internal report, and only "
+                "if it asserts no forbidden claim, hides no limitation, and "
+                "passes ClaimGuard with safety evidence intact. The dossier is "
+                "not a release; publication readiness is reported per the claim "
+                "registry, and the operator decides.",
+                ["policy:scientific_claims_publication_is_draft"])
+        component = self.components.get("scientific_claims")
+        if component is None:
+            return self.builder.missing_component_response("scientific_claims")
+        status = (component.scientific_claims_status()
+                  if hasattr(component, "scientific_claims_status")
+                  else component.snapshot()
+                  if hasattr(component, "snapshot")
+                  else component if isinstance(component, dict) else {})
+        refs = ["component:scientific_claims"]
+        if topic == "sci_safe":
+            text = (f"safely claimable: {status.get('supported_claim_count', 0)} "
+                    f"supported + {status.get('weakly_supported_claim_count', 0)} "
+                    "weakly supported claim(s); see the supported-claims section "
+                    "of SCIENTIFIC_CLAIM_REPORT.md. Supported means backed by "
+                    "mapped evidence, not proof of consciousness/life/agency")
+        elif topic == "sci_unsupported":
+            text = (f"unsupported claims: "
+                    f"{status.get('unsupported_claim_count', 0)} (they remain "
+                    "visible and unsupported); see CLAIM_REGISTRY.md")
+        elif topic == "sci_falsified":
+            text = (f"falsified/contradicted claims: "
+                    f"{status.get('falsified_claim_count', 0)} falsified, "
+                    f"{status.get('contradicted_claim_count', 0)} contradicted; "
+                    "these stay visible and block promotion -- see "
+                    "COUNTEREVIDENCE.md")
+        elif topic == "sci_strongest":
+            text = (f"strongest claims: {status.get('supported_claim_count', 0)} "
+                    "reached supported status (replication or strong controls "
+                    "required); see the supported-claims section")
+        elif topic == "sci_limitations":
+            text = (f"limitations: {status.get('limitation_count', 0)} recorded "
+                    "(mandatory ones include no consciousness/subjective/agency/"
+                    "real-world-actuation evidence); see LIMITATIONS.md")
+        elif topic == "sci_experiment":
+            text = ("see the experiment suggestions in SCIENTIFIC_CLAIM_REPORT: "
+                    "missing live data -> live-field experiment, weak replication "
+                    "-> replication pack, label contamination -> mitigation "
+                    "experiment, fixture overfit -> falsification/control pack")
+        else:
+            text = ("the scientific claim registry maps evidence to claims and "
+                    "blocks unsupported or forbidden claims; publication "
+                    f"readiness is {status.get('publication_readiness_status')}")
         return self.builder.status_response(text, refs)
 
     def _research_cycle(self, topic: str) -> CommunicationResponse:

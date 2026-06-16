@@ -2986,3 +2986,43 @@ Shows the recommended next operator action across several cycle stages, and the
 urgent blocker-resolution action when a critical safety blocker is present. Next
 actions are instructions for the operator; none is executed; a critical safety
 blocker can never be bypassed.
+
+## 339. Scientific Claims Demo ✅ (implemented)
+
+**Run:** `python examples/run_scientific_claims_demo.py --state-dir .solaris_ai_nn_claims/test_claims`
+Maps evidence to a strongly supported claim (replication + controls + falsification
+survival), a weakly supported claim (single direct observation), and an unsupported
+claim (no evidence), then writes the scientific claim report set. The registry
+proves nothing about consciousness/life/agency; unsupported claims stay visible.
+
+## 340. Theory Ledger Demo ✅ (implemented)
+
+**Run:** `python examples/run_theory_ledger_demo.py --state-dir .solaris_ai_nn_claims/test_theory_ledger`
+Records a working hypothesis, challenges it with counterevidence (preserving the
+prior version), and falsifies/retires a third statement. Theory is a hypothesis
+under evidence, never proof; revisions and challenged/falsified statements stay
+archived.
+
+## 341. Counterevidence Demo ✅ (implemented)
+
+**Run:** `python examples/run_counterevidence_demo.py --state-dir .solaris_ai_nn_claims/test_counterevidence`
+Detects fixture overfit, passive-parser equivalence, missing live data, a failed
+replication, and a falsification failure. Counterevidence is as visible as evidence;
+blocking counterevidence (falsification, safety regression, ClaimGuard failure)
+blocks a claim outright.
+
+## 342. Publication Dossier Demo ✅ (implemented)
+
+**Run:** `python examples/run_publication_dossier_demo.py --state-dir .solaris_ai_nn_claims/test_publication_dossier`
+Builds a draft publication dossier for a clean evidence set (ready as a preprint
+draft with mandatory limitations) and for a set that asserts a forbidden claim
+(blocked by forbidden claims). The dossier is a draft evidence compilation, not a
+release; it includes negative/inconclusive results and safety boundaries.
+
+## 343. Safe Abstract Demo ✅ (implemented)
+
+**Run:** `python examples/run_safe_abstract_demo.py --state-dir .solaris_ai_nn_claims/test_safe_abstract`
+Builds a technical preprint abstract, a README-safe summary, and a negative-result
+summary from weak-evidence claims. Abstracts state when evidence is weak, include
+no forbidden claim except as a disclaimer, and fall back to a negative/inconclusive
+abstract when no publishable claim exists.

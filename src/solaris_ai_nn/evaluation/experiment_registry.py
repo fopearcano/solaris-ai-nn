@@ -594,6 +594,31 @@ DESCRIPTIONS = {
         "no Git/GitHub/source/agent/auto-approval execution",
     "research_cycle_safety_protocol":
         "no Git/GitHub/source/agent/auto-approval execution",
+    "scientific_claims": "evidence-to-claim discipline + theory ledger",
+    "scientific_claims_protocol":
+        "scientific claim registry (maps evidence to claims)",
+    "scientific_claims_evaluation": "scientific claim state check",
+    "claim_registry_protocol": "claim registry (append-only; failures kept)",
+    "claim_registry_evaluation": "claim registry check",
+    "theory_ledger_protocol": "theory ledger (hypotheses, not proof)",
+    "theory_ledger_evaluation": "theory ledger check",
+    "evidence_mapping_protocol": "evidence map (many-to-many; missing explicit)",
+    "evidence_mapping_evaluation": "evidence mapping check",
+    "claim_strength_protocol":
+        "claim strength (falsification blocks; no mind score)",
+    "claim_strength_evaluation": "claim strength check",
+    "counterevidence_protocol": "counterevidence (as visible as evidence)",
+    "counterevidence_evaluation": "counterevidence check",
+    "forbidden_claim_detection":
+        "forbidden-claim detector (blocks consciousness/life/agency)",
+    "forbidden_claim_detection_protocol":
+        "forbidden-claim detector (disclaimers allowed)",
+    "publication_dossier": "draft publication evidence dossier",
+    "publication_dossier_protocol": "publication dossier readiness check",
+    "scientific_claim_safety":
+        "no unsupported/forbidden claims, deletion, release, Git/GitHub",
+    "scientific_claim_safety_protocol":
+        "no unsupported/forbidden claims, deletion, release, Git/GitHub",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -910,6 +935,17 @@ class ExperimentRegistry:
                         "blocked_state_protocol", "blocked_state_evaluation",
                         "next_action_protocol", "next_action_evaluation")
             or bool(merged.get("research_cycle", False)))
+        features["scientific_claims"] = (
+            name.startswith("scientific_claim")
+            or name in ("claim_registry_protocol", "claim_registry_evaluation",
+                        "theory_ledger_protocol", "theory_ledger_evaluation",
+                        "evidence_mapping_protocol",
+                        "evidence_mapping_evaluation", "claim_strength_protocol",
+                        "claim_strength_evaluation", "counterevidence_protocol",
+                        "counterevidence_evaluation", "forbidden_claim_detection",
+                        "forbidden_claim_detection_protocol",
+                        "publication_dossier", "publication_dossier_protocol")
+            or bool(merged.get("scientific_claims", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

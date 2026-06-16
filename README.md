@@ -529,7 +529,30 @@ python examples/run_cycle_decision_gate_demo.py                # advisory gates;
 python examples/run_evidence_ledger_demo.py                    # append-only ledger; failures/missing preserved
 python examples/run_artifact_graph_demo.py                     # artifact provenance; contradictions stay visible
 python examples/run_next_action_planner_demo.py                # next operator action; blocker resolution first
+
+# Scientific claims: what can we safely claim, and what is forbidden
+python examples/run_scientific_claims_demo.py                  # supported / weak / unsupported claims
+python examples/run_theory_ledger_demo.py                      # working hypothesis -> challenged -> falsified
+python examples/run_counterevidence_demo.py                    # fixture overfit, passive-parser equivalence, missing live
+python examples/run_publication_dossier_demo.py                # draft dossier; forbidden-claim rejection
+python examples/run_safe_abstract_demo.py                      # claim-constrained preprint / README / negative-result abstracts
 ```
+
+The Scientific Claim Registry maps evidence to claims and blocks unsupported or
+forbidden claims. It does not prove consciousness, sentience, biological life,
+personhood, agency, free will, emotion, feeling, understanding, self-awareness, or
+subjective experience. It registers supported, weakly supported, inconclusive,
+unsupported, contradicted, falsified, and forbidden claims; maps evidence and
+counterevidence many-to-many across every research layer; maintains a theory ledger
+(hypotheses under evidence, never proof); scores claim strength (strong requires
+replication or strong controls; falsification or a safety failure blocks it); makes
+limitations mandatory, specific, and linked to claims; builds claim-constrained safe
+abstracts and a draft publication-grade evidence dossier; and bridges ClaimGuard so
+that a ClaimGuard failure blocks publication readiness. Forbidden inner-state claims
+may appear only as explicit disclaimers; any dossier that asserts one is blocked.
+It reads local artifacts and writes reports only: the publication dossier is a draft
+evidence compilation, not a release, and no Git/GitHub operation, experiment
+execution, or external-agent run occurs.
 
 The Closed Research Cycle Orchestrator tracks where the research program is in its
 experimental cycle, what evidence supports the current state, what is blocked, and
@@ -1629,6 +1652,13 @@ src/solaris_ai_nn/
                 states, next action, cycle archive, runtime, reports, safety
                 (tracks state; reads local artifacts, writes reports; no Git/
                 GitHub; never self-approves)
+  scientific_claims/ scientific claim registry + theory ledger + evidence dossier:
+                claim registry, theory ledger, evidence mapping, claim strength,
+                counterevidence, forbidden claims, publication dossier, abstract
+                builder, limitations builder, ClaimGuard bridge, runtime, reports,
+                safety (maps evidence to claims; blocks unsupported/forbidden
+                claims; draft dossier only; no release/Git/GitHub; proves nothing
+                about consciousness/life/agency)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
   utils/        pure-stdlib math, logging

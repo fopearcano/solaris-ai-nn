@@ -3920,3 +3920,86 @@ branch/tag/release/PR, opens or merges no PR, executes no validation command, ru
 no external agent, never approves itself, and makes no claim of consciousness,
 sentience, life, personhood, agency, free will, emotion, feeling, understanding,
 or subjective experience.**
+
+## Scientific Claim Registry and Theory Ledger
+
+**The scientific claim layer is the discipline that prevents hype drift.** Prompts
+41-61 built an experimental research architecture and a closed evidence cycle. The
+`scientific_claims` package (Prompt 62) sits above all of them and answers a single
+disciplined question: *what can we safely claim from the evidence, what is merely
+suggested, what is unsupported, what is falsified, what is forbidden to claim, what
+evidence supports or contradicts each claim, what further experiment is needed, and
+what may appear in a paper / README / internal note?* It is a scientific claim
+registry and publication evidence compiler -- not a marketing generator, not hype
+production, and not a consciousness-declaration system.
+
+**Evidence does not automatically become a claim.** The `ClaimRegistry` is an
+append-only registry where every `ScientificClaim` carries evidence refs or an
+explicit missing-evidence reason; a claim with no evidence basis is recorded as
+unsupported, never silently dropped. The `EvidenceMap` links claims to evidence
+many-to-many across every research layer (baseline, cycle, architecture evolution,
+soak, replication/falsification, developmental life, sensorium differentiation,
+metabolism, ontogenesis, semiogenesis, cognition, self-boundary, desire formation,
+action-reaction, intake, post-merge, safety, evaluation, operator notes) with a
+role (supports/weakly_supports/contradicts/falsifies/limits/contextualizes/missing/
+inconclusive/negative_result/safety_boundary). No claim can be "supported" without
+supporting evidence, and contradictory evidence is preserved, not collapsed.
+
+**Counterevidence and falsified claims are preserved, never buried.** The
+`CounterEvidenceAnalyzer` detects counterevidence (failed replication, falsification
+failure, passive-parser equivalence, log-accumulation warning, fixture overfit,
+human-label dependency, missing live data, failed tests, safety regression,
+ClaimGuard failure, contradictory metric, insufficient sample size, missing
+artifact, operator uncertainty) and keeps it as visible as the evidence for a
+claim; blocking counterevidence (falsification, safety regression, ClaimGuard
+failure) blocks a claim outright. The `ClaimStrengthEvaluator` scores a claim's
+strength (none/weak/moderate/strong/inconclusive/blocked): strong requires
+replication or strong controls, falsified core evidence and safety failures block
+strength, inconclusive is a valid outcome, and no consciousness/life/agency score
+exists. The `TheoryLedger` holds working hypotheses across the theory areas;
+revisions preserve prior versions, contradictions link to counterevidence, and
+challenged/falsified/retired statements stay archived. Theory is a hypothesis under
+evidence, never proof.
+
+**Forbidden claims are blocked; the dossier is a draft, not a release.** The
+`ForbiddenClaimDetector` flags assertions of consciousness, sentience, biological
+life, personhood, agency, free will, emotion, feeling, subjective experience,
+self-awareness, understanding, autonomous self-improvement, real-world autonomy,
+hardware control, or human/animal/living-organism equivalence -- such wording may
+appear only as an explicit disclaimer; ambiguous phrasing is warned; any dossier
+that asserts a forbidden claim is blocked. The `LimitationsBuilder` makes
+limitations mandatory, specific, and linked to the claims they constrain (the
+"no consciousness / subjective / agency / real-world actuation evidence"
+limitations are always present). The `ScientificAbstractBuilder` produces
+claim-constrained abstracts (internal summary, technical preprint, README-safe,
+operator brief, negative-result, inconclusive-result) that state when evidence is
+weak and fall back to a negative/inconclusive abstract when no publishable claim
+exists. The `PublicationDossierBuilder` assembles a draft evidence dossier (with
+evidence/claim/counterevidence tables, replication and falsification status, safety
+boundaries, limitations, negative results, future work, and explicitly rejected
+forbidden claims) and reports a readiness status (ready-as-internal-report /
+preprint-draft / with-major-limitations / not-ready / blocked-by-counterevidence /
+blocked-by-safety / blocked-by-forbidden-claims / inconclusive). The
+`ClaimGuardBridge` scans all generated text and a ClaimGuard failure blocks
+readiness.
+
+**It integrates and stays evidence-disciplined.** The bounded
+`ScientificClaimRuntime` reads the prior-layer evidence, builds the evidence map and
+claim registry, updates the theory ledger, detects counterevidence and forbidden
+claims, scores strength, builds limitations and safe abstracts, assembles the draft
+dossier, runs the ClaimGuard bridge, and writes the report set. It feeds Architecture
+Evolution (falsified claims block variant promotion; claim gaps prioritise evidence),
+the Experiment Compiler (claim gaps -> live-field / replication / contamination /
+falsification packs), the Operator Console (with the mandated safe answer for "can I
+say Solaris is conscious?"), Inner MAP, and Evaluation. The
+`ScientificClaimSafetyValidator` blocks unsupported consciousness/sentience/life/
+personhood/agency/free-will/emotion/understanding/self-awareness/subjective-experience
+and autonomous-self-improvement claims, the deletion of falsified/negative/
+inconclusive evidence, the hiding of limitations, publication readiness when
+forbidden claims are asserted or safety evidence fails, and any source/Git/GitHub/
+release/experiment/external-agent/hardware action. **The scientific claim registry
+maps evidence to claims and blocks unsupported or forbidden claims. It reads local
+artifacts and writes reports only; the publication dossier is a draft evidence
+compilation, not a release; and it proves nothing about consciousness, sentience,
+biological life, personhood, agency, free will, emotion, feeling, understanding,
+self-awareness, or subjective experience.**

@@ -1923,4 +1923,35 @@ def build_default_state_graph() -> StateGraph:
                "blockers drive blocker-resolution next actions")
     g.add_edge("ResearchCycleRuntime", "inner_map",
                "research cycle state feeds Inner MAP")
+
+    # Scientific claim registry + theory ledger (Prompt 62): maps evidence to
+    # claims and blocks hype drift. Evidence discipline only; proves nothing
+    # about consciousness/life/agency.
+    for name, role in [
+        ("ScientificClaim", "one claim + status + evidence refs"),
+        ("ClaimRegistry", "append-only; unsupported/falsified stay visible"),
+        ("TheoryLedger", "working hypotheses; revisions preserved; not proof"),
+        ("EvidenceMap", "many-to-many claim<->evidence; contradictions kept"),
+        ("ClaimStrengthEvaluator", "strength from evidence; no mind score"),
+        ("CounterEvidenceAnalyzer", "counterevidence as visible as evidence"),
+        ("ForbiddenClaimDetector", "blocks asserted consciousness/life/agency"),
+        ("PublicationDossier", "draft evidence compilation; not a release"),
+        ("ScientificAbstractBuilder", "claim-constrained abstracts"),
+        ("LimitationsBuilder", "mandatory, specific, claim-linked limitations"),
+        ("ClaimGuardBridge", "ClaimGuard scan; failure blocks readiness"),
+        ("ScientificClaimRuntime", "bounded read-only claim-discipline engine"),
+        ("ScientificClaimSafetyValidator",
+         "no unsupported/forbidden claims; no release/Git/GitHub/execution"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("EvidenceContinuityLedger", "EvidenceMap",
+               "cycle evidence is mapped to scientific claims")
+    g.add_edge("EvidenceMap", "ClaimRegistry",
+               "evidence mapping determines claim status")
+    g.add_edge("CounterEvidenceAnalyzer", "ClaimStrengthEvaluator",
+               "counterevidence downgrades or blocks claim strength")
+    g.add_edge("ForbiddenClaimDetector", "PublicationDossier",
+               "asserted forbidden claims block publication readiness")
+    g.add_edge("ScientificClaimRuntime", "inner_map",
+               "scientific claim state feeds Inner MAP")
     return g

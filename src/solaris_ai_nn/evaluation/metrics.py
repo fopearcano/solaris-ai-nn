@@ -2328,3 +2328,48 @@ def research_cycle_metrics(rc: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "note": "closed research-cycle scientific-state tracker; no source "
                 "change, Git, GitHub, validation, or self-approval",
     }
+
+
+def scientific_claims_metrics(sc: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective scientific-claim metrics (evidence-to-claim discipline layer).
+
+    These describe *claim discipline*: claims by status (supported/weak/
+    inconclusive/unsupported/contradicted/falsified/forbidden), evidence
+    mappings, counterevidence, limitations, publication readiness, and
+    ClaimGuard blocks. The layer reads evidence and writes reports only; it
+    creates no release, runs no Git/GitHub, and makes no consciousness/life/
+    agency claim.
+    """
+    if not sc:
+        return {"present": False}
+    readiness = sc.get("publication_readiness_status")
+    return {
+        "present": True,
+        "scientific_claim_count": int(sc.get("scientific_claim_count", 0) or 0),
+        "supported_claim_count": int(sc.get("supported_claim_count", 0) or 0),
+        "weakly_supported_claim_count": int(
+            sc.get("weakly_supported_claim_count", 0) or 0),
+        "inconclusive_claim_count": int(
+            sc.get("inconclusive_claim_count", 0) or 0),
+        "unsupported_claim_count": int(
+            sc.get("unsupported_claim_count", 0) or 0),
+        "contradicted_claim_count": int(
+            sc.get("contradicted_claim_count", 0) or 0),
+        "falsified_claim_count": int(sc.get("falsified_claim_count", 0) or 0),
+        "forbidden_claim_count": int(sc.get("forbidden_claim_count", 0) or 0),
+        "theory_statement_count": int(sc.get("theory_statement_count", 0) or 0),
+        "evidence_mapping_count": int(sc.get("evidence_mapping_count", 0) or 0),
+        "counterevidence_count": int(sc.get("counterevidence_count", 0) or 0),
+        "limitation_count": int(sc.get("limitation_count", 0) or 0),
+        "publication_readiness_status": readiness,
+        "publication_readiness_status_count": 1 if readiness else 0,
+        "claimguard_block_count": int(sc.get("claimguard_block_count", 0) or 0),
+        "claim_safety_block_count": int(
+            sc.get("claim_safety_block_count", 0) or 0),
+        "proves_consciousness": False, "creates_release": False,
+        "runs_git": False, "calls_github": False, "modifies_source": False,
+        "is_consciousness_or_personhood": False,
+        "note": "scientific claim-discipline metrics; maps evidence to claims, "
+                "blocks unsupported/forbidden claims, creates no release, and "
+                "proves nothing about consciousness/life/agency",
+    }

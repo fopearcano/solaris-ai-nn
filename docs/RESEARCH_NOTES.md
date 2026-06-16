@@ -2466,3 +2466,61 @@ never be bypassed by any decision. None of this implies the orchestrator
 understands the program it tracks, decides anything, or is in any sense an agent;
 it is conservative research bookkeeping about the state of, and the gates between,
 experimental cycles.
+
+## Notes on the Scientific Claim Registry
+
+**Why claim discipline matters.** A research program accumulates evidence faster
+than it accumulates warranted claims, and the gap between the two is exactly where
+hype lives. Every prior layer produces artifacts -- traces, metrics, soak dossiers,
+replication matrices -- and it is tempting to read each suggestive number as a
+finding. The scientific claim registry exists to break that reflex: evidence does
+not automatically become a claim. A claim is registered only with its evidence
+mapping, its counterevidence, its strength, and its limitations attached, and a
+claim with no evidence basis is recorded as *unsupported* rather than quietly
+dropped or quietly promoted. The point is not to suppress ambition; it is to keep
+ambition and evidence in separate columns so the difference stays legible.
+
+**How to distinguish the claim grades.** *Supported* means mapped evidence backs
+the claim and it survived replication or strong controls; *weakly supported* means
+a single direct observation with no replication; *partially supported* means
+moderate evidence (two or more supporting factors) without replication;
+*inconclusive* means the evidence neither supports nor refutes; *unsupported* means
+no supporting evidence exists; *contradicted* means evidence points against it
+without a formal falsification; *falsified* means a falsification test refuted a
+core claim; and *forbidden* means the claim asserts an inner state we will not
+assert at all. These grades are not a ranking of importance -- an inconclusive
+result can be more scientifically interesting than a supported one -- they are a
+ranking of *what the evidence licenses us to say*.
+
+**Why limitations are first-class.** A limitation buried in a final paragraph is a
+limitation designed to be skipped. Here limitations are mandatory, specific, and
+linked to the claims they constrain, and they appear in the claim tables, not only
+at the end. The mandatory limitations -- no consciousness, subjective, agency, or
+real-world-actuation evidence -- are always present regardless of what was found,
+because their absence from a report would itself be a misleading signal.
+
+**Why counterevidence is not an embarrassment.** Failed replications, passive-parser
+equivalence, fixture overfit, and missing live data are not blemishes to be
+minimised; they are findings. The registry keeps counterevidence as visible as
+evidence and lets it downgrade or block a claim, because a claim that cannot survive
+its own counterevidence was never a claim, only a hope. Treating counterevidence as
+inconvenient is the precise failure mode that claim discipline is built to prevent.
+
+**Why consciousness/life/agency claims remain forbidden.** No measurement in this
+system bears on consciousness, sentience, biological life, personhood, agency, free
+will, emotion, feeling, understanding, self-awareness, or subjective experience, so
+no evidence could support such a claim and none is permitted as an assertion. These
+terms may appear only as explicit disclaimers; ambiguous wording ("seems aware",
+"as if it feels") is flagged; and any dossier that asserts a forbidden claim is
+blocked outright. This is not modesty about results -- it is accuracy about what the
+results are *about*.
+
+**How publication readiness differs from research interest.** A result can be deeply
+interesting and not remotely publishable, and the dossier keeps the two apart.
+Publication readiness asks a narrow question: does a draft evidence compilation
+assert only supported claims, include its negative and inconclusive results and
+safety boundaries, hide no limitation, and pass ClaimGuard with safety evidence
+intact? A forbidden assertion, a failed safety boundary, or blocking counterevidence
+makes a dossier *not ready* no matter how interesting the underlying work is. The
+dossier is a draft evidence compilation, never a release, and the decision to do
+anything with it remains the human operator's.

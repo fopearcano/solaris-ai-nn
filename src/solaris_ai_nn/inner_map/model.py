@@ -528,6 +528,15 @@ class InnerMapModel:
     # latest_research_cycle_report_path. Tracking only; it runs no Git/GitHub,
     # approves nothing, and makes no consciousness/life/agency claim.
     research_cycle: Optional[Dict[str, Any]] = None
+    # Scientific-claims status (Prompt 62); None when not attached. Keys:
+    # scientific_claims_enabled, scientific_claim_count, supported_claim_count,
+    # weakly_supported_claim_count, inconclusive_claim_count,
+    # unsupported_claim_count, falsified_claim_count, forbidden_claim_count,
+    # publication_readiness_status, claimguard_status,
+    # latest_scientific_claim_report_path. It maps evidence to claims and blocks
+    # unsupported/forbidden claims; it proves nothing about consciousness, life,
+    # agency, or subjective experience.
+    scientific_claims: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

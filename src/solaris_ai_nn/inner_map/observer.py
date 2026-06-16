@@ -99,6 +99,7 @@ class InnerMapObserver:
     post_merge_assimilation: Any = None  # optional dict/object of post-merge
     research_baseline: Any = None  # optional dict/object of research baseline
     research_cycle: Any = None  # optional dict/object of research-cycle status
+    scientific_claims: Any = None  # optional dict/object of scientific-claims
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -907,6 +908,17 @@ class InnerMapObserver:
                 model.research_cycle = cycle.research_cycle_status()
             elif hasattr(cycle, "snapshot"):
                 model.research_cycle = cycle.snapshot()
+        claims = self.scientific_claims
+        if claims is None and self.runner is not None:
+            claims = getattr(self.runner, "scientific_claims", None)
+        if claims is not None:
+            # Scientific-claims status (evidence-to-claim discipline view).
+            if isinstance(claims, dict):
+                model.scientific_claims = dict(claims)
+            elif hasattr(claims, "scientific_claims_status"):
+                model.scientific_claims = claims.scientific_claims_status()
+            elif hasattr(claims, "snapshot"):
+                model.scientific_claims = claims.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

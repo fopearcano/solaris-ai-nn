@@ -1343,6 +1343,42 @@ def _build_profiles() -> Dict[str, ScenarioProfile]:
             expected_metrics=["run_step_count"],
             max_runtime_s=60.0))
 
+    # -- Scientific claim profiles (Prompt 62) --------------------------------
+    # Maps evidence to scientific claims, preserves counterevidence and
+    # falsified results, blocks forbidden claims, and compiles a draft
+    # publication dossier. Reads evidence and writes reports only: no source
+    # change, no Git/GitHub, no release, no experiment execution, and no claim
+    # of consciousness, life, agency, or subjective experience.
+    _claim_modules = ["bridge", "governance", "ops", "inner_map",
+                      "research_cycle", "scientific_claims"]
+    for pid, desc in (
+            ("scientific_claims_status",
+             "Map evidence to scientific claims and report what may be said."),
+            ("scientific_claims_theory_ledger",
+             "Maintain the theory ledger (hypotheses under evidence)."),
+            ("scientific_claims_counterevidence",
+             "Detect counterevidence against claims (kept fully visible)."),
+            ("scientific_claims_publication_dossier",
+             "Compile a draft publication evidence dossier."),
+            ("scientific_claims_safe_abstract",
+             "Build claim-constrained safe abstracts."),
+            ("scientific_claims_forbidden_check",
+             "Detect and block forbidden inner-state claims.")):
+        add(ScenarioProfile(
+            profile_id=pid, description=desc,
+            run_context=_ctx(RunMode.SHORT_DEMO, max_steps=120),
+            enabled_modules=list(_claim_modules),
+            safety_constraints=list(_BASE_CONSTRAINTS) + [
+                "maps evidence to claims; asserts nothing unsupported",
+                "no claim of consciousness/sentience/life/personhood/agency",
+                "no deletion of falsified/negative/inconclusive evidence",
+                "no hiding of limitations; ClaimGuard is never bypassed",
+                "publication dossier is a draft; no release/Git/GitHub"],
+            governance_requirements=["enable_plural_sensorium_fixture"],
+            expected_artifacts=["SCIENTIFIC_CLAIM_REPORT.json"],
+            expected_metrics=["run_step_count"],
+            max_runtime_s=60.0))
+
     return profiles
 
 

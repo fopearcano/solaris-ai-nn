@@ -93,3 +93,5 @@ artifacts/
 .sann_research_baseline/
 .solaris_ai_nn_research_cycle/
 .sann_research_cycle/
+.solaris_ai_nn_claims/
+.sann_claims/
