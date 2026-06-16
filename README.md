@@ -133,6 +133,26 @@ fixture-only and bounded; missing optional modules are skipped honestly and show
 in the report; live read-only profiles stay blocked unless governance artifacts
 exist. Alpha is not a product release.
 
+## Technical Whitepaper / Architecture Book
+
+The documentation generator reconstructs the whole project into coherent local
+Markdown: a technical overview, a full whitepaper, a longer architecture book,
+Mermaid diagrams, a glossary, a module map, a research roadmap, a safety-boundary
+document, appendices, and a documentation index (written under `docs/whitepaper/`).
+
+```bash
+python -m solaris_ai_nn build-docs --state-dir .solaris_ai_nn_docs --docs-dir docs/whitepaper
+python -m solaris_ai_nn docs-index --state-dir .solaris_ai_nn_docs
+python -m solaris_ai_nn whitepaper --state-dir .solaris_ai_nn_docs --docs-dir docs/whitepaper
+```
+
+The Technical Whitepaper and Architecture Book generator creates local Markdown
+documentation only. It does not publish, upload, call GitHub, create releases,
+execute experiments, or make claims about consciousness, sentience, biological
+life, personhood, agency, free will, emotion, feeling, understanding,
+self-awareness, or subjective experience. Missing modules and missing evidence are
+marked honestly; "organismic" is an architectural metaphor throughout.
+
 ## Run the minimal experiment
 
 ```bash
@@ -1754,6 +1774,12 @@ src/solaris_ai_nn/
                 orchestration; no Git/GitHub/publish/feeders/hardware; honest
                 about skipped modules; proves nothing about consciousness/life/
                 agency)
+  architecture_book/ technical whitepaper + architecture book generator:
+                doc manifest, source collector, chapter model, outline, diagram,
+                glossary, whitepaper, architecture book, appendix, doc index,
+                runtime, reports, safety (reconstructs local Markdown docs only;
+                publishes/uploads nothing; calls no Git/GitHub; marks missing
+                modules honestly; makes no consciousness/life/agency claim)
   cli.py        unified `python -m solaris_ai_nn` Alpha CLI (local-only, bounded)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo

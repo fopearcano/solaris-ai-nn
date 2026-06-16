@@ -2515,3 +2515,42 @@ def alpha_system_metrics(al: Optional[Dict[str, Any]]) -> Dict[str, Any]:
                 "hardware/feeder control, Git/GitHub, publishing, or "
                 "consciousness/life/agency claim",
     }
+
+
+def architecture_book_metrics(ab: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective documentation-generator metrics (whitepaper / architecture book).
+
+    These describe *documentation reconstruction*: sources (and missing ones),
+    generated documents/chapters/diagrams, glossary entries, skipped chapters,
+    and documentation safety/ClaimGuard blocks. The generator writes local
+    Markdown only: it publishes nothing, uploads nothing, calls no Git/GitHub,
+    runs no experiment, and makes no consciousness/life/agency claim.
+    """
+    if not ab:
+        return {"present": False}
+    return {
+        "present": True,
+        "documentation_source_count": int(
+            ab.get("documentation_source_count", 0) or 0),
+        "missing_documentation_source_count": int(
+            ab.get("missing_documentation_source_count", 0) or 0),
+        "generated_document_count": int(
+            ab.get("generated_document_count", 0) or 0),
+        "generated_chapter_count": int(
+            ab.get("generated_chapter_count", 0) or 0),
+        "generated_diagram_count": int(
+            ab.get("generated_diagram_count", 0) or 0),
+        "glossary_entry_count": int(ab.get("glossary_entry_count", 0) or 0),
+        "skipped_chapter_count": int(ab.get("skipped_chapter_count", 0) or 0),
+        "documentation_safety_block_count": int(
+            ab.get("documentation_safety_block_count", 0) or 0),
+        "claimguard_documentation_block_count": int(
+            ab.get("claimguard_documentation_block_count", 0) or 0),
+        "claimguard_available": bool(ab.get("claimguard_available", False)),
+        "published": False, "uploaded": False, "runs_git": False,
+        "calls_github": False,
+        "is_consciousness_or_personhood": False,
+        "note": "documentation-reconstruction metrics; writes local Markdown "
+                "only; no publish/upload/Git/GitHub/experiment and no "
+                "consciousness/life/agency claim",
+    }

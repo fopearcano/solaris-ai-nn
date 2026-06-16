@@ -2039,4 +2039,30 @@ def build_default_state_graph() -> StateGraph:
                "demo steps produce indexed artifacts and skip markers")
     g.add_edge("AlphaResearchOrchestrator", "inner_map",
                "alpha system state feeds Inner MAP")
+
+    # Technical whitepaper / architecture book (Prompt 66): documentation
+    # reconstruction. Writes local Markdown only; publishes nothing, calls no
+    # Git/GitHub, and makes no consciousness/life/agency claim.
+    for name, role in [
+        ("DocumentationManifest", "indexes local sources; missing visible"),
+        ("ArchitectureSourceCollector", "read-only source summary; no exec"),
+        ("SolarisArchitectureOutlineBuilder",
+         "Part I-VII outline; planned modules marked"),
+        ("DiagramBuilder", "Mermaid diagrams; no self-modification"),
+        ("GlossaryBuilder", "technical glossary; metaphor clarified"),
+        ("TechnicalWhitepaperBuilder", "whitepaper + overview; non-claims"),
+        ("ArchitectureBookBuilder", "structured book; missing modules marked"),
+        ("DocumentationIndexBuilder", "doc index; missing docs visible"),
+        ("ArchitectureBookRuntime",
+         "bounded local doc generator; no publish/upload/Git/GitHub"),
+        ("ArchitectureBookSafetyValidator",
+         "no publish/upload/Git/GitHub/experiment/forbidden-claim"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("ArchitectureSourceCollector", "DocumentationManifest",
+               "collected sources are indexed in the documentation manifest")
+    g.add_edge("AlphaResearchOrchestrator", "ArchitectureBookRuntime",
+               "alpha reports are a documentation source")
+    g.add_edge("ArchitectureBookRuntime", "inner_map",
+               "documentation build status feeds Inner MAP")
     return g

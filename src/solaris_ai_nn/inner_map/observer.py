@@ -103,6 +103,7 @@ class InnerMapObserver:
     independent_review: Any = None  # optional dict/object of independent-review
     review_assimilation: Any = None  # optional dict/object of review-assimilation
     alpha_system: Any = None  # optional dict/object of alpha-system status
+    architecture_book: Any = None  # optional dict/object of documentation status
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -956,6 +957,17 @@ class InnerMapObserver:
                 model.alpha_system = alpha.alpha_status()
             elif hasattr(alpha, "snapshot"):
                 model.alpha_system = alpha.snapshot()
+        book = self.architecture_book
+        if book is None and self.runner is not None:
+            book = getattr(self.runner, "architecture_book", None)
+        if book is not None:
+            # Documentation-build status (whitepaper / architecture book view).
+            if isinstance(book, dict):
+                model.architecture_book = dict(book)
+            elif hasattr(book, "documentation_status"):
+                model.architecture_book = book.documentation_status()
+            elif hasattr(book, "snapshot"):
+                model.architecture_book = book.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

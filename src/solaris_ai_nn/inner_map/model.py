@@ -564,6 +564,14 @@ class InnerMapModel:
     # orchestration; it actuates nothing, controls no hardware/feeders, calls no
     # Git/GitHub, and makes no consciousness/life/agency claim.
     alpha_system: Optional[Dict[str, Any]] = None
+    # Architecture-book / whitepaper status (Prompt 66); None when not attached.
+    # Keys: architecture_book_enabled, documentation_source_count,
+    # generated_document_count, generated_chapter_count, generated_diagram_count,
+    # glossary_entry_count, documentation_safety_block_count,
+    # latest_whitepaper_path, latest_architecture_book_path. The generator writes
+    # local Markdown only; it publishes nothing, calls no Git/GitHub, and makes
+    # no consciousness/life/agency claim.
+    architecture_book: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

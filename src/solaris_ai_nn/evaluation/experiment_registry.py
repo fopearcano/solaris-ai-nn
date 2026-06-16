@@ -700,6 +700,29 @@ DESCRIPTIONS = {
     "alpha_cycle_status_evaluation": "alpha cycle status check",
     "alpha_safety": "no actuation/feeders/Git/GitHub/publish/claims",
     "alpha_safety_protocol": "no actuation/feeders/Git/GitHub/publish/claims",
+    "architecture_book": "technical whitepaper + architecture book generator",
+    "architecture_book_protocol":
+        "documentation reconstruction (local Markdown only)",
+    "architecture_book_evaluation": "documentation generator state check",
+    "documentation_manifest_protocol":
+        "doc manifest (local sources; missing visible)",
+    "documentation_manifest_evaluation": "doc manifest check",
+    "source_collection_protocol": "read-only source collection",
+    "source_collection_evaluation": "source collection check",
+    "whitepaper_generation_protocol":
+        "technical whitepaper (non-claims; claim-safe)",
+    "whitepaper_generation_evaluation": "whitepaper generation check",
+    "architecture_book_generation_protocol":
+        "architecture book chapters (missing modules marked)",
+    "architecture_book_generation_evaluation": "architecture book check",
+    "diagram_generation_protocol": "Mermaid diagrams (no self-modification)",
+    "diagram_generation_evaluation": "diagram generation check",
+    "glossary_generation_protocol": "glossary (metaphor/forbidden clarified)",
+    "glossary_generation_evaluation": "glossary generation check",
+    "documentation_safety":
+        "no publish/upload/Git/GitHub/experiment/forbidden-claim",
+    "documentation_safety_protocol":
+        "no publish/upload/Git/GitHub/experiment/forbidden-claim",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -1065,6 +1088,20 @@ class ExperimentRegistry:
             name.startswith("alpha_")
             or name in ("alpha_research_system",)
             or bool(merged.get("alpha_system", False)))
+        features["architecture_book"] = (
+            name.startswith("architecture_book")
+            or name in ("documentation_manifest_protocol",
+                        "documentation_manifest_evaluation",
+                        "source_collection_protocol",
+                        "source_collection_evaluation",
+                        "whitepaper_generation_protocol",
+                        "whitepaper_generation_evaluation",
+                        "diagram_generation_protocol",
+                        "diagram_generation_evaluation",
+                        "glossary_generation_protocol",
+                        "glossary_generation_evaluation",
+                        "documentation_safety", "documentation_safety_protocol")
+            or bool(merged.get("architecture_book", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

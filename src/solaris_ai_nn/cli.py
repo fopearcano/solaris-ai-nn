@@ -24,7 +24,18 @@ from .alpha_system.module_registry import AlphaModuleRegistry
 from .alpha_system.state_layout import AlphaStateLayout
 
 _ALPHA_COMMANDS = ("doctor", "init", "modules", "run-demo", "artifact-index",
-                   "cycle-status", "build-runbook", "build-report")
+                   "cycle-status", "build-runbook", "build-report",
+                   "build-docs", "docs-index", "whitepaper")
+
+
+def _book_runtime(args: argparse.Namespace):
+    from .architecture_book.book_runtime import ArchitectureBookRuntime
+
+    return ArchitectureBookRuntime(
+        state_dir=args.state_dir, docs_dir=args.docs_dir,
+        report_only=args.report_only, dry_run=args.dry_run,
+        max_runtime_s=args.max_runtime_s, strict=args.strict,
+        require_claimguard=args.require_claimguard)
 
 
 def _orchestrator(args: argparse.Namespace) -> AlphaResearchOrchestrator:
@@ -169,6 +180,66 @@ def cmd_build_report(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_build_docs(args: argparse.Namespace) -> int:
+    rt = _book_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"docs build refused: {result.get('reason')}")
+        return 2
+    rt.write_artifacts()
+    status = rt.documentation_status()
+    _print("alpha documentation build:")
+    _print(f"  sources: {status['documentation_source_count']} "
+           f"(missing {status['missing_documentation_source_count']})")
+    _print(f"  documents: {status['generated_document_count']}")
+    _print(f"  chapters: {status['generated_chapter_count']} "
+           f"(skipped {status['skipped_chapter_count']})")
+    _print(f"  diagrams: {status['generated_diagram_count']}; glossary: "
+           f"{status['glossary_entry_count']}")
+    _print(f"  ClaimGuard available: {status['claimguard_available']}; "
+           f"doc blocks: {status['claimguard_documentation_block_count']}")
+    _print(f"  whitepaper: {status['latest_whitepaper_path']}")
+    _print(f"  architecture book: {status['latest_architecture_book_path']}")
+    if status["claimguard_documentation_block_count"] and args.strict:
+        _print("  STRICT: documentation safety blockers present")
+        return 2
+    if not status["claimguard_available"] and args.require_claimguard:
+        _print("  STRICT: ClaimGuard unavailable")
+        return 2
+    return 0
+
+
+def cmd_docs_index(args: argparse.Namespace) -> int:
+    from .architecture_book.doc_index import DocumentationIndexBuilder
+
+    index = DocumentationIndexBuilder(docs_dir=args.docs_dir).build()
+    d = index.to_dict()
+    _print("alpha documentation index:")
+    for e in d["entries"]:
+        _print(f"  [{'present' if e['present'] else 'missing'}] {e['label']}: "
+               f"{e['path']}")
+    _print(f"  -> {d['present_document_count']} present, "
+           f"{d['missing_document_count']} missing")
+    return 0
+
+
+def cmd_whitepaper(args: argparse.Namespace) -> int:
+    import os
+
+    path = os.path.join(args.docs_dir, "SOLARIS_AI_NN_WHITEPAPER.md")
+    if os.path.isfile(path):
+        _print(f"technical whitepaper: {path} (already built)")
+        return 0
+    rt = _book_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"whitepaper build refused: {result.get('reason')}")
+        return 2
+    _print(f"technical whitepaper: "
+           f"{rt.documentation_status()['latest_whitepaper_path']}")
+    return 0
+
+
 _HANDLERS = {
     "init": cmd_init,
     "doctor": cmd_doctor,
@@ -178,6 +249,9 @@ _HANDLERS = {
     "cycle-status": cmd_cycle_status,
     "build-runbook": cmd_build_runbook,
     "build-report": cmd_build_report,
+    "build-docs": cmd_build_docs,
+    "docs-index": cmd_docs_index,
+    "whitepaper": cmd_whitepaper,
 }
 
 
@@ -186,6 +260,9 @@ _HANDLERS = {
 def _add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--state-dir", type=str, default=".solaris_ai_nn_alpha",
                         help="local alpha state directory root")
+    parser.add_argument("--docs-dir", type=str, default="docs/whitepaper",
+                        dest="docs_dir",
+                        help="output directory for generated documentation")
     parser.add_argument("--profile", type=str, default=None,
                         help=f"alpha profile id ({', '.join(available_profiles())})")
     parser.add_argument("--max-runtime-s", type=float, default=60.0,

@@ -4212,3 +4212,40 @@ Git, publish artifacts, upload files, create branches, control feeders/hardware,
 execute external agents, or prove consciousness, sentience, biological life,
 personhood, agency, free will, emotion, feeling, understanding, self-awareness, or
 subjective experience. Alpha is not a product release.**
+
+## Technical Whitepaper and Architecture Book
+
+The documentation generator (`architecture_book` package, Prompt 66) reconstructs
+the whole project -- Prompts 41-65 -- into coherent local Markdown: a technical
+overview, a full whitepaper, a longer architecture book, Mermaid diagrams, a
+glossary, a module map, a research roadmap, a safety-boundary document, appendices,
+and a documentation index. This is documentation reconstruction, not marketing,
+not a public release, and not proof of intelligence; it answers whether a
+technically competent reader can understand what Solaris-AI-NN is, how its modules
+relate, what evidence it produces, and what claims it permits and forbids.
+
+**It is local, honest, and claim-constrained.** The `ArchitectureSourceCollector`
+summarizes local sources read-only (README, docs, examples, and the alpha/claims/
+baseline/cycle/review state dirs); the `DocumentationManifest` lists missing and
+contradictory sources explicitly and never pretends missing material exists. The
+`SolarisArchitectureOutlineBuilder` builds the Part I-VII outline and marks
+planned/missing modules honestly; the `DiagramBuilder` emits Mermaid diagrams that
+imply no autonomous code modification; the `GlossaryBuilder` defines every term
+technically with metaphor and forbidden-claim clarifications; the
+`TechnicalWhitepaperBuilder`, `ArchitectureBookBuilder`, and
+`ArchitectureAppendixBuilder` produce the documents; and the
+`DocumentationIndexBuilder` lists them and the missing ones. The
+`ArchitectureBookRuntime` is bounded and writes documentation only -- it
+publishes nothing, uploads nothing, calls no Git/GitHub, runs no Git, runs no
+external agent, executes no experiment, controls no hardware/feeders/network/shell,
+and generates no unsupported claim. The `ArchitectureBookSafetyValidator` scans
+generated text and blocks forbidden inner-state claims and marketing language;
+ClaimGuard scans the Markdown. The generator complements the Alpha CLI: it is
+reached via `python -m solaris_ai_nn build-docs` / `docs-index` / `whitepaper`,
+feeds Inner MAP and Evaluation, and reads the alpha/claims/review reports as
+documentation sources. **The Technical Whitepaper and Architecture Book generator
+creates local Markdown documentation only. It does not publish, upload, call
+GitHub, run Git, create releases, execute experiments, run external agents, or
+make any claim of consciousness, sentience, biological life, personhood, agency,
+free will, emotion, feeling, understanding, self-awareness, or subjective
+experience.**

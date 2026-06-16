@@ -2671,3 +2671,43 @@ run, or a longer real research cycle, plugs into the same orchestrator rather th
 inventing a parallel one. Alpha is the scaffold the real runs stand on -- bounded
 now precisely so that what comes next can be trusted to have started from a known,
 inspectable, safe baseline.
+
+## Notes on the Technical Whitepaper and Architecture Book
+
+**Why technical reconstruction matters after alpha.** Building the system one
+prompt at a time produces capability but not coherence: by Prompt 65 the parts ran,
+but no single artifact let a newcomer (or a reviewer) understand the whole. The
+whitepaper and architecture book exist to reconstruct that coherence from the
+codebase that actually exists -- not from intentions. The generator reads the local
+sources, marks what is missing, and writes documents a technically competent reader
+can follow from thesis to module to evidence to claim discipline. Documentation is
+treated as a first-class research output, generated and version-controlled like
+code, rather than as an afterthought.
+
+**How documentation prevents architecture drift.** A module map and an outline that
+are regenerated from import-spec availability cannot quietly diverge from the code:
+if a module is absent, its chapter is marked planned/missing and its outline entry
+is tagged, so the documentation and the codebase are forced to agree. The appendix
+roadmap, artifact mapping, and CLI reference are likewise derived from the real
+package and the real state directories. Drift -- documentation describing a system
+that no longer exists -- is the most common way an architecture becomes
+unreviewable; regenerating the docs from the source is the cheapest defence.
+
+**Why whitepaper language must remain claim-constrained.** A whitepaper is exactly
+where overclaiming is most tempting and most damaging: it is the document a reader
+trusts to summarize the truth. So the generator runs every document through the
+documentation safety validator and ClaimGuard, blocks forbidden inner-state claims
+and marketing language, and writes the non-claims explicitly in the abstract, the
+overview, the glossary, and the safety chapter. Organismic vocabulary is defined as
+metaphor at first use. The discipline is not modesty for its own sake; it is what
+keeps the written record aligned with the evidence the rest of the system produces.
+
+**How docs prepare external review without publishing.** The whitepaper, book,
+module map, and appendices are exactly what an external reviewer needs to orient
+before running the local reviewer pack and reproducibility challenges -- and they
+are produced entirely locally. Nothing is uploaded, published, or sent; the docs
+sit in `docs/whitepaper/` and the build report sits under `.solaris_ai_nn_docs/`.
+A reviewer is handed a coherent, claim-constrained, honestly-gapped account of the
+architecture and can then reproduce and critique it offline. Preparing for review
+and publishing are deliberately kept separate: the operator, not the system,
+decides whether anything ever leaves the machine.

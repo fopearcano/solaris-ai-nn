@@ -3143,3 +3143,40 @@ descriptive only -- it never executes the next action.
 Builds the alpha report set, prints ClaimGuard availability (a warning if
 unavailable), and prints the safety boundary statement. The report shows skipped
 modules and blockers honestly and makes no consciousness/life/agency claim.
+
+## 359. Architecture Book Demo ✅ (implemented)
+
+**Run:** `python examples/run_architecture_book_demo.py --state-dir .solaris_ai_nn_docs/test_book --docs-dir docs/whitepaper`
+Collects local sources read-only and builds the technical overview, whitepaper,
+architecture book, module map, roadmap, safety boundaries, glossary, appendices,
+documentation index, and build report. Writes local Markdown only; publishes
+nothing, calls no Git/GitHub, executes no experiment, and makes no consciousness/
+life/agency claim.
+
+## 360. Whitepaper Builder Demo ✅ (implemented)
+
+**Run:** `python examples/run_whitepaper_builder_demo.py --state-dir .solaris_ai_nn_docs/test_whitepaper --docs-dir docs/whitepaper`
+Builds the technical overview and full whitepaper and prints their explicit
+non-claims and safety disclaimers (research architecture, organismic-as-metaphor,
+proves nothing about consciousness/life/agency).
+
+## 361. Diagram Builder Demo ✅ (implemented)
+
+**Run:** `python examples/run_diagram_builder_demo.py --state-dir .solaris_ai_nn_docs/test_diagrams`
+Generates the high-level architecture, organismic core loop, and research-cycle
+Mermaid diagrams. Diagrams are Markdown-compatible and imply no autonomous code
+modification and no real-world actuation.
+
+## 362. Glossary Builder Demo ✅ (implemented)
+
+**Run:** `python examples/run_glossary_builder_demo.py --state-dir .solaris_ai_nn_docs/test_glossary`
+Builds the technical glossary and shows the entries whose definitions carry an
+explicit not-consciousness/life/personhood/agency clarification; organismic terms
+are defined as architectural metaphors.
+
+## 363. Documentation Index Demo ✅ (implemented)
+
+**Run:** `python examples/run_documentation_index_demo.py --state-dir .solaris_ai_nn_docs/test_index --docs-dir docs/whitepaper`
+Builds the documentation and then the documentation index, showing present and
+missing documents (including optional alpha/claim/review reports). Missing
+documents are listed explicitly and never hidden.

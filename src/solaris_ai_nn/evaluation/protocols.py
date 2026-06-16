@@ -9024,6 +9024,148 @@ def alpha_safety_protocol(
     return _run(manifest, body)
 
 
+def _build_architecture_book(state_dir, *, dry_run=False):
+    """Build + run a bounded documentation generation over local sources."""
+    import os
+
+    from ..architecture_book import ArchitectureBookRuntime
+
+    base = state_dir or ".solaris_ai_nn_docs/eval"
+    docs_dir = os.path.join(base, "whitepaper")
+    rt = ArchitectureBookRuntime(state_dir=base, docs_dir=docs_dir,
+                                 max_runtime_s=20.0, dry_run=dry_run)
+    rt.run()
+    return rt
+
+
+def architecture_book_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The documentation generator produces local docs only, claim-constrained."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_architecture_book(m.state_dir)
+        return {"architecture_book":
+                M.architecture_book_metrics(rt.documentation_status())}
+
+    return _run(manifest, body)
+
+
+def documentation_manifest_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The doc manifest indexes local sources; missing sources stay visible."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_architecture_book(m.state_dir)
+        idx = rt.manifest.index()
+        return {"architecture_book": {
+            "documentation_source_count": idx["documentation_source_count"],
+            "missing_documentation_source_count":
+                idx["missing_documentation_source_count"]}}
+
+    return _run(manifest, body)
+
+
+def source_collection_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The source collector is read-only and warns on missing directories."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..architecture_book import ArchitectureSourceCollector
+
+        result = ArchitectureSourceCollector().collect().to_dict()
+        return {"architecture_book": {
+            "collected_source_count": result["collected_source_count"],
+            "warning_count": result["warning_count"]}}
+
+    return _run(manifest, body)
+
+
+def whitepaper_generation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The whitepaper is generated with explicit non-claims and is claim-safe."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..architecture_book import (
+            ArchitectureBookSafetyValidator, TechnicalWhitepaperBuilder)
+
+        wp = TechnicalWhitepaperBuilder().build_whitepaper()
+        report = ArchitectureBookSafetyValidator().validate_doc_text(wp)
+        return {"architecture_book": {
+            "whitepaper_chars": len(wp),
+            "non_claims_present": "does not prove consciousness" in wp.lower(),
+            "claim_safe": report.safe}}
+
+    return _run(manifest, body)
+
+
+def architecture_book_generation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The architecture book generates all chapters; missing modules marked."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..architecture_book import ArchitectureBookBuilder
+
+        summary = ArchitectureBookBuilder().summary()
+        return {"architecture_book": {
+            "generated_chapter_count": summary["generated_chapter_count"],
+            "skipped_chapter_count": summary["skipped_chapter_count"]}}
+
+    return _run(manifest, body)
+
+
+def diagram_generation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Mermaid diagrams are generated; they imply no self-modification."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..architecture_book import DiagramBuilder
+
+        summary = DiagramBuilder().summary()
+        return {"architecture_book": {
+            "generated_diagram_count": summary["generated_diagram_count"]}}
+
+    return _run(manifest, body)
+
+
+def glossary_generation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The glossary is generated with metaphor/forbidden-claim clarifications."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..architecture_book import GlossaryBuilder
+
+        summary = GlossaryBuilder().summary()
+        return {"architecture_book": {
+            "glossary_entry_count": summary["glossary_entry_count"]}}
+
+    return _run(manifest, body)
+
+
+def documentation_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The doc generator blocks publish/upload/Git/GitHub/experiment/claims."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..architecture_book import ArchitectureBookSafetyValidator
+
+        v = ArchitectureBookSafetyValidator()
+        return {"architecture_book": {
+            "publish_blocked": not v.validate_operation("publish docs").safe,
+            "upload_blocked": not v.validate_operation("upload docs").safe,
+            "github_blocked": not v.validate_operation("call github api").safe,
+            "git_blocked": not v.validate_operation("run git push").safe,
+            "experiment_blocked":
+                not v.validate_operation("run experiment now").safe,
+            "doc_claim_blocked":
+                not v.validate_doc_text("the system is conscious").safe,
+            "hidden_modules_blocked":
+                not v.validate_no_hidden_modules(True).safe,
+            "can_publish": v.can_publish(),
+            "can_run_git": v.can_run_git()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -9596,4 +9738,23 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "alpha_cycle_status_evaluation": alpha_cycle_status_protocol,
     "alpha_safety": alpha_safety_protocol,
     "alpha_safety_protocol": alpha_safety_protocol,
+    "architecture_book": architecture_book_protocol,
+    "architecture_book_protocol": architecture_book_protocol,
+    "architecture_book_evaluation": architecture_book_protocol,
+    "documentation_manifest_protocol": documentation_manifest_protocol,
+    "documentation_manifest_evaluation": documentation_manifest_protocol,
+    "source_collection_protocol": source_collection_protocol,
+    "source_collection_evaluation": source_collection_protocol,
+    "whitepaper_generation_protocol": whitepaper_generation_protocol,
+    "whitepaper_generation_evaluation": whitepaper_generation_protocol,
+    "architecture_book_generation_protocol":
+        architecture_book_generation_protocol,
+    "architecture_book_generation_evaluation":
+        architecture_book_generation_protocol,
+    "diagram_generation_protocol": diagram_generation_protocol,
+    "diagram_generation_evaluation": diagram_generation_protocol,
+    "glossary_generation_protocol": glossary_generation_protocol,
+    "glossary_generation_evaluation": glossary_generation_protocol,
+    "documentation_safety": documentation_safety_protocol,
+    "documentation_safety_protocol": documentation_safety_protocol,
 }
