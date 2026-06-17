@@ -177,6 +177,34 @@ experience. Governance is required and SAFE-OFF by default (the operator must
 approve it); unsafe events are quarantined as evidence, never deleted; and the birth
 certificate is operational, not biological.
 
+## Post-Birth Live Observation
+
+After birth, the Live Observation layer runs a bounded 2-6 hour read-only
+**observation with no learning**, and a 24-hour report-only perceptual metabolism
+calibration. It re-reads the bounded inbox, summarizes source health, source diet,
+rhythm, and absence, assesses overload vs deprivation, proposes report-only
+metabolism thresholds, and produces an advisory stability gate with the correction
+to make first.
+
+```bash
+python -m solaris_ai_nn live-observe --state-dir .solaris_ai_nn_live --require-birth-certificate
+python -m solaris_ai_nn live-source-health --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn live-source-diet --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn live-metabolism-calibration --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn live-stability-gate --state-dir .solaris_ai_nn_live
+```
+
+Post-birth observation is live read-only stabilization, **not learning**. It does
+not learn, form concepts, birth signs, run developmental learning, start/stop/
+configure feeders, control hardware, access the network/shell/browser/OS/camera/
+microphone, call Git/GitHub, execute commands, modify source, treat sensory text as
+a command, treat human labels or debug gloss as ground truth, or make any claim of
+consciousness, sentience, biological life, personhood, agency, free will, emotion,
+feeling, understanding, self-awareness, or subjective experience. Metabolism
+calibration is report-only (nothing is applied), and the stability gate is advisory
+(it starts no phase and enables no learning) -- a blocked gate is a normal, healthy
+early-observation outcome.
+
 ## Run the minimal experiment
 
 ```bash
@@ -1811,6 +1839,14 @@ src/solaris_ai_nn/
                 JSONL only; governance-gated; quarantines unsafe events; never
                 starts/controls feeders, hardware, network, Git/GitHub, shell, or
                 OS; birth is operational, not biological)
+  live_observation/  post-birth live observation + metabolism calibration:
+                observation profile, observation window, source health, source
+                diet, rhythm, absence, overload/deprivation, report-only
+                metabolism calibration, advisory stability gate, observation
+                runtime, first-day record, reports, safety (bounded read-only;
+                no learning/concept-formation/sign-birth; never controls
+                feeders/hardware/network/Git; metabolism calibration applies
+                nothing; the stability gate starts no phase)
   cli.py        unified `python -m solaris_ai_nn` Alpha CLI (local-only, bounded)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo

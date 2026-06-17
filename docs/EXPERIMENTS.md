@@ -3218,3 +3218,44 @@ phases. Solaris never controls the source.
 Builds a birth certificate from a synthetic accepted-event batch and shows the
 required non-claim disclaimer. The certificate is operational, not biological: it
 does not imply consciousness, life, or agency.
+
+## 369. Live Observation Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_observation_demo.py --state-dir .solaris_ai_nn_live/obs_demo`
+Runs the bounded post-birth live read-only observation on the sample inbox under
+approved governance and a birth certificate: prints the window count, source
+health/diet summary, load (overload/deprivation) status, the report-only metabolism
+calibration confidence, and the advisory stability decision with its recommended
+next phase. Nothing is learned; Solaris never controls the source.
+
+## 370. Live Source-Health Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_source_health_demo.py --state-dir .solaris_ai_nn_live/health_demo`
+Prints per-source health (healthy / noisy / silent / unstable / forbidden), event
+counts, and quarantine rates. A silent source may be an absence signal, not a
+failure; an unknown source is not trusted; a forbidden source blocks stability.
+
+## 371. Live Source-Diet Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_source_diet_demo.py --state-dir .solaris_ai_nn_live/diet_demo`
+Prints the source diet: per-source proportions, dominance score, operator-pulse and
+human-text proportions, and the balance verdict. No source should silently
+dominate; the operator pulse is stimulus, not the primary source; human text must
+not become the primary ontology. Report-only; nothing is learned.
+
+## 372. Live Metabolism-Calibration Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_metabolism_calibration_demo.py --state-dir .solaris_ai_nn_live/metab_demo`
+Prints the report-only perceptual metabolism calibration: recommended thresholds and
+per-signal weights. Nothing is applied -- no feeder, governance, configuration, or
+learning state is written or changed. This is descriptive metabolism, not
+understanding.
+
+## 373. Live Stability-Gate Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_stability_gate_demo.py --state-dir .solaris_ai_nn_live/gate_demo --fixture sample_overload_events.jsonl`
+Prints the advisory stability gate: the readiness status, any blockers and the
+correction to make first, warnings, and the recommended next phase. The gate is
+advisory only -- it starts no phase, changes no feeder, and enables no learning. Try
+the overload / deprivation fixtures to see the gate block; a blocked gate is a
+normal, healthy early-observation outcome.

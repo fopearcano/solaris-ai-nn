@@ -2096,4 +2096,42 @@ def build_default_state_graph() -> StateGraph:
                "accepted live events are converted to live_readonly stimuli")
     g.add_edge("LiveReadOnlyBirthRuntime", "inner_map",
                "live birth status feeds Inner MAP")
+
+    # Post-birth live observation (Prompt 68): bounded read-only stabilization
+    # after birth. It observes a bounded live event stream without learning,
+    # forming concepts, birthing signs, or controlling feeders/hardware/network.
+    for name, role in [
+        ("LiveObservationProfile",
+         "bounded read-only observation profile; no learning by default"),
+        ("LiveObservationWindow",
+         "bounded event-batch summary; no infinite tail"),
+        ("LiveSourceHealthEvaluator",
+         "per-source health; silent != failure; forbidden blocks stability"),
+        ("LiveSourceDietAnalyzer",
+         "source diet balance; no source silently dominates"),
+        ("LiveRhythmAnalyzer", "descriptive rhythm; weak marked weak"),
+        ("LiveAbsenceAnalyzer", "absence is a valid signal; not system death"),
+        ("LiveOverloadDeprivationAssessor",
+         "overload/deprivation; severe blocks ontogenesis recommendation"),
+        ("PerceptualMetabolismCalibrator",
+         "report-only thresholds; applies nothing"),
+        ("LiveStabilityGate",
+         "advisory readiness; starts no phase; enables no learning"),
+        ("PostBirthLiveObservationRuntime",
+         "bounded read-only observation; no learning/feeders/network/Git"),
+        ("LiveObservationSafetyValidator",
+         "no feeder/network/Git/command/default-learning; bounded; no hiding"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("LiveReadOnlyBirthRuntime", "PostBirthLiveObservationRuntime",
+               "a birth certificate is required before live observation")
+    g.add_edge("LiveSourceHealthEvaluator", "LiveStabilityGate",
+               "source health feeds the advisory stability decision")
+    g.add_edge("LiveOverloadDeprivationAssessor", "LiveStabilityGate",
+               "overload/deprivation feeds the advisory stability decision")
+    g.add_edge("LiveOverloadDeprivationAssessor",
+               "PerceptualMetabolismCalibrator",
+               "the load picture shapes report-only metabolism thresholds")
+    g.add_edge("PostBirthLiveObservationRuntime", "inner_map",
+               "live observation status feeds Inner MAP")
     return g

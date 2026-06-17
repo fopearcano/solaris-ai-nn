@@ -27,7 +27,30 @@ _ALPHA_COMMANDS = ("doctor", "init", "modules", "run-demo", "artifact-index",
                    "cycle-status", "build-runbook", "build-report",
                    "build-docs", "docs-index", "whitepaper",
                    "live-init", "live-doctor", "live-birth", "live-quarantine",
-                   "birth-certificate")
+                   "birth-certificate", "live-observe", "live-source-health",
+                   "live-source-diet", "live-metabolism-calibration",
+                   "live-stability-gate")
+
+
+def _observation_runtime(args: argparse.Namespace):
+    from .live_observation.observation_runtime import (
+        PostBirthLiveObservationRuntime,
+    )
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_live"
+    return PostBirthLiveObservationRuntime(
+        state_dir=state_dir, profile=args.profile,
+        max_runtime_s=args.max_runtime_s, max_files=args.max_files,
+        max_events=args.max_events,
+        observation_window_minutes=args.observation_window_minutes,
+        strict=args.strict, dry_run=args.dry_run, report_only=args.report_only,
+        require_governance=args.require_governance,
+        require_birth_certificate=args.require_birth_certificate,
+        allow_new_inbox_read=not args.no_inbox_read,
+        require_claimguard=args.require_claimguard,
+        operator_note=args.operator_note)
 
 
 def _birth_runtime(args: argparse.Namespace):
@@ -359,6 +382,100 @@ def cmd_birth_certificate(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_live_observe(args: argparse.Namespace) -> int:
+    rt = _observation_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"live observation refused: {result.get('reason')}")
+        return 2
+    st = rt.observation_status()
+    _print("post-birth live observation:")
+    _print(f"  run id: {st['observation_run_id']}")
+    _print(f"  blocked: {result['blocked']}")
+    for b in result["blockers"]:
+        _print(f"    blocker: {b}")
+    _print(f"  windows: {st['live_observation_window_count']}; accepted events: "
+           f"{st['live_observation_accepted_event_count']}")
+    _print(f"  quarantine rate: {st['live_observation_quarantine_rate']:.0%}")
+    _print(f"  source diet balance: {st['live_source_diet_balance']}")
+    _print(f"  load status: {st['live_load_status']}")
+    _print(f"  metabolism confidence: "
+           f"{st['metabolism_calibration_confidence']}")
+    _print(f"  stability status: {st['live_stability_status']}")
+    _print(f"  recommended next phase: {st['live_recommended_next_phase']}")
+    _print(f"  first-day record: {st['first_day_record_path']}")
+    _print(f"  learns / starts feeders: {st['learns']} / "
+           f"{st['starts_feeders']}")
+    if result["blocked"] and args.strict:
+        return 2
+    return 0
+
+
+def cmd_live_source_health(args: argparse.Namespace) -> int:
+    rt = _observation_runtime(args)
+    rt.run()
+    h = rt.source_health_summary
+    _print("live source health:")
+    _print(f"  sources: {h.get('live_source_count', 0)} (healthy "
+           f"{h.get('live_healthy_source_count', 0)}, noisy "
+           f"{h.get('live_noisy_source_count', 0)}, silent "
+           f"{h.get('live_silent_source_count', 0)}, forbidden "
+           f"{h.get('live_forbidden_source_count', 0)})")
+    for src in h.get("sources", []):
+        _print(f"    {src['source_id']}: {src['status']} "
+               f"(events {src['event_count']}, quarantine "
+               f"{src['quarantine_rate']:.0%})")
+    if h.get("blocks_stability") and args.strict:
+        return 2
+    return 0
+
+
+def cmd_live_source_diet(args: argparse.Namespace) -> int:
+    rt = _observation_runtime(args)
+    rt.run()
+    d = rt.source_diet
+    _print("live source diet:")
+    _print(f"  total events: {d.get('total_events', 0)}")
+    _print(f"  balance: {d.get('balance')}")
+    _print(f"  dominant source: {d.get('dominant_source') or 'none'}")
+    _print(f"  dominance score: {d.get('live_source_diet_dominance_score', 0.0)}")
+    _print(f"  operator pulse proportion: "
+           f"{d.get('live_operator_pulse_dominance_score', 0.0)}")
+    _print(f"  human text proportion: {d.get('human_text_proportion', 0.0)}")
+    return 0
+
+
+def cmd_live_metabolism_calibration(args: argparse.Namespace) -> int:
+    rt = _observation_runtime(args)
+    rt.run()
+    m = rt.metabolism
+    _print("live perceptual metabolism calibration (report-only):")
+    _print(f"  confidence: {m.get('calibration_confidence')}")
+    _print(f"  recommendations: {m.get('recommendation_count', 0)} "
+           f"(applied {m.get('applied')})")
+    for rec in m.get("recommendations", []):
+        unit = f" {rec['unit']}" if rec.get("unit") else ""
+        _print(f"    {rec['name']}: {rec['recommended_value']}{unit}")
+    return 0
+
+
+def cmd_live_stability_gate(args: argparse.Namespace) -> int:
+    rt = _observation_runtime(args)
+    rt.run()
+    g = rt.stability
+    _print("live stability gate (advisory only):")
+    _print(f"  status: {g.get('live_stability_status')}")
+    _print(f"  blocked: {g.get('blocked')}")
+    _print(f"  recommended next phase: {g.get('recommended_next_phase')}")
+    for b in g.get("blockers", []):
+        _print(f"    blocker: {b['blocker']} -> {b['correction']}")
+    for w in g.get("warnings", []):
+        _print(f"    warning: {w}")
+    if g.get("blocked") and args.strict:
+        return 2
+    return 0
+
+
 _HANDLERS = {
     "init": cmd_init,
     "doctor": cmd_doctor,
@@ -376,6 +493,11 @@ _HANDLERS = {
     "live-birth": cmd_live_birth,
     "live-quarantine": cmd_live_quarantine,
     "birth-certificate": cmd_birth_certificate,
+    "live-observe": cmd_live_observe,
+    "live-source-health": cmd_live_source_health,
+    "live-source-diet": cmd_live_source_diet,
+    "live-metabolism-calibration": cmd_live_metabolism_calibration,
+    "live-stability-gate": cmd_live_stability_gate,
 }
 
 
@@ -424,6 +546,16 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--operator-note", type=str, default="",
                         dest="operator_note",
                         help="optional operator note for the birth certificate")
+    # Post-birth live observation arguments (Prompt 68).
+    parser.add_argument("--observation-window-minutes", type=int, default=30,
+                        dest="observation_window_minutes",
+                        help="bounded observation window size in minutes")
+    parser.add_argument("--require-birth-certificate", action="store_true",
+                        default=False, dest="require_birth_certificate",
+                        help="require a birth certificate before observing")
+    parser.add_argument("--no-inbox-read", action="store_true", default=False,
+                        dest="no_inbox_read",
+                        help="do not read new inbox events during observation")
 
 
 def build_parser() -> argparse.ArgumentParser:

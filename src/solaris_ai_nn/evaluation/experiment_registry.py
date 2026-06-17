@@ -749,6 +749,25 @@ DESCRIPTIONS = {
         "no feeder/hardware/network/Git/command control; bounded",
     "live_birth_safety_protocol":
         "no feeder/hardware/network/Git/command control; bounded",
+    "live_observation":
+        "post-birth live observation (bounded, read-only, no learning)",
+    "live_observation_protocol":
+        "post-birth live observation (read-only stabilization, not learning)",
+    "live_observation_evaluation": "live observation state check",
+    "live_observation_no_learning":
+        "observation never learns/forms concepts/births signs by default",
+    "live_source_health":
+        "per-source health (silent != failure; unknown not trusted)",
+    "live_source_diet":
+        "source diet balance (no source silently dominates)",
+    "live_overload_deprivation":
+        "overload vs deprivation (severe blocks ontogenesis recommendation)",
+    "live_metabolism_calibration":
+        "report-only perceptual metabolism calibration (applies nothing)",
+    "live_stability_gate":
+        "advisory readiness gate (starts no phase; enables no learning)",
+    "live_observation_safety":
+        "no feeder/network/Git/command/default-learning; bounded; no hiding",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -1137,6 +1156,13 @@ class ExperimentRegistry:
             or name.startswith("live_membrane")
             or name.startswith("birth_certificate")
             or bool(merged.get("live_birth", False)))
+        features["live_observation"] = (
+            name.startswith("live_observation")
+            or name.startswith("live_source_")
+            or name.startswith("live_overload")
+            or name.startswith("live_metabolism")
+            or name.startswith("live_stability")
+            or bool(merged.get("live_observation", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

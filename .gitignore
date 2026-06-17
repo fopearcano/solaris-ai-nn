@@ -15,6 +15,8 @@ htmlcov/
 
 # Experiment output (JSONL telemetry/traces)
 *.jsonl
+# ...but the bundled example fixtures are committed for reproducibility.
+!examples/live_observation/*.jsonl
 runs/
 artifacts/
 

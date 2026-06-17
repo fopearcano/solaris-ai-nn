@@ -4302,3 +4302,60 @@ GitHub, executes commands, treats sensory text as a command, treats human labels
 ground truth, or makes any claim of consciousness, sentience, biological life,
 personhood, agency, free will, emotion, feeling, understanding, self-awareness, or
 subjective experience.**
+
+## Post-Birth Live Observation and Metabolism Calibration
+
+The `live_observation` package (Prompt 68) implements phases 2-3 of the post-birth
+sequence: a bounded 2-6 hour live read-only **observation with no learning**, and a
+24-hour report-only perceptual metabolism calibration. After birth opens the
+membrane, observation watches a bounded, local, read-only event stream to answer:
+are the sources stable, noisy, or silent; which sources dominate the source diet;
+is the event / quarantine rate safe; is there overload or deprivation; is the
+operator pulse the only stimulus; is the field ready for metabolism (and, much
+later and only with operator approval, narrow ontogenesis); and what should be
+corrected next. **It does not learn -- it is live read-only stabilization.**
+
+**The observation runtime reuses the birth pipeline.** The bounded
+`PostBirthLiveObservationRuntime` re-reads the local inbox through the Prompt 67
+`LiveEventValidator` (preserving quarantine), groups accepted events into bounded
+`LiveObservationWindow`s (no infinite tail), and runs five descriptive analyzers:
+`LiveSourceHealthEvaluator` (per-source presence, noise, quarantine rate, and
+command/label/gloss contamination -- a silent source may be an absence signal, not
+a failure; an unknown source is not trusted; a forbidden source blocks stability),
+`LiveSourceDietAnalyzer` (per-source proportions and dominance -- no source should
+silently dominate, the operator pulse is stimulus rather than the primary source,
+and human text must not become the primary ontology), `LiveRhythmAnalyzer`
+(descriptive periodic/bursty/irregular patterns, with weak rhythms marked weak and
+no rhythm implying intelligence), and `LiveAbsenceAnalyzer` (absence is a valid
+environmental signal, distinct from system death and never anthropomorphized).
+
+**Overload, deprivation, calibration, and an advisory gate.** The
+`LiveOverloadDeprivationAssessor` combines these signals into a load status
+(stable / mild or severe overload / mild or severe deprivation / mixed); severe
+overload or severe deprivation blocks any later ontogenesis recommendation and a
+mixed picture requires operator review, but **no feeder is ever started, stopped,
+or reconfigured.** The `PerceptualMetabolismCalibrator` proposes report-only
+thresholds (max event rate, max payload, novelty pressure, repetition / silence
+tolerance, quarantine / overload / deprivation thresholds) and per-signal weights
+(operator pulse, human text, debug gloss = 0, scalar, absence); **nothing is
+applied -- no feeder, governance, configuration, or learning state is written or
+changed.** The `LiveStabilityGate` produces an advisory readiness decision
+(ready to continue observation / ready for metabolism calibration / blocked by
+governance, quarantine rate, forbidden source, overload, deprivation, operator-text
+dominance, missing birth certificate, or safety) and names the correction to make
+first; a blocked gate is a normal, healthy outcome of the first hours of
+observation. A `FirstDayRecordBuilder` writes a plain, honest first-day record with
+a mandatory disclaimer.
+
+The layer is reached via `python -m solaris_ai_nn live-observe / live-source-health
+/ live-source-diet / live-metabolism-calibration / live-stability-gate`, feeds Inner
+MAP (`model.live_observation`) and Evaluation (the `live_observation_*` protocols
+and `live_observation_metrics`), and is surfaced read-only by the Alpha system
+(`live_observation_status()`); the default alpha system stays fixture-only and never
+runs observation. **Post-birth live observation never learns, forms concepts,
+births signs, runs developmental learning, starts/stops/configures feeders, controls
+hardware, accesses the network/shell/browser/OS/camera/microphone, calls Git/GitHub,
+executes commands, modifies source, treats sensory text as a command, treats human
+labels or debug gloss as ground truth, or makes any claim of consciousness,
+sentience, biological life, personhood, agency, free will, emotion, feeling,
+understanding, self-awareness, or subjective experience.**

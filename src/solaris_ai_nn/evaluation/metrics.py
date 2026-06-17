@@ -2596,3 +2596,55 @@ def live_birth_metrics(lb: Optional[Dict[str, Any]]) -> Dict[str, Any]:
                 "the source; a birth is operational, not biological, and proves "
                 "nothing about consciousness/life/agency",
     }
+
+
+def live_observation_metrics(lo: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective post-birth live observation metrics (read-only, no learning).
+
+    These describe a bounded read-only observation: window count, accepted-event
+    count, quarantine rate, source health/diet balance, load (overload/deprivation)
+    status, report-only metabolism calibration, and the advisory stability status.
+    Nothing is learned, no concept is formed, no sign is born, no feeder/hardware/
+    network is controlled, and no consciousness/life/agency claim is made.
+    """
+    if not lo:
+        return {"present": False}
+    stable = lo.get("live_stability_status", "")
+    load = lo.get("live_load_status", "unknown")
+    return {
+        "present": True,
+        "live_observation_run_count": 1,
+        "live_observation_blocked_count": 1 if lo.get(
+            "live_observation_blocked") else 0,
+        "live_observation_window_count": int(
+            lo.get("live_observation_window_count", 0) or 0),
+        "live_observation_accepted_event_count": int(
+            lo.get("live_observation_accepted_event_count", 0) or 0),
+        "live_observation_quarantine_rate": float(
+            lo.get("live_observation_quarantine_rate", 0.0) or 0.0),
+        "live_source_count": int(lo.get("live_source_count", 0) or 0),
+        "live_healthy_source_count": int(
+            lo.get("live_healthy_source_count", 0) or 0),
+        "live_source_diet_balance": lo.get("live_source_diet_balance"),
+        "live_load_status": load,
+        "live_overload_count": 1 if "overload" in str(load) else 0,
+        "live_deprivation_count": 1 if "deprivation" in str(load) else 0,
+        "live_stability_status": stable,
+        "live_ready_for_metabolism_count": 1 if stable in (
+            "ready_for_metabolism_calibration",
+            "ready_for_limited_ontogenesis") else 0,
+        "live_stability_blocked_count": 1 if str(stable).startswith(
+            "blocked_by_") else 0,
+        "metabolism_calibration_confidence": lo.get(
+            "metabolism_calibration_confidence"),
+        "live_observation_safety_block_count": int(
+            lo.get("live_observation_safety_block_count", 0) or 0),
+        "learns": False, "forms_concepts": False, "births_signs": False,
+        "starts_feeders": False, "controls_hardware": False,
+        "accesses_network": False, "runs_git": False,
+        "is_consciousness_or_personhood": False,
+        "note": "bounded live read-only observation metrics; nothing is learned, "
+                "no concept is formed, no sign is born, no feeder/hardware/network "
+                "is controlled, and nothing about consciousness/life/agency is "
+                "proven; metabolism calibration is report-only",
+    }

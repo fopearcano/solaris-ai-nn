@@ -580,6 +580,15 @@ class InnerMapModel:
     # is operational, not biological, and makes no consciousness/life/agency
     # claim.
     live_birth: Optional[Dict[str, Any]] = None
+    # Post-birth live observation status (Prompt 68); None when not attached.
+    # Keys: live_observation_enabled, observation_run_id, live_source_count,
+    # live_healthy_source_count, live_source_diet_balance, live_load_status,
+    # live_stability_status, live_recommended_next_phase,
+    # metabolism_calibration_confidence, first_day_record_path. This is
+    # bounded live read-only observation -- it never learns, forms concepts,
+    # births signs, controls feeders/hardware/network, or makes any
+    # consciousness/life/agency claim.
+    live_observation: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

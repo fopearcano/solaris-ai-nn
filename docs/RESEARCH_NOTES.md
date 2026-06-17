@@ -2758,3 +2758,57 @@ feeling, understanding, self-awareness, autonomous self-improvement, or subjecti
 experience. "Birth" is a metaphor for the first read-only exposure of the membrane
 to a real environment; it is a logged engineering milestone, not a claim that
 anything was born.
+
+## Notes on Post-Birth Live Observation and Metabolism Calibration
+
+**Why observation must come before learning.** The reflex after birth is to start
+learning immediately -- to let the system adapt to whatever arrives. Post-birth
+observation deliberately refuses that. For the first 2-6 hours (and then a 24-hour
+metabolism-calibration phase) the system only *watches* a bounded, read-only event
+stream: it measures, but it does not change. Nothing is learned, no concept is
+formed, no sign is born, and no developmental learning runs. The reason is the same
+one that motivates the bounded birth: you cannot trust adaptation to a stream you
+have not first characterized. Observation answers "is this field stable, balanced,
+and safe to metabolize?" before any later phase is even recommended.
+
+**Why a silent source is not a failure.** A source that produces no events is easy
+to misread as broken. Observation treats silence as a first-class signal: a silent
+source may simply be reporting absence, which is itself environmental information.
+The `LiveAbsenceAnalyzer` records absence windows and distinguishes deprivation
+(missing expected sources, persistent global silence) from stable background
+(explicit absence events, ordinary inter-event gaps). Absence is never confused with
+system death and is never anthropomorphized -- it is data, not distress.
+
+**Why no source may silently dominate.** A field where one source -- especially the
+operator pulse or human text -- supplies most events is a field whose later ontology
+would be skewed by whoever is loudest. The `LiveSourceDietAnalyzer` measures
+dominance precisely so it cannot happen silently: operator-pulse dominance and
+human-text dominance are flagged, and the operator pulse is held to its role as
+stimulus rather than the primary source. This is the perceptual analogue of a
+balanced diet: the goal is breadth, not a monoculture.
+
+**Why overload and deprivation both block ontogenesis.** Too much input and too
+little input are symmetric failure modes. Severe overload (a flooding feeder, a
+quarantine burst) and severe deprivation (global silence, a single source, repeated
+deprivation windows) each block any later ontogenesis recommendation, and a mixed
+picture is escalated for operator review. Crucially, the assessment never acts: it
+does not start, stop, or reconfigure a feeder. It names the problem and the
+correction; the operator decides.
+
+**Why metabolism calibration is report-only.** The calibration proposes thresholds
+and per-signal weights for perceptual metabolism -- but it applies none of them. No
+feeder, governance, configuration, or learning state is written or changed. This
+keeps the boundary between *measuring* a metabolism and *running* one explicit: the
+system can describe what a healthy intake might look like without quietly enacting
+it. Debug gloss is weighted to zero by construction, because a gloss is never ground
+truth.
+
+**Why the stability gate is advisory and a block is healthy.** The
+`LiveStabilityGate` answers a question -- is the field ready to continue observation,
+to calibrate metabolism, or (much later, only with operator approval) to permit a
+narrow ontogenesis experiment -- and it answers only with advice. It starts no
+phase, changes no feeder, and enables no learning. A blocked gate in the first hours
+of observation is the expected, healthy outcome: it means the system noticed a real
+problem (governance, quarantine rate, a forbidden source, overload, deprivation,
+operator-text dominance, a missing certificate) and is reporting the correction to
+make first, rather than pressing ahead.

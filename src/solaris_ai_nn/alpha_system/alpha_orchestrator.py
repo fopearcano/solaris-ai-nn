@@ -485,6 +485,41 @@ class AlphaResearchOrchestrator:
                             "ALPHA_RESEARCH_SYSTEM_REPORT.md")
         return path if os.path.isfile(path) else None
 
+    def live_observation_status(self, live_state_dir: str = ".solaris_ai_nn_live",
+                                ) -> Dict[str, Any]:
+        """Read-only view of the latest post-birth live observation (Prompt 68).
+
+        The default alpha system stays fixture-only: this never runs observation
+        and never learns/controls feeders. It only reads the latest observation
+        index written by the live_observation runtime (if present) to surface the
+        first-day record path, the advisory stability status, and the recommended
+        next phase. Returns ``{"live_observation_enabled": False}`` when no
+        observation state exists.
+        """
+        index_dir = os.path.join(live_state_dir, "observation", "index")
+        if not os.path.isdir(index_dir):
+            return {"live_observation_enabled": False,
+                    "note": "no post-birth live observation state present; the "
+                            "default alpha system remains fixture-only and never "
+                            "runs observation, learns, or controls feeders"}
+        files = sorted(f for f in os.listdir(index_dir) if f.endswith(".json"))
+        if not files:
+            return {"live_observation_enabled": False}
+        with open(os.path.join(index_dir, files[-1]), encoding="utf-8") as fh:
+            status = json.load(fh)
+        return {
+            "live_observation_enabled": True,
+            "observation_run_id": status.get("observation_run_id"),
+            "live_stability_status": status.get("live_stability_status"),
+            "live_recommended_next_phase": status.get(
+                "live_recommended_next_phase"),
+            "first_day_record_path": status.get("first_day_record_path"),
+            "live_load_status": status.get("live_load_status"),
+            "learns": False, "controls_feeders": False, "runs_git": False,
+            "note": "read-only view of the latest live observation; the alpha "
+                    "system never runs observation, learns, or controls feeders",
+        }
+
     def snapshot(self) -> Dict[str, Any]:
         return self.alpha_status()
 
