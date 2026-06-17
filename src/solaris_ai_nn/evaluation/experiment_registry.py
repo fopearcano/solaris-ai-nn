@@ -910,6 +910,27 @@ DESCRIPTIONS = {
         "local-only live tester bundle; no upload/publish",
     "tester_live_safety_protocol":
         "no feeder control/scheduling/execution; no network/Git; bounded",
+    "tester_console":
+        "read-only static local operator console; summarizes artifacts; "
+        "no server/browser/feeder/hardware control",
+    "tester_console_protocol":
+        "read-only static dashboard from local artifacts; bounded",
+    "console_artifact_discovery_protocol":
+        "read-only artifact discovery; tolerant of missing roots",
+    "console_status_model_protocol":
+        "per-stage health; optional missing is not failure",
+    "console_summary_card_protocol":
+        "concise per-area cards including a safety card",
+    "console_dashboard_protocol":
+        "static dashboard sections + what-this-cannot-do",
+    "console_safety_panel_protocol":
+        "prominent safety panel; safety issues never buried",
+    "console_next_action_protocol":
+        "next actions are recommendations only; never executed",
+    "console_run_index_protocol":
+        "append-only run index; latest run marked",
+    "console_safety_protocol":
+        "no server/browser/feeder/artifact-execution; read-only; bounded",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -1348,6 +1369,10 @@ class ExperimentRegistry:
             or name.startswith("tester_feeder")
             or name.startswith("tester_safe_event")
             or bool(merged.get("tester_live_readonly", False)))
+        features["tester_console"] = (
+            name.startswith("tester_console")
+            or name.startswith("console_")
+            or bool(merged.get("tester_console", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

@@ -645,6 +645,13 @@ class InnerMapModel:
     # hardware, trains on tester feedback, or makes consciousness/life/agency
     # claims.
     tester_live_readonly: Optional[Dict[str, Any]] = None
+    # Tester operator console status (Prompt 76); None when not attached. Keys:
+    # console_generated, console_profile, discovered_artifact_count,
+    # blocker_count, warning_count, latest_console_index_path,
+    # latest_console_html_path, latest_next_action. The console is a read-only
+    # static dashboard; it controls no feeders/hardware/network and makes no
+    # consciousness/life/agency claim.
+    tester_console: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

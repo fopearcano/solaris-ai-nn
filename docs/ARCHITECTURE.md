@@ -4759,3 +4759,40 @@ consciousness, sentience, biological life, personhood, agency, free will, emotio
 feeling, understanding, self-awareness, autonomous self-improvement, or subjective
 experience. A successful live-read-only run is operational evidence, not evidence of
 inner life.
+
+## Minimal Local Operator Console
+
+The `tester_console` package (Prompt 76) is a minimal local operator console for the
+first tester release. A trusted tester should not have to read dozens of raw JSON/
+Markdown files by hand, so the console discovers the local artifacts produced by the
+alpha/live/tester runs and renders a single **static local dashboard** -- static
+Markdown (`INDEX.md`, the primary output) plus an optional static **offline** HTML page
+(`INDEX.html`). It summarizes the tester release status, latest runs, reports, the
+artifact index, safety blockers, the quarantine summary, membrane status, membrane
+integration, sensory impressions, source pressure/diet, live birth and observation
+status, optional ontogenesis/semiogenesis/cognition summaries, scientific-claim
+warnings, reproducibility/regression status, bundle status, missing artifacts, skipped
+stages, the next recommended action, and known limitations.
+
+**It is a read-only console, not a control panel.** Artifact discovery is strictly
+read-only and bounded; the runtime writes only its own console files and never modifies
+run/governance/feeder artifacts. The safety panel is prominent: blockers appear at the
+top of the dashboard, safety issues are never buried below optional summaries, and the
+status model treats a missing *optional* stage as `skipped_optional` (not failure) while
+a missing *required* tester-release stage is a visible blocker. Raw private event
+payloads are not displayed by default; discovery only surfaces safe scalar summary keys.
+Next actions are recommendations only -- the console never executes them, and if a
+safety blocker exists the top action is always "fix the blocker" or "stop".
+
+**It runs no server and opens no browser.** The optional HTML is a static offline file:
+no external CDN/fonts/images, no required JavaScript, no network requests, no
+auto-refresh, no forms, and no active controls. The console never starts/stops/
+schedules/controls/executes feeders, controls hardware, accesses the network/shell/
+browser/OS/Git/GitHub, runs external services, publishes/uploads, executes artifact
+contents, treats console/sensory text as a command, treats human labels/debug gloss as
+ground truth, trains on tester feedback, or makes scientific overclaims. The Alpha
+system surfaces a read-only `tester_console_status()`, the Inner MAP records a
+`tester_console` entry, and Evaluation adds `tester_console` metrics and protocols. A
+green dashboard is operational status, not evidence of consciousness, sentience,
+biological life, personhood, agency, free will, emotion, feeling, understanding,
+self-awareness, autonomous self-improvement, or subjective experience.

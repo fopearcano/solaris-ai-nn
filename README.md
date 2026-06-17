@@ -404,6 +404,32 @@ feedback; and does not make claims about consciousness, sentience, biological li
 personhood, agency, free will, emotion, feeling, understanding, self-awareness,
 autonomous self-improvement, or subjective experience.
 
+## Minimal Local Operator Console
+
+The Minimal Local Operator Console (Prompt 76) turns the many JSON/Markdown artifacts
+from the alpha/live/tester runs into a single static, local, **read-only** dashboard --
+static Markdown (`INDEX.md`) plus an optional static **offline** HTML page
+(`INDEX.html`). It summarizes the tester release status, latest runs, reports, the
+artifact index, safety blockers, quarantine, membrane status, source diet, bundles,
+missing artifacts, skipped stages, and the next recommended action. It is a read-only
+console, not a control panel.
+
+```bash
+python -m solaris_ai_nn tester-console --state-dir .solaris_ai_nn_live --tester-state-dir .solaris_ai_nn_tester --console-dir .solaris_ai_nn_tester/console
+python -m solaris_ai_nn tester-console-md --tester-state-dir .solaris_ai_nn_tester --console-dir .solaris_ai_nn_tester/console
+python -m solaris_ai_nn tester-console-html --tester-state-dir .solaris_ai_nn_tester --console-dir .solaris_ai_nn_tester/console
+python -m solaris_ai_nn tester-console-status --tester-state-dir .solaris_ai_nn_tester --console-dir .solaris_ai_nn_tester/console
+```
+
+The Minimal Local Operator Console generates static local Markdown and optional static
+offline HTML summaries of tester runs, reports, safety blockers, quarantine, membrane
+status, source diet, artifacts, and next actions. It is read-only. It does not start
+feeders, run a server by default, open a browser, control hardware, access network/
+shell/Git/GitHub, publish/upload artifacts, execute artifact contents, train on tester
+feedback, or make claims about consciousness, sentience, biological life, personhood,
+agency, free will, emotion, feeling, understanding, self-awareness, autonomous
+self-improvement, or subjective experience.
+
 ## Run the minimal experiment
 
 ```bash
@@ -2113,6 +2139,14 @@ src/solaris_ai_nn/
                 governance + feeder registry required; membrane required before
                 downstream; local-only; no feeder/hardware/network/Git/publish;
                 tester feedback is not training; not consciousness evidence)
+  tester_console/  minimal local operator console (Prompt 76): console profile,
+                read-only artifact discovery, status model, summary cards, run
+                index, safety panel, next actions, static Markdown + optional
+                offline HTML dashboard, console reports, safety (read-only
+                static dashboard, not a control panel; no server/browser by
+                default; no feeder/hardware/network/Git control; no artifact
+                execution; raw private payloads hidden by default; not
+                consciousness evidence)
   cli.py        unified `python -m solaris_ai_nn` Alpha CLI (local-only, bounded)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo

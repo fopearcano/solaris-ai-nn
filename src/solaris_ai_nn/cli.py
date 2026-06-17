@@ -43,7 +43,9 @@ _ALPHA_COMMANDS = ("doctor", "init", "modules", "run-demo", "artifact-index",
                    "tester-repro", "tester-regression", "tester-fixtures",
                    "tester-live-init", "tester-live-doctor",
                    "tester-live-samples", "tester-live-run",
-                   "tester-live-bundle", "tester-live-checklist")
+                   "tester-live-bundle", "tester-live-checklist",
+                   "tester-console", "tester-console-md", "tester-console-html",
+                   "tester-console-status", "tester-console-runs")
 
 
 def _integration_runtime(args: argparse.Namespace):
@@ -64,6 +66,22 @@ def _integration_runtime(args: argparse.Namespace):
         allow_raw_fallback=args.allow_raw_fallback,
         require_claimguard=args.require_claimguard,
         operator_note=args.operator_note)
+
+
+def _tester_console_runtime(args: argparse.Namespace, **overrides):
+    from .tester_console import TesterConsoleRuntime
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_live"
+    kwargs = dict(
+        state_dir=state_dir, tester_state_dir=args.tester_state_dir,
+        console_dir=args.console_dir, profile=args.profile,
+        max_runtime_s=args.max_runtime_s, strict=args.strict,
+        dry_run=args.dry_run, report_only=args.report_only, html=args.html,
+        require_claimguard=args.require_claimguard)
+    kwargs.update(overrides)
+    return TesterConsoleRuntime(**kwargs)
 
 
 def _tester_live_runtime(args: argparse.Namespace, **overrides):
@@ -1339,6 +1357,94 @@ def cmd_tester_live_checklist(args: argparse.Namespace) -> int:
     return 0
 
 
+def _print_console_summary(rt, result) -> None:
+    _print("tester console:")
+    _print(f"  run id: {result['run_id']} ({result['console_profile']})")
+    _print(f"  overall health: {result['overall_health']}")
+    _print(f"  safety: {result['safety_status']} (blockers "
+           f"{result['blocker_count']}, warnings {result['warning_count']})")
+    _print(f"  artifacts: {result['artifact_count']} (missing required "
+           f"{result['missing_artifact_count']})")
+    _print(f"  next action: {result['latest_next_action']}")
+    if result.get("latest_console_index_path"):
+        _print(f"  INDEX.md: {result['latest_console_index_path']}")
+    if result.get("latest_console_html_path"):
+        _print(f"  INDEX.html: {result['latest_console_html_path']}")
+
+
+def cmd_tester_console(args: argparse.Namespace) -> int:
+    rt = _tester_console_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"tester console refused: {result.get('reason')}")
+        return 2
+    _print_console_summary(rt, result)
+    if result["safety_status"] == "blocked" and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_console_md(args: argparse.Namespace) -> int:
+    rt = _tester_console_runtime(args, profile="tester_console_markdown_only_v0",
+                                 html=False)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"tester console refused: {result.get('reason')}")
+        return 2
+    _print_console_summary(rt, result)
+    if result["safety_status"] == "blocked" and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_console_html(args: argparse.Namespace) -> int:
+    rt = _tester_console_runtime(args, profile="tester_console_html_static_v0",
+                                 html=True)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"tester console refused: {result.get('reason')}")
+        return 2
+    _print("tester console (static HTML):")
+    _print(f"  INDEX.html: {result.get('latest_console_html_path')}")
+    _print(f"  overall health: {result['overall_health']}; safety: "
+           f"{result['safety_status']}")
+    if result["safety_status"] == "blocked" and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_console_status(args: argparse.Namespace) -> int:
+    rt = _tester_console_runtime(args, profile="tester_console_status_only_v0",
+                                 html=False, dry_run=True)
+    rt.run()
+    st = rt.console_status()
+    _print("tester console status:")
+    _print(f"  overall health: {st['overall_health']}; release ready: "
+           f"{st['release_ready']}")
+    _print(f"  safety: {st['safety_status']} (blockers "
+           f"{st['safety_block_count']})")
+    _print(f"  artifacts: {st['artifact_count']}; missing required: "
+           f"{st['missing_artifact_count']}")
+    _print(f"  cards: {st['card_count']}; runs: {st['run_index_count']}")
+    _print(f"  next action: {st['latest_next_action']}")
+    if st["safety_status"] == "blocked" and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_console_runs(args: argparse.Namespace) -> int:
+    rt = _tester_console_runtime(args, html=False, dry_run=True)
+    rt.run()
+    idx = rt.run_index.to_dict() if rt.run_index else {}
+    _print("tester console runs:")
+    _print(f"  runs: {idx.get('run_count', 0)}; latest: "
+           f"{idx.get('latest_run_id', '-')}")
+    for r in idx.get("runs", [])[:25]:
+        _print(f"  - {r['run_id']} [{r['run_type']}] {r['status']}"
+               + ("  (latest)" if r["latest"] else ""))
+    return 0
+
+
 _HANDLERS = {
     "init": cmd_init,
     "doctor": cmd_doctor,
@@ -1397,6 +1503,11 @@ _HANDLERS = {
     "tester-live-run": cmd_tester_live_run,
     "tester-live-bundle": cmd_tester_live_bundle,
     "tester-live-checklist": cmd_tester_live_checklist,
+    "tester-console": cmd_tester_console,
+    "tester-console-md": cmd_tester_console_md,
+    "tester-console-html": cmd_tester_console_html,
+    "tester-console-status": cmd_tester_console_status,
+    "tester-console-runs": cmd_tester_console_runs,
 }
 
 
@@ -1544,6 +1655,13 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
                         dest="run_integration", help="run the membrane integration")
     parser.add_argument("--run-observation", action="store_true", default=False,
                         dest="run_observation", help="run Live Observation")
+    # Tester console arguments (Prompt 76).
+    parser.add_argument("--console-dir", type=str,
+                        default=".solaris_ai_nn_tester/console",
+                        dest="console_dir",
+                        help="tester console output directory")
+    parser.add_argument("--no-html", action="store_false", default=True,
+                        dest="html", help="do not generate the static HTML page")
 
 
 def build_parser() -> argparse.ArgumentParser:

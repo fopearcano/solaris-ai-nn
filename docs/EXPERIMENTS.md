@@ -3531,3 +3531,37 @@ Solaris starts no feeder.
 Builds the local tester live bundle and prints the manifest, including redactions and
 missing artifacts. The bundle is local-only; nothing is zipped automatically, uploaded,
 or published.
+
+## 409. Tester Console Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_console_demo.py --state-dir .solaris_ai_nn_live/test_console_demo --tester-state-dir .solaris_ai_nn_tester/test_console_demo --console-dir .solaris_ai_nn_tester/test_console_demo/console`
+Runs a fixture tester demo so there are artifacts to summarize, then builds the static
+Markdown + offline HTML console and prints where the dashboard was written. The console
+is read-only and opens nothing for you.
+
+## 410. Tester Console Status Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_console_status_demo.py --tester-state-dir .solaris_ai_nn_tester/test_console_status`
+Builds the console status across a clean fixture run (pass), a fixture run plus disabled
+governance (warnings), and an empty state (missing-required blocker), showing how
+optional missing layers are not failures.
+
+## 411. Tester Console Safety Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_console_safety_demo.py --tester-state-dir .solaris_ai_nn_tester/test_console_safety`
+Stages a quarantine record, a critical membrane bypass, and an unsupported scientific
+claim, and shows the console surfacing them in the safety panel and forcing a fix/stop
+next action.
+
+## 412. Tester Console Runs Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_console_runs_demo.py --tester-state-dir .solaris_ai_nn_tester/test_console_runs`
+Stages a fixture run plus a synthetic membrane report, builds the console, and prints
+the run index with run records and the latest-run marker. Old runs are preserved.
+
+## 413. Tester Console Next Actions Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_console_next_actions_demo.py --tester-state-dir .solaris_ai_nn_tester/test_console_next_actions`
+Shows how the recommended next action changes across an empty state (run the fixture
+demo), a clean fixture run (prepare live testing), and a safety blocker (fix the blocker
+/ stop). Next actions are recommendations only.

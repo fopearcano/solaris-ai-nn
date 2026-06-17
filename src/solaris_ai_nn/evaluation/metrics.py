@@ -2976,3 +2976,41 @@ def tester_live_readonly_metrics(
                 "Solaris controls nothing. Operational evidence, not "
                 "consciousness/life/agency.",
     }
+
+
+def tester_console_metrics(ts: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective tester-console metrics (a read-only static dashboard).
+
+    These describe the static, local, read-only operator console: run count,
+    discovered/missing artifact counts, blocker/warning/safety-block counts, the
+    run-index size, the card/next-action counts, and how many Markdown/HTML
+    dashboards were generated. The console controls no feeders/hardware/network,
+    runs no server, and makes no consciousness/life/agency claim.
+    """
+    if not ts:
+        return {"present": False}
+
+    def _i(key: str) -> int:
+        return int(ts.get(key, 0) or 0)
+
+    return {
+        "present": True,
+        "tester_console_run_count": 1,
+        "tester_console_artifact_count": _i("artifact_count"),
+        "tester_console_missing_artifact_count": _i("missing_artifact_count"),
+        "tester_console_blocker_count": _i("blocker_count"),
+        "tester_console_warning_count": _i("warning_count"),
+        "tester_console_safety_block_count": _i("safety_block_count"),
+        "tester_console_run_index_count": _i("run_index_count"),
+        "tester_console_card_count": _i("card_count"),
+        "tester_console_next_action_count": _i("next_action_count"),
+        "tester_console_html_generated_count": 1 if ts.get(
+            "html_generated") else 0,
+        "tester_console_markdown_generated_count": 1 if ts.get(
+            "markdown_generated") else 0,
+        "read_only": True, "runs_server": False, "opens_browser": False,
+        "controls_hardware": False, "accesses_network": False,
+        "is_consciousness_or_personhood": False,
+        "note": "read-only static console metrics; the console controls nothing "
+                "and proves nothing about consciousness/life/agency",
+    }

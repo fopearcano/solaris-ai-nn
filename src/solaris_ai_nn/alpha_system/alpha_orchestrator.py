@@ -830,6 +830,39 @@ class AlphaResearchOrchestrator:
                     "alpha system never runs it, starts feeders, or learns",
         }
 
+    def tester_console_status(
+            self, console_dir: str = ".solaris_ai_nn_tester/console",
+            ) -> Dict[str, Any]:
+        """Read-only view of the latest tester console build (Prompt 76).
+
+        Surfaces whether the static console is available, the latest console
+        index/HTML paths, the blocker/warning counts, and the latest next action.
+        This is a read-only view; the alpha system never runs the console.
+        """
+        status_path = os.path.join(console_dir, "CONSOLE_STATUS.json")
+        if not os.path.isfile(status_path):
+            return {"console_available": False,
+                    "note": "no tester console present; run "
+                            "`python -m solaris_ai_nn tester-console` first"}
+        try:
+            with open(status_path, encoding="utf-8") as fh:
+                status = json.load(fh)
+        except Exception:
+            return {"console_available": False}
+        return {
+            "console_available": True,
+            "latest_console_index_path": status.get(
+                "latest_console_index_path"),
+            "latest_console_html_path": status.get("latest_console_html_path"),
+            "console_blocker_count": status.get("blocker_count", 0),
+            "console_warning_count": status.get("warning_count", 0),
+            "latest_next_action": status.get("latest_next_action", ""),
+            "overall_health": status.get("overall_health", "unknown"),
+            "read_only": True, "runs_server": False, "learns": False,
+            "note": "read-only view of the latest tester console; the alpha "
+                    "system never runs the console or any control",
+        }
+
     def snapshot(self) -> Dict[str, Any]:
         return self.alpha_status()
 

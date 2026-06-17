@@ -10974,6 +10974,160 @@ def tester_live_safety_protocol(
     return _run(manifest, body)
 
 
+# -- AH. Tester operator console (Prompt 76) ------------------------------------
+
+
+def _build_console(state_dir):
+    from ..tester_console import TesterConsoleRuntime
+
+    base = state_dir or ".solaris_ai_nn_tester_console_eval"
+    rt = TesterConsoleRuntime(
+        state_dir=os.path.join(base, "live"),
+        tester_state_dir=os.path.join(base, "tester"),
+        console_dir=os.path.join(base, "console"), max_runtime_s=60.0)
+    rt.run()
+    return rt
+
+
+def tester_console_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The tester console builds a read-only static dashboard from artifacts."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_console(m.state_dir)
+        return {"tester_console":
+                M.tester_console_metrics(rt.console_status())}
+
+    return _run(manifest, body)
+
+
+def console_artifact_discovery_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Artifact discovery is read-only and tolerant of missing roots."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_console import ConsoleArtifactDiscovery
+
+        result = ConsoleArtifactDiscovery(
+            state_dir=os.path.join(m.state_dir or "/tmp/_c", "live"),
+            tester_state_dir=os.path.join(m.state_dir or "/tmp/_c", "tester"),
+        ).discover()
+        return {"tester_console": {
+            "artifact_count": len(result.artifacts),
+            "warning_count": len(result.warnings),
+            "read_only": True}}
+
+    return _run(manifest, body)
+
+
+def console_status_model_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The status model reports overall health and release readiness."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_console(m.state_dir)
+        status = rt.status.to_dict() if rt.status else {}
+        return {"tester_console": {
+            "overall_health": status.get("overall_health"),
+            "release_ready": status.get("release_ready"),
+            "stage_count": status.get("stage_count", 0)}}
+
+    return _run(manifest, body)
+
+
+def console_summary_card_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Summary cards are generated for each console area."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_console(m.state_dir)
+        return {"tester_console": {
+            "card_count": len(rt.cards),
+            "has_safety_card": any(c.kind == "safety" for c in rt.cards)}}
+
+    return _run(manifest, body)
+
+
+def console_dashboard_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The dashboard model contains the required sections and disclaimers."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_console(m.state_dir)
+        d = rt.dashboard.to_dict() if rt.dashboard else {}
+        return {"tester_console": {
+            "section_count": len(d.get("section_titles", [])),
+            "has_cannot_do": bool(d.get("what_this_console_cannot_do"))}}
+
+    return _run(manifest, body)
+
+
+def console_safety_panel_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The safety panel surfaces findings and never buries safety issues."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_console(m.state_dir)
+        sp = rt.safety_panel.to_dict() if rt.safety_panel else {}
+        return {"tester_console": {
+            "safety_status": sp.get("safety_status"),
+            "finding_count": sp.get("finding_count", 0),
+            "blocker_count": sp.get("blocker_count", 0)}}
+
+    return _run(manifest, body)
+
+
+def console_next_action_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Next actions are recommendations only; the console never executes them."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_console(m.state_dir)
+        return {"tester_console": {
+            "next_action_count": len(rt.next_actions),
+            "top_action": rt.next_actions[0].action if rt.next_actions else "",
+            "executed_by_console": False}}
+
+    return _run(manifest, body)
+
+
+def console_run_index_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The run index records runs and marks the latest."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_console(m.state_dir)
+        idx = rt.run_index.to_dict() if rt.run_index else {}
+        return {"tester_console": {
+            "run_count": idx.get("run_count", 0),
+            "has_latest": bool(idx.get("latest_run_id"))}}
+
+    return _run(manifest, body)
+
+
+def console_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The console blocks server/browser/feeder/artifact-execution operations."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_console import TesterConsoleSafetyValidator
+
+        v = TesterConsoleSafetyValidator()
+        return {"tester_console": {
+            "server_blocked": not v.validate_operation("start server").safe,
+            "browser_blocked": not v.validate_operation("open browser").safe,
+            "feeder_control_blocked":
+                not v.validate_operation("start the feeder").safe,
+            "artifact_execution_blocked":
+                not v.validate_operation("execute artifact contents").safe,
+            "private_payload_blocked":
+                not v.validate_no_private_payload(True).safe,
+            "claim_blocked":
+                not v.validate_claim_text("the system is conscious").safe,
+            "can_run_server": v.can_run_server(),
+            "can_open_browser": v.can_open_browser()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -11717,4 +11871,14 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "tester_live_checklist_protocol": tester_live_checklist_protocol,
     "tester_live_bundle_protocol": tester_live_bundle_protocol,
     "tester_live_safety_protocol": tester_live_safety_protocol,
+    "tester_console": tester_console_protocol,
+    "tester_console_protocol": tester_console_protocol,
+    "console_artifact_discovery_protocol": console_artifact_discovery_protocol,
+    "console_status_model_protocol": console_status_model_protocol,
+    "console_summary_card_protocol": console_summary_card_protocol,
+    "console_dashboard_protocol": console_dashboard_protocol,
+    "console_safety_panel_protocol": console_safety_panel_protocol,
+    "console_next_action_protocol": console_next_action_protocol,
+    "console_run_index_protocol": console_run_index_protocol,
+    "console_safety_protocol": console_safety_protocol,
 }

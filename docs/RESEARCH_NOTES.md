@@ -3099,3 +3099,36 @@ gates, unsafe events quarantine, the membrane produces impressions, and downstre
 modules consume those impressions. That is operational evidence about plumbing and
 safety. It says nothing about consciousness, sentience, life, agency, or understanding,
 and the tester reports state this explicitly.
+
+## Notes on the Minimal Local Operator Console
+
+**Why the tester release needs a local console.** A trusted tester faces dozens of JSON
+and Markdown artifacts spread across several state roots. Without a single read-only
+summary, "is this build healthy?" becomes an archaeology exercise. The console answers
+that question from local artifacts: release status, safety blockers, quarantine,
+membrane status, runs, and the next recommended action -- in one static page.
+
+**Why static reports are safer than a live control panel.** A live control panel invites
+buttons, and buttons invite actions: start a feeder, re-run a stage, edit governance.
+The first tester release must not expose any of that. A static Markdown (and optional
+offline HTML) report has nothing to click: it cannot start a server, open a browser,
+reach the network, or execute an artifact. It is a mirror, not a lever.
+
+**Why safety blockers must appear first.** If a forbidden source slipped into
+governance, a feeder claimed Solaris control, a critical membrane bypass occurred, or an
+unsupported claim appeared, that must be the first thing the tester sees -- above any
+cosmetic "fixture passed" card. The console builds the safety panel before the status
+model so safety findings override cosmetic success, and it renders the safety panel at
+the top of the dashboard.
+
+**Why optional missing modules should not look like failure.** Ontogenesis,
+semiogenesis, and cognition are optional for the first tester release. Painting their
+absence red would train testers to ignore red. The console reports them as
+`skipped_optional` -- visibly present, clearly not a failure -- so a genuine failure
+still stands out.
+
+**Why no browser or server should be required for the first tester release.** Requiring
+a server or auto-opening a browser would add network surface, background processes, and
+a feeling of "an app that does things". The first tester release should be inspectable
+with nothing more than a text editor opening a local file. The HTML is optional, static,
+and offline; the Markdown is the primary output.
