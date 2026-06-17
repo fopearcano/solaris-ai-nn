@@ -1,0 +1,6 @@
+{
+  "rc_available": true,
+  "readiness": "critical_blocked",
+  "blocker_count": 3,
+  "note": "RC is critically blocked; the first tester protocol still generates docs but marks the session as blocked. Resolve RC blockers first. Local only; nothing published."
+}

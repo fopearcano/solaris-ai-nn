@@ -47,6 +47,12 @@ class ArtifactKind:
     TESTER_RC_RELEASE_NOTES = "tester_rc_release_notes"
     TESTER_RC_RUNBOOK = "tester_rc_runbook"
     TESTER_RC_KNOWN_ISSUES = "tester_rc_known_issues"
+    FIRST_TESTER_PROTOCOL_REPORT = "first_tester_protocol_report"
+    FIRST_TESTER_SESSION_SCRIPT = "first_tester_session_script"
+    FIRST_TESTER_ACCEPTANCE_CRITERIA = "first_tester_acceptance_criteria"
+    FIRST_TESTER_STOP_CONDITIONS = "first_tester_stop_conditions"
+    FIRST_TESTER_HANDOFF_GUIDE = "first_tester_handoff_guide"
+    FIRST_TESTER_REVIEW_TEMPLATE = "first_tester_review_template"
     LIVE_GOVERNANCE = "live_governance"
     FEEDER_REGISTRY = "feeder_registry"
     LIVE_BIRTH_REPORT = "live_birth_report"
@@ -119,6 +125,18 @@ _DISCOVERY_SPECS = (
      "release_candidate/docs/TESTER_RUNBOOK.md"),
     (ArtifactKind.TESTER_RC_KNOWN_ISSUES, "tester",
      "release_candidate/docs/TESTER_KNOWN_ISSUES.md"),
+    (ArtifactKind.FIRST_TESTER_PROTOCOL_REPORT, "tester",
+     "first_tester_protocol/reports/FIRST_TESTER_PROTOCOL_REPORT.json"),
+    (ArtifactKind.FIRST_TESTER_SESSION_SCRIPT, "tester",
+     "first_tester_protocol/scripts/FIRST_TESTER_SESSION_SCRIPT.md"),
+    (ArtifactKind.FIRST_TESTER_ACCEPTANCE_CRITERIA, "tester",
+     "first_tester_protocol/checklists/FIRST_TESTER_ACCEPTANCE_CRITERIA.md"),
+    (ArtifactKind.FIRST_TESTER_STOP_CONDITIONS, "tester",
+     "first_tester_protocol/checklists/FIRST_TESTER_STOP_CONDITIONS.md"),
+    (ArtifactKind.FIRST_TESTER_HANDOFF_GUIDE, "tester",
+     "first_tester_protocol/handoff/FIRST_TESTER_HANDOFF_GUIDE.md"),
+    (ArtifactKind.FIRST_TESTER_REVIEW_TEMPLATE, "tester",
+     "first_tester_protocol/reports/FIRST_TESTER_POST_TEST_REVIEW_TEMPLATE.md"),
     (ArtifactKind.LIVE_GOVERNANCE, "live",
      "governance/LIVE_READONLY_GOVERNANCE.json"),
     (ArtifactKind.FEEDER_REGISTRY, "live", "feeders/FEEDER_REGISTRY.json"),
@@ -297,7 +315,7 @@ _SAFE_SUMMARY_KEYS = (
     "release_blocker_count", "critical_open_count", "open_blocker_count",
     "release_candidate_allowed",
     "rc_id", "blocker_count", "warning_count", "included_count",
-    "missing_count", "status",
+    "missing_count", "status", "session_status",
 )
 
 

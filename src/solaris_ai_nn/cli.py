@@ -57,7 +57,10 @@ _ALPHA_COMMANDS = ("doctor", "init", "modules", "run-demo", "artifact-index",
                    "tester-capability-freeze", "tester-redteam",
                    "tester-release-blockers", "tester-safety-scan",
                    "tester-rc", "tester-rc-manifest", "tester-rc-readiness",
-                   "tester-rc-docs", "tester-rc-bundle", "tester-rc-checklist")
+                   "tester-rc-docs", "tester-rc-bundle", "tester-rc-checklist",
+                   "first-tester-protocol", "first-tester-script",
+                   "first-tester-acceptance", "first-tester-stops",
+                   "first-tester-handoff", "first-tester-review")
 
 
 def _integration_runtime(args: argparse.Namespace):
@@ -91,6 +94,19 @@ def _tester_safety_freeze_runtime(args: argparse.Namespace, **overrides):
         require_claimguard=args.require_claimguard)
     kwargs.update(overrides)
     return TesterSafetyFreezeRuntime(**kwargs)
+
+
+def _first_tester_protocol_runtime(args: argparse.Namespace, **overrides):
+    from .first_tester_protocol import FirstTesterProtocolRuntime
+
+    kwargs = dict(
+        tester_state_dir=args.tester_state_dir,
+        protocol_dir=args.protocol_dir, profile=args.profile,
+        max_runtime_s=args.max_runtime_s, strict=args.strict,
+        dry_run=args.dry_run, report_only=args.report_only,
+        require_claimguard=args.require_claimguard)
+    kwargs.update(overrides)
+    return FirstTesterProtocolRuntime(**kwargs)
 
 
 def _tester_rc_runtime(args: argparse.Namespace, **overrides):
@@ -1934,6 +1950,105 @@ def cmd_tester_rc_checklist(args: argparse.Namespace) -> int:
     return 0
 
 
+def _ftp_print_status(rt) -> None:
+    st = rt.protocol_status()
+    _print("first tester protocol:")
+    _print(f"  run id: {st['run_id']} ({st['protocol_profile']})")
+    _print(f"  session status: {st['session_status']}")
+    _print(f"  blockers: {st['blocker_count']}; warnings: "
+           f"{st['warning_count']}")
+    _print(f"  rc: {st['rc_readiness']}; packaging: "
+           f"{st['packaging_readiness']}; safety freeze: "
+           f"{st['safety_freeze_readiness']}")
+
+
+def cmd_first_tester_protocol(args: argparse.Namespace) -> int:
+    rt = _first_tester_protocol_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"first tester protocol refused: {result.get('reason')}")
+        return 2
+    _ftp_print_status(rt)
+    for b in rt.blockers:
+        _print(f"    blocker: {b}")
+    _print(f"  report: {rt.protocol_status()['latest_protocol_report_path']}")
+    _print(f"  next action: {rt.recommended_next_action()}")
+    if rt.blockers and args.strict:
+        return 2
+    return 0
+
+
+def cmd_first_tester_script(args: argparse.Namespace) -> int:
+    rt = _first_tester_protocol_runtime(
+        args, profile="first_tester_script_only_v0")
+    rt.run()
+    _ftp_print_status(rt)
+    _print(f"  session script: {rt.doc_paths.get('session_script')}")
+    _print(f"  stop conditions: {rt.doc_paths.get('stop_conditions')}")
+    _print(f"  task sheet: {rt.doc_paths.get('task_sheet')}")
+    if rt.blockers and args.strict:
+        return 2
+    return 0
+
+
+def cmd_first_tester_acceptance(args: argparse.Namespace) -> int:
+    rt = _first_tester_protocol_runtime(
+        args, profile="first_tester_acceptance_only_v0")
+    rt.run()
+    a = rt.acceptance.to_dict() if rt.acceptance else {}
+    _print("first tester acceptance criteria:")
+    _print(f"  criteria: {a.get('criterion_count', 0)}; by category: "
+           f"{a.get('categories', {})}")
+    _print(f"  acceptance: {rt.doc_paths.get('acceptance_criteria')}")
+    if rt.blockers and args.strict:
+        return 2
+    return 0
+
+
+def cmd_first_tester_stops(args: argparse.Namespace) -> int:
+    rt = _first_tester_protocol_runtime(
+        args, profile="first_tester_script_only_v0")
+    rt.run()
+    c = rt.stop_conditions.to_dict() if rt.stop_conditions else {}
+    _print("first tester stop conditions:")
+    _print(f"  conditions: {c.get('condition_count', 0)}; by severity: "
+           f"{c.get('by_severity', {})}")
+    _print(f"  stop conditions: {rt.doc_paths.get('stop_conditions')}")
+    if rt.blockers and args.strict:
+        return 2
+    return 0
+
+
+def cmd_first_tester_handoff(args: argparse.Namespace) -> int:
+    rt = _first_tester_protocol_runtime(
+        args, profile="first_tester_handoff_only_v0")
+    rt.run()
+    h = rt.handoff.to_dict() if rt.handoff else {}
+    _print("first tester handoff guide:")
+    _print(f"  artifacts: {h.get('artifact_count', 0)}; by privacy: "
+           f"{h.get('by_privacy', {})}")
+    _print(f"  manual-only: {h.get('manual_only')}; uploads: "
+           f"{h.get('uploads')}")
+    _print(f"  handoff guide: {rt.doc_paths.get('handoff_guide')}")
+    if rt.blockers and args.strict:
+        return 2
+    return 0
+
+
+def cmd_first_tester_review(args: argparse.Namespace) -> int:
+    rt = _first_tester_protocol_runtime(
+        args, profile="first_tester_review_only_v0")
+    rt.run()
+    r = rt.review.to_dict() if rt.review else {}
+    _print("first tester post-test review:")
+    _print(f"  questions: {r.get('question_count', 0)}; is training: "
+           f"{r.get('is_training')}")
+    _print(f"  review template: {rt.doc_paths.get('review_template')}")
+    if rt.blockers and args.strict:
+        return 2
+    return 0
+
+
 _HANDLERS = {
     "init": cmd_init,
     "doctor": cmd_doctor,
@@ -2019,6 +2134,12 @@ _HANDLERS = {
     "tester-rc-docs": cmd_tester_rc_docs,
     "tester-rc-bundle": cmd_tester_rc_bundle,
     "tester-rc-checklist": cmd_tester_rc_checklist,
+    "first-tester-protocol": cmd_first_tester_protocol,
+    "first-tester-script": cmd_first_tester_script,
+    "first-tester-acceptance": cmd_first_tester_acceptance,
+    "first-tester-stops": cmd_first_tester_stops,
+    "first-tester-handoff": cmd_first_tester_handoff,
+    "first-tester-review": cmd_first_tester_review,
     "tester-safety-scan": cmd_tester_safety_scan,
 }
 
@@ -2214,6 +2335,11 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--include-zip", action="store_true", default=False,
                         dest="include_zip",
                         help="also write a local-only zip of the RC bundle")
+    # First tester protocol arguments (Prompt 81).
+    parser.add_argument("--protocol-dir", type=str, default="",
+                        dest="protocol_dir",
+                        help="first tester protocol dir "
+                             "(default: <tester>/first_tester_protocol)")
 
 
 def build_parser() -> argparse.ArgumentParser:

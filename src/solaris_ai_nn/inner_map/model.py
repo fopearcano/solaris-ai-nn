@@ -678,6 +678,13 @@ class InnerMapModel:
     # local step only; it publishes/uploads nothing, creates no GitHub release/
     # tag/issue, and makes no consciousness/life/agency claim.
     tester_release_candidate: Optional[Dict[str, Any]] = None
+    # First tester protocol (Prompt 81); None when not attached. Keys:
+    # first_tester_protocol_run_id, protocol_profile, session_status,
+    # blocker_count, warning_count, session_script_path,
+    # acceptance_criteria_path, handoff_guide_path, review_template_path. The
+    # protocol is local, documentation-only; it never runs the tester session,
+    # publishes, or makes a consciousness/life/agency claim.
+    first_tester_protocol: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

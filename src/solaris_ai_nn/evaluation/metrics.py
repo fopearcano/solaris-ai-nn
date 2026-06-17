@@ -3187,3 +3187,43 @@ def tester_release_candidate_metrics(
         "note": "local RC assembly metrics; the RC publishes nothing and makes "
                 "no consciousness/life/agency claim",
     }
+
+
+def first_tester_protocol_metrics(
+        ts: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective first-tester-protocol metrics (a local, documentation-only layer).
+
+    These describe the first-tester protocol generation: run count, blocker/warning
+    counts, and which docs were generated (session script, acceptance criteria, stop
+    conditions, handoff guide, review template). The protocol is local and documentation-
+    only; it never runs the tester session, publishes, trains on feedback, or makes a
+    consciousness/life/agency claim.
+    """
+    if not ts:
+        return {"present": False}
+
+    def _i(key: str) -> int:
+        return int(ts.get(key, 0) or 0)
+
+    def _has(key: str) -> int:
+        return 1 if ts.get(key) else 0
+
+    return {
+        "present": True,
+        "first_tester_protocol_run_count": 1,
+        "first_tester_protocol_blocker_count": _i("blocker_count"),
+        "first_tester_protocol_warning_count": _i("warning_count"),
+        "first_tester_script_generated_count": _has("session_script_path"),
+        "first_tester_acceptance_generated_count": _has(
+            "acceptance_criteria_path"),
+        "first_tester_stop_condition_count": _has("stop_conditions_path"),
+        "first_tester_handoff_generated_count": _has("handoff_guide_path"),
+        "first_tester_review_template_generated_count": _has(
+            "review_template_path"),
+        "first_tester_safety_block_count": _i("protocol_safety_block_count"),
+        "local_only": True, "runs_session": False, "published": False,
+        "is_consciousness_or_personhood": False,
+        "note": "local documentation-only first-tester protocol metrics; the "
+                "protocol does not run the session or imply consciousness/life/"
+                "agency",
+    }

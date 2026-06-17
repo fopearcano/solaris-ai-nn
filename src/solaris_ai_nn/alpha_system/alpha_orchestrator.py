@@ -1039,6 +1039,52 @@ class AlphaResearchOrchestrator:
                     "is a local assembly step only and publishes nothing",
         }
 
+    def first_tester_protocol_status(
+            self, tester_state_dir: str = ".solaris_ai_nn_tester",
+            ) -> Dict[str, Any]:
+        """Read-only view of the local first tester protocol (Prompt 81).
+
+        Surfaces the protocol session status, the latest protocol report /
+        session script / acceptance criteria / stop conditions / handoff guide
+        paths, and the protocol blocker count. The protocol is local and
+        documentation-only: it does not run the tester session, publish, or
+        create GitHub releases/tags/issues.
+        """
+        proto = os.path.join(tester_state_dir, "first_tester_protocol")
+        report = os.path.join(proto, "reports",
+                              "FIRST_TESTER_PROTOCOL_REPORT.json")
+        if not os.path.isdir(proto):
+            return {"first_tester_protocol_available": False,
+                    "note": "no first tester protocol present; run "
+                            "`python -m solaris_ai_nn first-tester-protocol`"}
+        status: Dict[str, Any] = {}
+        if os.path.isfile(report):
+            try:
+                with open(report, encoding="utf-8") as fh:
+                    status = (json.load(fh).get("sections", {})
+                              .get("protocol_status", {}) or {})
+            except Exception:
+                status = {}
+        return {
+            "first_tester_protocol_available": True,
+            "session_status": status.get("session_status", "unknown"),
+            "blocker_count": status.get("blocker_count", 0),
+            "warning_count": status.get("warning_count", 0),
+            "latest_protocol_report_path": os.path.join(
+                proto, "reports", "FIRST_TESTER_PROTOCOL_REPORT.md"),
+            "session_script_path": os.path.join(
+                proto, "scripts", "FIRST_TESTER_SESSION_SCRIPT.md"),
+            "acceptance_criteria_path": os.path.join(
+                proto, "checklists", "FIRST_TESTER_ACCEPTANCE_CRITERIA.md"),
+            "stop_conditions_path": os.path.join(
+                proto, "checklists", "FIRST_TESTER_STOP_CONDITIONS.md"),
+            "handoff_guide_path": os.path.join(
+                proto, "handoff", "FIRST_TESTER_HANDOFF_GUIDE.md"),
+            "local_only": True, "runs_session": False, "published": False,
+            "note": "read-only view of the local first tester protocol; it is "
+                    "documentation-only and does not run the tester session",
+        }
+
     def snapshot(self) -> Dict[str, Any]:
         return self.alpha_status()
 

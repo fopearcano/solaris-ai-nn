@@ -1019,6 +1019,25 @@ DESCRIPTIONS = {
         "sectioned RC checklist; never hides missing required items",
     "rc_safety_protocol":
         "no publish/upload/tag/release/feeder/feedback-training; bounded",
+    "first_tester_protocol":
+        "local first-tester protocol: session script, acceptance criteria, "
+        "stop conditions, handoff, review; documentation-only",
+    "first_tester_protocol_protocol":
+        "local documentation-only first-tester protocol; bounded",
+    "first_tester_session_script_protocol":
+        "fixture-first session script; optional governance-gated live-read-only",
+    "first_tester_acceptance_criteria_protocol":
+        "acceptance criteria across install/fixture/console/claims",
+    "first_tester_stop_conditions_protocol":
+        "critical/live/session/release/pause stop conditions",
+    "first_tester_artifact_handoff_protocol":
+        "manual-only handoff; raw inbox not safe to share by default",
+    "first_tester_task_sheet_protocol":
+        "required/optional task sheet with a stop-if-unsure note",
+    "first_tester_post_test_review_protocol":
+        "QA-only post-test review; not training, not ground truth",
+    "first_tester_safety_protocol":
+        "no session-run/publish/feeder/claim; documentation-only; bounded",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -1493,6 +1512,9 @@ class ExperimentRegistry:
             or name.startswith("rc_")
             or name == "tester_release_candidate"
             or bool(merged.get("tester_release_candidate", False)))
+        features["first_tester_protocol"] = (
+            name.startswith("first_tester")
+            or bool(merged.get("first_tester_protocol", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

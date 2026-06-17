@@ -533,6 +533,32 @@ local; it is shared manually only if a tester requests it. See
 `docs/TESTER_RELEASE_CANDIDATE.md`, `docs/TESTER_QUICKSTART.md`, `docs/TESTER_RUNBOOK.md`,
 `docs/TESTER_KNOWN_ISSUES.md`, and `docs/TESTER_FEEDBACK_GUIDE.md`.
 
+## First Tester Protocol
+
+The First Tester Protocol (Prompt 81) is the final operational layer before the first
+human tester touches the release candidate. It generates a local session script, task
+sheet, acceptance criteria, stop conditions, artifact handoff guide, and post-test review
+template for the first trusted tester.
+
+```bash
+python -m solaris_ai_nn first-tester-protocol --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn first-tester-script --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn first-tester-acceptance --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn first-tester-stops --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn first-tester-handoff --tester-state-dir .solaris_ai_nn_tester
+```
+
+It does not run the tester session, publish/upload artifacts, create GitHub issues/
+releases/tags, start feeders, control hardware, access network/shell/Git/GitHub/browser/
+OS, execute artifact contents, train on feedback, or make claims about consciousness,
+sentience, biological life, personhood, agency, free will, emotion, feeling,
+understanding, self-awareness, autonomous self-improvement, or subjective experience. The
+fixture demo comes first; live-read-only is optional and governance-gated; stop conditions
+override curiosity. See `docs/FIRST_TESTER_PROTOCOL.md`,
+`docs/FIRST_TESTER_SESSION_SCRIPT.md`, `docs/FIRST_TESTER_ACCEPTANCE_CRITERIA.md`,
+`docs/FIRST_TESTER_STOP_CONDITIONS.md`, `docs/FIRST_TESTER_HANDOFF.md`, and
+`docs/FIRST_TESTER_POST_TEST_REVIEW.md`.
+
 ## Run the minimal experiment
 
 ```bash
@@ -2282,6 +2308,13 @@ src/solaris_ai_nn/
                 package upload; no Git/GitHub/network/shell/browser/OS; no
                 feeder/hardware; no artifact execution; no training on feedback;
                 not consciousness evidence)
+  first_tester_protocol/  first trusted-tester protocol (Prompt 81): protocol
+                profile, session script, acceptance criteria, stop conditions,
+                artifact handoff, task sheet, post-test review, protocol
+                runtime, reports, safety (local documentation-only; does not run
+                the session; no publish/upload; no release/tag/issue; no
+                feeder/hardware/network/shell/Git/GitHub/browser/OS; no artifact
+                execution; no training on feedback; not consciousness evidence)
   cli.py        unified `python -m solaris_ai_nn` Alpha CLI (local-only, bounded)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo

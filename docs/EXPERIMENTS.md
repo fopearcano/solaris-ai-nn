@@ -3705,3 +3705,37 @@ feedback guide states feedback is not training.
 **Run:** `python examples/run_tester_rc_bundle_demo.py --tester-state-dir .solaris_ai_nn_tester/test_rc_bundle`
 Assembles the local RC bundle and prints the bundle directory, the included/missing artifact
 counts, and confirmation that nothing was uploaded or published. The bundle is local only.
+
+## 434. First Tester Protocol Demo ✅ (implemented)
+
+**Run:** `python examples/run_first_tester_protocol_demo.py --tester-state-dir .solaris_ai_nn_tester/test_first_tester_protocol_demo`
+Generates the full first-tester protocol twice: once against a ready RC (session ready) and
+once against a critically-blocked RC manifest (session blocked). It is documentation-only;
+it never runs the tester session.
+
+## 435. First Tester Session Script Demo ✅ (implemented)
+
+**Run:** `python examples/run_first_tester_script_demo.py --tester-state-dir .solaris_ai_nn_tester/test_first_tester_script`
+Generates the session script and checks that the fixture demo comes before any
+live-read-only step, live-read-only is optional, and the script has no upload/publish/
+release commands.
+
+## 436. First Tester Acceptance Demo ✅ (implemented)
+
+**Run:** `python examples/run_first_tester_acceptance_demo.py --tester-state-dir .solaris_ai_nn_tester/test_first_tester_acceptance`
+Generates the acceptance criteria and prints the categories and the pass/warning/blocker
+result states a tester or developer uses to judge each criterion.
+
+## 437. First Tester Stop Conditions Demo ✅ (implemented)
+
+**Run:** `python examples/run_first_tester_stops_demo.py --tester-state-dir .solaris_ai_nn_tester/test_first_tester_stops`
+Generates the stop conditions and prints the count per severity (critical stop, stop live
+testing, stop session, stop release, pause). A critical stop means preserve artifacts and
+stop.
+
+## 438. First Tester Handoff Demo ✅ (implemented)
+
+**Run:** `python examples/run_first_tester_handoff_demo.py --tester-state-dir .solaris_ai_nn_tester/test_first_tester_handoff`
+Generates the handoff guide and prints artifacts grouped by privacy level, showing that raw
+live inbox files and private payloads are not safe to share by default and that sharing is
+manual only.

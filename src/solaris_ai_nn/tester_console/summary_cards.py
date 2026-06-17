@@ -35,13 +35,15 @@ class SummaryCardKind:
     PACKAGING = "packaging"
     SAFETY_FREEZE = "safety_freeze"
     RELEASE_CANDIDATE = "release_candidate"
+    FIRST_TESTER_PROTOCOL = "first_tester_protocol"
     NEXT_ACTION = "next_action"
 
     ALL = (FIXTURE_DEMO, LIVE_TESTER, GOVERNANCE, FEEDER_REGISTRY, QUARANTINE,
            MEMBRANE, MEMBRANE_INTEGRATION, SENSORY_IMPRESSIONS, SOURCE_PRESSURE,
            OBSERVATION, ONTOGENESIS, SEMIOGENESIS, COGNITION, SAFETY, CLAIMS,
            REPRODUCIBILITY, REGRESSION, ARTIFACT_BUNDLE, FEEDBACK, PACKAGING,
-           SAFETY_FREEZE, RELEASE_CANDIDATE, NEXT_ACTION)
+           SAFETY_FREEZE, RELEASE_CANDIDATE, FIRST_TESTER_PROTOCOL,
+           NEXT_ACTION)
 
 
 class SummarySeverity:
@@ -338,6 +340,27 @@ class SummaryCardBuilder:
             next_action="run `tester-rc`" if not rc else
             "resolve open RC blockers" if rc_blockers else "",
             disclaimer="local assembly only; nothing is uploaded or released"))
+
+        # First tester protocol (local, documentation-only).
+        ftp = discovery.latest(K.FIRST_TESTER_PROTOCOL_REPORT)
+        ftp_status = ftp.summary.get("session_status") if ftp else None
+        ftp_blocked = ftp_status == "blocked"
+        ftp_script = discovery.latest(K.FIRST_TESTER_SESSION_SCRIPT)
+        cards.append(Card(
+            SummaryCardKind.FIRST_TESTER_PROTOCOL, "First tester protocol",
+            status=S.BLOCKER if ftp_blocked else (S.OK if ftp else S.NOT_RUN),
+            explanation="local session script + acceptance + stops + handoff; "
+            "documentation-only",
+            metrics={"session_status": ftp_status,
+                     "session_script": bool(ftp_script)},
+            blockers=["session blocked; resolve RC/packaging/safety blockers"]
+            if ftp_blocked else [],
+            report_path=ftp.path if ftp else "",
+            next_action="run `first-tester-protocol`" if not ftp else
+            "resolve blockers before the session" if ftp_blocked else
+            "run the first tester session following the script",
+            disclaimer="documentation-only; it does not run the tester "
+            "session"))
 
         # Safety card (always present, prominent).
         cards.append(Card(

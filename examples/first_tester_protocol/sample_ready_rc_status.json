@@ -1,0 +1,6 @@
+{
+  "rc_available": true,
+  "readiness": "ready_with_warnings",
+  "blocker_count": 0,
+  "note": "RC is ready; the first tester session may proceed (session status will be ready_with_warnings). Local only; nothing published."
+}

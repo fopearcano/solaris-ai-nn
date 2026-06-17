@@ -3269,3 +3269,39 @@ problem for a system problem. The RC assembly is a local assessment of release-a
 readiness and is not evidence of consciousness, sentience, biological life, personhood,
 agency, free will, emotion, feeling, understanding, self-awareness, autonomous
 self-improvement, or subjective experience.
+
+## Notes on the First Tester Protocol
+
+**Why the first tester protocol must be explicit.** A trusted tester who is left to "just
+try it" will improvise: run things in the wrong order, skip the fixture demo, enable
+live-read-only without reading governance, or read more into a report than is there. An
+explicit protocol -- session script, task sheet, acceptance criteria, stop conditions,
+handoff guide, and review template -- removes that ambiguity. The tester knows exactly what
+to install, what to run, in what order, what to inspect, what counts as success, when to
+stop, and what to send back.
+
+**Why stop conditions matter more than curiosity.** The most dangerous moment in a first
+test is when something interesting happens and the tester wants to keep going. The protocol
+puts stop conditions before every risky phase and states plainly that a critical stop means
+preserve the artifacts and stop. The system never tells a tester to work around a safety
+blocker. Stop conditions override curiosity by design.
+
+**Why first tester success is operational, not cognitive.** Success for the first tester is
+"it installed, the fixture demo ran, the console was readable, the reports made sense, and
+nothing overclaimed" -- not "the system seemed intelligent". The acceptance criteria are
+deliberately operational, and the claims criteria explicitly require that no report be read
+as evidence of consciousness, life, or agency. Sensory impressions are operational boundary
+records; raw events are audit material, not perception.
+
+**Why live-read-only should remain optional.** Live-read-only adds real external input and
+real risk. Making it mandatory for a first tester would force every tester through the
+highest-risk path before the lowest-risk one has earned trust. The protocol keeps
+live-read-only optional and governance-gated, behind the fixture demo, with external feeders
+manual and never started or controlled by Solaris.
+
+**Why handoff must be manual and privacy-aware.** Artifacts can contain local paths, raw
+event payloads, or private identifiers. An automatic upload would leak them. The handoff is
+manual only: the tester reviews each file, redacts secrets, and sends a folder by hand only
+if the developer asks. Nothing is uploaded, emailed automatically, or turned into a GitHub
+issue. The protocol is a local, documentation-only layer and makes no claim of
+consciousness, life, or agency.

@@ -4966,3 +4966,43 @@ and protocols. RC readiness is a local assessment of release-assembly readiness,
 public release and not evidence of consciousness, sentience, biological life, personhood,
 agency, free will, emotion, feeling, understanding, self-awareness, autonomous
 self-improvement, or subjective experience.
+
+## First Tester Protocol
+
+The `first_tester_protocol` package (Prompt 81) is the final operational wrapper around the
+release candidate. It is a local, documentation-only layer: it generates the first trusted
+tester's session script, task sheet, acceptance criteria, stop conditions, artifact handoff
+guide, and post-test review template. It does **not** run the tester session automatically.
+
+The `FirstTesterSessionScript` lays out phases A-L (preparation, install, doctor, fixture
+demo, static console, feedback init, optional live-read-only init/sample-validation/run,
+bundle generation, feedback completion, post-test handoff). It is fixture-first: the
+fixture demo precedes any live-read-only step, live-read-only is marked optional and
+governance-gated, and stop conditions appear before every risky phase. The script contains
+no upload/publish/release commands and never tells the tester to start a feeder from
+Solaris. The `FirstTesterAcceptanceCriteria` enumerates what counts as success, warning, or
+blocker across install, doctor, fixture demo, console, safety, feedback, the optional
+live-read-only path, artifacts, and claims. The `FirstTesterStopConditions` lists, by
+severity (pause, stop_session, stop_live_testing, stop_release, critical_stop), when to
+pause, stop, or escalate -- a critical stop means preserve the artifacts and stop, and the
+system never tells a tester to work around a safety blocker.
+
+The `FirstTesterArtifactHandoff` classifies local artifacts by privacy level and generates
+a manual-only handoff guide: nothing is uploaded, emailed automatically, or turned into a
+GitHub issue, and the tester reviews every file before sharing. The `FirstTesterTaskSheet`
+is the concise required/optional checklist with a "stop if unsure" note, and the
+`FirstTesterPostTestReview` generates a QA-only review template that is never training and
+never modifies Solaris automatically. The `FirstTesterProtocolRuntime` reads the RC,
+packaging, and safety-freeze status (read-only), generates the docs, writes the protocol
+reports, and computes a session status (``ready``/``ready_with_warnings``/``blocked``): if
+the RC, packaging doctor, or safety freeze is blocked, the protocol still generates the
+docs but marks the session as blocked.
+
+The Alpha system exposes a read-only `first_tester_protocol_status()`, the tester console
+discovers the protocol report / session script / acceptance criteria / stop conditions /
+handoff guide / review template and surfaces a first-tester-protocol summary card, the
+Inner MAP records a `first_tester_protocol` entry, and Evaluation adds
+`first_tester_protocol` metrics and protocols. The protocol is a local assessment and
+operational wrapper; it is not a public release, not a product launch, and not evidence of
+consciousness, sentience, biological life, personhood, agency, free will, emotion, feeling,
+understanding, self-awareness, autonomous self-improvement, or subjective experience.

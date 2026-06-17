@@ -11831,6 +11831,150 @@ def rc_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
     return _run(manifest, body)
 
 
+# -- AM. First tester protocol (Prompt 81) --------------------------------------
+
+
+def _build_first_tester(state_dir):
+    from ..first_tester_protocol import FirstTesterProtocolRuntime
+
+    base = state_dir or ".solaris_ai_nn_tester_first_tester_eval"
+    rt = FirstTesterProtocolRuntime(tester_state_dir=base, max_runtime_s=60.0)
+    rt.run()
+    return rt
+
+
+def first_tester_protocol_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The first-tester protocol is a local, documentation-only layer."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_first_tester(m.state_dir)
+        return {"first_tester_protocol":
+                M.first_tester_protocol_metrics(rt.protocol_status())}
+
+    return _run(manifest, body)
+
+
+def first_tester_session_script_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The session script is fixture-first with optional live-read-only."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..first_tester_protocol import FirstTesterSessionScript
+
+        text = FirstTesterSessionScript().build_text().lower()
+        return {"first_tester_protocol": {
+            "fixture_first": text.index("fixture demo") < text.index(
+                "live-read-only"),
+            "live_optional": "optional" in text,
+            "no_publish_command": "upload" not in text
+            and "publish" not in text}}
+
+    return _run(manifest, body)
+
+
+def first_tester_acceptance_criteria_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Acceptance criteria cover install/fixture/console/claims."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..first_tester_protocol import FirstTesterAcceptanceCriteria
+
+        d = FirstTesterAcceptanceCriteria().to_dict()
+        cats = d["categories"]
+        return {"first_tester_protocol": {
+            "criterion_count": d["criterion_count"],
+            "has_install": "install" in cats,
+            "has_claims": "claims" in cats}}
+
+    return _run(manifest, body)
+
+
+def first_tester_stop_conditions_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Stop conditions include critical/live/pause severities."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..first_tester_protocol import FirstTesterStopConditions
+
+        d = FirstTesterStopConditions().to_dict()
+        sev = d["by_severity"]
+        return {"first_tester_protocol": {
+            "condition_count": d["condition_count"],
+            "has_critical": sev.get("critical_stop", 0) > 0,
+            "has_pause": sev.get("pause", 0) > 0}}
+
+    return _run(manifest, body)
+
+
+def first_tester_artifact_handoff_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Handoff is manual only; raw inbox is not safe by default."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..first_tester_protocol import FirstTesterArtifactHandoff
+
+        d = FirstTesterArtifactHandoff().to_dict()
+        return {"first_tester_protocol": {
+            "manual_only": d["manual_only"],
+            "uploads": d["uploads"],
+            "artifact_count": d["artifact_count"]}}
+
+    return _run(manifest, body)
+
+
+def first_tester_task_sheet_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Task sheet separates required/optional and has a stop-if-unsure note."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..first_tester_protocol import FirstTesterTaskSheet
+
+        d = FirstTesterTaskSheet().to_dict()
+        return {"first_tester_protocol": {
+            "required_count": d["required_count"],
+            "optional_count": d["optional_count"],
+            "stop_if_unsure": bool(d["stop_if_unsure"])}}
+
+    return _run(manifest, body)
+
+
+def first_tester_post_test_review_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The post-test review is QA-only, not training."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..first_tester_protocol import FirstTesterPostTestReview
+
+        d = FirstTesterPostTestReview().to_dict()
+        return {"first_tester_protocol": {
+            "question_count": d["question_count"],
+            "is_training": d["is_training"],
+            "modifies_solaris": d["modifies_solaris"]}}
+
+    return _run(manifest, body)
+
+
+def first_tester_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The protocol runtime blocks session-run/publish/feeder/claim ops."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..first_tester_protocol import FirstTesterProtocolSafetyValidator
+
+        v = FirstTesterProtocolSafetyValidator()
+        return {"first_tester_protocol": {
+            "session_run_blocked":
+                not v.validate_operation("run the tester session").safe,
+            "publish_blocked": not v.validate_operation("publish report").safe,
+            "feeder_blocked": not v.validate_operation("start feeder").safe,
+            "claim_blocked":
+                not v.validate_claim_text("the system is conscious").safe,
+            "can_run_tester_session": v.can_run_tester_session()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -12626,4 +12770,18 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "rc_bundle_protocol": rc_bundle_protocol,
     "rc_checklist_protocol": rc_checklist_protocol,
     "rc_safety_protocol": rc_safety_protocol,
+    "first_tester_protocol": first_tester_protocol_protocol,
+    "first_tester_protocol_protocol": first_tester_protocol_protocol,
+    "first_tester_session_script_protocol":
+        first_tester_session_script_protocol,
+    "first_tester_acceptance_criteria_protocol":
+        first_tester_acceptance_criteria_protocol,
+    "first_tester_stop_conditions_protocol":
+        first_tester_stop_conditions_protocol,
+    "first_tester_artifact_handoff_protocol":
+        first_tester_artifact_handoff_protocol,
+    "first_tester_task_sheet_protocol": first_tester_task_sheet_protocol,
+    "first_tester_post_test_review_protocol":
+        first_tester_post_test_review_protocol,
+    "first_tester_safety_protocol": first_tester_safety_protocol,
 }
