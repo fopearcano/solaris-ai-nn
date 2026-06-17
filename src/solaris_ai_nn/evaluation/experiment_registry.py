@@ -954,6 +954,27 @@ DESCRIPTIONS = {
         "local-only feedback bundle; no upload/publish",
     "feedback_safety_protocol":
         "no training/command/auto-issue/upload from feedback; bounded",
+    "tester_packaging":
+        "local report-only tester release packaging; installs nothing, "
+        "publishes nothing, creates no releases/tags",
+    "tester_packaging_protocol":
+        "local report-only packaging readiness; bounded; installs nothing",
+    "dependency_check_protocol":
+        "read-only dependency check; installs nothing",
+    "environment_doctor_protocol":
+        "read-only environment doctor; no auto-fix/install/network",
+    "command_registry_check_protocol":
+        "verifies required tester commands; runs no command",
+    "install_guide_protocol":
+        "local editable-install guide + quickstart + safety text",
+    "release_manifest_protocol":
+        "deterministic release manifest; no Git call, no publish",
+    "clean_machine_readiness_protocol":
+        "flags hidden developer-machine assumptions; report-only",
+    "platform_notes_protocol":
+        "Windows/macOS/Linux notes; no admin/root, no global install",
+    "packaging_safety_protocol":
+        "no install/publish/release/tag/browser; bounded; report-only",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -1403,6 +1424,15 @@ class ExperimentRegistry:
                         "confusion_report_protocol", "suggestion_report_protocol",
                         "release_blocker_classifier_protocol")
             or bool(merged.get("tester_feedback", False)))
+        features["tester_packaging"] = (
+            name.startswith("tester_packaging")
+            or name in ("dependency_check_protocol",
+                        "environment_doctor_protocol",
+                        "command_registry_check_protocol",
+                        "install_guide_protocol", "release_manifest_protocol",
+                        "clean_machine_readiness_protocol",
+                        "platform_notes_protocol", "packaging_safety_protocol")
+            or bool(merged.get("tester_packaging", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

@@ -659,6 +659,13 @@ class InnerMapModel:
     # only; it is never training, RLHF, ground truth, or a command, and it never
     # modifies Solaris behaviour or makes consciousness/life/agency claims.
     tester_feedback: Optional[Dict[str, Any]] = None
+    # Tester packaging readiness (Prompt 78); None when not attached. Keys:
+    # packaging_run_id, doctor_status, dependency_blocker_count,
+    # command_blocker_count, clean_machine_readiness, latest_install_guide_path,
+    # latest_release_manifest_path. Packaging is local and report-only; it
+    # installs nothing, publishes nothing, and makes no consciousness/life/
+    # agency claim.
+    tester_packaging: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

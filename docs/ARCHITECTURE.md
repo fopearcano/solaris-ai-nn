@@ -4830,3 +4830,39 @@ Inner MAP records a `tester_feedback` entry, and Evaluation adds `tester_feedbac
 metrics and protocols. Nothing here implies consciousness, sentience, biological life,
 personhood, agency, free will, emotion, feeling, understanding, self-awareness,
 autonomous self-improvement, or subjective experience.
+
+## Tester Release Packaging
+
+The `tester_packaging` package (Prompt 78) makes Solaris-AI-NN ready for a first trusted
+tester installation. The tester clones/downloads the repo, creates a Python virtual
+environment, installs the package locally (`pip install -e .`), runs the doctor, runs
+the fixture tester demo, generates the static console, initializes live-read-only
+templates, validates safe/unsafe event packs, generates a local tester bundle, and fills
+feedback forms. This is about installability, packaging hygiene, environment checks,
+dependency clarity, command discovery, and clean-machine readiness.
+
+**The tester release uses a local editable install.** It is **not** a public release,
+**not** a product installer, and **not** cloud deployment. The packaging runtime is
+**report-only**: the `DependencyCheck` reports a clear blocker for a missing required
+dependency (and install instructions, never an install); the `TesterEnvironmentDoctor`
+reports environment readiness read-only and never auto-fixes, runs shell, accesses the
+network, opens a browser, or installs anything; the `CommandRegistryCheck` verifies the
+required tester commands are registered without running them; the
+`TesterInstallGuideBuilder` writes the install guide, quickstart, and troubleshooting;
+the `ReleaseManifestBuilder` lists the expected artifacts deterministically (the commit
+is read from `.git/HEAD` if present, never by calling Git) and publishes no release; the
+`PlatformNotesBuilder` writes Windows/macOS/Linux notes that require no admin/root and no
+global install.
+
+**Clean-machine readiness prevents hidden developer-machine assumptions.** The
+`CleanMachineReadinessCheck` is report-only and fails if the fixture demo would require
+preexisting live state, if the first run would need external feeders, or if the docs omit
+the install path -- ensuring a fresh clone in a clean directory can install and run the
+fixture demo with nothing but Python and a terminal. **No publish/upload/tag/release
+automation is included, and the runtime performs no package install.** The Alpha system
+exposes a read-only `tester_packaging_status()`, the tester console discovers the
+packaging report / install guide / release manifest / clean-machine report, the Inner
+MAP records a `tester_packaging` entry, and Evaluation adds `tester_packaging` metrics
+and protocols. Packaging readiness is a local assessment, not evidence of consciousness,
+sentience, biological life, personhood, agency, free will, emotion, feeling,
+understanding, self-awareness, autonomous self-improvement, or subjective experience.

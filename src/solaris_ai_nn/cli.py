@@ -48,7 +48,10 @@ _ALPHA_COMMANDS = ("doctor", "init", "modules", "run-demo", "artifact-index",
                    "tester-console-status", "tester-console-runs",
                    "tester-feedback-init", "tester-feedback-ingest",
                    "tester-feedback-report", "tester-feedback-ledger",
-                   "tester-feedback-bundle", "tester-feedback-blockers")
+                   "tester-feedback-bundle", "tester-feedback-blockers",
+                   "tester-packaging", "tester-install-guide",
+                   "tester-release-manifest", "tester-clean-machine",
+                   "tester-command-check")
 
 
 def _integration_runtime(args: argparse.Namespace):
@@ -69,6 +72,23 @@ def _integration_runtime(args: argparse.Namespace):
         allow_raw_fallback=args.allow_raw_fallback,
         require_claimguard=args.require_claimguard,
         operator_note=args.operator_note)
+
+
+def _tester_packaging_runtime(args: argparse.Namespace, **overrides):
+    from .tester_packaging import TesterPackagingRuntime
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_live"
+    kwargs = dict(
+        state_dir=state_dir, tester_state_dir=args.tester_state_dir,
+        packaging_dir=args.packaging_dir, profile=args.profile,
+        max_runtime_s=args.max_runtime_s, strict=args.strict,
+        dry_run=args.dry_run, report_only=args.report_only,
+        include_dev_checks=args.include_dev_checks,
+        require_claimguard=args.require_claimguard)
+    kwargs.update(overrides)
+    return TesterPackagingRuntime(**kwargs)
 
 
 def _tester_feedback_runtime(args: argparse.Namespace, **overrides):
@@ -1572,6 +1592,91 @@ def cmd_tester_feedback_blockers(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_tester_packaging(args: argparse.Namespace) -> int:
+    rt = _tester_packaging_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"tester packaging refused: {result.get('reason')}")
+        return 2
+    _print("tester packaging:")
+    _print(f"  run id: {result['run_id']} ({result['packaging_profile']})")
+    _print(f"  readiness: {result['readiness']}")
+    _print(f"  doctor: {result['doctor_status']}; dependency blockers: "
+           f"{result['dependency_blocker_count']}")
+    _print(f"  missing required commands: "
+           f"{result['missing_required_command_count']}")
+    _print(f"  clean-machine: {result['clean_machine_status']}; release: "
+           f"{result['release_readiness']}")
+    for b in result["blockers"]:
+        _print(f"    blocker: {b}")
+    _print(f"  report: {result['latest_packaging_report_path']}")
+    _print(f"  install guide: {result['latest_install_guide_path']}")
+    for a in result["next_actions"]:
+        _print(f"  next: {a}")
+    if result["blocked"] and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_install_guide(args: argparse.Namespace) -> int:
+    rt = _tester_packaging_runtime(args, profile="tester_packaging_guides_v0")
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"tester install guide refused: {result.get('reason')}")
+        return 2
+    _print("tester install guide:")
+    for label, path in rt.guide_paths.items():
+        _print(f"  {label}: {path}")
+    for kind, path in rt.platform_paths.items():
+        _print(f"  platform {kind}: {path}")
+    return 0
+
+
+def cmd_tester_release_manifest(args: argparse.Namespace) -> int:
+    rt = _tester_packaging_runtime(args, profile="tester_packaging_manifest_v0")
+    rt.run()
+    m = rt.manifest.to_dict() if rt.manifest else {}
+    _print("tester release manifest:")
+    _print(f"  package: {m.get('package_name')} {m.get('version')} "
+           f"(commit {m.get('commit', 'unknown')[:12]})")
+    _print(f"  readiness: {m.get('readiness')}")
+    _print(f"  artifacts: {m.get('artifact_count', 0)}; missing required: "
+           f"{m.get('missing_required', [])}")
+    _print(f"  missing optional: {m.get('missing_optional', [])}")
+    _print(f"  manifest: {rt.packaging_status()['latest_release_manifest_path']}")
+    if m.get("missing_required") and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_clean_machine(args: argparse.Namespace) -> int:
+    rt = _tester_packaging_runtime(args,
+                                   profile="tester_packaging_clean_machine_v0")
+    rt.run()
+    c = rt.clean_machine_result.to_dict() if rt.clean_machine_result else {}
+    _print("tester clean-machine readiness:")
+    _print(f"  status: {c.get('status')}; blockers: {c.get('blocker_count', 0)}")
+    for b in c.get("blockers", []):
+        _print(f"    blocker: {b}")
+    if not c.get("passed", True) and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_command_check(args: argparse.Namespace) -> int:
+    from .tester_packaging import CommandRegistryCheck
+
+    result = CommandRegistryCheck().check()
+    d = result.to_dict()
+    _print("tester command registry check:")
+    _print(f"  registered: {d['registered_count']}/{d['command_count']}")
+    _print(f"  missing required: {d['missing_required']}")
+    _print(f"  missing optional: {d['missing_optional']}")
+    if d["missing_required"] and args.strict:
+        return 2
+    return 0
+
+
 _HANDLERS = {
     "init": cmd_init,
     "doctor": cmd_doctor,
@@ -1641,6 +1746,11 @@ _HANDLERS = {
     "tester-feedback-ledger": cmd_tester_feedback_ledger,
     "tester-feedback-bundle": cmd_tester_feedback_bundle,
     "tester-feedback-blockers": cmd_tester_feedback_blockers,
+    "tester-packaging": cmd_tester_packaging,
+    "tester-install-guide": cmd_tester_install_guide,
+    "tester-release-manifest": cmd_tester_release_manifest,
+    "tester-clean-machine": cmd_tester_clean_machine,
+    "tester-command-check": cmd_tester_command_check,
 }
 
 
@@ -1809,6 +1919,13 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--no-privacy-redact", action="store_false",
                         default=True, dest="privacy_redact",
                         help="do not redact obvious secret markers (not advised)")
+    # Tester packaging arguments (Prompt 78).
+    parser.add_argument("--packaging-dir", type=str, default="",
+                        dest="packaging_dir",
+                        help="packaging dir (default: <tester>/packaging)")
+    parser.add_argument("--include-dev-checks", action="store_true",
+                        default=False, dest="include_dev_checks",
+                        help="include dev-dependency (pytest) checks")
 
 
 def build_parser() -> argparse.ArgumentParser:

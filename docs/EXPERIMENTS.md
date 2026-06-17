@@ -3601,3 +3601,37 @@ or published.
 Ingests a release-blocker safety concern, then builds the tester console and shows that
 it discovers the feedback report and surfaces the feedback release blocker in its safety
 panel and next actions.
+
+## 419. Tester Packaging Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_packaging_demo.py --tester-state-dir .solaris_ai_nn_tester/test_packaging_demo`
+Runs the report-only packaging readiness runtime: dependency check, environment doctor,
+command registry check, install guides + quickstart + platform notes, release manifest,
+and clean-machine readiness. It installs nothing and publishes nothing.
+
+## 420. Environment Doctor Demo ✅ (implemented)
+
+**Run:** `python examples/run_environment_doctor_demo.py --tester-state-dir .solaris_ai_nn_tester/test_doctor_demo`
+Runs the read-only environment doctor, then shows how a missing optional dependency is a
+warning and a missing required command is a blocker. The doctor never auto-fixes,
+installs, runs shell, accesses the network, or opens a browser.
+
+## 421. Clean Machine Check Demo ✅ (implemented)
+
+**Run:** `python examples/run_clean_machine_check_demo.py --tester-state-dir .solaris_ai_nn_tester/test_clean_machine`
+Runs the real clean-machine readiness check, then demonstrates a hidden-local-path
+blocker and a fixture-needs-live-state blocker. The check is report-only and flags
+hidden developer-machine assumptions.
+
+## 422. Release Manifest Demo ✅ (implemented)
+
+**Run:** `python examples/run_release_manifest_demo.py --tester-state-dir .solaris_ai_nn_tester/test_manifest`
+Builds the local release artifact manifest with required/optional artifact listing. It
+does not call Git (the commit is read from `.git/HEAD` if present) and does not publish a
+release.
+
+## 423. Install Guide Demo ✅ (implemented)
+
+**Run:** `python examples/run_install_guide_demo.py --tester-state-dir .solaris_ai_nn_tester/test_install_guide`
+Generates the install guide, quickstart, and troubleshooting docs plus the Windows/
+macOS/Linux platform notes (no admin/root, no global install).

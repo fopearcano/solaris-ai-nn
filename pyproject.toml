@@ -28,6 +28,7 @@ dependencies = ["numpy>=1.24"]
 test = ["pytest>=7.0"]
 
 [project.scripts]
+solaris-ai-nn = "solaris_ai_nn.cli:main"
 solaris-nn-demo = "solaris_ai_nn.experiments.minimal_continuous_esn:main"
 solaris-nn = "solaris_ai_nn.conscience.cli:main"
 solaris-nn-scenario = "solaris_ai_nn.conscience.cli:scenario_main"

@@ -906,6 +906,53 @@ class AlphaResearchOrchestrator:
                     "feedback is QA evidence only and never modifies behaviour",
         }
 
+    def tester_packaging_status(
+            self, tester_state_dir: str = ".solaris_ai_nn_tester",
+            ) -> Dict[str, Any]:
+        """Read-only view of the local tester packaging readiness (Prompt 78).
+
+        Surfaces the packaging readiness, the latest packaging report / install
+        guide / release manifest paths, the doctor status, the clean-machine
+        readiness, and the blocker count. Packaging is a local, report-only
+        assessment: it installs nothing, publishes nothing, and creates no
+        releases/tags.
+        """
+        packaging = os.path.join(tester_state_dir, "packaging")
+        report = os.path.join(packaging, "reports", "PACKAGING_REPORT.json")
+        if not os.path.isdir(packaging):
+            return {"packaging_available": False,
+                    "note": "no tester packaging present; run "
+                            "`python -m solaris_ai_nn tester-packaging`"}
+        status: Dict[str, Any] = {}
+        if os.path.isfile(report):
+            try:
+                with open(report, encoding="utf-8") as fh:
+                    status = (json.load(fh).get("sections", {})
+                              .get("packaging_status", {}) or {})
+            except Exception:
+                status = {}
+        guide = os.path.join(packaging, "install_guides",
+                             "TESTER_INSTALL_GUIDE.md")
+        manifest = os.path.join(packaging, "manifests",
+                                "TESTER_RELEASE_ARTIFACT_MANIFEST.json")
+        return {
+            "packaging_available": True,
+            "packaging_readiness": status.get("readiness", "unknown"),
+            "doctor_status": status.get("doctor_status", "unknown"),
+            "clean_machine_readiness": status.get("clean_machine_status",
+                                                  "unknown"),
+            "blocker_count": status.get("blocker_count", 0),
+            "latest_packaging_report_path": os.path.join(
+                packaging, "reports", "PACKAGING_REPORT.md"),
+            "latest_install_guide_path": guide if os.path.isfile(guide)
+            else None,
+            "latest_release_manifest_path": manifest
+            if os.path.isfile(manifest) else None,
+            "local_only": True, "installs_packages": False, "publishes": False,
+            "note": "read-only view of local tester packaging readiness; "
+                    "packaging installs nothing and publishes nothing",
+        }
+
     def snapshot(self) -> Dict[str, Any]:
         return self.alpha_status()
 

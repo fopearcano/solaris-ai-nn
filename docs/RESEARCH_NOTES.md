@@ -3164,3 +3164,35 @@ developer-controlled disposition and never triggers implementation automatically
 environment details, or accidental sensitive text. Keeping it local by default -- never
 uploaded, never turned into a remote issue automatically, with obvious secret markers
 redacted -- means the tester, not the system, decides what leaves their machine.
+
+## Notes on Tester Release Packaging
+
+**Why the first tester release must be installable before live testing expands.** A
+careful, claim-constrained system is worthless to a tester who cannot install it. Before
+expanding the live-read-only surface, the project must guarantee a clean clone installs
+with `pip install -e .`, the doctor passes, and the fixture demo runs -- so the tester's
+first experience is "it works locally", not "it depends on the developer's machine".
+
+**Why the doctor should not auto-fix.** An auto-fixing doctor hides problems and can take
+actions the tester never approved (installing packages, editing files, reaching the
+network). A read-only doctor reports exactly what is wrong and how to fix it by hand,
+leaving every action under the tester's control. The doctor never installs, runs shell,
+accesses the network, or opens a browser.
+
+**Why clean-machine checks matter.** The most common packaging failure is a hidden
+assumption: a path that only exists on the developer's machine, a fixture that secretly
+needs live state, or docs that omit the install step. The clean-machine readiness check
+exists to surface those assumptions before a tester hits them, and it fails the
+assessment when the first run would not work on a fresh clone.
+
+**Why packaging must not publish.** This is not a public release. Letting the packaging
+runtime upload to a registry, create a GitHub release, or push a tag would turn a local
+readiness tool into a distribution mechanism with real-world side effects. The runtime
+therefore installs nothing, publishes/uploads nothing, and creates no releases/tags --
+it only writes local reports, guides, and a manifest.
+
+**Why the fixture demo is required before live-read-only testing.** The fixture demo is
+the known-good rehearsal. If it has not passed, there is no baseline against which to
+judge a live run, and a tester could mistake a setup problem for a system problem. The
+install guide and packaging readiness therefore put the fixture demo first and gate the
+live-read-only path behind it.

@@ -32,12 +32,14 @@ class SummaryCardKind:
     REGRESSION = "regression"
     ARTIFACT_BUNDLE = "artifact_bundle"
     FEEDBACK = "feedback"
+    PACKAGING = "packaging"
     NEXT_ACTION = "next_action"
 
     ALL = (FIXTURE_DEMO, LIVE_TESTER, GOVERNANCE, FEEDER_REGISTRY, QUARANTINE,
            MEMBRANE, MEMBRANE_INTEGRATION, SENSORY_IMPRESSIONS, SOURCE_PRESSURE,
            OBSERVATION, ONTOGENESIS, SEMIOGENESIS, COGNITION, SAFETY, CLAIMS,
-           REPRODUCIBILITY, REGRESSION, ARTIFACT_BUNDLE, FEEDBACK, NEXT_ACTION)
+           REPRODUCIBILITY, REGRESSION, ARTIFACT_BUNDLE, FEEDBACK, PACKAGING,
+           NEXT_ACTION)
 
 
 class SummarySeverity:
@@ -275,6 +277,22 @@ class SummaryCardBuilder:
             if not fb else "review feedback release blockers"
             if fb_blockers else "",
             disclaimer="feedback does not modify Solaris behaviour"))
+
+        # Tester packaging readiness.
+        pkg = discovery.latest(K.TESTER_RELEASE_MANIFEST) \
+            or discovery.latest(K.TESTER_PACKAGING_REPORT)
+        guide = discovery.latest(K.TESTER_INSTALL_GUIDE)
+        pkg_readiness = pkg.summary.get("readiness") if pkg else None
+        cards.append(Card(
+            SummaryCardKind.PACKAGING, "Install readiness (packaging)",
+            status=S.BLOCKER if pkg_readiness == "blocked" else
+            (S.OK if pkg else S.NOT_RUN),
+            explanation="local editable install; report-only, installs nothing",
+            metrics={"readiness": pkg_readiness,
+                     "install_guide": bool(guide)},
+            report_path=pkg.path if pkg else "",
+            next_action="run `tester-packaging`" if not pkg else "",
+            disclaimer="packaging installs nothing and publishes nothing"))
 
         # Safety card (always present, prominent).
         cards.append(Card(

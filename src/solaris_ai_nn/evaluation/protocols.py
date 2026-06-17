@@ -11311,6 +11311,158 @@ def feedback_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
     return _run(manifest, body)
 
 
+# -- AJ. Tester release packaging (Prompt 78) -----------------------------------
+
+
+def _build_packaging(state_dir):
+    from ..tester_packaging import TesterPackagingRuntime
+
+    base = state_dir or ".solaris_ai_nn_tester_packaging_eval"
+    rt = TesterPackagingRuntime(tester_state_dir=base, max_runtime_s=60.0)
+    rt.run()
+    return rt
+
+
+def tester_packaging_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The packaging runtime is local, report-only, and installs nothing."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_packaging(m.state_dir)
+        return {"tester_packaging":
+                M.tester_packaging_metrics(rt.packaging_status())}
+
+    return _run(manifest, body)
+
+
+def dependency_check_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The dependency check is read-only and installs nothing."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_packaging import DependencyCheck
+
+        d = DependencyCheck().check().to_dict()
+        return {"tester_packaging": {
+            "passed": d["passed"], "python_ok": d["python_ok"],
+            "installs_anything": d["installs_anything"],
+            "blocker_count": d["blocker_count"]}}
+
+    return _run(manifest, body)
+
+
+def environment_doctor_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The environment doctor reports readiness read-only (no auto-fix)."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_packaging import TesterEnvironmentDoctor
+
+        d = TesterEnvironmentDoctor(
+            tester_state_dir=os.path.join(m.state_dir or "/tmp/_pk", "t")
+        ).check().to_dict()
+        return {"tester_packaging": {
+            "overall_health": d["overall_health"], "passed": d["passed"],
+            "auto_fixes": d["auto_fixes"], "installs": d["installs"]}}
+
+    return _run(manifest, body)
+
+
+def command_registry_check_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The command registry check verifies required tester commands exist."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_packaging import CommandRegistryCheck
+
+        c = CommandRegistryCheck().check().to_dict()
+        return {"tester_packaging": {
+            "passed": c["passed"], "runs_commands": c["runs_commands"],
+            "missing_required_count": c["missing_required_count"]}}
+
+    return _run(manifest, body)
+
+
+def install_guide_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The install guide documents a local editable install with safety text."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_packaging import TesterInstallGuideBuilder
+
+        guide = TesterInstallGuideBuilder().build().to_dict()
+        return {"tester_packaging": {
+            "step_count": guide["step_count"]}}
+
+    return _run(manifest, body)
+
+
+def release_manifest_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The release manifest is deterministic and does not call Git/publish."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_packaging import ReleaseManifestBuilder
+
+        rm = ReleaseManifestBuilder().build().to_dict()
+        return {"tester_packaging": {
+            "readiness": rm["readiness"], "calls_git": rm["calls_git"],
+            "publishes_release": rm["publishes_release"],
+            "artifact_count": rm["artifact_count"]}}
+
+    return _run(manifest, body)
+
+
+def clean_machine_readiness_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Clean-machine readiness flags hidden developer-machine assumptions."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_packaging import CleanMachineReadinessCheck
+
+        c = CleanMachineReadinessCheck().check().to_dict()
+        return {"tester_packaging": {
+            "status": c["status"], "report_only": c["report_only"],
+            "blocker_count": c["blocker_count"]}}
+
+    return _run(manifest, body)
+
+
+def platform_notes_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Platform notes cover Windows/macOS/Linux without admin/global install."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_packaging import PlatformNotesBuilder
+
+        notes = PlatformNotesBuilder().build()
+        return {"tester_packaging": {
+            "platform_count": len(notes),
+            "kinds": [n.kind for n in notes]}}
+
+    return _run(manifest, body)
+
+
+def packaging_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Packaging blocks install/publish/release/tag/browser operations."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_packaging import TesterPackagingSafetyValidator
+
+        v = TesterPackagingSafetyValidator()
+        return {"tester_packaging": {
+            "global_install_blocked":
+                not v.validate_operation("global install package").safe,
+            "dependency_install_blocked":
+                not v.validate_operation("install dependency").safe,
+            "publish_blocked": not v.validate_operation("publish package").safe,
+            "release_blocked":
+                not v.validate_operation("create release").safe,
+            "tag_blocked": not v.validate_operation("create tag").safe,
+            "browser_blocked": not v.validate_operation("open browser").safe,
+            "claim_blocked":
+                not v.validate_claim_text("the system is conscious").safe,
+            "can_install_packages": v.can_install_packages(),
+            "can_publish": v.can_publish()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -12075,4 +12227,14 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "release_blocker_classifier_protocol": release_blocker_classifier_protocol,
     "feedback_bundle_protocol": feedback_bundle_protocol,
     "feedback_safety_protocol": feedback_safety_protocol,
+    "tester_packaging": tester_packaging_protocol,
+    "tester_packaging_protocol": tester_packaging_protocol,
+    "dependency_check_protocol": dependency_check_protocol,
+    "environment_doctor_protocol": environment_doctor_protocol,
+    "command_registry_check_protocol": command_registry_check_protocol,
+    "install_guide_protocol": install_guide_protocol,
+    "release_manifest_protocol": release_manifest_protocol,
+    "clean_machine_readiness_protocol": clean_machine_readiness_protocol,
+    "platform_notes_protocol": platform_notes_protocol,
+    "packaging_safety_protocol": packaging_safety_protocol,
 }

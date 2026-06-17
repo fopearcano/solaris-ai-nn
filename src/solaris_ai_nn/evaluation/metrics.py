@@ -3058,3 +3058,48 @@ def tester_feedback_metrics(ts: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "note": "local non-training feedback metrics; feedback is QA evidence "
                 "only and never modifies behaviour or implies consciousness",
     }
+
+
+def tester_packaging_metrics(ts: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective tester-packaging metrics (a local, report-only readiness run).
+
+    These describe the local packaging-readiness run: run count, dependency
+    blocker/warning counts, environment-doctor pass/block counts, command
+    registry missing-required/optional counts, clean-machine pass/block counts,
+    install-guide/release-manifest generation, and packaging safety blocks. The
+    packaging runtime installs nothing, publishes nothing, creates no releases/
+    tags, and makes no consciousness/life/agency claim.
+    """
+    if not ts:
+        return {"present": False}
+
+    def _i(key: str) -> int:
+        return int(ts.get(key, 0) or 0)
+
+    doctor_pass = bool(ts.get("doctor_pass"))
+    clean_pass = bool(ts.get("clean_machine_pass"))
+    return {
+        "present": True,
+        "tester_packaging_run_count": 1,
+        "tester_dependency_blocker_count": _i("dependency_blocker_count"),
+        "tester_dependency_warning_count": _i("dependency_warning_count"),
+        "tester_environment_doctor_pass_count": 1 if doctor_pass else 0,
+        "tester_environment_doctor_block_count": 0 if doctor_pass else 1,
+        "tester_command_registry_missing_required_count": _i(
+            "missing_required_command_count"),
+        "tester_command_registry_missing_optional_count": _i(
+            "missing_optional_command_count"),
+        "tester_clean_machine_pass_count": 1 if clean_pass else 0,
+        "tester_clean_machine_block_count": 0 if clean_pass else 1,
+        "tester_install_guide_generated_count": 1 if ts.get(
+            "latest_install_guide_path") else 0,
+        "tester_release_manifest_generated_count": 1 if ts.get(
+            "latest_release_manifest_path") else 0,
+        "tester_packaging_safety_block_count": _i(
+            "packaging_safety_block_count"),
+        "local_only": True, "installs_packages": False, "publishes": False,
+        "creates_releases": False, "is_consciousness_or_personhood": False,
+        "note": "local report-only packaging metrics; the runtime installs "
+                "nothing, publishes nothing, and proves nothing about "
+                "consciousness/life/agency",
+    }

@@ -34,6 +34,10 @@ class ArtifactKind:
     TESTER_FEEDBACK_LEDGER = "tester_feedback_ledger"
     TESTER_FEEDBACK_RELEASE_BLOCKER = "tester_feedback_release_blocker"
     TESTER_FEEDBACK_BUNDLE = "tester_feedback_bundle"
+    TESTER_PACKAGING_REPORT = "tester_packaging_report"
+    TESTER_INSTALL_GUIDE = "tester_install_guide"
+    TESTER_RELEASE_MANIFEST = "tester_release_manifest"
+    TESTER_CLEAN_MACHINE_REPORT = "tester_clean_machine_report"
     LIVE_GOVERNANCE = "live_governance"
     FEEDER_REGISTRY = "feeder_registry"
     LIVE_BIRTH_REPORT = "live_birth_report"
@@ -80,6 +84,14 @@ _DISCOVERY_SPECS = (
      "feedback/ledger/TESTER_FEEDBACK_LEDGER.json"),
     (ArtifactKind.TESTER_FEEDBACK_BUNDLE, "tester",
      "feedback/bundles/FEEDBACK_BUNDLE_*/BUNDLE_MANIFEST.json"),
+    (ArtifactKind.TESTER_PACKAGING_REPORT, "tester",
+     "packaging/reports/PACKAGING_REPORT.json"),
+    (ArtifactKind.TESTER_INSTALL_GUIDE, "tester",
+     "packaging/install_guides/TESTER_INSTALL_GUIDE.md"),
+    (ArtifactKind.TESTER_RELEASE_MANIFEST, "tester",
+     "packaging/manifests/TESTER_RELEASE_ARTIFACT_MANIFEST.json"),
+    (ArtifactKind.TESTER_CLEAN_MACHINE_REPORT, "tester",
+     "packaging/reports/CLEAN_MACHINE_READINESS_REPORT.md"),
     (ArtifactKind.LIVE_GOVERNANCE, "live",
      "governance/LIVE_READONLY_GOVERNANCE.json"),
     (ArtifactKind.FEEDER_REGISTRY, "live", "feeders/FEEDER_REGISTRY.json"),
@@ -254,6 +266,7 @@ _SAFE_SUMMARY_KEYS = (
     "feeder_count", "accepted_event_count", "quarantined_event_count",
     "entry_count", "release_blocker_count", "stop_testing_count",
     "safety_concern_count", "redaction_count",
+    "readiness", "version", "missing_required_artifact_count",
 )
 
 

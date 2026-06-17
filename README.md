@@ -454,6 +454,32 @@ about consciousness, sentience, biological life, personhood, agency, free will, 
 feeling, understanding, self-awareness, autonomous self-improvement, or subjective
 experience. Release blockers and safety concerns are developer review items.
 
+## Tester Packaging and Install
+
+A trusted tester installs Solaris-AI-NN with a **local editable install** and verifies
+it with the doctor and the fixture demo. Tester Packaging (Prompt 78) provides install
+guides, an environment doctor, command registry checks, clean-machine readiness checks,
+platform notes, and a release artifact manifest.
+
+```bash
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\Activate.ps1
+pip install -e .
+python -m solaris_ai_nn doctor
+python -m solaris_ai_nn tester-packaging --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn tester-install-guide --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn tester-clean-machine --tester-state-dir .solaris_ai_nn_tester
+```
+
+Tester Packaging provides local install guides, environment doctor, command registry
+checks, clean-machine readiness checks, platform notes, and a tester release artifact
+manifest. It does not install packages automatically, publish/upload artifacts, create
+GitHub releases/tags/issues, start feeders, control hardware, access network/shell/Git/
+GitHub/browser/OS, run background services, train on tester feedback, or make claims
+about consciousness, sentience, biological life, personhood, agency, free will, emotion,
+feeling, understanding, self-awareness, autonomous self-improvement, or subjective
+experience.
+
 ## Run the minimal experiment
 
 ```bash
@@ -2179,6 +2205,13 @@ src/solaris_ai_nn/
                 Human Feedback / Teaching Loop; does not modify Solaris
                 behaviour, create issues, or upload; release blockers are
                 developer review items; not consciousness evidence)
+  tester_packaging/  tester release packaging + clean-machine readiness
+                (Prompt 78): packaging profile, dependency check, environment
+                doctor, command registry check, install guide builder, release
+                manifest, clean-machine check, platform notes, packaging
+                runtime, reports, safety (local editable install; report-only;
+                installs nothing; no publish/upload/release/tag automation; no
+                Git/network/shell/browser; not consciousness evidence)
   cli.py        unified `python -m solaris_ai_nn` Alpha CLI (local-only, bounded)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
