@@ -653,6 +653,46 @@ class AlphaResearchOrchestrator:
                     "controls feeders",
         }
 
+    def environmental_membrane_status(
+            self, live_state_dir: str = ".solaris_ai_nn_live") -> Dict[str, Any]:
+        """Read-only view of the latest environmental membrane run (Prompt 72).
+
+        The default alpha system stays fixture-only: this never runs the
+        membrane, never learns, and never controls feeders. It reads the latest
+        membrane index (if present) to surface availability, the latest report
+        path, the sensory-impression count, the blocked-impression count, the
+        source-pressure status, and the membrane safety status. Returns
+        ``{"membrane_enabled": False}`` when no membrane state exists.
+        """
+        index_dir = os.path.join(live_state_dir, "membrane", "index")
+        if not os.path.isdir(index_dir):
+            return {"membrane_enabled": False,
+                    "note": "no environmental membrane state present; the default "
+                            "alpha system remains fixture-only and never runs the "
+                            "membrane, learns, or controls feeders"}
+        files = sorted(f for f in os.listdir(index_dir) if f.endswith(".json"))
+        if not files:
+            return {"membrane_enabled": False}
+        with open(os.path.join(index_dir, files[-1]), encoding="utf-8") as fh:
+            status = json.load(fh)
+        return {
+            "membrane_enabled": True,
+            "membrane_run_id": status.get("membrane_run_id"),
+            "latest_membrane_report_path": status.get(
+                "latest_membrane_report_path"),
+            "membrane_impression_count": status.get(
+                "membrane_impression_count", 0),
+            "membrane_blocked_count": status.get("membrane_blocked_count", 0),
+            "membrane_quarantined_count": status.get(
+                "membrane_quarantined_count", 0),
+            "source_pressure_status": status.get("source_pressure_status"),
+            "membrane_safety_status": status.get("membrane_safety_status"),
+            "learns": False, "controls_feeders": False, "runs_git": False,
+            "note": "read-only view of the latest environmental membrane; the "
+                    "alpha system never runs the membrane, learns, or controls "
+                    "feeders",
+        }
+
     def snapshot(self) -> Dict[str, Any]:
         return self.alpha_status()
 

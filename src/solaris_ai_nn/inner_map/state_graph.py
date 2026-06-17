@@ -2261,4 +2261,47 @@ def build_default_state_graph() -> StateGraph:
                "readiness decisions are recorded in append-only cognition memory")
     g.add_edge("FirstLiveCognitionRuntime", "inner_map",
                "live cognition status feeds Inner MAP")
+
+    # Environmental membrane (Prompt 72): the perceptual boundary organ between
+    # validated external events and Solaris perception. Validated events ->
+    # membrane -> sensory impressions -> downstream modules. It controls no
+    # feeders and lets no raw event bypass it into ontogenesis/semiogenesis/
+    # cognition.
+    for name, role in [
+        ("EnvironmentalReceptorField",
+         "typed receptors; conservative unknown; attenuated operator pulse"),
+        ("MembranePermeabilityGate",
+         "allow/attenuate/block/quarantine -- not merely valid/invalid"),
+        ("MembraneSourcePressure",
+         "per-source pressure/dominance; informs permeability; no feeder change"),
+        ("MembraneSalienceModulator",
+         "attention weighting, not truth; operator/human-text salience capped"),
+        ("MembraneContaminationAnalyzer",
+         "boundary contamination; recorded even when allowed attenuated"),
+        ("MembraneImmuneResponse",
+         "routing metadata only; preserves blocked/quarantined evidence"),
+        ("SensoryImpression",
+         "first internal perceptual object; evidence-linked; gloss not truth"),
+        ("MembraneMemory",
+         "append-only boundary memory; toxic history never deleted"),
+        ("EnvironmentalMembraneRuntime",
+         "bounded read-only perceptual boundary; no feeders/network/Git"),
+        ("EnvironmentalMembraneSafetyValidator",
+         "no feeder/network/Git/command control; no raw bypass; bounded"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("LiveEventValidator", "EnvironmentalMembraneRuntime",
+               "validated accepted events flow into the membrane")
+    g.add_edge("EnvironmentalReceptorField", "MembranePermeabilityGate",
+               "receptor match informs the permeability decision")
+    g.add_edge("MembraneSourcePressure", "MembranePermeabilityGate",
+               "source pressure informs the permeability decision")
+    g.add_edge("MembraneContaminationAnalyzer", "MembranePermeabilityGate",
+               "contamination informs the permeability decision")
+    g.add_edge("MembranePermeabilityGate", "SensoryImpression",
+               "allowed events become sensory impressions")
+    g.add_edge("SensoryImpression", "plural_sensorium",
+               "sensory impressions are the downstream perceptual objects")
+    g.add_edge("EnvironmentalMembraneRuntime", "inner_map",
+               "environmental membrane status feeds Inner MAP")
     return g

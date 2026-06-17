@@ -619,6 +619,16 @@ class InnerMapModel:
     # never treats signs as language or traces as reasoning, and never makes any
     # consciousness/life/agency claim.
     live_cognition: Optional[Dict[str, Any]] = None
+    # Environmental membrane status (Prompt 72); None when not attached. Keys:
+    # membrane_enabled, membrane_run_id, membrane_receptor_count,
+    # membrane_event_input_count, membrane_impression_count,
+    # membrane_blocked_count, membrane_quarantined_count,
+    # source_pressure_status, membrane_contamination_count,
+    # membrane_immune_response_count, latest_membrane_report_path,
+    # latest_membrane_memory_path. The membrane is the perceptual boundary; it
+    # converts validated events into sensory impressions, controls no feeders,
+    # and makes no consciousness/life/agency claim.
+    environmental_membrane: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

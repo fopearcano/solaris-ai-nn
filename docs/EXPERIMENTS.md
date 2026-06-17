@@ -3380,3 +3380,41 @@ Runs the cognition pipeline over several scenarios and prints the advisory cogni
 readiness gate decision for each: ready, blocked by too few stable signs, and blocked
 by label dependence. The gate is advisory -- it enables no action, autonomy, or
 self-boundary tracking.
+
+## 389. Environmental Membrane Demo ✅ (implemented)
+
+**Run:** `python examples/run_environmental_membrane_demo.py --state-dir .solaris_ai_nn_live/membrane_demo`
+Sets up approved governance, a feeder registry, and a sample inbox of validated +
+contaminated events; runs the bounded environmental membrane runtime; and prints
+receptor count, permeability decisions, sensory impression counts, source pressure,
+and the recommended downstream phase. The membrane converts validated events into
+sensory impressions; it controls no feeders and makes no inner-life claim.
+
+## 390. Receptor Field Demo ✅ (implemented)
+
+**Run:** `python examples/run_receptor_field_demo.py --state-dir .solaris_ai_nn_live/receptor_demo`
+Builds the 11-receptor membrane field and matches sample events, showing which
+receptor handles each source. The operator-pulse receptor is attenuated by default
+and the unknown-source receptor is conservative.
+
+## 391. Permeability Demo ✅ (implemented)
+
+**Run:** `python examples/run_permeability_demo.py --state-dir .solaris_ai_nn_live/perm_demo`
+Feeds the validated + contaminated fixtures directly to the membrane and prints the
+permeability decision per event: allow / allow_attenuated / block / quarantine, plus
+absence-impression creation. The membrane says more than valid/invalid, and every
+decision is explained; blocked and quarantined impressions are visible.
+
+## 392. Source Pressure Demo ✅ (implemented)
+
+**Run:** `python examples/run_source_pressure_demo.py --state-dir .solaris_ai_nn_live/pressure_demo`
+Computes membrane source pressure for a balanced diet, an operator-dominated batch, a
+batch with a silent expected source, and a noisy batch. Source pressure informs
+permeability but never modifies feeders.
+
+## 393. Membrane Memory Demo ✅ (implemented)
+
+**Run:** `python examples/run_membrane_memory_demo.py --state-dir .solaris_ai_nn_live/memory_demo`
+Builds append-only membrane (boundary) memory across updates for a reliable source
+and a toxic source, showing reliability/toxicity accumulation and that toxic history
+is never deleted. Membrane memory is boundary memory, not cognition.

@@ -2951,3 +2951,46 @@ self. So cognition only *recommends* a live self-boundary phase once traces are
 promoted with low uncertainty and uncontradicted predictions; it never starts it, and
 the default configuration keeps action-reaction, developmental autonomy, and
 self-boundary tracking off.
+
+## Notes on the Environmental Membrane Core
+
+**Why the membrane is necessary before self-boundary.** A system cannot meaningfully
+contrast a "self" against a "world" if it has no boundary where the world is
+filtered, weighted, and turned into internal objects. The Environmental Membrane is
+that boundary. By inserting it between validated events and every internal module, we
+give Solaris a single, inspectable place where perception begins -- a prerequisite for
+any later, carefully-bounded notion of perspective.
+
+**Why validated events are not yet perception.** Validation answers a binary question:
+is this event well-formed and safe to accept? That is necessary but not perception. An
+accepted clock tick is not yet a *chronos impression*; an accepted operator note is
+not yet an attenuated *stimulus pressure*. Perception requires receptor matching,
+permeability regulation, salience, source-pressure context, and contamination
+weighting. The membrane does that work; the validator does not.
+
+**Why sensory impressions are the first internal perceptual objects.** Downstream
+modules should reason over impressions, not raw events, because impressions carry the
+boundary's judgment: which receptor handled the signal, how permeable the boundary
+was, how salient and how contaminated the signal is, and what it grounds in. Raw
+events lack this, and letting them flow directly into ontogenesis/semiogenesis/
+cognition would re-open the very contamination the membrane exists to manage.
+
+**Why source pressure matters.** A source that floods, falls silent, or dominates the
+diet changes the meaning of everything that crosses the boundary. Source pressure
+makes that visible and feeds it into permeability -- but only as information. The
+membrane never throttles a feeder; it attenuates impressions and reports the pressure
+so an operator can decide. Dominance is always visible in the reports.
+
+**Why operator text must be attenuated.** The operator pulse is a human poking the
+boundary. If it were allowed full salience it would quickly dominate the ontology and
+turn the system into a mirror of whoever is typing. So the operator-pulse receptor is
+attenuated by default, operator salience is capped, operator-text dominance is flagged
+as contamination, and the operator pulse is preserved as stimulus pressure -- never as
+teaching.
+
+**Why membrane memory is boundary memory, not cognition.** The membrane remembers
+which sources have been reliable, toxic, silent, or dominant, so the boundary can
+respond consistently over time. This is immune-like bookkeeping, not thought. It is
+append-only, never deletes toxic history, and never silently forgives a bad source;
+it recommends review rather than imposing permanent blocks, which remain the province
+of governance and safety.

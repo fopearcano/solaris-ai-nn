@@ -19,6 +19,7 @@ htmlcov/
 !examples/live_observation/*.jsonl
 !examples/live_ontogenesis/*.jsonl
 !examples/live_cognition/*.jsonl
+!examples/environmental_membrane/*.jsonl
 runs/
 artifacts/
 

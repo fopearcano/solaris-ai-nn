@@ -289,6 +289,33 @@ GitHub; never executes commands or modifies source; and never treats sensory tex
 a command, human labels or debug gloss as ground truth, or the operator pulse as
 teaching. Prediction failures and ambiguity are preserved; there is no cherry-picking.
 
+## Environmental Membrane
+
+The Environmental Membrane is the perceptual boundary organ: external events never
+flow directly into internal modules. The path is external feeders -> Live Birth
+inbox -> event validator -> **Environmental Membrane** -> sensory impressions ->
+downstream live modules. The membrane matches events to receptors, assesses source
+pressure and contamination, regulates permeability (allow / attenuate / amplify /
+block / quarantine / defer), modulates salience, generates sensory impressions,
+triggers immune responses, and maintains append-only boundary memory.
+
+```bash
+python -m solaris_ai_nn membrane-doctor --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn membrane-run --state-dir .solaris_ai_nn_live --max-events 500 --require-governance
+python -m solaris_ai_nn membrane-impressions --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn membrane-report --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn membrane-memory --state-dir .solaris_ai_nn_live
+```
+
+The Environmental Membrane converts validated read-only events into sensory
+impressions through receptor matching, permeability regulation, salience modulation,
+source pressure analysis, contamination checks, immune responses, and membrane
+memory. It does not start feeders, control hardware, access network/shell/Git/GitHub,
+execute commands, treat text as instruction, let raw events bypass it into
+ontogenesis/semiogenesis/cognition, or make claims about consciousness, sentience,
+biological life, personhood, agency, free will, emotion, feeling, understanding,
+self-awareness, autonomous self-improvement, or subjective experience.
+
 ## Run the minimal experiment
 
 ```bash
@@ -1963,6 +1990,15 @@ src/solaris_ai_nn/
                 simulation is bounded offline metadata; prediction failures
                 preserved, no cherry-picking; traces are not reasoning,
                 language, or consciousness)
+  environmental_membrane/  perceptual boundary organ between validated events
+                and perception: membrane profile, receptor field, permeability
+                gate, sensory impression schema, source pressure, salience
+                modulation, contamination, immune response, membrane memory,
+                runtime, reports, safety (validated events -> sensory
+                impressions; allow/attenuate/block/quarantine, not merely
+                valid/invalid; operator pulse attenuated, debug gloss never
+                truth; no feeder/hardware/network/Git control; no raw-event
+                bypass downstream; boundary records, not consciousness evidence)
   cli.py        unified `python -m solaris_ai_nn` Alpha CLI (local-only, bounded)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo

@@ -35,7 +35,27 @@ _ALPHA_COMMANDS = ("doctor", "init", "modules", "run-demo", "artifact-index",
                    "live-sign-birth-gate", "live-private-syntax",
                    "live-cognition", "live-cognition-traces",
                    "live-anticipations", "live-predictions",
-                   "live-cognition-gate")
+                   "live-cognition-gate", "membrane-doctor", "membrane-run",
+                   "membrane-impressions", "membrane-report", "membrane-memory")
+
+
+def _membrane_runtime(args: argparse.Namespace):
+    from .environmental_membrane.membrane_runtime import (
+        EnvironmentalMembraneRuntime,
+    )
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_live"
+    return EnvironmentalMembraneRuntime(
+        state_dir=state_dir, profile=args.profile,
+        max_runtime_s=args.max_runtime_s, max_events=args.max_events,
+        max_files=args.max_files, report_only=args.report_only,
+        dry_run=args.dry_run, strict=args.strict,
+        require_governance=args.require_governance,
+        require_feeder_registry=args.require_feeder_registry,
+        require_claimguard=args.require_claimguard,
+        operator_note=args.operator_note)
 
 
 def _cognition_runtime(args: argparse.Namespace):
@@ -813,6 +833,111 @@ def cmd_live_cognition_gate(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_membrane_doctor(args: argparse.Namespace) -> int:
+    rt = _membrane_runtime(args)
+    doctor = rt.run_doctor()
+    _print("environmental membrane doctor:")
+    _print(f"  profile: {doctor['membrane_profile']}")
+    _print(f"  governance: {doctor['governance_status']} (passed "
+           f"{doctor['governance_passed']})")
+    _print(f"  feeder registry present: {doctor['feeder_registry_present']}")
+    _print(f"  inbox has events: {doctor['inbox_has_events']}")
+    _print(f"  bounded: {doctor['bounded']}")
+    for b in doctor["blockers"]:
+        _print(f"    blocker: {b}")
+    _print(f"  passed: {doctor['passed']}")
+    if not doctor["passed"] and args.strict:
+        return 2
+    return 0
+
+
+def cmd_membrane_run(args: argparse.Namespace) -> int:
+    rt = _membrane_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"membrane run refused: {result.get('reason')}")
+        return 2
+    st = rt.membrane_status()
+    _print("environmental membrane run:")
+    _print(f"  run id: {st['membrane_run_id']}")
+    _print(f"  blocked: {result['blocked']}")
+    for b in result["blockers"]:
+        _print(f"    blocker: {b}")
+    _print(f"  receptors: {st['membrane_receptor_count']}")
+    _print(f"  events in: {st['membrane_event_input_count']}; impressions: "
+           f"{st['membrane_impression_count']}")
+    _print(f"  allowed: {st['membrane_allowed_count']}; attenuated: "
+           f"{st['membrane_attenuated_count']}; blocked: "
+           f"{st['membrane_blocked_count']}; quarantined: "
+           f"{st['membrane_quarantined_count']}")
+    _print(f"  source pressure: {st['source_pressure_status']}")
+    _print(f"  latest report: {st['latest_membrane_report_path']}")
+    if result["blocked"] and args.strict:
+        return 2
+    return 0
+
+
+def cmd_membrane_impressions(args: argparse.Namespace) -> int:
+    import os as _os
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_live"
+    index = _os.path.join(state_dir, "membrane", "impressions",
+                          "SENSORY_IMPRESSION_INDEX.json")
+    _print("sensory impression index:")
+    if not _os.path.isfile(index):
+        _print("  (no impressions yet; run membrane-run first)")
+        return 0
+    with open(index, encoding="utf-8") as fh:
+        data = json.load(fh)
+    _print(f"  impressions: {data.get('membrane_impression_count', 0)}")
+    _print(f"  by kind: {data.get('by_kind', {})}")
+    _print(f"  by permeability status: "
+           f"{data.get('by_permeability_status', {})}")
+    _print(f"  blocked: {data.get('blocked_impression_count', 0)}")
+    return 0
+
+
+def cmd_membrane_report(args: argparse.Namespace) -> int:
+    import os as _os
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_live"
+    report = _os.path.join(state_dir, "membrane", "reports",
+                           "ENVIRONMENTAL_MEMBRANE_REPORT.md")
+    if _os.path.isfile(report):
+        _print(f"environmental membrane report: {report}")
+        return 0
+    rt = _membrane_runtime(args)
+    rt.run()
+    _print(f"environmental membrane report: "
+           f"{rt.reports.get('markdown')}")
+    return 0
+
+
+def cmd_membrane_memory(args: argparse.Namespace) -> int:
+    import os as _os
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_live"
+    mem = _os.path.join(state_dir, "membrane", "memory", "MEMBRANE_MEMORY.json")
+    _print("membrane memory:")
+    if not _os.path.isfile(mem):
+        _print("  (no membrane memory yet; run membrane-run first)")
+        return 0
+    with open(mem, encoding="utf-8") as fh:
+        data = json.load(fh)
+    _print(f"  sources: {data.get('membrane_memory_source_count', 0)}")
+    _print(f"  toxic sources: {data.get('toxic_source_count', 0)}")
+    for sid, m in (data.get("sources", {}) or {}).items():
+        _print(f"    {sid}: reliability {m.get('reliability')} toxicity "
+               f"{m.get('toxicity')} (review {m.get('recommend_review')})")
+    return 0
+
+
 _HANDLERS = {
     "init": cmd_init,
     "doctor": cmd_doctor,
@@ -849,6 +974,11 @@ _HANDLERS = {
     "live-anticipations": cmd_live_anticipations,
     "live-predictions": cmd_live_predictions,
     "live-cognition-gate": cmd_live_cognition_gate,
+    "membrane-doctor": cmd_membrane_doctor,
+    "membrane-run": cmd_membrane_run,
+    "membrane-impressions": cmd_membrane_impressions,
+    "membrane-report": cmd_membrane_report,
+    "membrane-memory": cmd_membrane_memory,
 }
 
 

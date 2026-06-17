@@ -283,6 +283,31 @@ class LiveReadOnlyBirthRuntime:
             "accesses_network": False, "runs_git": False, "calls_github": False,
         }
 
+    def environmental_membrane_status(self) -> Dict[str, Any]:
+        """Read-only reference to the environmental membrane (Prompt 72), if any.
+
+        Live Birth remains responsible for event validation and quarantine and
+        does not bypass the membrane for downstream modules. The membrane (when
+        present) transforms accepted events into sensory impressions; the birth
+        certificate may reference this status.
+        """
+        index_dir = os.path.join(self.state_dir, "membrane", "index")
+        present = os.path.isdir(index_dir) and any(
+            n.endswith(".json") for n in os.listdir(index_dir)) \
+            if os.path.isdir(index_dir) else False
+        return {
+            "environmental_membrane_available": present,
+            "downstream_consumes_sensory_impressions": present,
+            "live_birth_bypasses_membrane": False,
+            "downstream_bypass_warning": (
+                "" if present else
+                "no environmental membrane present; downstream modules must not "
+                "consume raw events directly once the membrane is integrated"),
+            "note": "Live Birth validates/quarantines events and hands accepted "
+                    "events to the environmental membrane; it never bypasses the "
+                    "membrane for downstream modules",
+        }
+
     def snapshot(self) -> Dict[str, Any]:
         return self.live_birth_status()
 

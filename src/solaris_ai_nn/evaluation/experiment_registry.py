@@ -843,6 +843,29 @@ DESCRIPTIONS = {
     "live_cognition_safety":
         "no action / operator-only anticipation / label-gloss-only trace / "
         "language-reasoning claim; bounded; no hiding failures",
+    "environmental_membrane":
+        "environmental membrane (validated events -> sensory impressions)",
+    "environmental_membrane_protocol":
+        "perceptual boundary; receptors, permeability, impressions; no control",
+    "receptor_field":
+        "typed receptors; conservative unknown source; attenuated operator pulse",
+    "permeability":
+        "allow/attenuate/block/quarantine -- not merely valid/invalid",
+    "sensory_impression":
+        "first internal perceptual objects; evidence-linked; gloss not truth",
+    "source_pressure":
+        "per-source pressure/dominance; informs permeability; never controls",
+    "salience_modulation":
+        "attention weighting, not truth; operator/human-text salience capped",
+    "membrane_contamination":
+        "label/gloss/operator/secret/forbidden contamination at the boundary",
+    "membrane_immune_response":
+        "routing metadata only; preserves blocked/quarantined evidence",
+    "membrane_memory":
+        "append-only boundary memory; toxic history never deleted",
+    "environmental_membrane_safety":
+        "no feeder/network/Git/command control; no raw bypass; bounded; "
+        "no hiding contamination",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -1261,6 +1284,15 @@ class ExperimentRegistry:
             or name.startswith("live_prediction_assessment")
             or name.startswith("live_sign_input")
             or bool(merged.get("live_cognition", False)))
+        features["environmental_membrane"] = (
+            name.startswith("environmental_membrane")
+            or name.startswith("receptor_field")
+            or name.startswith("permeability")
+            or name.startswith("sensory_impression")
+            or name.startswith("source_pressure")
+            or name.startswith("salience_modulation")
+            or name.startswith("membrane_")
+            or bool(merged.get("environmental_membrane", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

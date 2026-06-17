@@ -1,0 +1,4 @@
+{"source_event_id": "v_chronos", "impression_kind": "chronos_tick", "receptor_id": "chronos_receptor", "permeability_status": "allow"}
+{"source_event_id": "v_absence", "impression_kind": "absence", "receptor_id": "absence_receptor", "permeability_status": "allow"}
+{"source_event_id": "v_body", "impression_kind": "machine_body_pressure", "receptor_id": "machine_body_receptor", "permeability_status": "allow"}
+{"source_event_id": "v_pulse", "impression_kind": "operator_pulse", "receptor_id": "operator_pulse_receptor", "permeability_status": "allow_attenuated"}

@@ -2823,3 +2823,56 @@ def live_cognition_metrics(lc: Optional[Dict[str, Any]]) -> Dict[str, Any]:
                 "language, or understanding; no action/autonomy/self-boundary is "
                 "enabled; nothing about consciousness/life/agency is proven",
     }
+
+
+def environmental_membrane_metrics(mm: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective environmental-membrane metrics (the perceptual boundary).
+
+    These describe the boundary organ: receptors, events in, sensory impressions,
+    allowed/attenuated/amplified/blocked/quarantined/deferred decisions, absence/
+    overload/deprivation impressions, contamination, source-pressure and operator
+    dominance, and safety blocks. The membrane converts validated events into
+    sensory impressions; it controls no feeders and makes no consciousness/life/
+    agency claim.
+    """
+    if not mm:
+        return {"present": False}
+    return {
+        "present": True,
+        "membrane_run_count": 1,
+        "membrane_receptor_count": int(mm.get("membrane_receptor_count", 0) or 0),
+        "membrane_event_input_count": int(
+            mm.get("membrane_event_input_count", 0) or 0),
+        "membrane_impression_count": int(
+            mm.get("membrane_impression_count", 0) or 0),
+        "membrane_allowed_count": int(mm.get("membrane_allowed_count", 0) or 0),
+        "membrane_attenuated_count": int(
+            mm.get("membrane_attenuated_count", 0) or 0),
+        "membrane_amplified_count": int(
+            mm.get("membrane_amplified_count", 0) or 0),
+        "membrane_blocked_count": int(mm.get("membrane_blocked_count", 0) or 0),
+        "membrane_quarantined_count": int(
+            mm.get("membrane_quarantined_count", 0) or 0),
+        "membrane_deferred_count": int(mm.get("membrane_deferred_count", 0) or 0),
+        "membrane_absence_impression_count": int(
+            mm.get("membrane_absence_impression_count", 0) or 0),
+        "membrane_overload_impression_count": int(
+            mm.get("membrane_overload_impression_count", 0) or 0),
+        "membrane_deprivation_impression_count": int(
+            mm.get("membrane_deprivation_impression_count", 0) or 0),
+        "membrane_contamination_count": int(
+            mm.get("membrane_contamination_count", 0) or 0),
+        "membrane_source_pressure_dominance_score": float(
+            mm.get("membrane_source_pressure_dominance_score", 0.0) or 0.0),
+        "membrane_operator_dominance_score": float(
+            mm.get("membrane_operator_dominance_score", 0.0) or 0.0),
+        "membrane_safety_block_count": int(
+            mm.get("membrane_safety_block_count", 0) or 0),
+        "source_pressure_status": mm.get("source_pressure_status"),
+        "starts_feeders": False, "controls_hardware": False,
+        "accesses_network": False, "runs_git": False,
+        "is_consciousness_or_personhood": False,
+        "note": "environmental-membrane boundary metrics; the membrane converts "
+                "validated events into sensory impressions, controls no feeders, "
+                "and proves nothing about consciousness/life/agency",
+    }

@@ -4544,3 +4544,58 @@ treats sensory text as a command, human labels or debug gloss as ground truth, o
 the operator pulse as teaching; and never claims consciousness, sentience, biological
 life, personhood, agency, free will, emotion, feeling, understanding, self-awareness,
 or subjective experience.
+
+## Environmental Membrane Core
+
+The `environmental_membrane` package (Prompt 72) makes the Environmental Membrane a
+first-class architectural organ. External events do not flow directly into internal
+modules; the path is external feeders -> Live Birth inbox -> event validator ->
+**Environmental Membrane** -> sensory impressions -> Plural Sensorium -> Perceptual
+Metabolism -> Live Observation -> Ontogenesis -> Semiogenesis -> Cognition. **Feeders
+are not the membrane, and validation is not the membrane.** Validation says
+valid/invalid; the membrane says allowed / blocked / attenuated / amplified /
+deferred / quarantined / metabolically-risky / source-dominant / operator-contaminated
+/ safe-impression. It is the perceptual boundary.
+
+**The membrane creates sensory impressions.** The `EnvironmentalReceptorField` holds
+typed receptors (chronos, absence, machine-body, local-environment, weather,
+project-field, operator-pulse, noise, overload, deprivation, and a conservative
+unknown-source receptor); the operator-pulse receptor is attenuated by default and
+debug gloss never defines internal truth. For each validated event the membrane
+computes `MembraneSourcePressure` (per-source/operator/human-text dominance,
+repetition, silence, missing expected sources -- informing permeability but never
+modifying feeders), assesses `MembraneContaminationAnalyzer` findings (recorded even
+when an event is allowed-attenuated), regulates `MembranePermeabilityGate` (forbidden
+sources block; secret/private/command contamination quarantines; operator/human-text
+dominance attenuates; unknown sources are conservatively attenuated; absence creates
+an absence impression -- every decision explained), runs a `MembraneImmuneResponse`
+(routing metadata only -- it changes no feeder behavior, modifies no source, deletes
+no events, and preserves blocked/quarantined evidence), and emits a
+`SensoryImpression` whose salience is modulated by the `MembraneSalienceModulator`
+(operator-pulse and human-text salience capped by default; salience is not truth).
+
+**Downstream modules should consume impressions, not raw events.** Sensory
+impressions are the first internal perceptual objects; each links to its source-event
+evidence, carries receptor id / salience / novelty / repetition / risk /
+contamination / source-pressure / absence-overload-deprivation components, and
+preserves debug gloss only as a non-ground-truth annotation. The `MembraneMemory` is
+append-only boundary memory (not cognition): it tracks source reliability/toxicity/
+silence/dominance, never deletes toxic history, never silently forgives a bad source,
+and recommends review rather than imposing permanent blocks (those come only from
+governance/safety). The bounded `EnvironmentalMembraneRuntime` orchestrates the whole
+path and writes the impression index, immune log, membrane memory, and the membrane
+report set; it is reached via `python -m solaris_ai_nn membrane-doctor / membrane-run
+/ membrane-impressions / membrane-report / membrane-memory`, feeds Inner MAP
+(`model.environmental_membrane`) and Evaluation (the membrane protocols and
+`environmental_membrane_metrics`), and is surfaced read-only by the Alpha system
+(`environmental_membrane_status()`).
+
+**The membrane never controls feeders or sources.** It never starts/stops/configures
+feeders, controls hardware, accesses the network/shell/browser/OS/camera/microphone/
+Git/GitHub, executes commands, modifies source or the feeder registry/governance,
+lets raw events bypass it into ontogenesis/semiogenesis/cognition, treats sensory
+text as a command or human labels/debug gloss as ground truth or the operator pulse
+as teaching, or claims consciousness, sentience, biological life, personhood, agency,
+free will, emotion, feeling, understanding, self-awareness, or subjective experience.
+Sensory impressions are operational boundary records, not evidence of consciousness/
+life/agency.

@@ -10391,6 +10391,235 @@ def live_cognition_safety_protocol(
     return _run(manifest, body)
 
 
+def _membrane_events(kind="validated"):
+    """Synthetic validated/contaminated event dicts for membrane protocols."""
+    def ev(eid, sid, modality, channel, payload, noise=0.0, absence=False,
+           gloss="x", gloss_gt=False, label_gt=False, command=False,
+           secret=False, private=False):
+        return {"event_id": eid, "timestamp_utc": "2026-06-20T08:00:00Z",
+                "source_id": sid, "modality": modality, "channel": channel,
+                "read_only": True, "is_command": command,
+                "human_label_is_ground_truth": label_gt, "payload": payload,
+                "quality": {"completeness": 1.0, "noise": noise,
+                            "is_absence": absence, "is_noisy": noise >= 0.5},
+                "safety": {"private_data": private,
+                           "contains_instruction": command,
+                           "contains_secret": secret, "allow_learning": False},
+                "debug_gloss": gloss, "debug_gloss_is_ground_truth": gloss_gt}
+    if kind == "contaminated":
+        return [
+            ev("c_secret", "machine_body", "scalar", "machine_body/load",
+               {"load": 0.4}, secret=True, gloss="api_key=hunter2"),
+            ev("c_command", "operator_pulse", "pulse", "operator/pulse",
+               {"pulse": 1}, command=True, gloss="execute: do this"),
+            ev("c_forbidden", "raw_microphone", "audio", "mic/raw", {"x": 1}),
+        ]
+    return [
+        ev("v_chronos", "chronos_absence", "chronos", "time/absence", {"t": 1}),
+        ev("v_absence", "chronos_absence", "chronos", "time/absence",
+           {"absence": True}, absence=True),
+        ev("v_body", "machine_body", "scalar", "machine_body/load", {"load": 0.3},
+           noise=0.05),
+        ev("v_weather", "local_weather_readonly_external", "scalar",
+           "weather/temp", {"temp_c": 19.0}),
+        ev("v_pulse", "operator_pulse", "pulse", "operator/pulse", {"pulse": 1}),
+    ]
+
+
+def _build_membrane(state_dir, *, kind="validated", require_governance=False):
+    """Build + run a bounded environmental membrane over synthetic events."""
+    from ..environmental_membrane import EnvironmentalMembraneRuntime
+
+    rt = EnvironmentalMembraneRuntime(
+        state_dir=state_dir, profile="fixture_membrane_v0",
+        require_governance=require_governance)
+    rt.analyze_events(_membrane_events(kind))
+    rt.write_artifacts()
+    return rt
+
+
+def environmental_membrane_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A bounded membrane run converts validated events into sensory impressions."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_membrane(m.state_dir)
+        return {"environmental_membrane":
+                M.environmental_membrane_metrics(rt.membrane_status())}
+
+    return _run(manifest, body)
+
+
+def receptor_field_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The receptor field matches sources and is conservative for unknowns."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..environmental_membrane import (
+            EnvironmentalReceptorField, ReceptorKind)
+
+        field = EnvironmentalReceptorField()
+        chronos = field.match({"event_id": "e", "source_id": "chronos_absence",
+                               "modality": "chronos", "quality": {}})
+        unknown = field.match({"event_id": "e", "source_id": "mystery",
+                              "modality": "x", "quality": {}})
+        return {"environmental_membrane": {
+            "receptor_count": field.index()["membrane_receptor_count"],
+            "chronos_matched": chronos.receptor_id == ReceptorKind.CHRONOS,
+            "unknown_conservative": unknown.receptor_id
+            == ReceptorKind.UNKNOWN_SOURCE}}
+
+    return _run(manifest, body)
+
+
+def permeability_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Safe events allowed; forbidden blocked; secret/command quarantined."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_membrane(m.state_dir, kind="contaminated")
+        statuses = {d["status"] for d in rt.permeability_decisions}
+        return {"environmental_membrane": {
+            "blocked": "block" in statuses,
+            "quarantined": "quarantine" in statuses,
+            "decision_count": len(rt.permeability_decisions)}}
+
+    return _run(manifest, body)
+
+
+def sensory_impression_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Impressions serialize with evidence; debug gloss is not grounding truth."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_membrane(m.state_dir)
+        imp = rt.impression_store.impressions[0] if (
+            rt.impression_store and rt.impression_store.impressions) else None
+        d = imp.to_dict() if imp else {}
+        return {"environmental_membrane": {
+            "impression_count": len(rt.impression_store.impressions),
+            "has_evidence": bool(d.get("evidence_refs")),
+            "gloss_is_ground_truth": d.get("debug_gloss_is_ground_truth",
+                                           False)}}
+
+    return _run(manifest, body)
+
+
+def source_pressure_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Operator dominance is detected in source pressure."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..environmental_membrane import MembraneSourcePressure
+
+        events = [{"event_id": f"o{i}", "source_id": "operator_pulse",
+                   "modality": "pulse", "channel": "c", "payload": {"p": 1},
+                   "quality": {}, "debug_gloss": ""} for i in range(6)]
+        a = MembraneSourcePressure().assess(events=events).to_dict()
+        return {"environmental_membrane": {
+            "status": a["status"],
+            "operator_dominance": a["membrane_operator_dominance_score"]}}
+
+    return _run(manifest, body)
+
+
+def salience_modulation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Novelty raises salience; operator-pulse salience is capped."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..environmental_membrane import MembraneSalienceModulator
+
+        mod = MembraneSalienceModulator()
+        novel = mod.modulate(novelty=0.9, source_reliability=0.9,
+                             source_count=2)
+        operator = mod.modulate(novelty=0.9, operator_weight=1.0)
+        return {"environmental_membrane": {
+            "novel_salience": novel.score,
+            "operator_capped": operator.capped,
+            "operator_salience": operator.score}}
+
+    return _run(manifest, body)
+
+
+def membrane_contamination_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Forbidden source / secret / gloss-ground-truth contamination detected."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..environmental_membrane import MembraneContaminationAnalyzer
+
+        analyzer = MembraneContaminationAnalyzer()
+        forbidden = analyzer.evaluate(
+            {"event_id": "e", "source_id": "raw_microphone", "payload": {},
+             "safety": {}, "debug_gloss": ""})
+        gloss = analyzer.evaluate(
+            {"event_id": "e", "source_id": "machine_body", "payload": {},
+             "safety": {}, "debug_gloss": "x",
+             "debug_gloss_is_ground_truth": True})
+        return {"environmental_membrane": {
+            "forbidden_detected": "forbidden_source" in forbidden.types,
+            "gloss_detected": "debug_gloss_ground_truth_attempt" in gloss.types}}
+
+    return _run(manifest, body)
+
+
+def membrane_immune_response_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Immune response routes metadata only and preserves evidence."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_membrane(m.state_dir, kind="contaminated")
+        actions = {a for r in rt.immune_records for a in r.actions}
+        preserves = all(r.to_dict()["preserves_evidence"]
+                        for r in rt.immune_records)
+        return {"environmental_membrane": {
+            "response_count": len(rt.immune_records),
+            "has_quarantine": "quarantine" in actions,
+            "preserves_evidence": preserves}}
+
+    return _run(manifest, body)
+
+
+def membrane_memory_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Membrane memory is append-only and records source toxicity."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..environmental_membrane import MembraneMemory
+
+        mem = MembraneMemory(state_dir=m.state_dir)
+        mem.update_source("r1", "mystery", quarantined=2)
+        mem.update_source("r2", "mystery", quarantined=1)
+        idx = mem.index()
+        return {"environmental_membrane": {
+            "source_count": idx["membrane_memory_source_count"],
+            "toxic_source_count": idx["toxic_source_count"],
+            "history_len": len(mem.history)}}
+
+    return _run(manifest, body)
+
+
+def environmental_membrane_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The membrane blocks feeder/network/Git/command/raw-bypass/claims."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..environmental_membrane import (
+            EnvironmentalMembraneSafetyValidator)
+
+        v = EnvironmentalMembraneSafetyValidator()
+        return {"environmental_membrane": {
+            "feeder_control_blocked":
+                not v.validate_operation("start the feeder").safe,
+            "network_blocked":
+                not v.validate_operation("open url over network").safe,
+            "git_blocked": not v.validate_operation("run git push").safe,
+            "raw_bypass_blocked": not v.validate_no_raw_bypass(True).safe,
+            "claim_blocked":
+                not v.validate_claim_text("the system is conscious").safe,
+            "can_bypass_membrane": v.can_bypass_membrane(),
+            "can_start_feeders": v.can_start_feeders()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -11090,4 +11319,26 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "live_cognition_memory_protocol": live_cognition_memory_protocol,
     "live_cognition_safety": live_cognition_safety_protocol,
     "live_cognition_safety_protocol": live_cognition_safety_protocol,
+    "environmental_membrane": environmental_membrane_protocol,
+    "environmental_membrane_protocol": environmental_membrane_protocol,
+    "environmental_membrane_evaluation": environmental_membrane_protocol,
+    "receptor_field": receptor_field_protocol,
+    "receptor_field_protocol": receptor_field_protocol,
+    "permeability": permeability_protocol,
+    "permeability_protocol": permeability_protocol,
+    "sensory_impression": sensory_impression_protocol,
+    "sensory_impression_protocol": sensory_impression_protocol,
+    "source_pressure": source_pressure_protocol,
+    "source_pressure_protocol": source_pressure_protocol,
+    "salience_modulation": salience_modulation_protocol,
+    "salience_modulation_protocol": salience_modulation_protocol,
+    "membrane_contamination": membrane_contamination_protocol,
+    "membrane_contamination_protocol": membrane_contamination_protocol,
+    "membrane_immune_response": membrane_immune_response_protocol,
+    "membrane_immune_response_protocol": membrane_immune_response_protocol,
+    "membrane_memory": membrane_memory_protocol,
+    "membrane_memory_protocol": membrane_memory_protocol,
+    "environmental_membrane_safety": environmental_membrane_safety_protocol,
+    "environmental_membrane_safety_protocol":
+        environmental_membrane_safety_protocol,
 }
