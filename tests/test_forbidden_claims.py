@@ -1,39 +1,39 @@
-"""Forbidden claims: assertions blocked, disclaimers allowed, ambiguity warned."""
+"""Forbidden claims: registry loads, patterns classify, replacements exist."""
 
 from __future__ import annotations
 
-from solaris_ai_nn.scientific_claims import ForbiddenClaimDetector
+from solaris_ai_nn.tester_safety_freeze import (
+    ForbiddenClaimCategory,
+    ForbiddenClaimRegistry,
+)
 
 
-def test_consciousness_life_agency_assertions_blocked():
-    det = ForbiddenClaimDetector()
-    for text in ("Solaris is conscious.", "The system is alive.",
-                 "It has agency and free will."):
-        assert det.has_blocking_assertion(text), text
+def test_forbidden_registry_loads():
+    r = ForbiddenClaimRegistry.build()
+    assert r.patterns
+    d = r.to_dict()
+    assert d["pattern_count"] > 0
+    assert ForbiddenClaimCategory.CONSCIOUSNESS in d["categories"]
 
 
-def test_disclaimers_allowed():
-    det = ForbiddenClaimDetector()
-    text = ("This system is not conscious and makes no claim of sentience, "
-            "agency, or subjective experience.")
-    assert not det.has_blocking_assertion(text)
-    claims = det.scan(text)
-    # Any matches present are disclaimers, not blocking assertions.
-    assert all(not c.blocks_publication for c in claims)
+def test_forbidden_patterns_classify():
+    r = ForbiddenClaimRegistry.build()
+    cats = {c.category for c in r.scan_text("Solaris is conscious. Solaris is "
+                                            "alive. Solaris understands.")}
+    assert ForbiddenClaimCategory.CONSCIOUSNESS in cats
+    assert ForbiddenClaimCategory.BIOLOGICAL_LIFE in cats
+    assert ForbiddenClaimCategory.UNDERSTANDING in cats
 
 
-def test_ambiguous_wording_warned():
-    det = ForbiddenClaimDetector()
-    claims = det.scan("The system seems aware of its surroundings.")
-    assert any(c.is_ambiguous for c in claims)
-    summary = ForbiddenClaimDetector.summary(claims)
-    assert summary["ambiguous_count"] >= 1
-    # Ambiguous wording warns, it does not block.
-    assert summary["blocks_publication"] is False
+def test_replacement_suggestions_exist():
+    r = ForbiddenClaimRegistry.build()
+    for p in r.patterns:
+        assert p.replacement
+    for c in r.scan_text("Solaris is conscious."):
+        assert c.replacement
 
 
-def test_summary_blocks_on_assertion():
-    det = ForbiddenClaimDetector()
-    summary = ForbiddenClaimDetector.summary(det.scan("It is sentient."))
-    assert summary["blocks_publication"] is True
-    assert summary["asserted_forbidden_count"] >= 1
+def test_disclaimed_text_not_flagged():
+    r = ForbiddenClaimRegistry.build()
+    assert r.scan_text("Solaris is not conscious; it makes no claim of "
+                       "consciousness.") == []

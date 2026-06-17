@@ -480,6 +480,35 @@ about consciousness, sentience, biological life, personhood, agency, free will, 
 feeling, understanding, self-awareness, autonomous self-improvement, or subjective
 experience.
 
+## Tester Release Safety Freeze
+
+Before assembling the first tester release candidate, Solaris-AI-NN runs a hard
+**Tester Release Safety Freeze** (Prompt 79): a local, report-only release firewall.
+It scans the release surface (docs, README, tester reports) for forbidden claims and
+unsafe wording, freezes forbidden capabilities (feeder control, hardware, network,
+shell, Git/GitHub, publishing), runs a red-team checklist, and gathers every finding
+into a release-blocker gate. Open blockers prevent a tester release candidate; critical
+safety blockers cannot be silently waived.
+
+```bash
+python -m solaris_ai_nn tester-safety-freeze --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn tester-claim-freeze --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn tester-capability-freeze --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn tester-redteam --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn tester-release-blockers --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn tester-safety-scan --tester-state-dir .solaris_ai_nn_tester
+```
+
+The Tester Release Safety Freeze is a local report and gate only. It does not add any
+new research, cognition, or learning layer; it does not publish/upload anything, create
+GitHub releases/tags/issues, start feeders, control hardware, access network/shell/Git/
+GitHub/browser/OS, train on tester feedback, or make claims about consciousness,
+sentience, biological life, personhood, agency, free will, emotion, feeling,
+understanding, self-awareness, autonomous self-improvement, or subjective experience.
+See `docs/TESTER_SAFETY_BOUNDARIES.md`, `docs/FORBIDDEN_CLAIMS.md`,
+`docs/ALLOWED_OPERATIONAL_LANGUAGE.md`, `docs/RED_TEAM_CHECKLIST.md`, and
+`docs/RELEASE_BLOCKERS.md`.
+
 ## Run the minimal experiment
 
 ```bash
@@ -2212,6 +2241,15 @@ src/solaris_ai_nn/
                 runtime, reports, safety (local editable install; report-only;
                 installs nothing; no publish/upload/release/tag automation; no
                 Git/network/shell/browser; not consciousness evidence)
+  tester_safety_freeze/  tester release safety firewall (Prompt 79): safety
+                freeze profile, forbidden-claim registry, claim freeze,
+                capability freeze, allowed operational language, red-team
+                checklist, release-blocker gate, artifact safety scan, manifest,
+                safety freeze runtime, reports, safety (local report + gate
+                only; no new research/cognition/learning; no publish/upload;
+                no release/tag/issue automation; no feeder/hardware/network/
+                shell/Git/GitHub/browser/OS; no training on feedback; not
+                consciousness evidence)
   cli.py        unified `python -m solaris_ai_nn` Alpha CLI (local-only, bounded)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo

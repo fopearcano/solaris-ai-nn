@@ -953,6 +953,45 @@ class AlphaResearchOrchestrator:
                     "packaging installs nothing and publishes nothing",
         }
 
+    def tester_safety_freeze_status(
+            self, tester_state_dir: str = ".solaris_ai_nn_tester",
+            ) -> Dict[str, Any]:
+        """Read-only view of the tester safety-freeze gate (Prompt 79).
+
+        Surfaces the safety-freeze readiness, the latest manifest / release
+        blocker report paths, the open release blocker count, and the forbidden
+        claim count. The safety freeze is a local report/gate-only firewall; it
+        does not prove the system safe in general.
+        """
+        sf = os.path.join(tester_state_dir, "safety_freeze")
+        manifest = os.path.join(sf, "manifests",
+                                "TESTER_SAFETY_FREEZE_MANIFEST.json")
+        if not os.path.isdir(sf):
+            return {"safety_freeze_available": False,
+                    "note": "no tester safety freeze present; run "
+                            "`python -m solaris_ai_nn tester-safety-freeze`"}
+        data: Dict[str, Any] = {}
+        if os.path.isfile(manifest):
+            try:
+                with open(manifest, encoding="utf-8") as fh:
+                    data = json.load(fh)
+            except Exception:
+                data = {}
+        return {
+            "safety_freeze_available": True,
+            "latest_safety_freeze_manifest_path": manifest
+            if os.path.isfile(manifest) else None,
+            "latest_release_blocker_report_path": os.path.join(
+                sf, "reports", "TESTER_RELEASE_BLOCKERS.md"),
+            "readiness": data.get("readiness", "unknown"),
+            "open_release_blocker_count": data.get("release_blocker_count", 0),
+            "critical_open_count": data.get("critical_open_count", 0),
+            "forbidden_claim_count": data.get("forbidden_claim_count", 0),
+            "report_gate_only": True, "local_only": True,
+            "note": "read-only view of the tester safety-freeze gate; it is a "
+                    "tester-release gate only and does not prove global safety",
+        }
+
     def snapshot(self) -> Dict[str, Any]:
         return self.alpha_status()
 

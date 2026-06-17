@@ -3196,3 +3196,39 @@ the known-good rehearsal. If it has not passed, there is no baseline against whi
 judge a live run, and a tester could mistake a setup problem for a system problem. The
 install guide and packaging readiness therefore put the fixture demo first and gate the
 live-read-only path behind it.
+
+## Notes on the Tester Release Safety Freeze
+
+**Why a hard freeze must precede the first tester release candidate.** Every prior
+prompt added a safety boundary in its own layer; a release candidate, however, assembles
+those layers into one artifact that leaves the developer's control and reaches a tester.
+That is exactly the moment a single overclaiming sentence, a leftover feeder-control
+phrase, or a membrane bypass can escape review. The safety freeze exists so that the
+release surface is inspected as a whole, once, against every boundary at the same time --
+and so that the default answer to "ship it?" is "not until the gate is clean".
+
+**Why the gate is report-only and adds no new capability.** The freeze is deliberately
+not a new research, cognition, or learning layer. Giving the release firewall any ability
+to act -- to rewrite docs, publish artifacts, or change behavior -- would make the gate
+itself a new attack surface and a new source of unreviewed change. It only reads
+artifacts, classifies findings, and refuses; remediation stays a human edit.
+
+**Why disclaimer-aware claim scanning matters.** A naive deny-list flags the very
+sentences that exist to deny a claim ("Solaris is *not* conscious"), which trains
+reviewers to ignore the scanner. The claim scanner therefore strips markdown, bounds the
+enclosing sentence by real delimiters, and recognizes disclaimer context and quoted meta-
+examples, so it flags genuine overclaims while leaving honest denials and teaching
+examples alone. The project's own boundary narrative (architecture/research notes/
+experiments/roadmap) is treated as a research doc whose findings are warnings, keeping the
+gate sharp for the tester-facing surface without permanently blocking on the project's
+internal discussion of the boundary it enforces.
+
+**Why critical safety blockers cannot be silently waived.** A waive path is necessary for
+genuinely non-critical cosmetic issues, but a release firewall whose hardest rules can be
+clicked away under deadline pressure is not a firewall. Metaphysical/autonomy claims,
+membrane/raw-event bypasses, and forbidden-capability findings are therefore critical:
+the gate refuses to waive them without a reason and refuses to silently waive them at
+all, so the only way past them is to fix the artifact. The safety freeze is a local
+assessment of release safety and is not evidence of consciousness, sentience, biological
+life, personhood, agency, free will, emotion, feeling, understanding, self-awareness,
+autonomous self-improvement, or subjective experience.

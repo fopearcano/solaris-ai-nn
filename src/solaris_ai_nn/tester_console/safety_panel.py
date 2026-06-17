@@ -166,6 +166,21 @@ class SafetyPanelBuilder:
                 add("feedback_release_blocker", "blocker",
                     f"{blockers} tester feedback release blocker(s) recorded")
 
+        # Safety-freeze release blockers (the release gate).
+        sf = discovery.latest(K.TESTER_SAFETY_FREEZE_MANIFEST) \
+            or discovery.latest(K.TESTER_RELEASE_BLOCKERS)
+        if sf is not None:
+            open_blockers = sf.summary.get(
+                "release_blocker_count", sf.summary.get("open_blocker_count", 0))
+            critical = sf.summary.get("critical_open_count", 0)
+            if critical:
+                add("safety_freeze_critical_blocker", "blocker",
+                    f"{critical} critical safety-freeze blocker(s) (cannot be "
+                    "waived)")
+            elif open_blockers:
+                add("safety_freeze_release_blocker", "blocker",
+                    f"{open_blockers} open safety-freeze release blocker(s)")
+
         # Always-present structural reassurances.
         add("console_read_only", "info",
             "the console is read-only and controls no feeders/hardware/network")

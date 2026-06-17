@@ -666,6 +666,12 @@ class InnerMapModel:
     # installs nothing, publishes nothing, and makes no consciousness/life/
     # agency claim.
     tester_packaging: Optional[Dict[str, Any]] = None
+    # Tester safety-freeze gate (Prompt 79); None when not attached. Keys:
+    # safety_freeze_run_id, readiness, open_blocker_count, forbidden_claim_count,
+    # capability_blocker_count, red_team_status, latest_safety_freeze_report_path.
+    # The safety freeze is a local report/gate-only firewall; it does not prove
+    # the system safe in general and makes no consciousness/life/agency claim.
+    tester_safety_freeze: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

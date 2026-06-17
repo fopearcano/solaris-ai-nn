@@ -4866,3 +4866,56 @@ MAP records a `tester_packaging` entry, and Evaluation adds `tester_packaging` m
 and protocols. Packaging readiness is a local assessment, not evidence of consciousness,
 sentience, biological life, personhood, agency, free will, emotion, feeling,
 understanding, self-awareness, autonomous self-improvement, or subjective experience.
+
+## Tester Release Safety Freeze
+
+The `tester_safety_freeze` package (Prompt 79) is the **release safety firewall**: a
+hard gate that runs before the first tester release candidate is assembled. It is a
+local report and gate only -- it adds no new research, cognition, or learning layer, and
+performs no actuation, networking, or publishing. Its job is to inspect everything the
+release surface would expose to a tester and refuse to let a candidate proceed if any
+forbidden claim, forbidden capability, unsafe wording, missing disclaimer, membrane or
+raw-event bypass, feeder-control risk, hardware/network/shell/Git/GitHub risk, privacy
+risk, feedback-as-training risk, install/doctor/fixture blocker, governance blocker, or
+overclaiming console/report is detected.
+
+The `ForbiddenClaimRegistry` carries a deny-list of metaphysical and autonomy claims
+(consciousness, sentience, biological life, personhood, agency, free will, emotion,
+feeling, understanding, self-awareness, autonomous self-improvement, subjective
+experience, autonomous intent/desire, real-world autonomy) with safer operational
+replacements; its scanner strips markdown and recognizes disclaimer context (so a
+sentence that explicitly *denies* a claim is not flagged) and quoted meta-examples. The
+`TesterClaimFreeze` scans the release docs and reports for forbidden claims and missing
+disclaimers, treating metaphysical/autonomy claims as **release blockers**; the repo's
+internal research narrative (architecture/research-notes/experiments/roadmap) is
+recognized as a research doc and its findings are downgraded to warnings so the gate
+stays meaningful for the tester-facing surface without permanently blocking on the
+project's own boundary discussion.
+
+The `TesterCapabilityFreeze` freezes forbidden capabilities -- it scans for language that
+implies feeder control, hardware/real-world actuation, network/shell/Git/GitHub/browser/
+OS access, background services, automatic publishing, or training on tester feedback,
+and recognizes negated/forbidden phrasing so a clearly-stated prohibition is not a
+finding. The `AllowedOperationalLanguageRegistry` supplies the safe operational
+vocabulary and suggested replacements. The `TesterRedTeamChecklist` runs adversarial
+checks across fixture reproducibility, unsafe-event quarantine, governance, feeder
+externality, membrane/raw-event ordering, privacy, claims/disclaimers, feedback, and
+console/packaging read-only posture; failed or unknown **critical** checks become
+release blockers. The `TesterReleaseBlockerGate` aggregates every finding into one gate:
+`release_candidate_allowed` is true only when no blocker is open, and critical safety
+blockers cannot be silently waived (a waive requires a reason and is refused for critical
+categories). The `TesterArtifactSafetyScan` sweeps text artifacts for the same forbidden
+claims and capabilities, skipping binaries.
+
+The `TesterSafetyFreezeRuntime` orchestrates these checks over the discovered artifacts,
+gathers evidence (fixture reproducibility, membrane presence, critical/raw-event bypass,
+feedback posture), populates the blocker gate, and writes a freeze report and manifest.
+The Alpha system exposes a read-only `tester_safety_freeze_status()`, the tester console
+discovers the freeze report / manifest / release-blockers artifacts and surfaces a
+safety-freeze summary card and critical/release-blocker safety-panel findings, the Inner
+MAP records a `tester_safety_freeze` entry, Evaluation adds `tester_safety_freeze`
+metrics and protocols, and packaging readiness is blocked while any release blocker is
+open. The safety freeze is a local assessment of release safety, not evidence of
+consciousness, sentience, biological life, personhood, agency, free will, emotion,
+feeling, understanding, self-awareness, autonomous self-improvement, or subjective
+experience.

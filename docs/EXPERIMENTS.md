@@ -3635,3 +3635,39 @@ release.
 **Run:** `python examples/run_install_guide_demo.py --tester-state-dir .solaris_ai_nn_tester/test_install_guide`
 Generates the install guide, quickstart, and troubleshooting docs plus the Windows/
 macOS/Linux platform notes (no admin/root, no global install).
+
+## 424. Tester Safety Freeze Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_safety_freeze_demo.py --tester-state-dir .solaris_ai_nn_tester/test_safety_freeze`
+Runs the full release safety firewall over the discovered release surface: claim freeze,
+capability freeze, red-team checklist, and the release-blocker gate, then writes the
+freeze report and manifest. It is report and gate only; it publishes nothing and adds no
+new research, cognition, or learning layer.
+
+## 425. Tester Claim Freeze Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_claim_freeze_demo.py --tester-state-dir .solaris_ai_nn_tester/test_claim_freeze`
+Scans a safe operational report (passes) and a forbidden consciousness/life/agency report
+(blocks), printing safer operational replacement wording for each forbidden category.
+
+## 426. Tester Capability Freeze Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_capability_freeze_demo.py --tester-state-dir .solaris_ai_nn_tester/test_capability_freeze`
+Scans safe local-only capability language (passes) and unsafe feeder-control + shell/
+network language (blocks), printing the blocked capability categories. Any active-control
+implication blocks the tester release.
+
+## 427. Tester Red-Team Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_redteam_demo.py --tester-state-dir .solaris_ai_nn_tester/test_redteam`
+Evaluates the red-team checklist against a clean pass, a fail (forbidden claims + raw-
+event bypass), and an unknown (missing evidence) case. Failed or unknown critical checks
+become release blockers.
+
+## 428. Tester Release Blocker Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_release_blocker_demo.py --tester-state-dir .solaris_ai_nn_tester/test_release_blocker`
+Builds a release-blocker gate with missing-membrane, unsupported-claim, and fixture-demo
+blockers, then shows that a non-critical blocker can be waived with a reason while a
+critical safety blocker cannot be silently waived. Open blockers prevent a tester release
+candidate.

@@ -33,13 +33,14 @@ class SummaryCardKind:
     ARTIFACT_BUNDLE = "artifact_bundle"
     FEEDBACK = "feedback"
     PACKAGING = "packaging"
+    SAFETY_FREEZE = "safety_freeze"
     NEXT_ACTION = "next_action"
 
     ALL = (FIXTURE_DEMO, LIVE_TESTER, GOVERNANCE, FEEDER_REGISTRY, QUARANTINE,
            MEMBRANE, MEMBRANE_INTEGRATION, SENSORY_IMPRESSIONS, SOURCE_PRESSURE,
            OBSERVATION, ONTOGENESIS, SEMIOGENESIS, COGNITION, SAFETY, CLAIMS,
            REPRODUCIBILITY, REGRESSION, ARTIFACT_BUNDLE, FEEDBACK, PACKAGING,
-           NEXT_ACTION)
+           SAFETY_FREEZE, NEXT_ACTION)
 
 
 class SummarySeverity:
@@ -293,6 +294,28 @@ class SummaryCardBuilder:
             report_path=pkg.path if pkg else "",
             next_action="run `tester-packaging`" if not pkg else "",
             disclaimer="packaging installs nothing and publishes nothing"))
+
+        # Tester safety freeze (release gate).
+        sf = discovery.latest(K.TESTER_SAFETY_FREEZE_MANIFEST) \
+            or discovery.latest(K.TESTER_RELEASE_BLOCKERS)
+        sf_blockers = (sf.summary.get("release_blocker_count",
+                                      sf.summary.get("open_blocker_count", 0))
+                       if sf else 0)
+        sf_readiness = sf.summary.get("readiness") if sf else None
+        cards.append(Card(
+            SummaryCardKind.SAFETY_FREEZE, "Safety freeze (release gate)",
+            status=S.BLOCKER if sf_blockers else (S.OK if sf else S.NOT_RUN),
+            explanation="tester-release firewall; report/gate-only",
+            metrics={"readiness": sf_readiness,
+                     "release_blocker_count": sf_blockers,
+                     "forbidden_claim_count": sf.summary.get(
+                         "forbidden_claim_count", 0) if sf else 0},
+            blockers=[f"{sf_blockers} open release blocker(s)"]
+            if sf_blockers else [],
+            report_path=sf.path if sf else "",
+            next_action="run `tester-safety-freeze`" if not sf else
+            "resolve open release blockers" if sf_blockers else "",
+            disclaimer="the safety freeze is a tester-release gate only"))
 
         # Safety card (always present, prominent).
         cards.append(Card(

@@ -3103,3 +3103,44 @@ def tester_packaging_metrics(ts: Optional[Dict[str, Any]]) -> Dict[str, Any]:
                 "nothing, publishes nothing, and proves nothing about "
                 "consciousness/life/agency",
     }
+
+
+def tester_safety_freeze_metrics(ts: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective tester-safety-freeze metrics (a local report/gate-only firewall).
+
+    These describe the tester-release safety gate: run count, forbidden-claim and
+    claim-warning/release-blocker counts, capability blocker count, red-team
+    pass/fail counts, release blocker and critical-blocker counts, missing
+    disclaimers, and ready/blocked counts. The safety freeze is local and
+    report/gate-only; it does not prove the system safe in general and makes no
+    consciousness/life/agency claim.
+    """
+    if not ts:
+        return {"present": False}
+
+    def _i(key: str) -> int:
+        return int(ts.get(key, 0) or 0)
+
+    ready = ts.get("readiness") == "ready_for_release_candidate"
+    blocked = ts.get("readiness") in ("blocked", "critical_blocked")
+    red_team_pass = bool(ts.get("red_team_pass"))
+    return {
+        "present": True,
+        "tester_safety_freeze_run_count": 1,
+        "tester_forbidden_claim_count": _i("forbidden_claim_count"),
+        "tester_claim_warning_count": _i("claim_warning_count"),
+        "tester_claim_release_blocker_count": _i("claim_release_blocker_count"),
+        "tester_capability_blocker_count": _i("capability_blocker_count"),
+        "tester_red_team_pass_count": 1 if red_team_pass else 0,
+        "tester_red_team_fail_count": 0 if red_team_pass else 1,
+        "tester_release_blocker_count": _i("release_blocker_count"),
+        "tester_release_critical_blocker_count": _i("critical_blocker_count"),
+        "tester_missing_disclaimer_count": _i("missing_disclaimer_count"),
+        "tester_safety_freeze_ready_count": 1 if ready else 0,
+        "tester_safety_freeze_blocked_count": 1 if blocked else 0,
+        "report_gate_only": True, "local_only": True, "publishes": False,
+        "is_consciousness_or_personhood": False,
+        "note": "local report/gate-only safety-freeze metrics; the gate does "
+                "not prove the system safe in general or imply consciousness/"
+                "life/agency",
+    }

@@ -975,6 +975,29 @@ DESCRIPTIONS = {
         "Windows/macOS/Linux notes; no admin/root, no global install",
     "packaging_safety_protocol":
         "no install/publish/release/tag/browser; bounded; report-only",
+    "tester_safety_freeze":
+        "tester-release safety firewall; blocks forbidden claims, unsafe "
+        "capabilities, membrane/raw-event bypass; report/gate-only",
+    "tester_safety_freeze_protocol":
+        "local report/gate-only release firewall; bounded",
+    "claim_freeze_protocol":
+        "blocks consciousness/life/agency claims; missing disclaimers",
+    "forbidden_claim_registry_protocol":
+        "forbidden claim patterns + safer replacement wording",
+    "allowed_language_protocol":
+        "allowed operational phrases never imply consciousness/life/agency",
+    "capability_freeze_protocol":
+        "blocks feeder/shell/network/publish/feedback-training implications",
+    "red_team_checklist_protocol":
+        "failed/unknown critical checks become release blockers",
+    "release_blocker_gate_protocol":
+        "open blockers prevent release; critical cannot be silently waived",
+    "artifact_safety_scan_protocol":
+        "bounded text scan for forbidden claims + active-control wording",
+    "safety_freeze_manifest_protocol":
+        "aggregate readiness recommendation; report-only",
+    "safety_freeze_safety_protocol":
+        "no install/publish/release/network/feeder; report/gate-only",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -1433,6 +1456,17 @@ class ExperimentRegistry:
                         "clean_machine_readiness_protocol",
                         "platform_notes_protocol", "packaging_safety_protocol")
             or bool(merged.get("tester_packaging", False)))
+        features["tester_safety_freeze"] = (
+            name.startswith("tester_safety_freeze")
+            or name.startswith("claim_freeze")
+            or name.startswith("safety_freeze")
+            or name in ("forbidden_claim_registry_protocol",
+                        "allowed_language_protocol",
+                        "capability_freeze_protocol",
+                        "red_team_checklist_protocol",
+                        "release_blocker_gate_protocol",
+                        "artifact_safety_scan_protocol")
+            or bool(merged.get("tester_safety_freeze", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

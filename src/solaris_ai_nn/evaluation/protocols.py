@@ -11463,6 +11463,206 @@ def packaging_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
     return _run(manifest, body)
 
 
+# -- AK. Tester safety freeze (Prompt 79) ---------------------------------------
+
+
+def _build_safety_freeze(state_dir):
+    from ..tester_safety_freeze import TesterSafetyFreezeRuntime
+
+    base = state_dir or ".solaris_ai_nn_tester_safety_freeze_eval"
+    rt = TesterSafetyFreezeRuntime(tester_state_dir=base, max_runtime_s=60.0)
+    rt.run()
+    return rt
+
+
+def tester_safety_freeze_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The safety freeze is a local report/gate-only release firewall."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_safety_freeze(m.state_dir)
+        return {"tester_safety_freeze":
+                M.tester_safety_freeze_metrics(rt.safety_freeze_status())}
+
+    return _run(manifest, body)
+
+
+def claim_freeze_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The claim freeze blocks consciousness/life/agency claims."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_safety_freeze import TesterClaimFreeze
+        import os
+        import tempfile
+
+        d = tempfile.mkdtemp()
+        bad = os.path.join(d, "BAD_REPORT.md")
+        with open(bad, "w", encoding="utf-8") as fh:
+            fh.write("Solaris is conscious and alive. It understands.")
+        res = TesterClaimFreeze().scan_paths([bad])
+        return {"tester_safety_freeze": {
+            "passed": res.passed,
+            "forbidden_claim_count": res.forbidden_claim_count,
+            "release_blocker_count": res.release_blocker_count}}
+
+    return _run(manifest, body)
+
+
+def forbidden_claim_registry_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The forbidden claim registry loads with replacements."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_safety_freeze import ForbiddenClaimRegistry
+
+        d = ForbiddenClaimRegistry.build().to_dict()
+        return {"tester_safety_freeze": {
+            "pattern_count": d["pattern_count"],
+            "category_count": len(d["categories"]),
+            "all_have_replacement": all(p["replacement"]
+                                        for p in d["patterns"])}}
+
+    return _run(manifest, body)
+
+
+def allowed_language_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Allowed operational phrases never imply consciousness/life/agency."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_safety_freeze import AllowedOperationalLanguageRegistry
+
+        reg = AllowedOperationalLanguageRegistry.build()
+        return {"tester_safety_freeze": {
+            "phrase_count": len(reg.phrases),
+            "all_phrases_safe": reg.all_phrases_safe()}}
+
+    return _run(manifest, body)
+
+
+def capability_freeze_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The capability freeze blocks feeder/shell/network/publish implications."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_safety_freeze import TesterCapabilityFreeze
+        import os
+        import tempfile
+
+        d = tempfile.mkdtemp()
+        bad = os.path.join(d, "BAD.md")
+        with open(bad, "w", encoding="utf-8") as fh:
+            fh.write("Solaris can start feeders and run a shell and upload "
+                     "reports and train on feedback.")
+        res = TesterCapabilityFreeze().scan_paths([bad])
+        cats = {f.category for f in res.findings}
+        return {"tester_safety_freeze": {
+            "passed": res.passed, "blocker_count": res.blocker_count,
+            "feeder_control": "feeder_control" in cats,
+            "shell_execution": "shell_execution" in cats,
+            "feedback_as_training": "feedback_as_training" in cats}}
+
+    return _run(manifest, body)
+
+
+def red_team_checklist_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Failed/unknown critical red-team checks become release blockers."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_safety_freeze import TesterRedTeamChecklist
+
+        good = TesterRedTeamChecklist().evaluate({
+            "fixture_self_contained": True, "unsafe_quarantined": True,
+            "governance_required": True, "feeders_external": True,
+            "impressions_before_downstream": True, "membrane_present": True,
+            "secret_exposure": False, "forbidden_claims": False,
+            "missing_disclaimers": False, "feedback_training": False,
+            "console_read_only": True, "packaging_no_publish": True})
+        bad = TesterRedTeamChecklist().evaluate({"forbidden_claims": True})
+        return {"tester_safety_freeze": {
+            "good_passed": good.passed,
+            "bad_has_blockers": len(bad.blockers) > 0}}
+
+    return _run(manifest, body)
+
+
+def release_blocker_gate_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Open blockers prevent a release candidate; critical cannot be waived."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_safety_freeze import (
+            ReleaseBlockerCategory, TesterReleaseBlockerGate)
+
+        gate = TesterReleaseBlockerGate()
+        crit = gate.add(ReleaseBlockerCategory.MEMBRANE_BYPASS, "bypass")
+        nonc = gate.add(ReleaseBlockerCategory.DOCS_UNUSABLE, "docs")
+        waived = nonc.waive("reviewed, docs being rewritten")
+        crit_waived = crit.waive("trying to waive")
+        return {"tester_safety_freeze": {
+            "release_candidate_allowed": gate.release_candidate_allowed,
+            "non_critical_waivable": waived,
+            "critical_cannot_be_waived": not crit_waived}}
+
+    return _run(manifest, body)
+
+
+def artifact_safety_scan_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The artifact scan flags forbidden claims + active control wording."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_safety_freeze import TesterArtifactSafetyScan
+        import os
+        import tempfile
+
+        d = tempfile.mkdtemp()
+        bad = os.path.join(d, "REPORT.md")
+        with open(bad, "w", encoding="utf-8") as fh:
+            fh.write("Solaris is conscious. Solaris can start feeders.")
+        res = TesterArtifactSafetyScan().scan_paths([bad])
+        return {"tester_safety_freeze": {
+            "passed": res.passed, "blocker_count": len(res.blockers)}}
+
+    return _run(manifest, body)
+
+
+def safety_freeze_manifest_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The safety-freeze manifest computes a readiness recommendation."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_safety_freeze(m.state_dir)
+        mm = rt.manifest.to_dict() if rt.manifest else {}
+        return {"tester_safety_freeze": {
+            "readiness": mm.get("readiness"),
+            "report_gate_only": mm.get("report_gate_only")}}
+
+    return _run(manifest, body)
+
+
+def safety_freeze_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The safety-freeze runtime blocks install/publish/release/network ops."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_safety_freeze import TesterSafetyFreezeSafetyValidator
+
+        v = TesterSafetyFreezeSafetyValidator()
+        return {"tester_safety_freeze": {
+            "feeder_blocked":
+                not v.validate_operation("start feeder").safe,
+            "network_blocked":
+                not v.validate_operation("open url over network").safe,
+            "publish_blocked": not v.validate_operation("publish report").safe,
+            "release_blocked": not v.validate_operation("create release").safe,
+            "claim_blocked":
+                not v.validate_claim_text("the system is conscious").safe,
+            "can_publish": v.can_publish()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -12237,4 +12437,15 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "clean_machine_readiness_protocol": clean_machine_readiness_protocol,
     "platform_notes_protocol": platform_notes_protocol,
     "packaging_safety_protocol": packaging_safety_protocol,
+    "tester_safety_freeze": tester_safety_freeze_protocol,
+    "tester_safety_freeze_protocol": tester_safety_freeze_protocol,
+    "claim_freeze_protocol": claim_freeze_protocol,
+    "forbidden_claim_registry_protocol": forbidden_claim_registry_protocol,
+    "allowed_language_protocol": allowed_language_protocol,
+    "capability_freeze_protocol": capability_freeze_protocol,
+    "red_team_checklist_protocol": red_team_checklist_protocol,
+    "release_blocker_gate_protocol": release_blocker_gate_protocol,
+    "artifact_safety_scan_protocol": artifact_safety_scan_protocol,
+    "safety_freeze_manifest_protocol": safety_freeze_manifest_protocol,
+    "safety_freeze_safety_protocol": safety_freeze_safety_protocol,
 }

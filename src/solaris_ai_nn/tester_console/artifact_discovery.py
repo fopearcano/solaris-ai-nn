@@ -38,6 +38,9 @@ class ArtifactKind:
     TESTER_INSTALL_GUIDE = "tester_install_guide"
     TESTER_RELEASE_MANIFEST = "tester_release_manifest"
     TESTER_CLEAN_MACHINE_REPORT = "tester_clean_machine_report"
+    TESTER_SAFETY_FREEZE_REPORT = "tester_safety_freeze_report"
+    TESTER_SAFETY_FREEZE_MANIFEST = "tester_safety_freeze_manifest"
+    TESTER_RELEASE_BLOCKERS = "tester_release_blockers"
     LIVE_GOVERNANCE = "live_governance"
     FEEDER_REGISTRY = "feeder_registry"
     LIVE_BIRTH_REPORT = "live_birth_report"
@@ -92,6 +95,12 @@ _DISCOVERY_SPECS = (
      "packaging/manifests/TESTER_RELEASE_ARTIFACT_MANIFEST.json"),
     (ArtifactKind.TESTER_CLEAN_MACHINE_REPORT, "tester",
      "packaging/reports/CLEAN_MACHINE_READINESS_REPORT.md"),
+    (ArtifactKind.TESTER_SAFETY_FREEZE_REPORT, "tester",
+     "safety_freeze/reports/TESTER_SAFETY_FREEZE_REPORT.json"),
+    (ArtifactKind.TESTER_SAFETY_FREEZE_MANIFEST, "tester",
+     "safety_freeze/manifests/TESTER_SAFETY_FREEZE_MANIFEST.json"),
+    (ArtifactKind.TESTER_RELEASE_BLOCKERS, "tester",
+     "safety_freeze/reports/TESTER_RELEASE_BLOCKERS.json"),
     (ArtifactKind.LIVE_GOVERNANCE, "live",
      "governance/LIVE_READONLY_GOVERNANCE.json"),
     (ArtifactKind.FEEDER_REGISTRY, "live", "feeders/FEEDER_REGISTRY.json"),
@@ -267,6 +276,8 @@ _SAFE_SUMMARY_KEYS = (
     "entry_count", "release_blocker_count", "stop_testing_count",
     "safety_concern_count", "redaction_count",
     "readiness", "version", "missing_required_artifact_count",
+    "release_blocker_count", "critical_open_count", "open_blocker_count",
+    "release_candidate_allowed",
 )
 
 

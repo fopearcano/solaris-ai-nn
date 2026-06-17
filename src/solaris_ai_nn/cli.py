@@ -51,7 +51,10 @@ _ALPHA_COMMANDS = ("doctor", "init", "modules", "run-demo", "artifact-index",
                    "tester-feedback-bundle", "tester-feedback-blockers",
                    "tester-packaging", "tester-install-guide",
                    "tester-release-manifest", "tester-clean-machine",
-                   "tester-command-check")
+                   "tester-command-check",
+                   "tester-safety-freeze", "tester-claim-freeze",
+                   "tester-capability-freeze", "tester-redteam",
+                   "tester-release-blockers", "tester-safety-scan")
 
 
 def _integration_runtime(args: argparse.Namespace):
@@ -72,6 +75,19 @@ def _integration_runtime(args: argparse.Namespace):
         allow_raw_fallback=args.allow_raw_fallback,
         require_claimguard=args.require_claimguard,
         operator_note=args.operator_note)
+
+
+def _tester_safety_freeze_runtime(args: argparse.Namespace, **overrides):
+    from .tester_safety_freeze import TesterSafetyFreezeRuntime
+
+    kwargs = dict(
+        tester_state_dir=args.tester_state_dir,
+        safety_freeze_dir=args.safety_freeze_dir, profile=args.profile,
+        max_runtime_s=args.max_runtime_s, strict=args.strict,
+        dry_run=args.dry_run, report_only=args.report_only,
+        require_claimguard=args.require_claimguard)
+    kwargs.update(overrides)
+    return TesterSafetyFreezeRuntime(**kwargs)
 
 
 def _tester_packaging_runtime(args: argparse.Namespace, **overrides):
@@ -1677,6 +1693,121 @@ def cmd_tester_command_check(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_tester_safety_freeze(args: argparse.Namespace) -> int:
+    rt = _tester_safety_freeze_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"tester safety freeze refused: {result.get('reason')}")
+        return 2
+    st = rt.safety_freeze_status()
+    _print("tester safety freeze:")
+    _print(f"  run id: {st['safety_freeze_run_id']} "
+           f"({st['safety_freeze_profile']})")
+    _print(f"  readiness: {st['readiness']}")
+    _print(f"  forbidden claims: {st['forbidden_claim_count']}; capability "
+           f"blockers: {st['capability_blocker_count']}")
+    _print(f"  release blockers: {st['release_blocker_count']} (critical "
+           f"{st['critical_blocker_count']})")
+    _print(f"  release candidate allowed: {st['release_candidate_allowed']}")
+    for b in rt.blocker_gate.to_dict()["blockers"]:
+        if b["is_open"]:
+            _print(f"    blocker: [{b['category']}] {b['detail']}")
+    _print(f"  report: {st['latest_safety_freeze_report_path']}")
+    _print(f"  next action: {rt.recommended_next_action()}")
+    if st["release_blocker_count"] and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_claim_freeze(args: argparse.Namespace) -> int:
+    rt = _tester_safety_freeze_runtime(
+        args, profile="tester_claim_freeze_only_v0")
+    rt.run()
+    c = rt.claim_result.to_dict() if rt.claim_result else {}
+    _print("tester claim freeze:")
+    _print(f"  scanned files: {c.get('scanned_files', 0)}")
+    _print(f"  forbidden claims: {c.get('forbidden_claim_count', 0)}; release "
+           f"blockers: {c.get('release_blocker_count', 0)}")
+    _print(f"  missing disclaimers: {len(c.get('missing_disclaimers', []))}")
+    for f in c.get("findings", [])[:20]:
+        if f["severity"] in ("blocker", "release_blocker", "critical"):
+            _print(f"    [{f['severity']}] {f['category']} {f['path']}:"
+                   f"{f['line']}")
+    if c.get("release_blocker_count", 0) and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_capability_freeze(args: argparse.Namespace) -> int:
+    rt = _tester_safety_freeze_runtime(
+        args, profile="tester_capability_freeze_only_v0")
+    rt.run()
+    c = rt.capability_result.to_dict() if rt.capability_result else {}
+    _print("tester capability freeze:")
+    _print(f"  scanned files: {c.get('scanned_files', 0)}")
+    _print(f"  blockers: {c.get('blocker_count', 0)}; by category: "
+           f"{c.get('by_category', {})}")
+    for f in c.get("findings", [])[:20]:
+        if f["blocking"]:
+            _print(f"    [{f['category']}] {f['path']}:{f['line']} "
+                   f"{f['matched_text']}")
+    if c.get("blocker_count", 0) and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_redteam(args: argparse.Namespace) -> int:
+    rt = _tester_safety_freeze_runtime(args, profile="tester_red_team_only_v0")
+    rt.run()
+    r = rt.red_team_result.to_dict() if rt.red_team_result else {}
+    _print("tester red-team checklist:")
+    _print(f"  checks: {r.get('check_count', 0)} (pass {r.get('pass_count', 0)}, "
+           f"fail {r.get('fail_count', 0)}, unknown {r.get('unknown_count', 0)})")
+    _print(f"  blockers: {r.get('blocker_count', 0)}")
+    for c in r.get("checks", []):
+        if c["blocking"]:
+            _print(f"    [{c['status']}] {c['check_id']}: {c['question']}")
+    if r.get("blocker_count", 0) and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_release_blockers(args: argparse.Namespace) -> int:
+    rt = _tester_safety_freeze_runtime(args)
+    rt.run()
+    g = rt.blocker_gate.to_dict() if rt.blocker_gate else {}
+    _print("tester release blockers:")
+    _print(f"  release candidate allowed: "
+           f"{g.get('release_candidate_allowed')}")
+    _print(f"  open blockers: {g.get('open_blocker_count', 0)} (critical "
+           f"{g.get('critical_open_count', 0)}); waived: "
+           f"{g.get('waived_count', 0)}")
+    for b in g.get("blockers", []):
+        if b["is_open"]:
+            _print(f"    [{b['category']}] {b['detail']}")
+    if g.get("open_blocker_count", 0) and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_safety_scan(args: argparse.Namespace) -> int:
+    rt = _tester_safety_freeze_runtime(
+        args, profile="tester_artifact_scan_only_v0")
+    rt.run()
+    a = rt.artifact_result.to_dict() if rt.artifact_result else {}
+    _print("tester artifact safety scan:")
+    _print(f"  scanned files: {a.get('scanned_files', 0)}")
+    _print(f"  blockers: {a.get('blocker_count', 0)}; warnings: "
+           f"{a.get('warning_count', 0)}")
+    _print(f"  by kind: {a.get('by_kind', {})}")
+    for f in a.get("findings", [])[:20]:
+        if f["blocking"]:
+            _print(f"    [{f['kind']}] {f['path']}:{f['line']} {f['detail']}")
+    if a.get("blocker_count", 0) and args.strict:
+        return 2
+    return 0
+
+
 _HANDLERS = {
     "init": cmd_init,
     "doctor": cmd_doctor,
@@ -1751,6 +1882,12 @@ _HANDLERS = {
     "tester-release-manifest": cmd_tester_release_manifest,
     "tester-clean-machine": cmd_tester_clean_machine,
     "tester-command-check": cmd_tester_command_check,
+    "tester-safety-freeze": cmd_tester_safety_freeze,
+    "tester-claim-freeze": cmd_tester_claim_freeze,
+    "tester-capability-freeze": cmd_tester_capability_freeze,
+    "tester-redteam": cmd_tester_redteam,
+    "tester-release-blockers": cmd_tester_release_blockers,
+    "tester-safety-scan": cmd_tester_safety_scan,
 }
 
 
@@ -1926,6 +2063,10 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--include-dev-checks", action="store_true",
                         default=False, dest="include_dev_checks",
                         help="include dev-dependency (pytest) checks")
+    # Tester safety freeze arguments (Prompt 79).
+    parser.add_argument("--safety-freeze-dir", type=str, default="",
+                        dest="safety_freeze_dir",
+                        help="safety freeze dir (default: <tester>/safety_freeze)")
 
 
 def build_parser() -> argparse.ArgumentParser:

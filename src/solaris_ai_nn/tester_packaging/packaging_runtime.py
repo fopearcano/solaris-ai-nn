@@ -177,6 +177,30 @@ class TesterPackagingRuntime:
             "missing_required_commands": cmd.get("missing_required", []),
         }
 
+    def _safety_freeze_status(self) -> Dict[str, Any]:
+        """Read-only view of the tester safety-freeze manifest, if present."""
+        import json
+        manifest = os.path.join(self.tester_state_dir, "safety_freeze",
+                                "manifests", "TESTER_SAFETY_FREEZE_MANIFEST.json")
+        if not os.path.isfile(manifest):
+            return {"safety_freeze_available": False,
+                    "open_release_blocker_count": 0, "readiness": "unknown"}
+        try:
+            with open(manifest, encoding="utf-8") as fh:
+                data = json.load(fh)
+        except Exception:
+            return {"safety_freeze_available": False,
+                    "open_release_blocker_count": 0, "readiness": "unknown"}
+        return {
+            "safety_freeze_available": True,
+            "latest_safety_freeze_report_path": os.path.join(
+                self.tester_state_dir, "safety_freeze", "reports",
+                "TESTER_SAFETY_FREEZE_REPORT.md"),
+            "open_release_blocker_count": data.get("release_blocker_count", 0),
+            "forbidden_claim_count": data.get("forbidden_claim_count", 0),
+            "readiness": data.get("readiness", "unknown"),
+        }
+
     def packaging_status(self) -> Dict[str, Any]:
         dep = self.dependency_result.to_dict() if self.dependency_result else {}
         doc = self.doctor_result.to_dict() if self.doctor_result else {}
@@ -184,7 +208,9 @@ class TesterPackagingRuntime:
         clean = self.clean_machine_result.to_dict() \
             if self.clean_machine_result else {}
         manifest = self.manifest.to_dict() if self.manifest else {}
-        readiness = "blocked" if self.blockers else (
+        sf = self._safety_freeze_status()
+        readiness = "blocked" if (self.blockers
+                                  or sf.get("open_release_blocker_count")) else (
             "ready_with_warnings" if (self.warnings or dep.get("warning_count")
                                       or cmd.get("missing_optional_count"))
             else "ready")
@@ -194,6 +220,7 @@ class TesterPackagingRuntime:
             "packaging_profile": self.packaging_profile.profile_id,
             "local_only": True, "installs_packages": False, "publishes": False,
             "readiness": readiness,
+            "safety_freeze": sf,
             "doctor_status": doc.get("overall_health", "unknown"),
             "doctor_pass": doc.get("passed", False),
             "dependency_blocker_count": dep.get("blocker_count", 0),
