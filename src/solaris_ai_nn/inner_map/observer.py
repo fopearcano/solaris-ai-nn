@@ -108,6 +108,7 @@ class InnerMapObserver:
     live_observation: Any = None  # optional dict/object of live observation status
     live_ontogenesis: Any = None  # optional dict/object of live ontogenesis status
     live_semiogenesis: Any = None  # optional dict/object of live semiogenesis status
+    live_cognition: Any = None  # optional dict/object of live cognition status
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -1016,6 +1017,17 @@ class InnerMapObserver:
                 model.live_semiogenesis = semiogenesis.semiogenesis_status()
             elif hasattr(semiogenesis, "snapshot"):
                 model.live_semiogenesis = semiogenesis.snapshot()
+        cognition = self.live_cognition
+        if cognition is None and self.runner is not None:
+            cognition = getattr(self.runner, "live_cognition", None)
+        if cognition is not None:
+            # First live cognition status (sign-based anticipation records).
+            if isinstance(cognition, dict):
+                model.live_cognition = dict(cognition)
+            elif hasattr(cognition, "cognition_status"):
+                model.live_cognition = cognition.cognition_status()
+            elif hasattr(cognition, "snapshot"):
+                model.live_cognition = cognition.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

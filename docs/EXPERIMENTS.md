@@ -3340,3 +3340,43 @@ operational relation structure -- not language grammar and not semantics.
 Prints the conservative sign birth gate decision per candidate over the safe and
 contaminated fixtures: born, deferred, contaminated, or a specific blocked-by status.
 The gate is conservative -- it does not enable cognition, language, or action.
+
+## 384. Live Cognition Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_cognition_demo.py --state-dir .solaris_ai_nn_live/cog_demo`
+Runs observation, ontogenesis, and semiogenesis to produce stable private signs, then
+runs the bounded first live cognition runtime and prints eligible-sign / trace
+counts, anticipations, internal simulations, prediction assessment, mean uncertainty,
+and the readiness-gate status. No action is enabled; signs are private; Solaris never
+controls the source.
+
+## 385. Live Anticipation Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_anticipation_demo.py --state-dir .solaris_ai_nn_live/ant_demo`
+Generates bounded anticipations directly from the safe sign fixture: rhythm
+continuation, continued silence (absence), co-occurrence, and recurrence -- each
+carrying explicit uncertainty. Anticipation is internal prediction metadata only; it
+requests no data, controls no feeders, and acts in no world.
+
+## 386. Live Uncertainty Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_uncertainty_demo.py --state-dir .solaris_ai_nn_live/unc_demo`
+Estimates explicit uncertainty for a low-uncertainty trace, a high-uncertainty trace
+(missing evidence), and a contradicted trace (counterevidence exceeds support),
+showing that contradiction and missing evidence raise uncertainty. High uncertainty
+prevents trace promotion.
+
+## 387. Live Internal Simulation Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_internal_simulation_demo.py --state-dir .solaris_ai_nn_live/sim_demo`
+Generates bounded internal simulations from anticipations. Each is offline metadata
+only: bounded by max steps, controls no feeders or sources, executes no commands,
+preserves uncertainty, and is left as not-yet-observed pending later events.
+
+## 388. Live Cognition Gate Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_cognition_gate_demo.py --state-dir .solaris_ai_nn_live/cgate_demo`
+Runs the cognition pipeline over several scenarios and prints the advisory cognition
+readiness gate decision for each: ready, blocked by too few stable signs, and blocked
+by label dependence. The gate is advisory -- it enables no action, autonomy, or
+self-boundary tracking.

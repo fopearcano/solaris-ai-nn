@@ -1,0 +1,83 @@
+{
+  "records": [
+    {
+      "sign_id": "live_sign_rhythm",
+      "private_token": "sig_live_rhythm01",
+      "status": "born",
+      "linked_concept_ids": [
+        "c_machine_body"
+      ],
+      "utility_score": 0.8,
+      "source_distribution": {
+        "machine_body": 6
+      },
+      "supporting_refs": [
+        "machine_body:scalar:aa"
+      ],
+      "contradicting_refs": [],
+      "contamination_findings": [],
+      "birth_gate_status": "born",
+      "debug_alias": ""
+    },
+    {
+      "sign_id": "live_sign_absence",
+      "private_token": "sig_live_absence01",
+      "status": "born",
+      "linked_concept_ids": [
+        "c_chronos_absence"
+      ],
+      "utility_score": 0.74,
+      "source_distribution": {
+        "chronos_absence": 5
+      },
+      "supporting_refs": [
+        "chronos_absence:chronos:absence"
+      ],
+      "contradicting_refs": [],
+      "contamination_findings": [],
+      "birth_gate_status": "born",
+      "debug_alias": ""
+    },
+    {
+      "sign_id": "live_sign_cooccur",
+      "private_token": "sig_live_cooccur01",
+      "status": "stable_candidate",
+      "linked_concept_ids": [
+        "c_weather",
+        "c_artifact"
+      ],
+      "utility_score": 0.7,
+      "source_distribution": {
+        "local_weather_readonly_external": 3,
+        "project_artifact_field": 3
+      },
+      "supporting_refs": [
+        "weather:scalar:dd",
+        "artifact:field:ee"
+      ],
+      "contradicting_refs": [],
+      "contamination_findings": [],
+      "birth_gate_status": "stable_candidate",
+      "debug_alias": ""
+    },
+    {
+      "sign_id": "live_sign_overload",
+      "private_token": "sig_live_overload01",
+      "status": "stable_candidate",
+      "linked_concept_ids": [
+        "c_machine_body"
+      ],
+      "utility_score": 0.66,
+      "source_distribution": {
+        "machine_body": 4
+      },
+      "supporting_refs": [
+        "machine_body:scalar:bb"
+      ],
+      "contradicting_refs": [],
+      "contamination_findings": [],
+      "birth_gate_status": "stable_candidate",
+      "debug_alias": ""
+    }
+  ]
+}

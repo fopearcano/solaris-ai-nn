@@ -2905,3 +2905,49 @@ amplify the flaws. So semiogenesis only *recommends* a live cognition candidate 
 once enough useful signs are born and the field is clean; it never starts cognition,
 and the default configuration keeps full cognition, action-reaction learning, and
 developmental autonomy off.
+
+## Notes on First Live Sensorium-Native Cognition
+
+**Why anticipation is the first cognition test.** Before reasoning, planning, or
+self-modeling, the cheapest honest test of whether internal structure is *about* the
+world is prediction: does a sign help anticipate what comes next? First live cognition
+makes anticipation the entry point precisely because it is falsifiable against later
+live-read-only events. A sign that anticipates nothing, or anticipates wrongly, earns
+no cognitive standing -- regardless of how stable it looked in semiogenesis.
+
+**Why prediction failures matter.** A system that only remembers its hits is
+deceiving itself. Every anticipation is assessed against later events and the outcome
+-- matched, contradicted, ambiguous, or not-yet-observed -- is preserved in
+append-only cognition memory. Contradicted predictions are kept and surfaced;
+ambiguous outcomes are never forced into success; and the readiness gate blocks
+promotion when predictions are net-contradicted. The failure log is the integrity of
+the whole layer.
+
+**Why uncertainty must be explicit.** Cognition without calibrated doubt is just
+confident guessing. Every trace carries an explicit uncertainty derived from sign and
+concept stability, source diversity, contradiction, and missing evidence. High
+uncertainty prevents promotion; contradiction and missing evidence raise it; and any
+reduction must be evidence-linked. Making uncertainty a first-class field stops the
+system from treating a lucky single match as knowledge.
+
+**Why internal simulation must be bounded.** Simulation is where a system could run
+away from the evidence -- unrolling long imagined futures and then believing them.
+Internal simulation here is deliberately small: step-bounded, offline metadata that
+controls no feeders or sources, executes no commands, and is left as not-yet-observed
+until real events can check it. It is a scratchpad for comparison, not a generator of
+truth.
+
+**Why sign traversal is not reasoning proof.** Walking the private syntax graph from
+sign to sign produces relation paths, and it is tempting to call that "reasoning." It
+is not. Traversal is bounded, depth-limited, invents no relations, and keeps weak
+relations weak; the resulting paths are operational structure, not inference. The
+layer disclaims reasoning proofs explicitly, because a graph walk that looks like
+thought is exactly the kind of thing an observer over-reads.
+
+**Why self-boundary must wait for stable cognition traces.** Self-boundary and
+perspective tracking presuppose a stable enough model of the world to contrast a
+"self" against. Building that on shaky anticipations would manufacture a spurious
+self. So cognition only *recommends* a live self-boundary phase once traces are
+promoted with low uncertainty and uncontradicted predictions; it never starts it, and
+the default configuration keeps action-reaction, developmental autonomy, and
+self-boundary tracking off.

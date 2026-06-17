@@ -2761,3 +2761,65 @@ def live_semiogenesis_metrics(ls: Optional[Dict[str, Any]]) -> Dict[str, Any]:
                 "cognition/action-reaction/developmental autonomy is enabled; "
                 "nothing about consciousness/life/agency is proven",
     }
+
+
+def live_cognition_metrics(lc: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective first-live-cognition metrics (conservative, read-only).
+
+    These describe bounded sign-based anticipation over stable live private signs:
+    eligible signs, cognition traces (active/useful/rejected/contaminated),
+    anticipations, internal simulations, prediction assessment (matched/
+    contradicted), mean uncertainty, and readiness pass/block counts. Cognition
+    traces are operational anticipation/relation records. No action/action-reaction/
+    developmental autonomy/self-boundary is enabled, signs are not language, traces
+    are not reasoning proof, and no consciousness/life/agency claim is made.
+    """
+    if not lc:
+        return {"present": False}
+    gate = lc.get("live_cognition_readiness_status", "")
+    blocked = str(gate).startswith("blocked_by_")
+    return {
+        "present": True,
+        "live_cognition_run_count": 1,
+        "live_eligible_sign_count": int(
+            lc.get("live_eligible_sign_count", 0) or 0),
+        "live_cognition_trace_count": int(
+            lc.get("live_cognition_trace_count", 0) or 0),
+        "live_active_trace_count": int(
+            lc.get("live_active_trace_count", 0) or 0),
+        "live_useful_trace_count": int(
+            lc.get("live_useful_trace_count", 0) or 0),
+        "live_rejected_trace_count": int(
+            lc.get("live_rejected_trace_count", 0) or 0),
+        "live_contaminated_trace_count": int(
+            lc.get("live_contaminated_trace_count", 0) or 0),
+        "live_anticipation_count": int(lc.get("live_anticipation_count", 0) or 0),
+        "live_internal_simulation_count": int(
+            lc.get("live_internal_simulation_count", 0) or 0),
+        "live_prediction_assessment_count": int(
+            lc.get("live_prediction_assessment_count", 0) or 0),
+        "live_prediction_matched_count": int(
+            lc.get("live_prediction_matched_count", 0) or 0),
+        "live_prediction_contradicted_count": int(
+            lc.get("live_prediction_contradicted_count", 0) or 0),
+        "live_uncertainty_mean": float(lc.get("live_uncertainty_mean", 0.0)
+                                       or 0.0),
+        "live_cognition_readiness_pass_count": 0 if blocked else 1,
+        "live_cognition_readiness_block_count": 1 if blocked else 0,
+        "live_cognition_readiness_status": gate,
+        "recommended_next_phase": lc.get("recommended_next_phase"),
+        "live_cognition_safety_block_count": int(
+            lc.get("live_cognition_safety_block_count", 0) or 0),
+        "enables_action": False, "enables_action_reaction": False,
+        "enables_developmental_autonomy": False,
+        "enables_self_boundary": False,
+        "signs_are_language_understanding": False,
+        "traces_prove_reasoning": False,
+        "starts_feeders": False, "controls_hardware": False,
+        "accesses_network": False, "runs_git": False,
+        "is_consciousness_or_personhood": False,
+        "note": "bounded sign-based anticipation metrics; cognition traces are "
+                "operational anticipation/relation records, not reasoning, "
+                "language, or understanding; no action/autonomy/self-boundary is "
+                "enabled; nothing about consciousness/life/agency is proven",
+    }

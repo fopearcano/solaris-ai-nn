@@ -10070,6 +10070,327 @@ def live_semiogenesis_safety_protocol(
     return _run(manifest, body)
 
 
+def _cognition_sign_records(kind="safe"):
+    """Synthetic safe/contaminated sign records for cognition component protocols."""
+    def rec(sid, token, status, concepts, sources, utility,
+            contamination=None, alias=""):
+        return {"sign_id": sid, "private_token": token, "status": status,
+                "linked_concept_ids": concepts, "utility_score": utility,
+                "source_distribution": sources,
+                "supporting_refs": concepts, "contradicting_refs": [],
+                "contamination_findings": contamination or [],
+                "debug_alias": alias}
+    if kind == "contaminated":
+        return [rec("ct_op", "sig_live_op", "born", ["c_op"],
+                    {"operator_pulse": 5}, 0.6,
+                    ["operator_pulse_dominance"])]
+    return [
+        rec("s_machine", "sig_live_machine", "born", ["c_machine_body"],
+            {"machine_body": 6}, 0.8),
+        rec("s_absence", "sig_live_absence", "born", ["c_chronos_absence"],
+            {"chronos_absence": 5}, 0.74),
+        rec("s_weather", "sig_live_weather", "stable_candidate", ["c_weather"],
+            {"local_weather_readonly_external": 4}, 0.68),
+    ]
+
+
+def _cognition_later_events():
+    def ev(eid, sid, channel, absence=False):
+        return {"event_id": eid, "timestamp_utc": "2026-06-19T09:00:00Z",
+                "source_id": sid, "modality": "scalar", "channel": channel,
+                "read_only": True, "is_command": False,
+                "human_label_is_ground_truth": False, "payload": {"v": 1},
+                "quality": {"completeness": 1.0, "noise": 0.0,
+                            "is_absence": absence, "is_noisy": False},
+                "safety": {"private_data": False, "contains_instruction": False,
+                           "contains_secret": False, "allow_learning": False}}
+    return [ev("l1", "machine_body", "machine_body/load"),
+            ev("l2", "chronos_absence", "time/absence", absence=True)]
+
+
+def _synthetic_cognition_signs(kind="safe"):
+    from ..live_cognition import SignInputLoader
+
+    return SignInputLoader().from_records(
+        _cognition_sign_records(kind), synthetic=True)
+
+
+def _build_live_cognition(state_dir, *, profile=None, require=False):
+    """Build + run a bounded first live cognition over a real state chain."""
+    from ..live_semiogenesis import FirstLiveSemiogenesisRuntime
+    from ..live_cognition import FirstLiveCognitionRuntime
+
+    _build_live_ontogenesis(state_dir, kind="stable", allow_birth=True)
+    FirstLiveSemiogenesisRuntime(state_dir=state_dir,
+                                 allow_limited_birth=True).run()
+    rt = FirstLiveCognitionRuntime(
+        state_dir=state_dir,
+        profile=profile or "live_cognition_anticipation_limited_v0",
+        require_governance=require, require_birth_certificate=require,
+        require_observation_stability=require, require_live_concepts=require,
+        require_live_signs=require)
+    rt.run()
+    return rt
+
+
+def live_cognition_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """A bounded first live cognition runs and produces cognition-trace records."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_live_cognition(m.state_dir)
+        return {"live_cognition":
+                M.live_cognition_metrics(rt.cognition_status())}
+
+    return _run(manifest, body)
+
+
+def live_sign_input_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Only born/stable signs are eligible; contaminated excluded."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        ci = _synthetic_cognition_signs("safe")
+        contaminated = _synthetic_cognition_signs("contaminated")
+        return {"live_cognition": {
+            "eligible_count": len(ci.eligible),
+            "contaminated_excluded": all(
+                not s.eligible for s in contaminated.signs if s.contaminated)}}
+
+    return _run(manifest, body)
+
+
+def live_cognition_trace_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Traces serialize with evidence and are not proof of reasoning."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_cognition import FirstLiveCognitionRuntime
+
+        rt = FirstLiveCognitionRuntime(
+            state_dir=m.state_dir,
+            profile="live_cognition_anticipation_limited_v0")
+        rt.analyze_signs(_synthetic_cognition_signs("safe").eligible,
+                         later_events=_cognition_later_events())
+        trace = rt.traces[0] if rt.traces else None
+        d = trace.to_dict() if trace else {}
+        return {"live_cognition": {
+            "trace_count": len(rt.traces),
+            "preserves_evidence": "supporting_evidence" in d,
+            "not_proof_of_reasoning": True}}
+
+    return _run(manifest, body)
+
+
+def live_anticipation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Rhythm/absence anticipations are generated with uncertainty."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_cognition import LiveAnticipationEngine
+
+        signs = _synthetic_cognition_signs("safe").eligible
+        rhythm = {"patterns": [{"source_id": "machine_body",
+                                "kind": "periodic"}]}
+        ants = LiveAnticipationEngine().anticipate(
+            signs=signs, load_status="stable", rhythm=rhythm)
+        types = {a.anticipation_type for a in ants}
+        return {"live_cognition": {
+            "anticipation_count": len(ants),
+            "has_rhythm": "rhythm_continuation" in types,
+            "has_absence": "source_silence_likely_continues" in types,
+            "all_have_uncertainty": all(a.uncertainty > 0 for a in ants)}}
+
+    return _run(manifest, body)
+
+
+def live_uncertainty_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Contradiction and missing evidence increase uncertainty."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_cognition import UncertaintyEstimator
+
+        est = UncertaintyEstimator()
+        low = est.estimate(sign_stability=0.85, concept_stability=0.8,
+                           source_reliability=0.9, source_count=2,
+                           modality_count=2, recurrence=6, rhythm_present=True,
+                           supporting_count=6, counter_count=0)
+        contradicted = est.estimate(sign_stability=0.7, concept_stability=0.7,
+                                    source_count=2, modality_count=2,
+                                    recurrence=5, supporting_count=3,
+                                    counter_count=6)
+        return {"live_cognition": {
+            "low_uncertainty": low.uncertainty,
+            "contradicted_uncertainty": contradicted.uncertainty,
+            "contradiction_increases": contradicted.uncertainty
+            > low.uncertainty}}
+
+    return _run(manifest, body)
+
+
+def live_relation_traversal_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Traversal is bounded by max depth and invents no relations."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_cognition import LiveRelationTraversal
+
+        syntax = {"relations": [
+            {"source_sign": "a", "target_sign": "b",
+             "relation_type": "source_linked", "strength": "weak",
+             "blocked": False},
+            {"source_sign": "b", "target_sign": "c",
+             "relation_type": "source_linked", "strength": "weak",
+             "blocked": False},
+            {"source_sign": "c", "target_sign": "d",
+             "relation_type": "source_linked", "strength": "weak",
+             "blocked": False},
+            {"source_sign": "d", "target_sign": "e",
+             "relation_type": "source_linked", "strength": "weak",
+             "blocked": False}]}
+        result = LiveRelationTraversal(max_depth=2).traverse(syntax).to_dict()
+        return {"live_cognition": {
+            "path_count": result["path_count"],
+            "max_observed_depth": result["max_observed_depth"],
+            "depth_respected": result["max_observed_depth"] <= 2}}
+
+    return _run(manifest, body)
+
+
+def live_internal_simulation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Simulation is bounded by max steps and controls nothing."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_cognition import (
+            LiveAnticipationEngine, LiveInternalSimulation)
+
+        signs = _synthetic_cognition_signs("safe").eligible
+        rhythm = {"patterns": [{"source_id": "machine_body",
+                                "kind": "periodic"}]}
+        ants = LiveAnticipationEngine().anticipate(signs=signs, rhythm=rhythm)
+        sims = LiveInternalSimulation(max_steps=4).simulate(ants)
+        return {"live_cognition": {
+            "simulation_count": len(sims),
+            "max_steps_respected": all(s.step_count <= 4 for s in sims),
+            "controls_nothing": all(
+                not s.to_dict()["controls_feeders"]
+                and not s.to_dict()["acts_in_world"] for s in sims)}}
+
+    return _run(manifest, body)
+
+
+def live_prediction_assessment_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Predictions are assessed against later events; failures preserved."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_cognition import (
+            LiveAnticipationEngine, LivePredictionAssessment)
+
+        signs = _synthetic_cognition_signs("safe").eligible
+        rhythm = {"patterns": [{"source_id": "machine_body",
+                                "kind": "periodic"}]}
+        ants = LiveAnticipationEngine().anticipate(signs=signs, rhythm=rhythm)
+        result = LivePredictionAssessment().assess(
+            anticipations=ants, later_events=_cognition_later_events())
+        return {"live_cognition": {
+            "assessed": result["live_prediction_assessment_count"],
+            "matched": result["live_prediction_matched_count"],
+            "preserves_outcomes": "outcomes" in result}}
+
+    return _run(manifest, body)
+
+
+def live_cognition_contamination_filter_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Operator/label/gloss dependency is detected and blocks promotion."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_cognition import FirstLiveCognitionRuntime
+
+        rt = FirstLiveCognitionRuntime(
+            state_dir=m.state_dir,
+            profile="live_cognition_anticipation_limited_v0")
+        rt.analyze_signs(_synthetic_cognition_signs("contaminated").signs)
+        contaminated = sum(1 for r in rt.contamination_results
+                           if r.get("contaminated"))
+        types = {f.get("contamination_type")
+                 for r in rt.contamination_results
+                 for f in r.get("findings", [])}
+        return {"live_cognition": {
+            "contaminated_trace_count": contaminated,
+            "operator_dominance_detected": "operator_pulse_dominance" in types}}
+
+    return _run(manifest, body)
+
+
+def live_cognition_readiness_gate_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The advisory gate readies stable cognition and blocks weak signs."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_cognition import FirstLiveCognitionRuntime
+
+        ready = _build_live_cognition(m.state_dir)
+        weak = FirstLiveCognitionRuntime(
+            state_dir=m.state_dir + "_weak",
+            profile="live_cognition_anticipation_limited_v0")
+        weak.analyze_signs(_synthetic_cognition_signs("safe").eligible[:1])
+        return {"live_cognition": {
+            "ready_status": ready.readiness.get("cognition_readiness_status"),
+            "weak_blocked": weak.readiness.get("cognition_readiness_status")
+            == "blocked_by_weak_signs",
+            "enables_action": False}}
+
+    return _run(manifest, body)
+
+
+def live_cognition_memory_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Cognition memory preserves records and links them to evidence."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_live_cognition(m.state_dir)
+        index = (rt.cognition_memory.index().to_dict()
+                 if rt.cognition_memory else {})
+        return {"live_cognition": {
+            "cognition_record_count": index.get(
+                "live_cognition_record_count", 0),
+            "preserves_all_statuses": "by_status" in index}}
+
+    return _run(manifest, body)
+
+
+def live_cognition_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Cognition blocks operator-only anticipation / label-gloss-only traces."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_cognition import LiveCognitionSafetyValidator
+
+        v = LiveCognitionSafetyValidator()
+        return {"live_cognition": {
+            "action_blocked":
+                not v.validate_operation("enable real-world action").safe,
+            "operator_only_anticipation_blocked":
+                not v.validate_anticipation_evidence(
+                    operator_text_only=True).safe,
+            "label_only_trace_blocked": not v.validate_trace_evidence(
+                label_only=True, gloss_only=False).safe,
+            "gloss_only_trace_blocked": not v.validate_trace_evidence(
+                label_only=False, gloss_only=True).safe,
+            "language_claim_blocked":
+                not v.validate_claim_text(
+                    "the trace understands language").safe,
+            "reasoning_claim_blocked":
+                not v.validate_claim_text("this proves reasoning").safe,
+            "consciousness_claim_blocked":
+                not v.validate_claim_text("the system is conscious").safe}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -10741,4 +11062,32 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "live_sign_memory_protocol": live_sign_memory_protocol,
     "live_semiogenesis_safety": live_semiogenesis_safety_protocol,
     "live_semiogenesis_safety_protocol": live_semiogenesis_safety_protocol,
+    "live_cognition": live_cognition_protocol,
+    "live_cognition_protocol": live_cognition_protocol,
+    "live_cognition_evaluation": live_cognition_protocol,
+    "live_sign_input": live_sign_input_protocol,
+    "live_sign_input_protocol": live_sign_input_protocol,
+    "live_cognition_trace": live_cognition_trace_protocol,
+    "live_cognition_trace_protocol": live_cognition_trace_protocol,
+    "live_anticipation": live_anticipation_protocol,
+    "live_anticipation_protocol": live_anticipation_protocol,
+    "live_uncertainty": live_uncertainty_protocol,
+    "live_uncertainty_protocol": live_uncertainty_protocol,
+    "live_relation_traversal": live_relation_traversal_protocol,
+    "live_relation_traversal_protocol": live_relation_traversal_protocol,
+    "live_internal_simulation": live_internal_simulation_protocol,
+    "live_internal_simulation_protocol": live_internal_simulation_protocol,
+    "live_prediction_assessment": live_prediction_assessment_protocol,
+    "live_prediction_assessment_protocol": live_prediction_assessment_protocol,
+    "live_cognition_contamination_filter":
+        live_cognition_contamination_filter_protocol,
+    "live_cognition_contamination_filter_protocol":
+        live_cognition_contamination_filter_protocol,
+    "live_cognition_readiness_gate": live_cognition_readiness_gate_protocol,
+    "live_cognition_readiness_gate_protocol":
+        live_cognition_readiness_gate_protocol,
+    "live_cognition_memory": live_cognition_memory_protocol,
+    "live_cognition_memory_protocol": live_cognition_memory_protocol,
+    "live_cognition_safety": live_cognition_safety_protocol,
+    "live_cognition_safety_protocol": live_cognition_safety_protocol,
 }

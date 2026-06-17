@@ -606,6 +606,53 @@ class AlphaResearchOrchestrator:
                     "or controls feeders",
         }
 
+    def live_cognition_status(self,
+                              live_state_dir: str = ".solaris_ai_nn_live",
+                              ) -> Dict[str, Any]:
+        """Read-only view of the latest first live cognition run (Prompt 71).
+
+        The default alpha system stays fixture-only: this never runs cognition,
+        never learns, and never controls feeders. It only reads the latest
+        cognition index written by the live_cognition runtime (if present) to
+        surface the run id, trace / anticipation counts, prediction outcomes, the
+        readiness-gate status, the cognition-memory path, and the recommended next
+        phase. Returns ``{"live_cognition_enabled": False}`` when no cognition
+        state exists.
+        """
+        index_dir = os.path.join(live_state_dir, "cognition", "index")
+        if not os.path.isdir(index_dir):
+            return {"live_cognition_enabled": False,
+                    "note": "no first live cognition state present; the default "
+                            "alpha system remains fixture-only and never runs "
+                            "cognition, learns, or controls feeders"}
+        files = sorted(f for f in os.listdir(index_dir) if f.endswith(".json"))
+        if not files:
+            return {"live_cognition_enabled": False}
+        with open(os.path.join(index_dir, files[-1]), encoding="utf-8") as fh:
+            status = json.load(fh)
+        return {
+            "live_cognition_enabled": True,
+            "cognition_run_id": status.get("cognition_run_id"),
+            "live_cognition_trace_count": status.get(
+                "live_cognition_trace_count", 0),
+            "live_anticipation_count": status.get("live_anticipation_count", 0),
+            "live_prediction_matched_count": status.get(
+                "live_prediction_matched_count", 0),
+            "live_prediction_contradicted_count": status.get(
+                "live_prediction_contradicted_count", 0),
+            "live_cognition_readiness_status": status.get(
+                "live_cognition_readiness_status"),
+            "recommended_next_phase": status.get("recommended_next_phase"),
+            "latest_cognition_memory_path": status.get(
+                "latest_cognition_memory_path"),
+            "enables_action": False, "signs_are_language_understanding": False,
+            "traces_prove_reasoning": False, "learns": False,
+            "controls_feeders": False, "runs_git": False,
+            "note": "read-only view of the latest live cognition; the alpha "
+                    "system never runs cognition, learns, enables action, or "
+                    "controls feeders",
+        }
+
     def snapshot(self) -> Dict[str, Any]:
         return self.alpha_status()
 

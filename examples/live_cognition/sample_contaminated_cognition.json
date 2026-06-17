@@ -1,0 +1,105 @@
+{
+  "records": [
+    {
+      "sign_id": "ct_operator",
+      "private_token": "sig_live_op",
+      "status": "born",
+      "linked_concept_ids": [
+        "c_op"
+      ],
+      "utility_score": 0.6,
+      "source_distribution": {
+        "operator_pulse": 5
+      },
+      "supporting_refs": [
+        "c_op"
+      ],
+      "contradicting_refs": [],
+      "contamination_findings": [
+        "operator_pulse_dominance"
+      ],
+      "birth_gate_status": "born",
+      "debug_alias": ""
+    },
+    {
+      "sign_id": "ct_gloss",
+      "private_token": "sig_live_gloss",
+      "status": "gloss_dependent",
+      "linked_concept_ids": [
+        "c_g"
+      ],
+      "utility_score": 0.5,
+      "source_distribution": {
+        "machine_body": 4
+      },
+      "supporting_refs": [
+        "c_g"
+      ],
+      "contradicting_refs": [],
+      "contamination_findings": [
+        "debug_gloss_dependency"
+      ],
+      "birth_gate_status": "gloss_dependent",
+      "debug_alias": "this gloss is the meaning"
+    },
+    {
+      "sign_id": "ct_label",
+      "private_token": "sig_live_label",
+      "status": "label_dependent",
+      "linked_concept_ids": [
+        "c_l"
+      ],
+      "utility_score": 0.5,
+      "source_distribution": {
+        "local_environment_manual": 4
+      },
+      "supporting_refs": [
+        "c_l"
+      ],
+      "contradicting_refs": [],
+      "contamination_findings": [
+        "human_label_dependency"
+      ],
+      "birth_gate_status": "label_dependent",
+      "debug_alias": ""
+    },
+    {
+      "sign_id": "ct_language",
+      "private_token": "sig_live_lang",
+      "status": "born",
+      "linked_concept_ids": [
+        "c_lang"
+      ],
+      "utility_score": 0.6,
+      "source_distribution": {
+        "machine_body": 5
+      },
+      "supporting_refs": [
+        "c_lang"
+      ],
+      "contradicting_refs": [],
+      "contamination_findings": [],
+      "birth_gate_status": "born",
+      "debug_alias": "the word means dog and understands language"
+    },
+    {
+      "sign_id": "ct_secret",
+      "private_token": "sig_live_secret",
+      "status": "born",
+      "linked_concept_ids": [
+        "c_s"
+      ],
+      "utility_score": 0.6,
+      "source_distribution": {
+        "machine_body": 5
+      },
+      "supporting_refs": [
+        "c_s"
+      ],
+      "contradicting_refs": [],
+      "contamination_findings": [],
+      "birth_gate_status": "born",
+      "debug_alias": "api_key=hunter2"
+    }
+  ]
+}

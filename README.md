@@ -259,6 +259,36 @@ GitHub; never executes commands or modifies source; and never treats sensory tex
 a command, human labels or debug gloss as ground truth, or the operator pulse as
 teaching.
 
+## First Live Sensorium-Native Cognition
+
+After stable private signs exist, the First Live Sensorium-Native Cognition layer
+forms bounded sign-based anticipation over them. It loads eligible signs, builds
+cognition traces, generates anticipations with explicit uncertainty, traverses the
+private syntax graph, runs bounded internal simulations, assesses predictions against
+later live-read-only events, filters contamination, and gates cognition readiness
+conservatively.
+
+```bash
+python -m solaris_ai_nn live-cognition --state-dir .solaris_ai_nn_live --require-governance --require-birth-certificate --require-observation-stability --require-live-concepts --require-live-signs
+python -m solaris_ai_nn live-cognition-traces --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn live-anticipations --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn live-predictions --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn live-cognition-gate --state-dir .solaris_ai_nn_live
+```
+
+First Live Sensorium-Native Cognition creates bounded sign-based anticipation,
+relation traversal, uncertainty tracking, internal simulation, and prediction
+assessment records. These records do not prove language understanding, reasoning,
+consciousness, sentience, biological life, personhood, agency, free will, emotion,
+feeling, self-awareness, autonomous self-improvement, or subjective experience. It
+never enables real-world action, action-reaction learning, developmental autonomy, or
+self-boundary tracking by default; never treats internal signs as language
+understanding or maps signs to human words as ground truth; never starts/stops/
+configures feeders, controls hardware, or accesses the network/shell/browser/OS/Git/
+GitHub; never executes commands or modifies source; and never treats sensory text as
+a command, human labels or debug gloss as ground truth, or the operator pulse as
+teaching. Prediction failures and ambiguity are preserved; there is no cherry-picking.
+
 ## Run the minimal experiment
 
 ```bash
@@ -1921,6 +1951,18 @@ src/solaris_ai_nn/
                 labels/gloss/operator never sign identity; private syntax is not
                 language; tokens never store secrets; signs do not imply language
                 or understanding)
+  live_cognition/  first live sensorium-native cognition + readiness gate:
+                cognition profile, sign input, cognition trace, anticipation
+                engine, uncertainty model, relation traversal, internal
+                simulation, prediction assessment, cognition contamination
+                filter, cognition readiness gate, cognition memory, cognition
+                runtime, cognition record, reports, safety (bounded read-only
+                sign-based anticipation over born/stable signs; no action/
+                action-reaction/developmental-autonomy/self-boundary by default;
+                anticipation requests no data and controls nothing; internal
+                simulation is bounded offline metadata; prediction failures
+                preserved, no cherry-picking; traces are not reasoning,
+                language, or consciousness)
   cli.py        unified `python -m solaris_ai_nn` Alpha CLI (local-only, bounded)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo

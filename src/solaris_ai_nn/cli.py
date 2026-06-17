@@ -32,7 +32,34 @@ _ALPHA_COMMANDS = ("doctor", "init", "modules", "run-demo", "artifact-index",
                    "live-stability-gate", "live-ontogenesis", "live-concepts",
                    "live-concept-candidates", "live-concept-birth-gate",
                    "live-semiogenesis", "live-signs", "live-sign-candidates",
-                   "live-sign-birth-gate", "live-private-syntax")
+                   "live-sign-birth-gate", "live-private-syntax",
+                   "live-cognition", "live-cognition-traces",
+                   "live-anticipations", "live-predictions",
+                   "live-cognition-gate")
+
+
+def _cognition_runtime(args: argparse.Namespace):
+    from .live_cognition.cognition_runtime import FirstLiveCognitionRuntime
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_live"
+    return FirstLiveCognitionRuntime(
+        state_dir=state_dir, profile=args.profile,
+        max_runtime_s=args.max_runtime_s, max_signs=args.max_signs,
+        max_traces=args.max_traces,
+        max_simulation_steps=args.max_simulation_steps,
+        max_traversal_depth=args.max_traversal_depth,
+        min_prediction_utility=args.min_prediction_utility,
+        max_uncertainty=args.max_uncertainty,
+        strict=args.strict, dry_run=args.dry_run, report_only=args.report_only,
+        require_governance=args.require_governance,
+        require_birth_certificate=args.require_birth_certificate,
+        require_observation_stability=args.require_observation_stability,
+        require_live_concepts=args.require_live_concepts,
+        require_live_signs=args.require_live_signs,
+        require_claimguard=args.require_claimguard,
+        operator_note=args.operator_note)
 
 
 def _semiogenesis_runtime(args: argparse.Namespace):
@@ -696,6 +723,96 @@ def cmd_live_private_syntax(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_live_cognition(args: argparse.Namespace) -> int:
+    rt = _cognition_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"live cognition refused: {result.get('reason')}")
+        return 2
+    st = rt.cognition_status()
+    _print("first live cognition:")
+    _print(f"  run id: {st['cognition_run_id']}")
+    _print(f"  blocked: {result['blocked']}")
+    for b in result["blockers"]:
+        _print(f"    blocker: {b}")
+    _print(f"  eligible signs: {st['live_eligible_sign_count']}")
+    _print(f"  cognition traces: {st['live_cognition_trace_count']} (useful "
+           f"{st['live_useful_trace_count']}, contaminated "
+           f"{st['live_contaminated_trace_count']})")
+    _print(f"  anticipations: {st['live_anticipation_count']}; internal "
+           f"simulations: {st['live_internal_simulation_count']}")
+    _print(f"  predictions: {st['live_prediction_assessment_count']} (matched "
+           f"{st['live_prediction_matched_count']}, contradicted "
+           f"{st['live_prediction_contradicted_count']})")
+    _print(f"  mean uncertainty: {st['live_uncertainty_mean']}")
+    _print(f"  readiness gate: {st['live_cognition_readiness_status']}")
+    _print(f"  recommended next phase: {st['recommended_next_phase']}")
+    _print(f"  cognition memory: {st['latest_cognition_memory_path']}")
+    _print(f"  enables action / traces=reasoning: {st['enables_action']} / "
+           f"{st['traces_prove_reasoning']}")
+    if result["blocked"] and args.strict:
+        return 2
+    return 0
+
+
+def cmd_live_cognition_traces(args: argparse.Namespace) -> int:
+    rt = _cognition_runtime(args)
+    rt.run()
+    _print("live cognition traces:")
+    if not rt.traces:
+        _print("  (no traces; field may be blocked or lack eligible signs)")
+    for t in sorted(rt.traces, key=lambda x: x.uncertainty)[:25]:
+        _print(f"  - [{t.status}] kind={t.kind} "
+               f"uncertainty={t.uncertainty:.2f} "
+               f"support={t.supporting_count} counter={t.counter_count}")
+    return 0
+
+
+def cmd_live_anticipations(args: argparse.Namespace) -> int:
+    rt = _cognition_runtime(args)
+    rt.run()
+    _print("live anticipations:")
+    if not rt.anticipations:
+        _print("  (no anticipations; profile may be trace-only or field blocked)")
+    for a in rt.anticipations[:25]:
+        d = a.to_dict()
+        _print(f"  - {d['anticipation_type']} (horizon {d['horizon']}, "
+               f"uncertainty {d['uncertainty']:.2f}, {d['status']})")
+    return 0
+
+
+def cmd_live_predictions(args: argparse.Namespace) -> int:
+    rt = _cognition_runtime(args)
+    rt.run()
+    p = rt.prediction
+    _print("live prediction assessment:")
+    _print(f"  assessed: {p.get('live_prediction_assessment_count', 0)}")
+    _print(f"  matched: {p.get('live_prediction_matched_count', 0)}; "
+           f"partially: {p.get('partially_matched_count', 0)}; "
+           f"contradicted: {p.get('live_prediction_contradicted_count', 0)}")
+    _print(f"  not yet observed: {p.get('not_yet_observed_count', 0)}; "
+           f"ambiguous: {p.get('ambiguous_count', 0)}")
+    _print(f"  prediction utility: {p.get('prediction_utility', 0.0)}")
+    return 0
+
+
+def cmd_live_cognition_gate(args: argparse.Namespace) -> int:
+    rt = _cognition_runtime(args)
+    rt.run()
+    g = rt.readiness
+    _print("live cognition readiness gate (advisory only):")
+    _print(f"  status: {g.get('cognition_readiness_status')}")
+    _print(f"  blocked: {g.get('blocked')}; ready: {g.get('ready')}")
+    _print(f"  recommended next phase: {g.get('recommended_next_phase')}")
+    for b in g.get("blockers", []):
+        _print(f"    blocker: {b['blocker']} -> {b['correction']}")
+    for w in g.get("warnings", []):
+        _print(f"    warning: {w}")
+    if g.get("blocked") and args.strict:
+        return 2
+    return 0
+
+
 _HANDLERS = {
     "init": cmd_init,
     "doctor": cmd_doctor,
@@ -727,6 +844,11 @@ _HANDLERS = {
     "live-sign-candidates": cmd_live_sign_candidates,
     "live-sign-birth-gate": cmd_live_sign_birth_gate,
     "live-private-syntax": cmd_live_private_syntax,
+    "live-cognition": cmd_live_cognition,
+    "live-cognition-traces": cmd_live_cognition_traces,
+    "live-anticipations": cmd_live_anticipations,
+    "live-predictions": cmd_live_predictions,
+    "live-cognition-gate": cmd_live_cognition_gate,
 }
 
 
@@ -814,6 +936,24 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--require-live-concepts", action="store_true",
                         default=False, dest="require_live_concepts",
                         help="require eligible live proto-concepts before signs")
+    # First live cognition arguments (Prompt 71).
+    parser.add_argument("--max-traces", type=int, default=200,
+                        dest="max_traces", help="bounded max cognition traces")
+    parser.add_argument("--max-simulation-steps", type=int, default=8,
+                        dest="max_simulation_steps",
+                        help="bounded max internal-simulation steps")
+    parser.add_argument("--max-traversal-depth", type=int, default=3,
+                        dest="max_traversal_depth",
+                        help="bounded max private-syntax traversal depth")
+    parser.add_argument("--min-prediction-utility", type=float, default=0.5,
+                        dest="min_prediction_utility",
+                        help="minimum prediction utility for readiness")
+    parser.add_argument("--max-uncertainty", type=float, default=0.6,
+                        dest="max_uncertainty",
+                        help="max uncertainty for trace promotion")
+    parser.add_argument("--require-live-signs", action="store_true",
+                        default=False, dest="require_live_signs",
+                        help="require eligible live signs before cognition")
 
 
 def build_parser() -> argparse.ArgumentParser:

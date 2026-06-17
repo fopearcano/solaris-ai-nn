@@ -2215,4 +2215,50 @@ def build_default_state_graph() -> StateGraph:
                "gate decisions are recorded in append-only sign memory")
     g.add_edge("FirstLiveSemiogenesisRuntime", "inner_map",
                "live semiogenesis status feeds Inner MAP")
+
+    # First live cognition (Prompt 71): bounded sign-based anticipation over
+    # stable private signs. It enables no action/autonomy/self-boundary, treats
+    # no sign as language and no trace as reasoning, and controls no feeders.
+    for name, role in [
+        ("LiveCognitionProfile",
+         "trace-first profile; no action by default"),
+        ("SignInputLoader",
+         "loads born/stable private signs; excludes contaminated"),
+        ("LiveAnticipationEngine",
+         "internal prediction metadata only; operator-only blocked"),
+        ("UncertaintyEstimator",
+         "explicit uncertainty; high uncertainty prevents promotion"),
+        ("LiveRelationTraversal",
+         "bounded depth-limited traversal; invents no relations"),
+        ("LiveInternalSimulation",
+         "bounded offline metadata; controls nothing"),
+        ("LivePredictionAssessment",
+         "anticipation vs later events; failures preserved; no cherry-picking"),
+        ("LiveCognitionContaminationFilter",
+         "labels/gloss/operator never define a trace; signs are not language"),
+        ("LiveCognitionReadinessGate",
+         "advisory readiness; enables no action/autonomy/self-boundary"),
+        ("LiveCognitionMemory",
+         "append-only local metadata; false starts preserved; evidence-linked"),
+        ("FirstLiveCognitionRuntime",
+         "bounded read-only cognition; no action/feeders/network/Git"),
+        ("LiveCognitionSafetyValidator",
+         "no action / operator-only anticipation / label-gloss-only trace / "
+         "language-reasoning claim; bounded"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("FirstLiveSemiogenesisRuntime", "FirstLiveCognitionRuntime",
+               "only born/stable private signs seed cognition traces")
+    g.add_edge("SignInputLoader", "LiveAnticipationEngine",
+               "eligible signs seed bounded anticipations")
+    g.add_edge("LiveAnticipationEngine", "LivePredictionAssessment",
+               "anticipations are assessed against later observed events")
+    g.add_edge("UncertaintyEstimator", "LiveCognitionReadinessGate",
+               "uncertainty gates cognition readiness")
+    g.add_edge("LiveCognitionContaminationFilter", "LiveCognitionReadinessGate",
+               "contamination gates cognition readiness")
+    g.add_edge("LiveCognitionReadinessGate", "LiveCognitionMemory",
+               "readiness decisions are recorded in append-only cognition memory")
+    g.add_edge("FirstLiveCognitionRuntime", "inner_map",
+               "live cognition status feeds Inner MAP")
     return g

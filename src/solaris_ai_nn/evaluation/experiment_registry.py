@@ -815,6 +815,34 @@ DESCRIPTIONS = {
     "live_semiogenesis_safety":
         "no sign birth without concept / from label-gloss-operator alone / "
         "secret token; no language claim; bounded; no hiding",
+    "live_cognition":
+        "first live sensorium-native cognition (bounded sign-based anticipation)",
+    "live_cognition_protocol":
+        "sign-based anticipation + prediction assessment; no action by default",
+    "live_cognition_evaluation": "live cognition state check",
+    "live_sign_input":
+        "load eligible born/stable private signs; exclude contaminated",
+    "live_cognition_trace":
+        "cognition trace with preserved evidence; not proof of reasoning",
+    "live_anticipation":
+        "rhythm/absence/co-occurrence anticipation with explicit uncertainty",
+    "live_uncertainty":
+        "explicit uncertainty; contradiction/missing evidence increase it",
+    "live_relation_traversal":
+        "bounded depth-limited private-syntax traversal; invents no relations",
+    "live_internal_simulation":
+        "bounded offline simulation; controls nothing; preserves uncertainty",
+    "live_prediction_assessment":
+        "anticipation vs later events; failures and ambiguity preserved",
+    "live_cognition_contamination_filter":
+        "operator/label/gloss/language-claim cognition contamination detection",
+    "live_cognition_readiness_gate":
+        "advisory readiness gate; enables no action/autonomy/self-boundary",
+    "live_cognition_memory":
+        "append-only cognition memory; preserves false starts; links evidence",
+    "live_cognition_safety":
+        "no action / operator-only anticipation / label-gloss-only trace / "
+        "language-reasoning claim; bounded; no hiding failures",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -1224,6 +1252,15 @@ class ExperimentRegistry:
             or name.startswith("live_private_syntax")
             or name.startswith("live_concept_input")
             or bool(merged.get("live_semiogenesis", False)))
+        features["live_cognition"] = (
+            name.startswith("live_cognition")
+            or name.startswith("live_anticipation")
+            or name.startswith("live_uncertainty")
+            or name.startswith("live_relation_traversal")
+            or name.startswith("live_internal_simulation")
+            or name.startswith("live_prediction_assessment")
+            or name.startswith("live_sign_input")
+            or bool(merged.get("live_cognition", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

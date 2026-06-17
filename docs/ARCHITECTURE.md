@@ -4483,3 +4483,64 @@ never treats sensory text as a command, human labels or debug gloss as ground tr
 or the operator pulse as teaching; and never claims consciousness, sentience,
 biological life, personhood, agency, free will, emotion, feeling, understanding,
 self-awareness, or subjective experience.
+
+## First Live Sensorium-Native Cognition
+
+The `live_cognition` package (Prompt 71) implements the first bounded live
+sensorium-native cognition phase: Solaris uses private signs and proto-concepts to
+form internal anticipatory structures. **It begins only after stable private signs
+exist** (Prompt 70), which themselves rest on proto-concepts (Prompt 69), observation
+stability (Prompt 68), and birth (Prompt 67). It answers: can signs help anticipate
+future sensory events; relate absence, recurrence, rhythm, overload, and source
+health; reduce internal uncertainty; support bounded internal simulation; and predict
+source changes without controlling sources; which sign relations are useful or
+spurious; and which anticipations are supported, contradicted, or inconclusive. This
+is bounded sign-based anticipation over live-read-only private signs and
+feature-grounded proto-concepts -- **not** language understanding, a reasoning proof,
+consciousness, subjective experience, agency, or biological development.
+
+**Cognition traces are sign-based anticipation and relation records.** The bounded
+`FirstLiveCognitionRuntime` loads eligible (born/stable, uncontaminated) signs from
+the live sign memory and the private syntax graph, then: the `LiveAnticipationEngine`
+derives bounded anticipations (rhythm continuation, continued silence, recurrence,
+co-occurrence, overload/deprivation risk) as internal prediction metadata only --
+requesting no data, controlling no feeders, acting in no world, and blocking
+operator-text-only anticipation; the `UncertaintyEstimator` attaches an explicit
+uncertainty to every trace (high uncertainty prevents promotion; contradiction and
+missing evidence raise it); the `LiveRelationTraversal` walks the private syntax
+graph within a bounded depth without inventing relations; and the
+`LiveInternalSimulation` rolls small, step-bounded offline scenarios that control
+nothing and are compared against later observed events.
+
+**Prediction assessment preserves failures and ambiguity.** The
+`LivePredictionAssessment` compares anticipations against later live-read-only events
+and records matched / partially-matched / contradicted / not-yet-observed /
+ambiguous / contaminated outcomes -- prediction success is operational evidence only,
+failures are preserved, and there is no cherry-picking. The
+`LiveCognitionContaminationFilter` flags human-label / debug-gloss / operator-phrase
+dependence, operator/human-text dominance, sign-as-language and reasoning-proof
+claims, command-like text, secret markers, forbidden sources, and source artifacts;
+contaminated traces cannot be promoted. The advisory `LiveCognitionReadinessGate`
+then decides what the field is ready for -- trace records, anticipation, internal
+simulation, or (much later, only with operator approval) self-boundary tracking -- or
+blocks on missing/weak signs, high uncertainty, contradicted predictions,
+label/gloss/operator dependence, a forbidden source, or overload/deprivation. The
+`LiveCognitionMemory` records every trace -- active, useful, weak, rejected,
+contradicted, contaminated -- as append-only local metadata linked to evidence.
+
+The layer is reached via `python -m solaris_ai_nn live-cognition /
+live-cognition-traces / live-anticipations / live-predictions /
+live-cognition-gate`, feeds Inner MAP (`model.live_cognition`) and Evaluation (the
+`live_cognition_*` protocols and `live_cognition_metrics`), records operational-only
+evidence for the Research Cycle and Scientific Claims, and is surfaced read-only by
+the Alpha system (`live_cognition_status()`); the default alpha system stays
+fixture-only. **Action-reaction and autonomy are not enabled by default.** First live
+cognition never enables real-world action, action-reaction learning, developmental
+autonomy, or self-boundary tracking; never treats internal signs as language
+understanding or maps signs to human words as ground truth; never starts/stops/
+configures feeders, controls hardware, or accesses the network/shell/browser/OS/
+camera/microphone/Git/GitHub; never executes commands or modifies source; never
+treats sensory text as a command, human labels or debug gloss as ground truth, or
+the operator pulse as teaching; and never claims consciousness, sentience, biological
+life, personhood, agency, free will, emotion, feeling, understanding, self-awareness,
+or subjective experience.

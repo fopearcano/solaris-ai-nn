@@ -608,6 +608,17 @@ class InnerMapModel:
     # developmental autonomy, never treats signs as language understanding, and
     # never makes any consciousness/life/agency claim.
     live_semiogenesis: Optional[Dict[str, Any]] = None
+    # First live cognition status (Prompt 71); None when not attached. Keys:
+    # live_cognition_enabled, cognition_run_id, live_eligible_sign_count,
+    # live_cognition_trace_count, live_anticipation_count,
+    # live_internal_simulation_count, live_prediction_assessment_count,
+    # live_prediction_contradicted_count, live_cognition_readiness_status,
+    # latest_cognition_memory_path, latest_cognition_report_path. Cognition
+    # traces are operational sign-based anticipation/relation records -- never
+    # enables action / action-reaction / developmental autonomy / self-boundary,
+    # never treats signs as language or traces as reasoning, and never makes any
+    # consciousness/life/agency claim.
+    live_cognition: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""
