@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from typing import Any, List, Optional
 
@@ -54,7 +55,9 @@ _ALPHA_COMMANDS = ("doctor", "init", "modules", "run-demo", "artifact-index",
                    "tester-command-check",
                    "tester-safety-freeze", "tester-claim-freeze",
                    "tester-capability-freeze", "tester-redteam",
-                   "tester-release-blockers", "tester-safety-scan")
+                   "tester-release-blockers", "tester-safety-scan",
+                   "tester-rc", "tester-rc-manifest", "tester-rc-readiness",
+                   "tester-rc-docs", "tester-rc-bundle", "tester-rc-checklist")
 
 
 def _integration_runtime(args: argparse.Namespace):
@@ -88,6 +91,22 @@ def _tester_safety_freeze_runtime(args: argparse.Namespace, **overrides):
         require_claimguard=args.require_claimguard)
     kwargs.update(overrides)
     return TesterSafetyFreezeRuntime(**kwargs)
+
+
+def _tester_rc_runtime(args: argparse.Namespace, **overrides):
+    from .tester_release_candidate import TesterRCRuntime
+
+    kwargs = dict(
+        tester_state_dir=args.tester_state_dir, rc_dir=args.rc_dir,
+        profile=args.profile, max_runtime_s=args.max_runtime_s,
+        strict=args.strict, dry_run=args.dry_run, report_only=args.report_only,
+        include_optional_reports=args.include_optional_reports,
+        include_static_console=args.include_static_console,
+        include_private_payloads=args.include_private_payloads,
+        include_zip=args.include_zip,
+        require_claimguard=args.require_claimguard)
+    kwargs.update(overrides)
+    return TesterRCRuntime(**kwargs)
 
 
 def _tester_packaging_runtime(args: argparse.Namespace, **overrides):
@@ -1808,6 +1827,113 @@ def cmd_tester_safety_scan(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_tester_rc(args: argparse.Namespace) -> int:
+    rt = _tester_rc_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"tester rc refused: {result.get('reason')}")
+        return 2
+    st = rt.rc_status()
+    _print("tester release candidate:")
+    _print(f"  rc id: {st['rc_id']} ({st['rc_profile']})")
+    _print(f"  readiness: {st['readiness']} (gate: "
+           f"{st['rc_readiness_status']})")
+    _print(f"  blockers: {st['blocker_count']} (critical "
+           f"{st['critical_blocker_count']}); warnings: {st['warning_count']}")
+    _print(f"  missing required artifacts: "
+           f"{st['missing_required_artifact_count']}")
+    if rt.readiness:
+        for b in rt.readiness.blockers:
+            _print(f"    blocker: {'[critical] ' if b.critical else ''}"
+                   f"{b.check}: {b.detail}")
+    _print(f"  bundle: {st['latest_rc_bundle_path']}")
+    _print(f"  report: {st['latest_rc_report_path']}")
+    _print(f"  next action: {rt.recommended_next_action()}")
+    if st["blocker_count"] and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_rc_manifest(args: argparse.Namespace) -> int:
+    rt = _tester_rc_runtime(args, profile="tester_rc_manifest_only_v0")
+    rt.run()
+    m = rt.manifest.to_dict() if rt.manifest else {}
+    _print("tester rc manifest:")
+    _print(f"  rc id: {m.get('rc_id')}; package: {m.get('package_name')} "
+           f"{m.get('package_version') or '(version unknown)'}")
+    _print(f"  commit: {m.get('commit_hash')}; readiness: "
+           f"{m.get('readiness')}")
+    _print(f"  missing required artifacts: "
+           f"{m.get('missing_required_artifact_count', 0)}")
+    _print(f"  known missing optional modules: "
+           f"{m.get('known_missing_optional_modules', [])}")
+    _print(f"  manifest: {rt.manifest_paths.get('json')}")
+    if m.get("missing_required_artifact_count", 0) and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_rc_readiness(args: argparse.Namespace) -> int:
+    rt = _tester_rc_runtime(args, profile="tester_rc_readiness_only_v0")
+    rt.run()
+    r = rt.readiness.to_dict() if rt.readiness else {}
+    _print("tester rc readiness:")
+    _print(f"  status: {r.get('status')}")
+    _print(f"  blockers: {r.get('blocker_count', 0)} (critical "
+           f"{r.get('critical_blocker_count', 0)}); warnings: "
+           f"{r.get('warning_count', 0)}")
+    for b in r.get("blockers", []):
+        _print(f"    [{'critical' if b['critical'] else 'blocker'}] "
+               f"{b['check']}: {b['detail']}")
+    _print(f"  report: {rt.reports.get('readiness_md')}")
+    if r.get("blocker_count", 0) and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_rc_docs(args: argparse.Namespace) -> int:
+    rt = _tester_rc_runtime(args, profile="tester_rc_docs_only_v0")
+    rt.run()
+    _print("tester rc docs:")
+    for key, path in rt.doc_paths.items():
+        _print(f"  {key}: {path}")
+    return 0
+
+
+def cmd_tester_rc_bundle(args: argparse.Namespace) -> int:
+    rt = _tester_rc_runtime(args, profile="tester_rc_bundle_only_v0")
+    rt.run()
+    b = rt.bundle.to_dict() if rt.bundle else {}
+    _print("tester rc bundle:")
+    _print(f"  bundle dir: {b.get('bundle_dir')}")
+    _print(f"  included: {b.get('included_count', 0)}; missing: "
+           f"{b.get('missing_count', 0)}; zipped: {b.get('zipped', False)}")
+    _print("  note: local bundle only; nothing uploaded/published/tagged/"
+           "released")
+    return 0
+
+
+def cmd_tester_rc_checklist(args: argparse.Namespace) -> int:
+    rt = _tester_rc_runtime(args, profile="tester_rc_readiness_only_v0")
+    rt.run()
+    c = rt.checklist.to_dict() if rt.checklist else {}
+    _print("tester rc checklist:")
+    _print(f"  items: {c.get('item_count', 0)}; blocking: "
+           f"{c.get('blocking_count', 0)}; passed: {c.get('passed')}")
+    for i in c.get("items", []):
+        if i["blocking"]:
+            _print(f"    [{i['status']}] ({i['tier']}) {i['section']} -- "
+                   f"{i['label']}")
+    if rt.checklist:
+        path = os.path.join(rt._sub("checklists"), "TESTER_RC_CHECKLIST.md")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(rt.checklist.to_markdown())
+        _print(f"  checklist: {path}")
+    if c.get("blocking_count", 0) and args.strict:
+        return 2
+    return 0
+
+
 _HANDLERS = {
     "init": cmd_init,
     "doctor": cmd_doctor,
@@ -1887,6 +2013,12 @@ _HANDLERS = {
     "tester-capability-freeze": cmd_tester_capability_freeze,
     "tester-redteam": cmd_tester_redteam,
     "tester-release-blockers": cmd_tester_release_blockers,
+    "tester-rc": cmd_tester_rc,
+    "tester-rc-manifest": cmd_tester_rc_manifest,
+    "tester-rc-readiness": cmd_tester_rc_readiness,
+    "tester-rc-docs": cmd_tester_rc_docs,
+    "tester-rc-bundle": cmd_tester_rc_bundle,
+    "tester-rc-checklist": cmd_tester_rc_checklist,
     "tester-safety-scan": cmd_tester_safety_scan,
 }
 
@@ -2067,6 +2199,21 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--safety-freeze-dir", type=str, default="",
                         dest="safety_freeze_dir",
                         help="safety freeze dir (default: <tester>/safety_freeze)")
+    # Tester release candidate arguments (Prompt 80).
+    parser.add_argument("--rc-dir", type=str, default="", dest="rc_dir",
+                        help="RC dir (default: <tester>/release_candidate)")
+    parser.add_argument("--include-optional-reports", action="store_true",
+                        default=False, dest="include_optional_reports",
+                        help="include optional module reports in RC collection")
+    parser.add_argument("--include-static-console", action="store_true",
+                        default=False, dest="include_static_console",
+                        help="include the static HTML console in the RC bundle")
+    parser.add_argument("--include-private-payloads", action="store_true",
+                        default=False, dest="include_private_payloads",
+                        help="include private payloads in RC (not advised)")
+    parser.add_argument("--include-zip", action="store_true", default=False,
+                        dest="include_zip",
+                        help="also write a local-only zip of the RC bundle")
 
 
 def build_parser() -> argparse.ArgumentParser:

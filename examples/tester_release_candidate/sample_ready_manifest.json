@@ -1,0 +1,328 @@
+{
+  "manifest_version": "tester_rc_v0",
+  "rc_id": "rc_1781727896153",
+  "rc_profile": "tester_rc_manifest_only_v0",
+  "generated_utc": "2026-06-17T20:24:56Z",
+  "package_name": "solaris-ai-nn",
+  "package_version": "0.1.0",
+  "python_requirement": ">=3.11",
+  "repository_name": null,
+  "commit_hash": "b09badbe45faf037c725d28ae6fab1a95691f805",
+  "required_commands": [
+    "doctor",
+    "tester-demo",
+    "tester-console",
+    "tester-live-init",
+    "tester-live-doctor",
+    "tester-feedback-init",
+    "tester-packaging",
+    "tester-safety-freeze",
+    "tester-rc"
+  ],
+  "optional_commands": [
+    "tester-live-run",
+    "tester-feedback-bundle",
+    "tester-install-guide",
+    "tester-clean-machine",
+    "tester-redteam",
+    "tester-rc-bundle"
+  ],
+  "required_docs": [
+    "readme",
+    "install_guide",
+    "quickstart",
+    "forbidden_claims_doc",
+    "allowed_language_doc",
+    "safety_boundaries_doc"
+  ],
+  "required_examples": [],
+  "fixture_artifacts": [
+    "fixture_instructions"
+  ],
+  "live_artifacts": [
+    "live_readonly_instructions",
+    "external_feeder_policy"
+  ],
+  "console_artifacts": [
+    "console_instructions"
+  ],
+  "feedback_artifacts": [
+    "feedback_form"
+  ],
+  "packaging_artifacts": [
+    "install_guide",
+    "packaging_report",
+    "environment_doctor_report",
+    "command_registry_report",
+    "clean_machine_report"
+  ],
+  "safety_freeze_artifacts": [
+    "safety_freeze_report",
+    "release_blocker_report",
+    "forbidden_claims_doc",
+    "allowed_language_doc",
+    "safety_boundaries_doc"
+  ],
+  "known_optional_modules": [
+    "ontogenesis report",
+    "semiogenesis report",
+    "cognition report",
+    "scientific claims report",
+    "technical whitepaper",
+    "static HTML console"
+  ],
+  "known_missing_optional_modules": [
+    "ontogenesis report",
+    "semiogenesis report",
+    "cognition report",
+    "scientific claims report",
+    "technical whitepaper",
+    "static HTML console"
+  ],
+  "artifacts": [
+    {
+      "key": "readme",
+      "label": "README",
+      "tier": "required",
+      "present": true,
+      "path": "README.md"
+    },
+    {
+      "key": "install_guide",
+      "label": "install guide",
+      "tier": "required",
+      "present": true,
+      "path": "/tmp/tmp5nufxf4l/packaging/install_guides/TESTER_INSTALL_GUIDE.md"
+    },
+    {
+      "key": "quickstart",
+      "label": "quickstart",
+      "tier": "required",
+      "present": true,
+      "path": "/tmp/tmp5nufxf4l/packaging/install_guides/TESTER_QUICKSTART.md"
+    },
+    {
+      "key": "packaging_report",
+      "label": "tester packaging report",
+      "tier": "required",
+      "present": true,
+      "path": "/tmp/tmp5nufxf4l/packaging/reports/PACKAGING_REPORT.md"
+    },
+    {
+      "key": "environment_doctor_report",
+      "label": "environment doctor report",
+      "tier": "required",
+      "present": true,
+      "path": "/tmp/tmp5nufxf4l/packaging/reports/ENVIRONMENT_DOCTOR_REPORT.md"
+    },
+    {
+      "key": "command_registry_report",
+      "label": "command registry report",
+      "tier": "required",
+      "present": true,
+      "path": "/tmp/tmp5nufxf4l/packaging/reports/COMMAND_REGISTRY_REPORT.md"
+    },
+    {
+      "key": "clean_machine_report",
+      "label": "clean-machine readiness report",
+      "tier": "required",
+      "present": true,
+      "path": "/tmp/tmp5nufxf4l/packaging/reports/CLEAN_MACHINE_READINESS_REPORT.md"
+    },
+    {
+      "key": "safety_freeze_report",
+      "label": "tester safety freeze report",
+      "tier": "required",
+      "present": true,
+      "path": "/tmp/tmp5nufxf4l/safety_freeze/reports/TESTER_SAFETY_FREEZE_REPORT.md"
+    },
+    {
+      "key": "release_blocker_report",
+      "label": "release blocker report",
+      "tier": "required",
+      "present": true,
+      "path": "/tmp/tmp5nufxf4l/safety_freeze/reports/TESTER_RELEASE_BLOCKERS.md"
+    },
+    {
+      "key": "forbidden_claims_doc",
+      "label": "forbidden claims doc",
+      "tier": "required",
+      "present": true,
+      "path": "docs/FORBIDDEN_CLAIMS.md"
+    },
+    {
+      "key": "allowed_language_doc",
+      "label": "allowed operational language doc",
+      "tier": "required",
+      "present": true,
+      "path": "docs/ALLOWED_OPERATIONAL_LANGUAGE.md"
+    },
+    {
+      "key": "feedback_form",
+      "label": "tester feedback form",
+      "tier": "required",
+      "present": true,
+      "path": "/tmp/tmp5nufxf4l/feedback/forms/TESTER_FEEDBACK_FORM.md"
+    },
+    {
+      "key": "fixture_instructions",
+      "label": "tester fixture instructions",
+      "tier": "required",
+      "present": true,
+      "path": "docs/TESTER_RUNBOOK.md"
+    },
+    {
+      "key": "live_readonly_instructions",
+      "label": "tester live-read-only instructions",
+      "tier": "required",
+      "present": true,
+      "path": "docs/TESTER_RUNBOOK.md"
+    },
+    {
+      "key": "external_feeder_policy",
+      "label": "external feeder policy",
+      "tier": "required",
+      "present": true,
+      "path": "examples/tester_live_readonly/README.md"
+    },
+    {
+      "key": "console_instructions",
+      "label": "tester console instructions",
+      "tier": "required",
+      "present": true,
+      "path": "docs/TESTER_RUNBOOK.md"
+    },
+    {
+      "key": "safety_boundaries_doc",
+      "label": "tester safety boundaries",
+      "tier": "required",
+      "present": true,
+      "path": "docs/TESTER_SAFETY_BOUNDARIES.md"
+    },
+    {
+      "key": "fixture_demo_report",
+      "label": "fixture demo report",
+      "tier": "recommended",
+      "present": false,
+      "path": "/tmp/tmp5nufxf4l/reports/TESTER_DEMO_REPORT.md"
+    },
+    {
+      "key": "reproducibility_report",
+      "label": "reproducibility report",
+      "tier": "recommended",
+      "present": false,
+      "path": "/tmp/tmp5nufxf4l/reproducibility/TESTER_REPRODUCIBILITY_REPORT.md"
+    },
+    {
+      "key": "regression_report",
+      "label": "regression report",
+      "tier": "recommended",
+      "present": false,
+      "path": "/tmp/tmp5nufxf4l/regression/TESTER_REGRESSION_REPORT.md"
+    },
+    {
+      "key": "console_index",
+      "label": "tester console index",
+      "tier": "recommended",
+      "present": false,
+      "path": "/tmp/tmp5nufxf4l/console/INDEX.md"
+    },
+    {
+      "key": "live_doctor_report",
+      "label": "tester live doctor report",
+      "tier": "recommended",
+      "present": false,
+      "path": "/tmp/tmp5nufxf4l/live/reports/TESTER_LIVE_DOCTOR_REPORT.md"
+    },
+    {
+      "key": "membrane_report",
+      "label": "membrane report",
+      "tier": "recommended",
+      "present": false,
+      "path": ".solaris_ai_nn_live/membrane/reports/ENVIRONMENTAL_MEMBRANE_REPORT.md"
+    },
+    {
+      "key": "membrane_integration_report",
+      "label": "membrane integration report",
+      "tier": "recommended",
+      "present": false,
+      "path": ".solaris_ai_nn_live/membrane/integration/MEMBRANE_INTEGRATION_REPORT.md"
+    },
+    {
+      "key": "observation_report",
+      "label": "observation report",
+      "tier": "recommended",
+      "present": false,
+      "path": ".solaris_ai_nn_live/observation/reports/LIVE_OBSERVATION_REPORT.md"
+    },
+    {
+      "key": "feedback_report",
+      "label": "feedback report",
+      "tier": "recommended",
+      "present": false,
+      "path": "/tmp/tmp5nufxf4l/feedback/reports/TESTER_FEEDBACK_REPORT.md"
+    },
+    {
+      "key": "ontogenesis_report",
+      "label": "ontogenesis report",
+      "tier": "optional",
+      "present": false,
+      "path": ".solaris_ai_nn_live/ontogenesis/reports/LIVE_ONTOGENESIS_REPORT.md"
+    },
+    {
+      "key": "semiogenesis_report",
+      "label": "semiogenesis report",
+      "tier": "optional",
+      "present": false,
+      "path": ".solaris_ai_nn_live/semiogenesis/reports/LIVE_SEMIOGENESIS_REPORT.md"
+    },
+    {
+      "key": "cognition_report",
+      "label": "cognition report",
+      "tier": "optional",
+      "present": false,
+      "path": ".solaris_ai_nn_live/cognition/reports/LIVE_COGNITION_REPORT.md"
+    },
+    {
+      "key": "scientific_claims_report",
+      "label": "scientific claims report",
+      "tier": "optional",
+      "present": false,
+      "path": ".solaris_ai_nn_alpha/reports/SCIENTIFIC_CLAIM_REPORT.md"
+    },
+    {
+      "key": "architecture_book",
+      "label": "architecture book",
+      "tier": "optional",
+      "present": true,
+      "path": "docs/ARCHITECTURE.md"
+    },
+    {
+      "key": "technical_whitepaper",
+      "label": "technical whitepaper",
+      "tier": "optional",
+      "present": false,
+      "path": "docs/whitepaper/TECHNICAL_WHITEPAPER.md"
+    },
+    {
+      "key": "static_html_console",
+      "label": "static HTML console",
+      "tier": "optional",
+      "present": false,
+      "path": "/tmp/tmp5nufxf4l/console/INDEX.html"
+    }
+  ],
+  "readiness": "ready_with_warnings",
+  "blocker_count": 0,
+  "warning_count": 10,
+  "missing_required_artifact_count": 0,
+  "safety_freeze_status": "ready_with_warnings",
+  "packaging_status": "ready_with_warnings",
+  "tester_console_status": "read_only",
+  "feedback_readiness_status": "non_training",
+  "local_only": true,
+  "published": false,
+  "uploaded": false,
+  "implies_publication": false,
+  "note": "local tester release-candidate manifest; it does not imply publication and no artifact was uploaded or released"
+}

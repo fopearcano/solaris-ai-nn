@@ -3232,3 +3232,40 @@ all, so the only way past them is to fix the artifact. The safety freeze is a lo
 assessment of release safety and is not evidence of consciousness, sentience, biological
 life, personhood, agency, free will, emotion, feeling, understanding, self-awareness,
 autonomous self-improvement, or subjective experience.
+
+## Notes on the Tester Release Candidate Assembly
+
+**Why RC assembly happens after the safety freeze.** The release candidate is the moment
+many layers become one artifact that leaves the developer's control. Assembling it before
+the safety freeze would mean packaging up claims and capabilities that have not yet been
+checked as a whole. Putting RC assembly *after* the freeze means the gate has already run
+once over the entire release surface, and the RC readiness gate can simply require that the
+freeze passed -- the RC never has to re-litigate safety, only confirm it.
+
+**Why a local RC bundle is safer than public release automation.** A button that creates a
+GitHub release, uploads a package, and tags a commit is convenient and dangerous: it turns a
+local readiness tool into a distribution mechanism with irreversible, outward-facing side
+effects. The RC instead assembles a local bundle directory and stops. Sharing it is a
+separate, manual, deliberate act by a human -- there is no code path that uploads, tags, or
+releases anything, so a mistaken or automated run cannot publish.
+
+**Why the first tester RC should remain boring and inspectable.** The first build a tester
+receives should be the least surprising thing possible: a directory of plain Markdown and
+JSON they can read, with a manifest that lists exactly what is and is not present. Every
+artifact is a reference to a file the tester can open; nothing is opaque, nothing is
+executed, and the readiness verdict is reproducible from the same inputs.
+
+**Why known issues must be visible.** Hiding open blockers or missing artifacts to make a
+build look ready is the fastest way to lose a tester's trust and to ship a real problem. The
+known-issues document and the RC checklist therefore list open release blockers, missing
+optional modules, and non-blocking warnings explicitly; the checklist never hides a missing
+required item, and the report's "what this does not do" section is always present.
+
+**Why fixture-first remains mandatory.** The runbook puts the self-contained fixture demo
+before any live-read-only step, and the readiness gate blocks if the fixture demo failed (in
+all but an explicit docs-only profile). The fixture demo is the known-good rehearsal; a
+tester who reaches live-read-only without it has no baseline and could mistake a setup
+problem for a system problem. The RC assembly is a local assessment of release-assembly
+readiness and is not evidence of consciousness, sentience, biological life, personhood,
+agency, free will, emotion, feeling, understanding, self-awareness, autonomous
+self-improvement, or subjective experience.

@@ -34,13 +34,14 @@ class SummaryCardKind:
     FEEDBACK = "feedback"
     PACKAGING = "packaging"
     SAFETY_FREEZE = "safety_freeze"
+    RELEASE_CANDIDATE = "release_candidate"
     NEXT_ACTION = "next_action"
 
     ALL = (FIXTURE_DEMO, LIVE_TESTER, GOVERNANCE, FEEDER_REGISTRY, QUARANTINE,
            MEMBRANE, MEMBRANE_INTEGRATION, SENSORY_IMPRESSIONS, SOURCE_PRESSURE,
            OBSERVATION, ONTOGENESIS, SEMIOGENESIS, COGNITION, SAFETY, CLAIMS,
            REPRODUCIBILITY, REGRESSION, ARTIFACT_BUNDLE, FEEDBACK, PACKAGING,
-           SAFETY_FREEZE, NEXT_ACTION)
+           SAFETY_FREEZE, RELEASE_CANDIDATE, NEXT_ACTION)
 
 
 class SummarySeverity:
@@ -316,6 +317,27 @@ class SummaryCardBuilder:
             next_action="run `tester-safety-freeze`" if not sf else
             "resolve open release blockers" if sf_blockers else "",
             disclaimer="the safety freeze is a tester-release gate only"))
+
+        # Tester release candidate (local assembly).
+        rc = discovery.latest(K.TESTER_RC_MANIFEST) \
+            or discovery.latest(K.TESTER_RC_READINESS_REPORT)
+        rc_readiness = rc.summary.get("readiness",
+                                      rc.summary.get("status")) if rc else None
+        rc_blockers = rc.summary.get("blocker_count", 0) if rc else 0
+        rc_bundle = discovery.latest(K.TESTER_RC_BUNDLE_REPORT)
+        cards.append(Card(
+            SummaryCardKind.RELEASE_CANDIDATE, "Release candidate (local)",
+            status=S.BLOCKER if rc_blockers else (S.OK if rc else S.NOT_RUN),
+            explanation="local tester RC assembly; publishes/uploads nothing",
+            metrics={"readiness": rc_readiness,
+                     "blocker_count": rc_blockers,
+                     "bundle": bool(rc_bundle)},
+            blockers=[f"{rc_blockers} open RC blocker(s)"] if rc_blockers
+            else [],
+            report_path=rc.path if rc else "",
+            next_action="run `tester-rc`" if not rc else
+            "resolve open RC blockers" if rc_blockers else "",
+            disclaimer="local assembly only; nothing is uploaded or released"))
 
         # Safety card (always present, prominent).
         cards.append(Card(

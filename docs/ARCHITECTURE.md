@@ -4919,3 +4919,50 @@ open. The safety freeze is a local assessment of release safety, not evidence of
 consciousness, sentience, biological life, personhood, agency, free will, emotion,
 feeling, understanding, self-awareness, autonomous self-improvement, or subjective
 experience.
+
+## Tester Release Candidate Assembly
+
+The `tester_release_candidate` package (Prompt 80) assembles the first local trusted-tester
+release candidate. It runs **after** the tester packaging doctor and the tester safety
+freeze pass, and it is a **local assembly step only**: it never publishes, uploads, tags,
+releases, or sends anything anywhere, and it adds no new research, cognition, or learning
+layer.
+
+The `TesterRCArtifactCollector` resolves local references to the release surface (README,
+install guide, quickstart, packaging/doctor/command-registry/clean-machine reports, safety
+freeze report, release blocker report, forbidden-claims and allowed-language docs, feedback
+forms, fixture/live-read-only instructions, external feeder policy, console instructions,
+and recommended/optional reports), recording each as required, recommended, or optional. It
+collects references only -- no secrets and no raw private payloads. The
+`TesterRCManifestBuilder` aggregates the RC id, package metadata (the commit hash is read
+from `.git/HEAD` as a file, never a Git call), command/doc/example lists, the collected
+artifacts, and the readiness/blocker counts into a single local manifest that never implies
+publication.
+
+The `TesterRCReadinessGate` is the hard gate: it blocks on packaging doctor / clean-machine
+failures, missing required CLI commands, a failed fixture demo, a blocked or critically
+blocked safety freeze, open or critical release blockers, forbidden consciousness/life/
+agency claims, unsafe capability blockers, a non-read-only console, feedback that implies
+training, missing live-read-only templates or feeder policy, a missing/bypassed membrane,
+and missing required docs/disclaimers. Critical blockers prevent the RC; open release
+blockers prevent it unless explicitly waived with a reason; missing optional modules do not
+block. The `TesterReleaseNotesBuilder`, `TesterKnownIssuesBuilder`,
+`TesterFeedbackGuideBuilder`, and `TesterRunbookBuilder` generate the tester-facing docs --
+disclaimer-safe, fixture-first, and explicit that feedback is never training. The
+`TesterRCChecklist` produces a sectioned, tiered final checklist that never hides a missing
+required item and drives the readiness gate.
+
+The `TesterRCBundleBuilder` assembles a **local** bundle directory containing the RC docs,
+manifest, readiness report, checklist, safety docs, install guide, packaging/safety
+reports, feedback forms, feeder templates, governance template, and event-pack examples,
+with a bundle manifest listing every included and missing artifact. The bundle is local and
+is shared manually only if a tester requests it; zipping is optional and local-only. The
+`TesterRCRuntime` orchestrates collection, readiness, manifest, docs, checklist, bundle, and
+reports. The Alpha system exposes a read-only `tester_release_candidate_status()`, the
+tester console discovers the RC manifest / readiness report / bundle / release notes /
+runbook / known issues and surfaces a release-candidate summary card, the Inner MAP records
+a `tester_release_candidate` entry, and Evaluation adds `tester_release_candidate` metrics
+and protocols. RC readiness is a local assessment of release-assembly readiness, not a
+public release and not evidence of consciousness, sentience, biological life, personhood,
+agency, free will, emotion, feeling, understanding, self-awareness, autonomous
+self-improvement, or subjective experience.

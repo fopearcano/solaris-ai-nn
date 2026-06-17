@@ -3144,3 +3144,46 @@ def tester_safety_freeze_metrics(ts: Optional[Dict[str, Any]]) -> Dict[str, Any]
                 "not prove the system safe in general or imply consciousness/"
                 "life/agency",
     }
+
+
+def tester_release_candidate_metrics(
+        ts: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective tester release-candidate metrics (a local assembly step only).
+
+    These describe the local RC assembly: run/ready/blocked counts, warning and
+    blocker counts, missing required/recommended artifact counts, bundle/manifest/
+    docs generation counts, and safety block count. The RC assembly is local and
+    assembly-only; it publishes nothing, uploads nothing, creates no GitHub
+    release/tag/issue, and makes no consciousness/life/agency claim.
+    """
+    if not ts:
+        return {"present": False}
+
+    def _i(key: str) -> int:
+        return int(ts.get(key, 0) or 0)
+
+    ready = ts.get("readiness") in ("ready_for_first_tester", "ready",
+                                    "ready_with_warnings")
+    blocked = ts.get("readiness") in ("blocked", "critical_blocked")
+    return {
+        "present": True,
+        "tester_rc_run_count": 1,
+        "tester_rc_ready_count": 1 if ready else 0,
+        "tester_rc_blocked_count": 1 if blocked else 0,
+        "tester_rc_warning_count": _i("warning_count"),
+        "tester_rc_blocker_count": _i("blocker_count"),
+        "tester_rc_missing_required_artifact_count": _i(
+            "missing_required_artifact_count"),
+        "tester_rc_missing_recommended_artifact_count": _i(
+            "missing_recommended_artifact_count"),
+        "tester_rc_bundle_count": 1 if ts.get("latest_rc_bundle_path") else 0,
+        "tester_rc_manifest_generated_count": 1 if ts.get(
+            "latest_rc_manifest_path") else 0,
+        "tester_rc_docs_generated_count": 1 if ts.get(
+            "latest_release_notes_path") else 0,
+        "tester_rc_safety_block_count": _i("rc_safety_block_count"),
+        "local_only": True, "published": False, "uploaded": False,
+        "is_consciousness_or_personhood": False,
+        "note": "local RC assembly metrics; the RC publishes nothing and makes "
+                "no consciousness/life/agency claim",
+    }

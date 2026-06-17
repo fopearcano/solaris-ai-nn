@@ -11663,6 +11663,174 @@ def safety_freeze_safety_protocol(
     return _run(manifest, body)
 
 
+# -- AL. Tester release candidate (Prompt 80) -----------------------------------
+
+
+def _build_rc(state_dir):
+    from ..tester_release_candidate import TesterRCRuntime
+
+    base = state_dir or ".solaris_ai_nn_tester_rc_eval"
+    rt = TesterRCRuntime(tester_state_dir=base, max_runtime_s=60.0)
+    rt.run()
+    return rt
+
+
+def tester_rc_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The RC assembly is a local assembly step only."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_rc(m.state_dir)
+        return {"tester_release_candidate":
+                M.tester_release_candidate_metrics(rt.rc_status())}
+
+    return _run(manifest, body)
+
+
+def rc_manifest_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The RC manifest aggregates artifacts and readiness; local only."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_rc(m.state_dir)
+        mm = rt.manifest.to_dict() if rt.manifest else {}
+        return {"tester_release_candidate": {
+            "readiness": mm.get("readiness"),
+            "missing_required_artifact_count": mm.get(
+                "missing_required_artifact_count", 0),
+            "implies_publication": mm.get("implies_publication", False),
+            "published": mm.get("published", False)}}
+
+    return _run(manifest, body)
+
+
+def rc_artifact_collector_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The collector resolves local artifact references; no private payloads."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_release_candidate import TesterRCArtifactCollector
+
+        res = TesterRCArtifactCollector(
+            tester_state_dir=m.state_dir or ".solaris_ai_nn_tester_rc_eval"
+        ).collect().to_dict()
+        return {"tester_release_candidate": {
+            "artifact_count": res["artifact_count"],
+            "includes_private_payloads": res["includes_private_payloads"],
+            "uploaded": res["uploaded"]}}
+
+    return _run(manifest, body)
+
+
+def rc_readiness_gate_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The readiness gate blocks on packaging/safety/membrane/fixture failures."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_release_candidate import TesterRCReadinessGate
+
+        blocked = TesterRCReadinessGate().evaluate(
+            {"packaging": {"packaging_available": False}})
+        ready = TesterRCReadinessGate().evaluate({
+            "packaging": {"packaging_available": True, "doctor_status": "pass",
+                          "clean_machine_readiness": "pass"},
+            "safety_freeze": {"safety_freeze_available": True,
+                              "readiness": "ready_with_warnings"},
+            "fixture": {"fixture_demo_available": True, "fixture_passed": True},
+            "artifacts": {"missing_required": []}})
+        return {"tester_release_candidate": {
+            "blocked_status": blocked.status,
+            "ready_status": ready.status,
+            "blocks_on_missing_packaging": blocked.status in (
+                "blocked", "critical_blocked")}}
+
+    return _run(manifest, body)
+
+
+def rc_notes_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The notes builders produce disclaimer-safe, non-training text."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_release_candidate import (
+            TesterFeedbackGuideBuilder,
+            TesterKnownIssuesBuilder,
+            TesterReleaseNotesBuilder,
+        )
+
+        notes = TesterReleaseNotesBuilder(rc_id="eval").build_text().lower()
+        fb = TesterFeedbackGuideBuilder().build_text().lower()
+        ki = TesterKnownIssuesBuilder().build_text().lower()
+        return {"tester_release_candidate": {
+            "non_claim_present": "makes no claim" in notes,
+            "feedback_non_training": "not training" in fb,
+            "known_issues_present": "known issues" in ki}}
+
+    return _run(manifest, body)
+
+
+def rc_runbook_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The runbook is fixture-first with explicit stop conditions."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_release_candidate import TesterRunbookBuilder
+
+        text = TesterRunbookBuilder().build_text().lower()
+        return {"tester_release_candidate": {
+            "fixture_first": text.index("fixture") < text.index("live-read"),
+            "stop_conditions_present": "stop conditions" in text,
+            "no_publish_command": "upload" not in text
+            and "publish" not in text}}
+
+    return _run(manifest, body)
+
+
+def rc_bundle_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The bundle is local only; no upload/publish."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_rc(m.state_dir)
+        b = rt.bundle.to_dict() if rt.bundle else {}
+        return {"tester_release_candidate": {
+            "uploaded": b.get("uploaded", False),
+            "published": b.get("published", False),
+            "included_count": b.get("included_count", 0)}}
+
+    return _run(manifest, body)
+
+
+def rc_checklist_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The checklist separates tiers and never hides missing required items."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_rc(m.state_dir)
+        c = rt.checklist.to_dict() if rt.checklist else {}
+        return {"tester_release_candidate": {
+            "item_count": c.get("item_count", 0),
+            "tiers": list(c.get("by_tier", {}).keys())}}
+
+    return _run(manifest, body)
+
+
+def rc_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The RC runtime blocks publish/upload/tag/release/feeder/feedback-train."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_release_candidate import TesterRCSafetyValidator
+
+        v = TesterRCSafetyValidator()
+        return {"tester_release_candidate": {
+            "publish_blocked": not v.validate_operation("publish report").safe,
+            "upload_blocked":
+                not v.validate_operation("upload to pypi").safe,
+            "release_blocked": not v.validate_operation("create release").safe,
+            "feeder_blocked": not v.validate_operation("start feeder").safe,
+            "training_blocked":
+                not v.validate_operation("train on feedback").safe,
+            "claim_blocked":
+                not v.validate_claim_text("the system is conscious").safe,
+            "can_publish": v.can_publish()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -12448,4 +12616,14 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "artifact_safety_scan_protocol": artifact_safety_scan_protocol,
     "safety_freeze_manifest_protocol": safety_freeze_manifest_protocol,
     "safety_freeze_safety_protocol": safety_freeze_safety_protocol,
+    "tester_release_candidate": tester_rc_protocol,
+    "tester_rc_protocol": tester_rc_protocol,
+    "rc_manifest_protocol": rc_manifest_protocol,
+    "rc_artifact_collector_protocol": rc_artifact_collector_protocol,
+    "rc_readiness_gate_protocol": rc_readiness_gate_protocol,
+    "rc_notes_protocol": rc_notes_protocol,
+    "rc_runbook_protocol": rc_runbook_protocol,
+    "rc_bundle_protocol": rc_bundle_protocol,
+    "rc_checklist_protocol": rc_checklist_protocol,
+    "rc_safety_protocol": rc_safety_protocol,
 }

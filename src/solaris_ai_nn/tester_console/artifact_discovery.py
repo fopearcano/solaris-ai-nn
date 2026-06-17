@@ -41,6 +41,12 @@ class ArtifactKind:
     TESTER_SAFETY_FREEZE_REPORT = "tester_safety_freeze_report"
     TESTER_SAFETY_FREEZE_MANIFEST = "tester_safety_freeze_manifest"
     TESTER_RELEASE_BLOCKERS = "tester_release_blockers"
+    TESTER_RC_MANIFEST = "tester_rc_manifest"
+    TESTER_RC_READINESS_REPORT = "tester_rc_readiness_report"
+    TESTER_RC_BUNDLE_REPORT = "tester_rc_bundle_report"
+    TESTER_RC_RELEASE_NOTES = "tester_rc_release_notes"
+    TESTER_RC_RUNBOOK = "tester_rc_runbook"
+    TESTER_RC_KNOWN_ISSUES = "tester_rc_known_issues"
     LIVE_GOVERNANCE = "live_governance"
     FEEDER_REGISTRY = "feeder_registry"
     LIVE_BIRTH_REPORT = "live_birth_report"
@@ -101,6 +107,18 @@ _DISCOVERY_SPECS = (
      "safety_freeze/manifests/TESTER_SAFETY_FREEZE_MANIFEST.json"),
     (ArtifactKind.TESTER_RELEASE_BLOCKERS, "tester",
      "safety_freeze/reports/TESTER_RELEASE_BLOCKERS.json"),
+    (ArtifactKind.TESTER_RC_MANIFEST, "tester",
+     "release_candidate/manifests/TESTER_RC_MANIFEST.json"),
+    (ArtifactKind.TESTER_RC_READINESS_REPORT, "tester",
+     "release_candidate/reports/TESTER_RC_READINESS_REPORT.json"),
+    (ArtifactKind.TESTER_RC_BUNDLE_REPORT, "tester",
+     "release_candidate/bundles/TESTER_RC_BUNDLE_*/BUNDLE_MANIFEST.json"),
+    (ArtifactKind.TESTER_RC_RELEASE_NOTES, "tester",
+     "release_candidate/docs/TESTER_RELEASE_NOTES.md"),
+    (ArtifactKind.TESTER_RC_RUNBOOK, "tester",
+     "release_candidate/docs/TESTER_RUNBOOK.md"),
+    (ArtifactKind.TESTER_RC_KNOWN_ISSUES, "tester",
+     "release_candidate/docs/TESTER_KNOWN_ISSUES.md"),
     (ArtifactKind.LIVE_GOVERNANCE, "live",
      "governance/LIVE_READONLY_GOVERNANCE.json"),
     (ArtifactKind.FEEDER_REGISTRY, "live", "feeders/FEEDER_REGISTRY.json"),
@@ -278,6 +296,8 @@ _SAFE_SUMMARY_KEYS = (
     "readiness", "version", "missing_required_artifact_count",
     "release_blocker_count", "critical_open_count", "open_blocker_count",
     "release_candidate_allowed",
+    "rc_id", "blocker_count", "warning_count", "included_count",
+    "missing_count", "status",
 )
 
 

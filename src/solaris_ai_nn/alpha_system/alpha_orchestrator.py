@@ -992,6 +992,53 @@ class AlphaResearchOrchestrator:
                     "tester-release gate only and does not prove global safety",
         }
 
+    def tester_release_candidate_status(
+            self, tester_state_dir: str = ".solaris_ai_nn_tester",
+            ) -> Dict[str, Any]:
+        """Read-only view of the local tester release candidate (Prompt 80).
+
+        Surfaces the RC readiness, the latest RC manifest / readiness report /
+        bundle paths, the blocker and warning counts. The RC assembly is a local
+        step only: it publishes nothing, uploads nothing, and creates no GitHub
+        releases/tags/issues.
+        """
+        rc = os.path.join(tester_state_dir, "release_candidate")
+        manifest = os.path.join(rc, "manifests", "TESTER_RC_MANIFEST.json")
+        if not os.path.isdir(rc):
+            return {"rc_available": False,
+                    "note": "no tester release candidate present; run "
+                            "`python -m solaris_ai_nn tester-rc`"}
+        data: Dict[str, Any] = {}
+        if os.path.isfile(manifest):
+            try:
+                with open(manifest, encoding="utf-8") as fh:
+                    data = json.load(fh)
+            except Exception:
+                data = {}
+        bundles = os.path.join(rc, "bundles")
+        bundle_path = None
+        if os.path.isdir(bundles):
+            subs = sorted(os.path.join(bundles, b)
+                          for b in os.listdir(bundles)
+                          if b.startswith("TESTER_RC_BUNDLE_"))
+            bundle_path = subs[-1] if subs else None
+        return {
+            "rc_available": True,
+            "latest_rc_manifest_path": manifest
+            if os.path.isfile(manifest) else None,
+            "latest_rc_readiness_report_path": os.path.join(
+                rc, "reports", "TESTER_RC_READINESS_REPORT.md"),
+            "latest_rc_bundle_path": bundle_path,
+            "readiness": data.get("readiness", "unknown"),
+            "blocker_count": data.get("blocker_count", 0),
+            "warning_count": data.get("warning_count", 0),
+            "missing_required_artifact_count": data.get(
+                "missing_required_artifact_count", 0),
+            "local_only": True, "published": False, "uploaded": False,
+            "note": "read-only view of the local tester release candidate; it "
+                    "is a local assembly step only and publishes nothing",
+        }
+
     def snapshot(self) -> Dict[str, Any]:
         return self.alpha_status()
 

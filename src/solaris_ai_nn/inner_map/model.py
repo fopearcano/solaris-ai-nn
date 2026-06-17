@@ -672,6 +672,12 @@ class InnerMapModel:
     # The safety freeze is a local report/gate-only firewall; it does not prove
     # the system safe in general and makes no consciousness/life/agency claim.
     tester_safety_freeze: Optional[Dict[str, Any]] = None
+    # Tester release candidate assembly (Prompt 80); None when not attached.
+    # Keys: rc_id, readiness, blocker_count, warning_count, bundle_path,
+    # release_notes_path, runbook_path, known_issues_path. The RC assembly is a
+    # local step only; it publishes/uploads nothing, creates no GitHub release/
+    # tag/issue, and makes no consciousness/life/agency claim.
+    tester_release_candidate: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

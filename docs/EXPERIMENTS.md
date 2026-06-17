@@ -3671,3 +3671,37 @@ Builds a release-blocker gate with missing-membrane, unsupported-claim, and fixt
 blockers, then shows that a non-critical blocker can be waived with a reason while a
 critical safety blocker cannot be silently waived. Open blockers prevent a tester release
 candidate.
+
+## 429. Tester RC Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_rc_demo.py --tester-state-dir .solaris_ai_nn_tester/test_rc_demo`
+Runs the full RC assembly twice: a blocked case against an under-prepared tester state and
+a ready-with-warnings case against a state seeded with packaging and safety-freeze
+manifests. It is a local assembly step only; it publishes/uploads nothing.
+
+## 430. Tester RC Manifest Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_rc_manifest_demo.py --tester-state-dir .solaris_ai_nn_tester/test_rc_manifest`
+Builds the RC manifest and prints the package metadata, the commit hash (read from
+`.git/HEAD` as a file, never a Git call), readiness, missing required artifacts, and known-
+missing optional modules (warning only). The manifest implies no publication.
+
+## 431. Tester RC Readiness Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_rc_readiness_demo.py --tester-state-dir .solaris_ai_nn_tester/test_rc_readiness`
+Evaluates the RC readiness gate against ready, ready-with-warnings, blocked-by-packaging,
+and critically-blocked-by-safety-freeze cases. Critical safety/membrane/claim blockers
+cannot be silently waived; missing optional modules do not block.
+
+## 432. Tester RC Docs Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_rc_docs_demo.py --tester-state-dir .solaris_ai_nn_tester/test_rc_docs`
+Builds the release notes, quickstart, runbook, known issues, and feedback guide, and checks
+that the notes carry a non-claim, the runbook is fixture-first with stop conditions, and the
+feedback guide states feedback is not training.
+
+## 433. Tester RC Bundle Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_rc_bundle_demo.py --tester-state-dir .solaris_ai_nn_tester/test_rc_bundle`
+Assembles the local RC bundle and prints the bundle directory, the included/missing artifact
+counts, and confirmation that nothing was uploaded or published. The bundle is local only.

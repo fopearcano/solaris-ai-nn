@@ -998,6 +998,27 @@ DESCRIPTIONS = {
         "aggregate readiness recommendation; report-only",
     "safety_freeze_safety_protocol":
         "no install/publish/release/network/feeder; report/gate-only",
+    "tester_release_candidate":
+        "local tester release-candidate assembly; collects docs/manifests/"
+        "reports/bundle; publishes nothing, uploads nothing",
+    "tester_rc_protocol":
+        "local RC assembly step; bounded; no publish/upload/release",
+    "rc_manifest_protocol":
+        "aggregate RC manifest; local only; implies no publication",
+    "rc_artifact_collector_protocol":
+        "resolves local artifact references; no private payloads/upload",
+    "rc_readiness_gate_protocol":
+        "blocks on packaging/safety/membrane/fixture failures",
+    "rc_notes_protocol":
+        "disclaimer-safe release notes/known issues/feedback guide",
+    "rc_runbook_protocol":
+        "fixture-first runbook with explicit stop conditions",
+    "rc_bundle_protocol":
+        "local RC bundle; nothing uploaded/published/tagged/released",
+    "rc_checklist_protocol":
+        "sectioned RC checklist; never hides missing required items",
+    "rc_safety_protocol":
+        "no publish/upload/tag/release/feeder/feedback-training; bounded",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -1467,6 +1488,11 @@ class ExperimentRegistry:
                         "release_blocker_gate_protocol",
                         "artifact_safety_scan_protocol")
             or bool(merged.get("tester_safety_freeze", False)))
+        features["tester_release_candidate"] = (
+            name.startswith("tester_rc")
+            or name.startswith("rc_")
+            or name == "tester_release_candidate"
+            or bool(merged.get("tester_release_candidate", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

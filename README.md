@@ -509,6 +509,30 @@ See `docs/TESTER_SAFETY_BOUNDARIES.md`, `docs/FORBIDDEN_CLAIMS.md`,
 `docs/ALLOWED_OPERATIONAL_LANGUAGE.md`, `docs/RED_TEAM_CHECKLIST.md`, and
 `docs/RELEASE_BLOCKERS.md`.
 
+## Tester Release Candidate
+
+Once packaging and the safety freeze pass, Solaris-AI-NN assembles the first local
+trusted-tester **release candidate** (Prompt 80). The Tester Release Candidate system
+assembles a local trusted-tester RC bundle, manifest, release notes, quickstart, runbook,
+known issues, feedback guide, readiness report, and checklist.
+
+```bash
+python -m solaris_ai_nn tester-rc --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn tester-rc-manifest --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn tester-rc-readiness --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn tester-rc-docs --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn tester-rc-bundle --tester-state-dir .solaris_ai_nn_tester
+```
+
+It does not publish/upload artifacts, create GitHub releases/tags/issues, upload packages,
+start feeders, control hardware, access network/shell/Git/GitHub/browser/OS, execute
+artifact contents, train on feedback, or make claims about consciousness, sentience,
+biological life, personhood, agency, free will, emotion, feeling, understanding,
+self-awareness, autonomous self-improvement, or subjective experience. The RC bundle is
+local; it is shared manually only if a tester requests it. See
+`docs/TESTER_RELEASE_CANDIDATE.md`, `docs/TESTER_QUICKSTART.md`, `docs/TESTER_RUNBOOK.md`,
+`docs/TESTER_KNOWN_ISSUES.md`, and `docs/TESTER_FEEDBACK_GUIDE.md`.
+
 ## Run the minimal experiment
 
 ```bash
@@ -2250,6 +2274,14 @@ src/solaris_ai_nn/
                 no release/tag/issue automation; no feeder/hardware/network/
                 shell/Git/GitHub/browser/OS; no training on feedback; not
                 consciousness evidence)
+  tester_release_candidate/  local trusted-tester release candidate assembly
+                (Prompt 80): RC profile, manifest, artifact collector,
+                readiness gate, notes/known-issues/feedback-guide builders,
+                runbook builder, checklist, bundle builder, RC runtime, reports,
+                safety (local assembly only; no publish/upload/tag/release; no
+                package upload; no Git/GitHub/network/shell/browser/OS; no
+                feeder/hardware; no artifact execution; no training on feedback;
+                not consciousness evidence)
   cli.py        unified `python -m solaris_ai_nn` Alpha CLI (local-only, bounded)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo
