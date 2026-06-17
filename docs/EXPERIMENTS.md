@@ -3259,3 +3259,44 @@ correction to make first, warnings, and the recommended next phase. The gate is
 advisory only -- it starts no phase, changes no feeder, and enables no learning. Try
 the overload / deprivation fixtures to see the gate block; a blocked gate is a
 normal, healthy early-observation outcome.
+
+## 374. Live Ontogenesis Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_ontogenesis_demo.py --state-dir .solaris_ai_nn_live/onto_demo`
+Sets up approved governance, a feeder registry, a (demo) birth certificate, and a
+sample inbox of stable recurring patterns; runs the post-birth observation to
+produce an observation stability gate; then runs the bounded first live ontogenesis
+runtime and prints feature/recurrence/candidate counts, born proto-concepts, the
+birth-gate status, and the recommended next phase. Nothing is learned; no
+semiogenesis is enabled; Solaris never controls the source.
+
+## 375. Live Feature Extraction Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_feature_extraction_demo.py --state-dir .solaris_ai_nn_live/feat_demo`
+Extracts feature vectors directly from the stable-pattern fixture: scalar payload
+buckets, absence markers, and rhythm markers. Demonstrates that the debug gloss is
+kept only as a non-ground-truth annotation and the operator pulse is not teaching.
+
+## 376. Live Proto-Concept Candidate Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_proto_concept_candidate_demo.py --state-dir .solaris_ai_nn_live/cand_demo`
+Runs the analysis pipeline on the stable, inconclusive, and contaminated fixtures to
+show the full range of candidate statuses: emerging / stabilizing / stable candidate
+/ born, weak, suspended, rejected, contaminated, and source-artifact. A candidate is
+not a concept until it passes the birth gate.
+
+## 377. Live Contamination Filter Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_contamination_filter_demo.py --state-dir .solaris_ai_nn_live/contam_demo`
+Runs the pipeline on the contaminated-pattern fixture and prints contamination
+findings per candidate: operator-pulse dominance (a hard block), debug-gloss /
+human-label ground-truth attempts, command-like text, fixture-marker leakage, and
+source-artifact warnings. Contaminated candidates cannot be born.
+
+## 378. Live Concept Birth Gate Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_concept_birth_gate_demo.py --state-dir .solaris_ai_nn_live/birth_gate_demo`
+Runs the pipeline on the stable, inconclusive, and contaminated fixtures and prints
+the conservative concept birth gate decision per candidate: born, deferred,
+contaminated, or a specific blocked-by status. The gate is conservative -- it does
+not enable semiogenesis, create language, or claim understanding.

@@ -2812,3 +2812,53 @@ of observation is the expected, healthy outcome: it means the system noticed a r
 problem (governance, quarantine rate, a forbidden source, overload, deprivation,
 operator-text dominance, a missing certificate) and is reporting the correction to
 make first, rather than pressing ahead.
+
+## Notes on First Live Ontogenesis
+
+**Why concept birth must be conservative.** The first time a system forms concepts
+from real input, the cheap failure mode is to mint a "concept" for every passing
+pattern. First live ontogenesis does the opposite: a candidate must clear governance,
+a birth certificate, an unblocked observation stability gate, a recurrence threshold,
+a conservative stability score, a contamination filter, and an evidence-balance check
+before it may be *born*. The default profile does not even allow birth -- it produces
+candidates only. The bias is deliberately toward *not* birthing: a missed concept can
+be formed later, but a falsely-born one pollutes everything downstream.
+
+**Why recurrence is not enough.** Recurrence is necessary but not sufficient. A noisy
+sensor that repeats the same malformed reading recurs; an operator who types the same
+note recurs; a fixture marker recurs. Recurrence is therefore only one factor among
+many (source diversity, noise resistance, absence tolerance, low operator/label/gloss
+dependence, payload consistency), and the recurrence tracker itself flags
+operator-only and human-text-only recurrence as contamination risks. A pattern earns
+candidacy by recurring *and* surviving the other tests.
+
+**Why human-text dominance is dangerous.** If human text -- the operator pulse or
+manually-entered environment notes -- supplies most of a candidate's support, the
+resulting "concept" is really a record of what a human said, not of the environment.
+That is how a system drifts from grounding into parroting. So the operator pulse is
+held to its role as stimulus (never teaching), human labels and debug gloss may
+annotate but never define, and a candidate with no non-human-label feature signature
+cannot be born no matter how stable it looks.
+
+**Why rejected candidates matter.** Concept memory is append-only and keeps the
+false starts: weak, suspended, rejected, and contaminated candidates are all
+preserved with their evidence and counterevidence. The rejected pile is the audit
+trail -- it shows what was considered and why it was declined, makes contamination
+patterns visible over time, and prevents the quiet disappearance of evidence that
+would make the born concepts look more inevitable than they were.
+
+**Why proto-concepts do not imply understanding.** A born proto-concept is an
+operational feature-stability record: "this structural feature signature recurred
+stably across these sources with this evidence." It is not a meaning, a symbol, a
+word, or an experience. The gate explicitly creates no language and claims no
+understanding. Naming these records "proto-concepts" is an engineering convenience,
+not a claim about cognition, and certainly not about consciousness, life, or agency.
+
+**Why live semiogenesis must wait for stable proto-concepts.** Semiogenesis -- the
+birth of signs that relate concepts -- only makes sense once there are stable, trusted
+proto-concepts to relate. Building signs on top of unstable or contaminated
+candidates would compound the error: a shaky proto-concept becomes a shaky sign
+becomes a shaky little language. So ontogenesis only *recommends* semiogenesis (when
+enough proto-concepts are born and the field is clean); it never starts it, and the
+default configuration keeps semiogenesis, action-reaction learning, and developmental
+autonomy off.

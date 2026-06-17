@@ -768,6 +768,28 @@ DESCRIPTIONS = {
         "advisory readiness gate (starts no phase; enables no learning)",
     "live_observation_safety":
         "no feeder/network/Git/command/default-learning; bounded; no hiding",
+    "live_ontogenesis":
+        "first live ontogenesis (conservative proto-concept candidate formation)",
+    "live_ontogenesis_protocol":
+        "feature-grounded proto-concept formation; no semiogenesis by default",
+    "live_ontogenesis_evaluation": "live ontogenesis state check",
+    "live_feature_extraction":
+        "feature evidence from validated events; gloss never ground truth",
+    "live_recurrence_tracking":
+        "recurrence needs multiple observations; single event insufficient",
+    "live_proto_concept_candidate":
+        "proto-concept candidate with preserved supporting/counter evidence",
+    "live_stability_scoring":
+        "conservative stability score; noisy single-source downgraded",
+    "live_contamination_filter":
+        "operator/human-label/gloss/source-artifact contamination detection",
+    "live_concept_birth_gate":
+        "conservative concept birth gate; births stable, blocks contamination",
+    "live_concept_memory":
+        "append-only concept memory; preserves false starts; links evidence",
+    "live_ontogenesis_safety":
+        "no semiogenesis/single-event/operator-only/gloss-only/contaminated "
+        "birth; bounded; no hiding",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -1163,6 +1185,14 @@ class ExperimentRegistry:
             or name.startswith("live_metabolism")
             or name.startswith("live_stability")
             or bool(merged.get("live_observation", False)))
+        features["live_ontogenesis"] = (
+            name.startswith("live_ontogenesis")
+            or name.startswith("live_feature_")
+            or name.startswith("live_recurrence")
+            or name.startswith("live_proto_concept")
+            or name.startswith("live_contamination")
+            or name.startswith("live_concept")
+            or bool(merged.get("live_ontogenesis", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

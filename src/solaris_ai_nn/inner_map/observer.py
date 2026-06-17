@@ -106,6 +106,7 @@ class InnerMapObserver:
     architecture_book: Any = None  # optional dict/object of documentation status
     live_birth: Any = None  # optional dict/object of live read-only birth status
     live_observation: Any = None  # optional dict/object of live observation status
+    live_ontogenesis: Any = None  # optional dict/object of live ontogenesis status
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -992,6 +993,17 @@ class InnerMapObserver:
                 model.live_observation = observation.observation_status()
             elif hasattr(observation, "snapshot"):
                 model.live_observation = observation.snapshot()
+        ontogenesis = self.live_ontogenesis
+        if ontogenesis is None and self.runner is not None:
+            ontogenesis = getattr(self.runner, "live_ontogenesis", None)
+        if ontogenesis is not None:
+            # First live ontogenesis status (conservative proto-concept records).
+            if isinstance(ontogenesis, dict):
+                model.live_ontogenesis = dict(ontogenesis)
+            elif hasattr(ontogenesis, "ontogenesis_status"):
+                model.live_ontogenesis = ontogenesis.ontogenesis_status()
+            elif hasattr(ontogenesis, "snapshot"):
+                model.live_ontogenesis = ontogenesis.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

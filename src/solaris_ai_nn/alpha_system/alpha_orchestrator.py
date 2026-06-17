@@ -520,6 +520,48 @@ class AlphaResearchOrchestrator:
                     "system never runs observation, learns, or controls feeders",
         }
 
+    def live_ontogenesis_status(self,
+                                live_state_dir: str = ".solaris_ai_nn_live",
+                                ) -> Dict[str, Any]:
+        """Read-only view of the latest first live ontogenesis run (Prompt 69).
+
+        The default alpha system stays fixture-only: this never runs ontogenesis,
+        never learns, and never controls feeders. It only reads the latest
+        ontogenesis index written by the live_ontogenesis runtime (if present) to
+        surface the run id, candidate / born counts, birth-gate status, the
+        concept-memory path, and the recommended next phase. Returns
+        ``{"live_ontogenesis_enabled": False}`` when no ontogenesis state exists.
+        """
+        index_dir = os.path.join(live_state_dir, "ontogenesis", "index")
+        if not os.path.isdir(index_dir):
+            return {"live_ontogenesis_enabled": False,
+                    "note": "no first live ontogenesis state present; the "
+                            "default alpha system remains fixture-only and never "
+                            "runs ontogenesis, learns, or controls feeders"}
+        files = sorted(f for f in os.listdir(index_dir) if f.endswith(".json"))
+        if not files:
+            return {"live_ontogenesis_enabled": False}
+        with open(os.path.join(index_dir, files[-1]), encoding="utf-8") as fh:
+            status = json.load(fh)
+        return {
+            "live_ontogenesis_enabled": True,
+            "ontogenesis_run_id": status.get("ontogenesis_run_id"),
+            "live_candidate_count": status.get("live_candidate_count", 0),
+            "live_born_proto_concept_count": status.get(
+                "live_born_proto_concept_count", 0),
+            "live_contaminated_candidate_count": status.get(
+                "live_contaminated_candidate_count", 0),
+            "live_birth_gate_status": status.get("live_birth_gate_status"),
+            "recommended_next_phase": status.get("recommended_next_phase"),
+            "latest_concept_memory_path": status.get(
+                "latest_concept_memory_path"),
+            "enables_semiogenesis": False, "learns": False,
+            "controls_feeders": False, "runs_git": False,
+            "note": "read-only view of the latest live ontogenesis; the alpha "
+                    "system never runs ontogenesis, learns, enables "
+                    "semiogenesis, or controls feeders",
+        }
+
     def snapshot(self) -> Dict[str, Any]:
         return self.alpha_status()
 

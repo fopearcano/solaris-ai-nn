@@ -2134,4 +2134,45 @@ def build_default_state_graph() -> StateGraph:
                "the load picture shapes report-only metabolism thresholds")
     g.add_edge("PostBirthLiveObservationRuntime", "inner_map",
                "live observation status feeds Inner MAP")
+
+    # First live ontogenesis (Prompt 69): conservative, feature-grounded proto-
+    # concept formation after birth and observation stability. It never enables
+    # semiogenesis/action-reaction/developmental autonomy or controls feeders.
+    for name, role in [
+        ("LiveOntogenesisProfile",
+         "candidate-first profile; no semiogenesis by default"),
+        ("LiveFeatureExtractor",
+         "feature evidence from validated events; gloss never truth"),
+        ("LiveRecurrenceTracker",
+         "recurrence needs multiple observations; single event insufficient"),
+        ("LiveProtoConceptCandidate",
+         "feature-stability record; not a concept until the gate"),
+        ("StabilityScorer", "conservative stability; noisy single-source low"),
+        ("LiveOntogenesisContaminationFilter",
+         "labels/gloss annotate, never define; operator pulse not teaching"),
+        ("LiveConceptBirthGate",
+         "conservative birth gate; no semiogenesis, no understanding claim"),
+        ("LiveConceptMemory",
+         "append-only local metadata; false starts preserved; evidence-linked"),
+        ("FirstLiveOntogenesisRuntime",
+         "bounded read-only ontogenesis; no learning/feeders/network/Git"),
+        ("LiveOntogenesisSafetyValidator",
+         "no semiogenesis/single-event/operator-only/gloss-only/contaminated "
+         "birth; bounded; no hiding"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("PostBirthLiveObservationRuntime", "FirstLiveOntogenesisRuntime",
+               "observation stability gate must be unblocked before ontogenesis")
+    g.add_edge("LiveFeatureExtractor", "LiveRecurrenceTracker",
+               "feature vectors are grouped into recurrence patterns")
+    g.add_edge("LiveRecurrenceTracker", "LiveProtoConceptCandidate",
+               "recurring signatures become proto-concept candidates")
+    g.add_edge("LiveOntogenesisContaminationFilter", "LiveConceptBirthGate",
+               "contamination findings gate concept birth")
+    g.add_edge("StabilityScorer", "LiveConceptBirthGate",
+               "stability scores gate concept birth")
+    g.add_edge("LiveConceptBirthGate", "LiveConceptMemory",
+               "gate decisions are recorded in append-only concept memory")
+    g.add_edge("FirstLiveOntogenesisRuntime", "inner_map",
+               "live ontogenesis status feeds Inner MAP")
     return g

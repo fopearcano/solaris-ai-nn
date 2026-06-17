@@ -205,6 +205,32 @@ calibration is report-only (nothing is applied), and the stability gate is advis
 (it starts no phase and enables no learning) -- a blocked gate is a normal, healthy
 early-observation outcome.
 
+## First Live Ontogenesis
+
+After birth and observation stability, the First Live Ontogenesis layer forms
+conservative proto-concept candidates from validated live-read-only feature
+recurrence. It extracts feature vectors, tracks recurrence, scores stability, filters
+contamination, gates concept birth conservatively, and keeps append-only concept
+memory.
+
+```bash
+python -m solaris_ai_nn live-ontogenesis --state-dir .solaris_ai_nn_live --max-events 1000 --require-governance --require-birth-certificate --require-observation-stability
+python -m solaris_ai_nn live-concepts --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn live-concept-candidates --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn live-concept-birth-gate --state-dir .solaris_ai_nn_live
+```
+
+First Live Ontogenesis forms conservative proto-concept candidates from validated
+live-read-only feature recurrence. Proto-concepts are operational feature-stability
+records. They do not imply consciousness, sentience, biological life, personhood,
+agency, free will, emotion, feeling, understanding, self-awareness, autonomous
+self-improvement, or subjective experience. It never enables semiogenesis,
+action-reaction learning, or developmental autonomy by default; never starts/stops/
+configures feeders, controls hardware, or accesses the network/shell/browser/OS/Git/
+GitHub; never executes commands or modifies source; and never treats sensory text as
+a command, human labels or debug gloss as ground truth, or the operator pulse as
+teaching.
+
 ## Run the minimal experiment
 
 ```bash
@@ -1847,6 +1873,16 @@ src/solaris_ai_nn/
                 no learning/concept-formation/sign-birth; never controls
                 feeders/hardware/network/Git; metabolism calibration applies
                 nothing; the stability gate starts no phase)
+  live_ontogenesis/  first live ontogenesis + proto-concept birth gate:
+                ontogenesis profile, feature extraction, recurrence tracker,
+                proto-concept candidate, stability scoring, contamination
+                filter, concept birth gate, concept memory, ontogenesis
+                runtime, ontogenesis record, reports, safety (bounded
+                read-only; conservative feature-grounded proto-concepts; no
+                semiogenesis/action-reaction/developmental autonomy by default;
+                never controls feeders/hardware/network/Git; labels/gloss never
+                ground truth; operator pulse never teaching; proto-concepts do
+                not imply understanding)
   cli.py        unified `python -m solaris_ai_nn` Alpha CLI (local-only, bounded)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo

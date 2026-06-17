@@ -589,6 +589,15 @@ class InnerMapModel:
     # births signs, controls feeders/hardware/network, or makes any
     # consciousness/life/agency claim.
     live_observation: Optional[Dict[str, Any]] = None
+    # First live ontogenesis status (Prompt 69); None when not attached. Keys:
+    # live_ontogenesis_enabled, ontogenesis_run_id, live_feature_vector_count,
+    # live_candidate_count, live_born_proto_concept_count,
+    # live_contaminated_candidate_count, live_birth_gate_status,
+    # latest_concept_memory_path, latest_ontogenesis_report_path. This is
+    # conservative feature-grounded proto-concept formation -- it never enables
+    # semiogenesis / action-reaction / developmental autonomy, controls
+    # feeders/hardware/network, or makes any consciousness/life/agency claim.
+    live_ontogenesis: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

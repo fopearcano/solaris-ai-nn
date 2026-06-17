@@ -4359,3 +4359,66 @@ executes commands, modifies source, treats sensory text as a command, treats hum
 labels or debug gloss as ground truth, or makes any claim of consciousness,
 sentience, biological life, personhood, agency, free will, emotion, feeling,
 understanding, self-awareness, or subjective experience.**
+
+## First Live Ontogenesis
+
+The `live_ontogenesis` package (Prompt 69) implements the first live ontogenesis
+phase: limited, conservative proto-concept formation from validated real
+environmental flux. **It begins only after birth (Prompt 67) and an unblocked
+observation stability gate (Prompt 68).** It answers: are there recurring live
+feature patterns; which are stable enough to be proto-concept candidates; which are
+source-specific artifacts; which are fixture-like or label-contaminated; which
+survive absence, noise, and recurrence tests; which should be born, weakened,
+suspended, or rejected; is the field ready for later semiogenesis; and what evidence
+and counterevidence bear on each candidate. It is feature-grounded proto-concept
+formation from live-read-only environmental recurrence -- **not** semantic learning
+from human labels, language acquisition, symbolic understanding, consciousness, or
+biological development.
+
+**Proto-concepts are feature-stability records.** The bounded
+`FirstLiveOntogenesisRuntime` re-reads the local inbox through the Prompt 67
+validator, then: the `LiveFeatureExtractor` turns each accepted event into a feature
+vector (source/modality/channel, a timestamp bucket, bucketed scalar values,
+categorical keys, a payload-shape signature, absence/noise markers, and rhythm/load
+context) -- debug gloss is stored only as a non-ground-truth annotation, human text
+is represented structurally rather than semantically, the operator pulse is never
+allowed to dominate, and raw private/secret events are never extracted. The
+`LiveRecurrenceTracker` groups feature vectors by signature (recurrence requires
+multiple observations; a single event cannot birth a concept; operator-pulse-only
+recurrence is insufficient; human-text-only recurrence is a contamination risk). The
+`LiveProtoConceptCandidate` preserves both supporting and contradicting evidence;
+weak, suspended, rejected, and contaminated candidates all remain visible.
+
+**Concept birth is conservatively gated.** The `StabilityScorer` scores each
+candidate across recurrence, source/modality diversity, temporal persistence, noise
+resistance, absence tolerance, low contamination / operator / label / gloss
+dependence, cross-source support, and payload consistency -- high recurrence from one
+noisy source or from operator text is not enough, and contradictory evidence lowers
+confidence. The `LiveOntogenesisContaminationFilter` flags human-label / debug-gloss
+ground-truth attempts, operator-pulse / human-text / source-diet dominance,
+fixture-marker leakage, command-like text, private/secret markers, forbidden
+sources, malformed payloads, and source artifacts (labels and gloss annotate but
+never define; the operator pulse is stimulus, not teaching; contaminated candidates
+cannot be born; a source artifact may persist only if marked as such). The
+`LiveConceptBirthGate` then requires valid governance, a birth certificate, an
+unblocked observation stability gate, real accepted-event evidence, recurrence and
+stability above threshold, contamination below threshold, no forbidden source, no
+severe overload/deprivation, no operator-text dominance, at least one
+non-human-label feature signature, and more supporting evidence than counterevidence
+before a candidate may be *born*. The `LiveConceptMemory` records every candidate --
+born, weak, rejected, contaminated -- as append-only local metadata linked to its
+evidence; false starts are never deleted.
+
+The layer is reached via `python -m solaris_ai_nn live-ontogenesis / live-concepts /
+live-concept-candidates / live-concept-birth-gate`, feeds Inner MAP
+(`model.live_ontogenesis`) and Evaluation (the `live_ontogenesis_*` protocols and
+`live_ontogenesis_metrics`), records operational-only evidence for the Research Cycle
+and Scientific Claims, and is surfaced read-only by the Alpha system
+(`live_ontogenesis_status()`); the default alpha system stays fixture-only. **First
+live ontogenesis never enables semiogenesis, action-reaction learning, or
+developmental autonomy by default; never starts/stops/configures feeders, controls
+hardware, or accesses the network/shell/browser/OS/camera/microphone/Git/GitHub;
+never executes commands or modifies source; never treats sensory text as a command,
+human labels or debug gloss as ground truth, or the operator pulse as teaching; and
+never claims consciousness, sentience, biological life, personhood, agency, free
+will, emotion, feeling, understanding, self-awareness, or subjective experience.**

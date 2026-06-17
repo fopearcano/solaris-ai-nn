@@ -29,7 +29,30 @@ _ALPHA_COMMANDS = ("doctor", "init", "modules", "run-demo", "artifact-index",
                    "live-init", "live-doctor", "live-birth", "live-quarantine",
                    "birth-certificate", "live-observe", "live-source-health",
                    "live-source-diet", "live-metabolism-calibration",
-                   "live-stability-gate")
+                   "live-stability-gate", "live-ontogenesis", "live-concepts",
+                   "live-concept-candidates", "live-concept-birth-gate")
+
+
+def _ontogenesis_runtime(args: argparse.Namespace):
+    from .live_ontogenesis.ontogenesis_runtime import (
+        FirstLiveOntogenesisRuntime,
+    )
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_live"
+    return FirstLiveOntogenesisRuntime(
+        state_dir=state_dir, profile=args.profile,
+        max_runtime_s=args.max_runtime_s, max_files=args.max_files,
+        max_events=args.max_events, max_candidates=args.max_candidates,
+        min_recurrence=args.min_recurrence, min_stability=args.min_stability,
+        strict=args.strict, dry_run=args.dry_run, report_only=args.report_only,
+        require_governance=args.require_governance,
+        require_birth_certificate=args.require_birth_certificate,
+        require_observation_stability=args.require_observation_stability,
+        allow_limited_birth=args.allow_limited_birth,
+        require_claimguard=args.require_claimguard,
+        operator_note=args.operator_note)
 
 
 def _observation_runtime(args: argparse.Namespace):
@@ -476,6 +499,83 @@ def cmd_live_stability_gate(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_live_ontogenesis(args: argparse.Namespace) -> int:
+    rt = _ontogenesis_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"live ontogenesis refused: {result.get('reason')}")
+        return 2
+    st = rt.ontogenesis_status()
+    _print("first live ontogenesis:")
+    _print(f"  run id: {st['ontogenesis_run_id']}")
+    _print(f"  blocked: {result['blocked']}")
+    for b in result["blockers"]:
+        _print(f"    blocker: {b}")
+    _print(f"  feature vectors: {st['live_feature_vector_count']}; recurrence "
+           f"patterns: {st['live_recurrence_pattern_count']}")
+    _print(f"  candidates: {st['live_candidate_count']} (stable "
+           f"{st['live_stable_candidate_count']}, born "
+           f"{st['live_born_proto_concept_count']}, contaminated "
+           f"{st['live_contaminated_candidate_count']})")
+    _print(f"  birth gate status: {st['live_birth_gate_status']}")
+    _print(f"  recommended next phase: {st['recommended_next_phase']}")
+    _print(f"  concept memory: {st['latest_concept_memory_path']}")
+    _print(f"  enables semiogenesis / starts feeders: "
+           f"{st['enables_semiogenesis']} / {st['starts_feeders']}")
+    if result["blocked"] and args.strict:
+        return 2
+    return 0
+
+
+def cmd_live_concepts(args: argparse.Namespace) -> int:
+    import os as _os
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_live"
+    index = _os.path.join(state_dir, "ontogenesis", "concepts",
+                          "LIVE_CONCEPT_MEMORY.json")
+    _print("live concept memory:")
+    if not _os.path.isfile(index):
+        _print("  (no concept memory yet; run live-ontogenesis first)")
+        return 0
+    with open(index, encoding="utf-8") as fh:
+        data = json.load(fh)
+    _print(f"  concept records: {data.get('live_concept_record_count', 0)}")
+    _print(f"  by status: {data.get('by_status', {})}")
+    _print(f"  born: {data.get('born_count', 0)}")
+    return 0
+
+
+def cmd_live_concept_candidates(args: argparse.Namespace) -> int:
+    rt = _ontogenesis_runtime(args)
+    rt.run()
+    _print("live proto-concept candidates:")
+    if not rt.candidates:
+        _print("  (no candidates; field may be blocked or have too few events)")
+    for c in sorted(rt.candidates, key=lambda x: -x.stability_score)[:25]:
+        _print(f"  - [{c.status}] recurrence={c.recurrence_count} "
+               f"stability={c.stability_score:.2f} "
+               f"support={c.supporting_count} counter={c.counter_count}")
+    return 0
+
+
+def cmd_live_concept_birth_gate(args: argparse.Namespace) -> int:
+    rt = _ontogenesis_runtime(args)
+    rt.run()
+    _print("live concept birth gate (conservative):")
+    born = [g for g in rt.birth_gate_results if g.get("born")]
+    blocked = [g for g in rt.birth_gate_results if g.get("blocked")]
+    _print(f"  candidates evaluated: {len(rt.birth_gate_results)}")
+    _print(f"  born: {len(born)}; blocked/contaminated: {len(blocked)}")
+    for g in rt.birth_gate_results[:25]:
+        _print(f"  - {g['candidate_id']}: {g['concept_birth_gate_status']} "
+               f"(born={g['born']})")
+    if rt.blocked and args.strict:
+        return 2
+    return 0
+
+
 _HANDLERS = {
     "init": cmd_init,
     "doctor": cmd_doctor,
@@ -498,6 +598,10 @@ _HANDLERS = {
     "live-source-diet": cmd_live_source_diet,
     "live-metabolism-calibration": cmd_live_metabolism_calibration,
     "live-stability-gate": cmd_live_stability_gate,
+    "live-ontogenesis": cmd_live_ontogenesis,
+    "live-concepts": cmd_live_concepts,
+    "live-concept-candidates": cmd_live_concept_candidates,
+    "live-concept-birth-gate": cmd_live_concept_birth_gate,
 }
 
 
@@ -556,6 +660,23 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--no-inbox-read", action="store_true", default=False,
                         dest="no_inbox_read",
                         help="do not read new inbox events during observation")
+    # First live ontogenesis arguments (Prompt 69).
+    parser.add_argument("--max-candidates", type=int, default=200,
+                        dest="max_candidates",
+                        help="bounded max proto-concept candidates")
+    parser.add_argument("--min-recurrence", type=int, default=3,
+                        dest="min_recurrence",
+                        help="minimum recurrence for a proto-concept candidate")
+    parser.add_argument("--min-stability", type=float, default=0.6,
+                        dest="min_stability",
+                        help="minimum stability score for concept birth")
+    parser.add_argument("--require-observation-stability", action="store_true",
+                        default=False, dest="require_observation_stability",
+                        help="require an unblocked observation stability gate")
+    parser.add_argument("--allow-limited-birth", action="store_true",
+                        default=False, dest="allow_limited_birth",
+                        help="allow conservative proto-concept birth (else "
+                             "candidate-only)")
 
 
 def build_parser() -> argparse.ArgumentParser:

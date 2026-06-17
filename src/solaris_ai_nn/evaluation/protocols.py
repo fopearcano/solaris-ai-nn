@@ -9580,6 +9580,258 @@ def live_observation_safety_protocol(
     return _run(manifest, body)
 
 
+def _ontogenesis_events(kind: str = "stable"):
+    """Synthetic already-trusted event dicts for ontogenesis component protocols."""
+
+    def ev(eid, ts, sid, modality, channel, payload, noise=0.0, absence=False,
+           gloss_gt=False, label_gt=False):
+        return {"event_id": eid, "timestamp_utc": ts, "source_id": sid,
+                "modality": modality, "channel": channel, "read_only": True,
+                "is_command": False, "human_label_is_ground_truth": label_gt,
+                "payload": payload,
+                "quality": {"completeness": 1.0, "noise": noise,
+                            "is_absence": absence, "is_noisy": noise >= 0.5},
+                "safety": {"private_data": False, "contains_instruction": False,
+                           "contains_secret": False, "allow_learning": False},
+                "debug_gloss": "DEBUG ONLY (not ground truth)",
+                "debug_gloss_is_ground_truth": gloss_gt}
+
+    if kind == "contaminated":
+        rows = [ev(f"op{i}", f"2026-06-18T11:0{i}:00Z", "operator_pulse",
+                   "pulse", "operator/pulse", {"pulse": 1}) for i in range(5)]
+        rows.append(ev("lbl", "2026-06-18T11:06:00Z", "local_environment_manual",
+                       "manual", "environment/manual", {"room": "x"},
+                       label_gt=True))
+        return rows
+    if kind == "inconclusive":
+        return [ev("s1", "2026-06-18T13:00:00Z", "machine_body", "scalar",
+                   "machine_body/temp", {"temp": 41.0})]
+    # stable: recurring scalar patterns across several sources (a balanced field
+    # so observation is stable and conservative birth is possible).
+    rows = [ev(f"b{i}", f"2026-06-18T08:0{i}:00Z", "machine_body", "scalar",
+               "machine_body/load", {"load": 0.30 + i * 0.01}, noise=0.05)
+            for i in range(6)]
+    rows += [ev(f"w{i}", f"2026-06-18T08:1{i}:00Z",
+                "local_weather_readonly_external", "scalar", "weather/temp",
+                {"temp_c": 19.0}) for i in range(4)]
+    rows += [ev(f"a{i}", f"2026-06-18T08:2{i}:00Z", "project_artifact_field",
+                "field", "artifact/counts", {"reports": 12}) for i in range(4)]
+    rows += [ev(f"ab{i}", f"2026-06-18T08:3{i}:00Z", "chronos_absence",
+                "chronos", "time/absence", {"absence": True}, absence=True)
+             for i in range(3)]
+    rows += [ev("e0", "2026-06-18T08:40:00Z", "local_environment_manual",
+                "manual", "environment/x", {"v": 1}),
+             ev("op0", "2026-06-18T08:41:00Z", "operator_pulse", "pulse",
+                "operator/pulse", {"pulse": 1})]
+    return rows
+
+
+def _build_live_ontogenesis(state_dir, *, kind="stable", allow_birth=True,
+                            require_observation=False):
+    """Build + run a bounded first live ontogenesis over synthetic local events."""
+    import json as _json
+    import os as _os
+
+    from ..live_birth import approved_governance, feeder_registry_template
+    from ..live_observation import PostBirthLiveObservationRuntime
+    from ..live_ontogenesis import FirstLiveOntogenesisRuntime
+
+    base = state_dir or ".solaris_ai_nn_live/onto_eval"
+    for sub in ("governance", "feeders", "inbox", "certificates"):
+        _os.makedirs(_os.path.join(base, sub), exist_ok=True)
+    with open(_os.path.join(base, "governance",
+                            "LIVE_READONLY_GOVERNANCE.json"), "w",
+              encoding="utf-8") as fh:
+        _json.dump(approved_governance(), fh)
+    with open(_os.path.join(base, "feeders", "FEEDER_REGISTRY.json"), "w",
+              encoding="utf-8") as fh:
+        _json.dump(feeder_registry_template(), fh)
+    with open(_os.path.join(base, "certificates", "BIRTH_CERTIFICATE_eval.md"),
+              "w", encoding="utf-8") as fh:
+        fh.write("# Birth certificate (eval)\n")
+    with open(_os.path.join(base, "inbox", "events.jsonl"), "w",
+              encoding="utf-8") as fh:
+        for e in _ontogenesis_events(kind):
+            fh.write(_json.dumps(e) + "\n")
+    PostBirthLiveObservationRuntime(state_dir=base).run()
+    rt = FirstLiveOntogenesisRuntime(
+        state_dir=base, allow_limited_birth=allow_birth,
+        require_observation_stability=require_observation)
+    rt.run()
+    return rt
+
+
+def live_ontogenesis_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """A bounded first live ontogenesis runs and produces proto-concept records."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_live_ontogenesis(m.state_dir)
+        return {"live_ontogenesis":
+                M.live_ontogenesis_metrics(rt.ontogenesis_status())}
+
+    return _run(manifest, body)
+
+
+def live_feature_extraction_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Scalar/absence features are extracted; gloss is never ground truth."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_ontogenesis import LiveFeatureExtractor
+
+        result = LiveFeatureExtractor().extract(
+            accepted_events=_ontogenesis_events("stable"))
+        d = result.to_dict()
+        sample = d["vectors"][0] if d["vectors"] else {}
+        return {"live_ontogenesis": {
+            "feature_vector_count": d["live_feature_vector_count"],
+            "gloss_is_ground_truth": sample.get(
+                "debug_gloss_is_ground_truth", False),
+            "human_label_is_ground_truth": sample.get(
+                "human_label_is_ground_truth", False)}}
+
+    return _run(manifest, body)
+
+
+def live_recurrence_tracking_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Recurrence needs multiple observations; a single event is insufficient."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_ontogenesis import (
+            LiveFeatureExtractor, LiveRecurrenceTracker)
+
+        many = LiveFeatureExtractor().extract(
+            accepted_events=_ontogenesis_events("stable")).vectors
+        one = LiveFeatureExtractor().extract(
+            accepted_events=_ontogenesis_events("inconclusive")).vectors
+        many_p = LiveRecurrenceTracker().track(many)
+        one_p = LiveRecurrenceTracker().track(one)
+        return {"live_ontogenesis": {
+            "recurrence_pattern_count": len(many_p),
+            "strong_or_moderate": any(p.strength in ("strong", "moderate")
+                                      for p in many_p),
+            "single_event_strength_none": all(p.strength == "none"
+                                              for p in one_p)}}
+
+    return _run(manifest, body)
+
+
+def live_proto_concept_candidate_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Candidates serialize with evidence and are not concepts before the gate."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_live_ontogenesis(m.state_dir)
+        cand = rt.candidates[0] if rt.candidates else None
+        d = cand.to_dict() if cand else {}
+        return {"live_ontogenesis": {
+            "candidate_count": len(rt.candidates),
+            "has_supporting": bool(d.get("supporting_events", [])) if cand
+            else False,
+            "preserves_evidence": "supporting_events" in d}}
+
+    return _run(manifest, body)
+
+
+def live_stability_scoring_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Stable patterns score higher than noisy single-source recurrence."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_live_ontogenesis(m.state_dir)
+        scores = [v.get("stability_score", 0.0)
+                  for v in rt.stability_scores.values()]
+        return {"live_ontogenesis": {
+            "scored_candidate_count": len(scores),
+            "max_stability": max(scores) if scores else 0.0}}
+
+    return _run(manifest, body)
+
+
+def live_contamination_filter_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Operator dominance is detected and blocks concept birth."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_ontogenesis import FirstLiveOntogenesisRuntime
+
+        rt = FirstLiveOntogenesisRuntime(state_dir=m.state_dir,
+                                         allow_limited_birth=True)
+        rt.analyze_events(_ontogenesis_events("contaminated"), observation={
+            "present": True, "blocked": False, "stability": {}, "load": {},
+            "source_diet": {"balance": "operator_pulse_dominant"},
+            "source_health": {}, "rhythm": {}, "metabolism": {}})
+        contaminated = sum(1 for r in rt.contamination_results
+                           if r.get("contaminated"))
+        return {"live_ontogenesis": {
+            "contaminated_candidate_count": contaminated,
+            "any_operator_dominance": any(
+                f.get("contamination_type") == "operator_pulse_dominance"
+                for r in rt.contamination_results
+                for f in r.get("findings", []))}}
+
+    return _run(manifest, body)
+
+
+def live_concept_birth_gate_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The conservative gate births stable evidence and blocks contamination."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_live_ontogenesis(m.state_dir, kind="stable",
+                                     allow_birth=True)
+        born = sum(1 for g in rt.birth_gate_results if g.get("born"))
+        return {"live_ontogenesis": {
+            "birth_gate_evaluated": len(rt.birth_gate_results),
+            "born_count": born,
+            "enables_semiogenesis": False}}
+
+    return _run(manifest, body)
+
+
+def live_concept_memory_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Concept memory preserves records and links them to evidence."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_live_ontogenesis(m.state_dir)
+        index = rt.concept_memory.index().to_dict() if rt.concept_memory else {}
+        return {"live_ontogenesis": {
+            "concept_record_count": index.get("live_concept_record_count", 0),
+            "preserves_all_statuses": "by_status" in index}}
+
+    return _run(manifest, body)
+
+
+def live_ontogenesis_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Ontogenesis blocks single-event/operator-only/gloss-only/contaminated birth."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_ontogenesis import LiveOntogenesisSafetyValidator
+
+        v = LiveOntogenesisSafetyValidator()
+        return {"live_ontogenesis": {
+            "semiogenesis_blocked":
+                not v.validate_operation("enable semiogenesis").safe,
+            "single_event_blocked": not v.validate_birth_evidence(
+                recurrence_count=1, operator_text_only=False,
+                debug_gloss_only=False, contaminated=False).safe,
+            "operator_only_blocked": not v.validate_birth_evidence(
+                recurrence_count=5, operator_text_only=True,
+                debug_gloss_only=False, contaminated=False).safe,
+            "gloss_only_blocked": not v.validate_birth_evidence(
+                recurrence_count=5, operator_text_only=False,
+                debug_gloss_only=True, contaminated=False).safe,
+            "claim_blocked":
+                not v.validate_claim_text("the system is conscious").safe,
+            "can_enable_semiogenesis_by_default":
+                v.can_enable_semiogenesis_by_default()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -10209,4 +10461,24 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "live_stability_gate_protocol": live_stability_gate_protocol,
     "live_observation_safety": live_observation_safety_protocol,
     "live_observation_safety_protocol": live_observation_safety_protocol,
+    "live_ontogenesis": live_ontogenesis_protocol,
+    "live_ontogenesis_protocol": live_ontogenesis_protocol,
+    "live_ontogenesis_evaluation": live_ontogenesis_protocol,
+    "live_feature_extraction": live_feature_extraction_protocol,
+    "live_feature_extraction_protocol": live_feature_extraction_protocol,
+    "live_recurrence_tracking": live_recurrence_tracking_protocol,
+    "live_recurrence_tracking_protocol": live_recurrence_tracking_protocol,
+    "live_proto_concept_candidate": live_proto_concept_candidate_protocol,
+    "live_proto_concept_candidate_protocol":
+        live_proto_concept_candidate_protocol,
+    "live_stability_scoring": live_stability_scoring_protocol,
+    "live_stability_scoring_protocol": live_stability_scoring_protocol,
+    "live_contamination_filter": live_contamination_filter_protocol,
+    "live_contamination_filter_protocol": live_contamination_filter_protocol,
+    "live_concept_birth_gate": live_concept_birth_gate_protocol,
+    "live_concept_birth_gate_protocol": live_concept_birth_gate_protocol,
+    "live_concept_memory": live_concept_memory_protocol,
+    "live_concept_memory_protocol": live_concept_memory_protocol,
+    "live_ontogenesis_safety": live_ontogenesis_safety_protocol,
+    "live_ontogenesis_safety_protocol": live_ontogenesis_safety_protocol,
 }

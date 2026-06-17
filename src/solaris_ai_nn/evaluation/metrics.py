@@ -2648,3 +2648,57 @@ def live_observation_metrics(lo: Optional[Dict[str, Any]]) -> Dict[str, Any]:
                 "is controlled, and nothing about consciousness/life/agency is "
                 "proven; metabolism calibration is report-only",
     }
+
+
+def live_ontogenesis_metrics(lo: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective first-live-ontogenesis metrics (conservative, read-only).
+
+    These describe bounded, feature-grounded proto-concept formation: feature
+    vectors, recurrence patterns, candidates, stable candidates, born proto-
+    concepts, rejected/contaminated/source-artifact candidates, and birth-gate
+    pass/block counts. Proto-concepts are operational feature-stability records.
+    Nothing is learned semantically, no semiogenesis / action-reaction /
+    developmental autonomy is enabled, no feeder/hardware/network is controlled,
+    and no consciousness/life/agency claim is made.
+    """
+    if not lo:
+        return {"present": False}
+    gate = lo.get("live_birth_gate_status", "")
+    born = int(lo.get("live_born_proto_concept_count", 0) or 0)
+    return {
+        "present": True,
+        "live_ontogenesis_run_count": 1,
+        "live_ontogenesis_blocked_count": 1 if lo.get(
+            "live_ontogenesis_blocked") else 0,
+        "live_feature_vector_count": int(
+            lo.get("live_feature_vector_count", 0) or 0),
+        "live_recurrence_pattern_count": int(
+            lo.get("live_recurrence_pattern_count", 0) or 0),
+        "live_candidate_count": int(lo.get("live_candidate_count", 0) or 0),
+        "live_stable_candidate_count": int(
+            lo.get("live_stable_candidate_count", 0) or 0),
+        "live_born_proto_concept_count": born,
+        "live_rejected_candidate_count": int(
+            lo.get("live_rejected_candidate_count", 0) or 0),
+        "live_contaminated_candidate_count": int(
+            lo.get("live_contaminated_candidate_count", 0) or 0),
+        "live_source_artifact_candidate_count": int(
+            lo.get("live_source_artifact_candidate_count", 0) or 0),
+        "live_birth_gate_pass_count": born,
+        "live_birth_gate_block_count": int(
+            lo.get("live_contaminated_candidate_count", 0) or 0)
+        + (1 if str(gate) == "blocked" else 0),
+        "live_birth_gate_status": gate,
+        "recommended_next_phase": lo.get("recommended_next_phase"),
+        "live_ontogenesis_safety_block_count": int(
+            lo.get("live_ontogenesis_safety_block_count", 0) or 0),
+        "enables_semiogenesis": False, "enables_action_reaction": False,
+        "enables_developmental_autonomy": False,
+        "starts_feeders": False, "controls_hardware": False,
+        "accesses_network": False, "runs_git": False,
+        "is_consciousness_or_personhood": False,
+        "note": "bounded feature-grounded proto-concept formation; proto-"
+                "concepts are operational feature-stability records; no "
+                "semiogenesis/action-reaction/developmental autonomy is "
+                "enabled; nothing about consciousness/life/agency is proven",
+    }
