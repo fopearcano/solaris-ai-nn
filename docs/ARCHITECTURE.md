@@ -4654,3 +4654,59 @@ truth or the operator pulse as teaching, or claims consciousness, sentience,
 biological life, personhood, agency, free will, emotion, feeling, understanding,
 self-awareness, or subjective experience. Membrane integration is an architectural
 audit/enforcement layer, not evidence of inner life.
+
+## Tester Fixture Spine
+
+The `tester_fixture_spine` package (Prompt 74) is the first tester-safe reproducible
+demo spine. **The tester release does not begin with live data; it begins with
+fixture-only golden runs.** It is a known-good organismic rehearsal that a trusted
+tester runs before any live read-only birth/observation testing. The one command
+`python -m solaris_ai_nn tester-demo --profile fixture_tester_v0` runs a bounded,
+deterministic rehearsal and produces a tester run summary, an artifact bundle, fixture/
+membrane/observation/optional-learning/claim-safety reports, a reproducibility status,
+a regression status, and next-step instructions. This is about reproducibility and
+tester confidence, not impressive cognition.
+
+**The membrane path is required; live data is not.** The demo stages a deterministic
+fixture pack (`examples/tester_fixture_spine/fixture_tester_v0/events.jsonl`) into a
+per-run inbox, validates and quarantines it (the unsafe command-like event is
+quarantined, never learned), runs the environmental membrane to generate sensory
+impressions, runs the membrane-integration audit, observes over the impressions
+(distinguishing the event diet from the impression diet), and then *optionally* runs
+limited ontogenesis/semiogenesis/cognition from the impressions. **Raw events are not
+perception**: downstream learning consumes sensory impressions, and a raw-event
+downstream path is a failure in strict mode. If the membrane is unavailable, the demo
+fails in strict mode and produces a limited, honest report otherwise -- it never runs
+downstream learning without impressions.
+
+**Golden runs, reproducibility, and regression.** A `GoldenRunManifest` records the
+expected *artifact structure* and safety invariants -- never fragile timestamps or run
+ids -- so it tolerates changing run ids and timestamps and checks semantics. The
+`TesterReproducibilityCheck` confirms the same fixture hash, the expected artifact
+structure, the expected quarantine/impression/receptor behavior, the operator-pulse
+attenuation, and the safety invariants; it fails on missing required artifacts or
+unsupported claims and warns on missing optional modules. The `TesterRegressionCheck`
+is structural and safety-focused: it tolerates numeric/wording changes but fails if the
+membrane path disappears, a raw-event bypass appears, or a safety disclaimer or
+required artifact disappears. **Optional cognition layers can skip honestly** with an
+explicit marker; skipped stages are never hidden.
+
+**The tester bundle is local only.** `TesterBundleBuilder` assembles a human-readable
+`TESTER_BUNDLE_<run_id>/` directory with copies/references to every report, the
+reproducibility/regression results, the list of skipped stages, a README for the
+tester, and a tester-feedback-form placeholder. It is never zipped automatically,
+never uploaded, and never published, and it contains no secrets or private data.
+**Tester feedback is not training**: it is collected for human review only and is never
+used as a label, ground truth, or training signal. The Alpha system surfaces a
+read-only `tester_fixture_status()`, the Inner MAP records a `tester_fixture_spine`
+entry, and Evaluation adds `tester_fixture_spine` metrics and protocols.
+
+**The tester spine controls nothing.** It is bounded and fixture-only by default; it
+requires no live data/governance/feeders, and it never starts/stops/configures
+feeders, controls hardware, accesses the network/shell/browser/OS/Git/GitHub, runs
+external services, publishes or uploads anything, executes commands from fixture text,
+treats sensory text as a command, treats human labels or debug gloss as ground truth,
+treats the operator pulse as teaching, trains on tester feedback, or claims
+consciousness, sentience, biological life, personhood, agency, free will, emotion,
+feeling, understanding, self-awareness, autonomous self-improvement, or subjective
+experience. Fixture success is a reproducibility signal, not evidence of inner life.

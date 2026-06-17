@@ -3457,3 +3457,42 @@ violated status against the membrane.
 Walks the live perceptual pipeline stage by stage and prints, per stage, the status,
 impression count, raw-fallback count, and bypass findings. Fallback, missing
 artifacts, and bypasses are all visible.
+
+## 399. Tester Fixture Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_fixture_demo.py --state-dir .solaris_ai_nn_tester/demo`
+Runs the full fixture-only known-good organismic rehearsal (validation/quarantine ->
+environmental membrane -> sensory impressions -> membrane-integration audit ->
+observation -> optional ontogenesis/semiogenesis/cognition -> claim/safety scan),
+builds a local artifact bundle, and prints the golden-run, reproducibility, and
+regression results. No live data is required and nothing is published or uploaded.
+
+## 400. Tester Golden Manifest Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_golden_demo.py --state-dir .solaris_ai_nn_tester/golden`
+Builds (or rebuilds) the golden run manifest and prints the expected artifact structure
+-- required vs optional, present vs missing -- showing that the manifest tolerates
+changing run ids and timestamps and checks semantic structure and safety invariants.
+
+## 401. Tester Reproducibility Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_reproducibility_demo.py --state-dir .solaris_ai_nn_tester/repro`
+Runs a known-good fixture demo (pass), then demonstrates a pass-with-warnings case (a
+missing optional module) and a fail case (a missing required artifact). Reproducibility
+ignores timestamps/run ids and fails on missing required artifacts or unsupported
+claims.
+
+## 402. Tester Regression Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_regression_demo.py --state-dir .solaris_ai_nn_tester/regression`
+Runs a known-good fixture demo (no regression), then demonstrates two regressions: the
+membrane path disappearing and an unsupported claim appearing. Regression is structural
+and safety-focused.
+
+## 403. Tester Bundle Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_bundle_demo.py --state-dir .solaris_ai_nn_tester/bundle`
+Generates a local tester artifact bundle with the optional learning stages disabled and
+prints the manifest, including the entries and the missing optional artifacts. The
+bundle is local-only and human-readable; nothing is zipped automatically, uploaded, or
+published.

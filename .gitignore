@@ -21,6 +21,7 @@ htmlcov/
 !examples/live_cognition/*.jsonl
 !examples/environmental_membrane/*.jsonl
 !examples/membrane_integration/**/*.jsonl
+!examples/tester_fixture_spine/**/*.jsonl
 runs/
 artifacts/
 
@@ -111,3 +112,5 @@ artifacts/
 .sann_docs/
 .solaris_ai_nn_live/
 .sann_live/
+.solaris_ai_nn_tester/
+.sann_tester/

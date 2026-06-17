@@ -349,6 +349,33 @@ agency, free will, emotion, feeling, understanding, self-awareness, autonomous
 self-improvement, or subjective experience. It is an architectural audit/enforcement
 layer, not evidence of inner life.
 
+## Tester Fixture Spine
+
+The Tester Fixture Spine (Prompt 74) is the first tester-safe reproducible demo spine.
+The tester release does not begin with live data; it begins with **fixture-only golden
+runs**. A trusted tester runs one command and gets a bounded, deterministic, local
+known-good organismic rehearsal -- validation/quarantine -> environmental membrane ->
+sensory impressions -> membrane-integration audit -> observation -> optional
+ontogenesis/semiogenesis/cognition -> claim/safety scan -- plus a golden manifest,
+reproducibility and regression checks, a tester report, and a local artifact bundle.
+The membrane path is required and downstream learning consumes sensory impressions;
+optional cognition layers skip honestly with an explicit marker.
+
+```bash
+python -m solaris_ai_nn tester-demo --state-dir .solaris_ai_nn_tester --profile fixture_tester_v0
+python -m solaris_ai_nn tester-golden --state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn tester-bundle --state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn tester-repro --state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn tester-regression --state-dir .solaris_ai_nn_tester
+```
+
+The Tester Fixture Spine provides a local fixture-only golden run and reproducible demo
+bundle for trusted testers. It does not require live data, start feeders, control
+hardware, access network/shell/Git/GitHub, publish/upload artifacts, execute commands
+from fixture text, train on tester feedback, or make claims about consciousness,
+sentience, biological life, personhood, agency, free will, emotion, feeling,
+understanding, self-awareness, autonomous self-improvement, or subjective experience.
+
 ## Run the minimal experiment
 
 ```bash
@@ -2041,6 +2068,14 @@ src/solaris_ai_nn/
                 mode blocks raw-event bypass and missing ancestry; bounded and
                 read-only; no feeder/hardware/network/Git control; audit/
                 enforcement layer, not consciousness evidence)
+  tester_fixture_spine/  fixture-only golden runs + reproducible demo bundle
+                (Prompt 74): tester profile, deterministic fixture pack, golden
+                manifest, expected-output invariants, golden run, artifact
+                bundle, reproducibility/regression checks, tester demo runtime,
+                tester reports, safety (fixture-only known-good rehearsal before
+                live testing; membrane required; raw events are not perception;
+                no live data/feeders/hardware/network/Git/publish; tester
+                feedback is not training; not consciousness evidence)
   cli.py        unified `python -m solaris_ai_nn` Alpha CLI (local-only, bounded)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo

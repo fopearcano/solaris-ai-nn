@@ -866,6 +866,29 @@ DESCRIPTIONS = {
     "environmental_membrane_safety":
         "no feeder/network/Git/command control; no raw bypass; bounded; "
         "no hiding contamination",
+    "tester_fixture_spine":
+        "fixture-only golden run + reproducible demo bundle; membrane required; "
+        "no live data; tester feedback is not training",
+    "tester_fixture_spine_protocol":
+        "fixture-only known-good organismic rehearsal; bounded; local-only",
+    "tester_profile_protocol":
+        "fixture-only tester profile; membrane required; no live governance",
+    "fixture_pack_protocol":
+        "deterministic fixture pack; unsafe event quarantined; gloss not truth",
+    "golden_manifest_protocol":
+        "expected artifact structure; tolerates run ids/timestamps",
+    "golden_run_protocol":
+        "bounded golden run steps; optional stages skip honestly",
+    "expected_outputs_protocol":
+        "structural + safety invariants for a known-good run",
+    "tester_artifact_bundle_protocol":
+        "local-only tester bundle; lists missing optional artifacts; no upload",
+    "tester_reproducibility_protocol":
+        "reproducibility ignores timestamps; fails on missing required/claims",
+    "tester_regression_protocol":
+        "structural/safety regression; fails if membrane path/disclaimers lost",
+    "tester_safety_protocol":
+        "no live data/feeder/network/Git/command/feedback-training; bounded",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -1293,6 +1316,12 @@ class ExperimentRegistry:
             or name.startswith("salience_modulation")
             or name.startswith("membrane_")
             or bool(merged.get("environmental_membrane", False)))
+        features["tester_fixture_spine"] = (
+            name.startswith("tester_")
+            or name.startswith("fixture_pack")
+            or name.startswith("golden_")
+            or name.startswith("expected_outputs")
+            or bool(merged.get("tester_fixture_spine", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

@@ -733,6 +733,55 @@ class AlphaResearchOrchestrator:
                     "feeders",
         }
 
+    def tester_fixture_status(
+            self, tester_state_dir: str = ".solaris_ai_nn_tester",
+            ) -> Dict[str, Any]:
+        """Read-only view of the latest tester fixture demo run (Prompt 74).
+
+        Surfaces whether a fixture-only tester demo ran, the latest tester report
+        and bundle paths, the reproducibility/regression statuses, the fixture
+        profile, the membrane status, and the critical blocker count. The default
+        fixture alpha runs without a tester demo present; this is a read-only
+        view -- the alpha system never runs the tester demo, learns, or controls
+        feeders.
+        """
+        base = os.path.join(tester_state_dir, "reports")
+        if not os.path.isdir(base):
+            return {"tester_demo_available": False,
+                    "note": "no tester fixture state present; run "
+                            "`python -m solaris_ai_nn tester-demo` first"}
+        summaries = sorted(f for f in os.listdir(base)
+                           if f.startswith("TESTER_RUN_SUMMARY_")
+                           and f.endswith(".json"))
+        if not summaries:
+            return {"tester_demo_available": False}
+        with open(os.path.join(base, summaries[-1]), encoding="utf-8") as fh:
+            summary = json.load(fh)
+        repro = summary.get("reproducibility", {}) or {}
+        regr = summary.get("regression", {}) or {}
+        membrane = summary.get("membrane_status", {}) or {}
+        return {
+            "tester_demo_available": True,
+            "tester_run_id": summary.get("tester_run_id"),
+            "fixture_profile": (summary.get("tester_profile", {}) or {}).get(
+                "profile_id"),
+            "latest_tester_report_path": os.path.join(
+                base, f"TESTER_DEMO_REPORT_{summary.get('tester_run_id')}.md"),
+            "latest_tester_summary_path": os.path.join(base, summaries[-1]),
+            "reproducibility_status": repro.get("reproducibility_status",
+                                                "inconclusive"),
+            "regression_status": regr.get("regression_status", "inconclusive"),
+            "membrane_status": ("present" if membrane.get(
+                "membrane_impression_count") else "absent"),
+            "membrane_impression_count": membrane.get(
+                "membrane_impression_count", 0),
+            "critical_blocker_count": len(summary.get("blockers", []) or []),
+            "fixture_only": True, "requires_live_data": False,
+            "learns": False, "controls_feeders": False, "runs_git": False,
+            "note": "read-only view of the latest fixture-only tester demo; the "
+                    "alpha system never runs it, learns, or controls feeders",
+        }
+
     def snapshot(self) -> Dict[str, Any]:
         return self.alpha_status()
 

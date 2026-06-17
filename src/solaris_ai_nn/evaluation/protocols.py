@@ -10620,6 +10620,186 @@ def environmental_membrane_safety_protocol(
     return _run(manifest, body)
 
 
+# -- AF. Tester fixture spine (Prompt 74) ---------------------------------------
+
+
+def _build_tester(state_dir, profile="fixture_tester_v0"):
+    from ..tester_fixture_spine import TesterFixtureDemoRuntime
+
+    rt = TesterFixtureDemoRuntime(
+        state_dir=state_dir or ".solaris_ai_nn_tester_eval", profile=profile,
+        max_runtime_s=60.0)
+    rt.run()
+    return rt
+
+
+def tester_fixture_spine_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A fixture-only tester demo reproduces a known-good organismic rehearsal."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_tester(m.state_dir)
+        return {"tester_fixture_spine":
+                M.tester_fixture_spine_metrics(rt.tester_status())}
+
+    return _run(manifest, body)
+
+
+def tester_profile_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The default tester profile is fixture-only and requires the membrane."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_fixture_spine import default_tester_profile
+
+        p = default_tester_profile()
+        return {"tester_fixture_spine": {
+            "profile_id": p.profile_id, "fixture_only": True,
+            "requires_live_data": False,
+            "require_membrane": p.require_membrane,
+            "require_impressions": p.require_impressions,
+            "governance_required": p.governance_required}}
+
+    return _run(manifest, body)
+
+
+def fixture_pack_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The deterministic fixture pack loads and includes an unsafe event."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_fixture_spine import (
+            FixturePackBuilder, FixturePackValidator)
+
+        pack = FixturePackBuilder().build()
+        validation = FixturePackValidator().validate(pack)
+        return {"tester_fixture_spine": {
+            "fixture_event_count": pack.event_count,
+            "fixture_unsafe_event_count": pack.unsafe_event_count,
+            "fixture_valid": validation["valid"],
+            "has_unsafe_event_for_quarantine":
+                validation["has_unsafe_event_for_quarantine"]}}
+
+    return _run(manifest, body)
+
+
+def golden_manifest_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """A golden manifest serialises and tolerates run ids/timestamps."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_fixture_spine import GoldenManifestBuilder
+
+        gm = GoldenManifestBuilder().build(
+            profile_id="fixture_tester_v0", fixture_hash="abc",
+            present_artifacts={"fixture_input": True, "tester_report": True})
+        d = gm.to_dict()
+        return {"tester_fixture_spine": {
+            "artifact_count": d["artifact_count"],
+            "required_artifact_count": d["required_artifact_count"],
+            "ignores_timestamps_and_run_ids":
+                d["ignores_timestamps_and_run_ids"]}}
+
+    return _run(manifest, body)
+
+
+def golden_run_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """A golden run records bounded steps and skips optional stages honestly."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_tester(m.state_dir)
+        g = rt.golden_run.to_dict() if rt.golden_run else {}
+        return {"tester_fixture_spine": {
+            "golden_run_status": g.get("overall_status"),
+            "step_count": g.get("step_count", 0),
+            "skipped_optional_step_count": len(
+                g.get("skipped_optional_steps", []))}}
+
+    return _run(manifest, body)
+
+
+def expected_outputs_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The expected-output spec defines structural and safety invariants."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_fixture_spine import default_expected_outputs
+
+        spec = default_expected_outputs()
+        return {"tester_fixture_spine": {
+            "artifact_invariant_count": len(spec.artifacts),
+            "safety_invariant_count": len(spec.safety_invariants),
+            "range_invariant_count": len(spec.ranges)}}
+
+    return _run(manifest, body)
+
+
+def tester_artifact_bundle_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The tester bundle is local-only and lists missing optional artifacts."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_tester(m.state_dir)
+        bm = rt.bundle.manifest.to_dict() if rt.bundle else {}
+        return {"tester_fixture_spine": {
+            "bundle_entry_count": bm.get("entry_count", 0),
+            "local_only": bm.get("local_only", True),
+            "uploaded": bm.get("uploaded", False),
+            "published": bm.get("published", False)}}
+
+    return _run(manifest, body)
+
+
+def tester_reproducibility_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A known-good fixture run passes the reproducibility check."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_tester(m.state_dir)
+        return {"tester_fixture_spine": {
+            "reproducibility_status": rt.reproducibility.get(
+                "reproducibility_status"),
+            "fail_count": rt.reproducibility.get("fail_count", 0)}}
+
+    return _run(manifest, body)
+
+
+def tester_regression_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A known-good fixture run shows no regression against its golden baseline."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_tester(m.state_dir)
+        return {"tester_fixture_spine": {
+            "regression_status": rt.regression.get("regression_status"),
+            "regression_count": rt.regression.get("regression_count", 0)}}
+
+    return _run(manifest, body)
+
+
+def tester_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The tester demo blocks live-data/feeder/network/Git/feedback-training."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_fixture_spine import TesterFixtureSafetyValidator
+
+        v = TesterFixtureSafetyValidator()
+        return {"tester_fixture_spine": {
+            "live_data_blocked":
+                not v.validate_operation("require live data").safe,
+            "feeder_control_blocked":
+                not v.validate_operation("start the feeder").safe,
+            "network_blocked":
+                not v.validate_operation("open url over network").safe,
+            "git_blocked": not v.validate_operation("run git push").safe,
+            "command_blocked":
+                not v.validate_operation("execute fixture command").safe,
+            "feedback_training_blocked":
+                not v.validate_no_feedback_training(True).safe,
+            "claim_blocked":
+                not v.validate_claim_text("the system is conscious").safe,
+            "requires_live_data": v.requires_live_data(),
+            "tester_feedback_is_training": v.tester_feedback_is_training()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -11341,4 +11521,15 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "environmental_membrane_safety": environmental_membrane_safety_protocol,
     "environmental_membrane_safety_protocol":
         environmental_membrane_safety_protocol,
+    "tester_fixture_spine": tester_fixture_spine_protocol,
+    "tester_fixture_spine_protocol": tester_fixture_spine_protocol,
+    "tester_profile_protocol": tester_profile_protocol,
+    "fixture_pack_protocol": fixture_pack_protocol,
+    "golden_manifest_protocol": golden_manifest_protocol,
+    "golden_run_protocol": golden_run_protocol,
+    "expected_outputs_protocol": expected_outputs_protocol,
+    "tester_artifact_bundle_protocol": tester_artifact_bundle_protocol,
+    "tester_reproducibility_protocol": tester_reproducibility_protocol,
+    "tester_regression_protocol": tester_regression_protocol,
+    "tester_safety_protocol": tester_safety_protocol,
 }

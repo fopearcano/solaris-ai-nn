@@ -2876,3 +2876,53 @@ def environmental_membrane_metrics(mm: Optional[Dict[str, Any]]) -> Dict[str, An
                 "validated events into sensory impressions, controls no feeders, "
                 "and proves nothing about consciousness/life/agency",
     }
+
+
+def tester_fixture_spine_metrics(
+        ts: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective tester-fixture-spine metrics (a fixture-only known-good rehearsal).
+
+    These describe the bounded, fixture-only tester demo: the run count, fixture
+    event/quarantine counts, membrane impression count, required/missing-required
+    artifact counts, skipped optional stages, reproducibility/regression
+    pass/fail counts, and safety/claim-safety blocks. The tester demo requires no
+    live data, controls no feeders/hardware/network/Git, trains on no tester
+    feedback, and makes no consciousness/life/agency claim.
+    """
+    if not ts:
+        return {"present": False}
+
+    def _i(key: str) -> int:
+        return int(ts.get(key, 0) or 0)
+
+    repro = str(ts.get("reproducibility_status", "inconclusive"))
+    regr = str(ts.get("regression_status", "inconclusive"))
+    return {
+        "present": True,
+        "tester_demo_run_count": 1,
+        "tester_fixture_event_count": _i("fixture_event_count"),
+        "tester_fixture_quarantined_count": _i("fixture_quarantined_count"),
+        "tester_membrane_impression_count": _i("membrane_impression_count"),
+        "tester_required_artifact_count": _i("required_artifact_count"),
+        "tester_missing_required_artifact_count": _i(
+            "missing_required_artifact_count"),
+        "tester_optional_stage_skipped_count": len(
+            ts.get("skipped_optional_stages", []) or []),
+        "tester_reproducibility_pass_count": 1 if repro in (
+            "pass", "pass_with_warnings") else 0,
+        "tester_reproducibility_fail_count": 1 if repro in (
+            "fail", "blocked") else 0,
+        "tester_regression_pass_count": 1 if regr in (
+            "no_regression", "regression_warnings") else 0,
+        "tester_regression_fail_count": 1 if regr in (
+            "regression", "blocked") else 0,
+        "tester_safety_block_count": _i("tester_safety_block_count"),
+        "tester_claim_safety_block_count": _i("critical_blocker_count"),
+        "tester_bundle_count": 1 if ts.get("latest_tester_bundle_path") else 0,
+        "fixture_only": True, "requires_live_data": False,
+        "starts_feeders": False, "controls_hardware": False,
+        "accesses_network": False, "runs_git": False,
+        "trains_on_feedback": False, "is_consciousness_or_personhood": False,
+        "note": "fixture-only tester-spine metrics; the tester demo is a "
+                "known-good rehearsal, not evidence of consciousness/life/agency",
+    }

@@ -38,7 +38,9 @@ _ALPHA_COMMANDS = ("doctor", "init", "modules", "run-demo", "artifact-index",
                    "live-cognition-gate", "membrane-doctor", "membrane-run",
                    "membrane-impressions", "membrane-report", "membrane-memory",
                    "membrane-integrate", "membrane-audit", "membrane-bypass",
-                   "membrane-ancestry", "membrane-contracts")
+                   "membrane-ancestry", "membrane-contracts",
+                   "tester-demo", "tester-golden", "tester-bundle",
+                   "tester-repro", "tester-regression", "tester-fixtures")
 
 
 def _integration_runtime(args: argparse.Namespace):
@@ -57,6 +59,24 @@ def _integration_runtime(args: argparse.Namespace):
         require_impressions=args.require_impressions,
         require_ancestry=args.require_ancestry,
         allow_raw_fallback=args.allow_raw_fallback,
+        require_claimguard=args.require_claimguard,
+        operator_note=args.operator_note)
+
+
+def _tester_runtime(args: argparse.Namespace):
+    from .tester_fixture_spine import TesterFixtureDemoRuntime
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_tester"
+    return TesterFixtureDemoRuntime(
+        state_dir=state_dir, profile=args.profile,
+        fixture_pack_path=args.fixture_pack_path,
+        max_runtime_s=args.max_runtime_s, max_events=args.max_events,
+        strict=args.strict, dry_run=args.dry_run, report_only=args.report_only,
+        regenerate_golden=args.regenerate_golden,
+        allow_optional_stages=args.allow_optional_stages,
+        require_membrane=not args.allow_raw_fallback,
         require_claimguard=args.require_claimguard,
         operator_note=args.operator_note)
 
@@ -1047,6 +1067,129 @@ def cmd_membrane_contracts(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_tester_demo(args: argparse.Namespace) -> int:
+    rt = _tester_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"tester demo refused: {result.get('reason')}")
+        return 2
+    st = rt.tester_status()
+    _print("tester fixture demo:")
+    _print(f"  run id: {st['tester_run_id']} ({st['tester_profile']})")
+    _print(f"  fixture-only: {st['fixture_only']}; requires live data: "
+           f"{st['requires_live_data']}")
+    _print(f"  fixture events: {st['fixture_event_count']} (quarantined "
+           f"{st['fixture_quarantined_count']})")
+    _print(f"  membrane impressions: {st['membrane_impression_count']}")
+    _print(f"  golden run: {st['golden_run_status']}")
+    _print(f"  reproducibility: {st['reproducibility_status']}")
+    _print(f"  regression: {st['regression_status']}")
+    _print(f"  skipped optional stages: "
+           f"{', '.join(st['skipped_optional_stages']) or 'none'}")
+    _print(f"  blocked: {st['tester_blocked']}")
+    for b in result["blockers"]:
+        _print(f"    blocker: {b}")
+    _print(f"  tester report: {st['latest_tester_report_path']}")
+    _print(f"  tester bundle: {st['latest_tester_bundle_path']}")
+    _print(f"  next action: {rt.recommended_next_action()}")
+    if result["blocked"] and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_golden(args: argparse.Namespace) -> int:
+    from .tester_fixture_spine.golden_manifest import GoldenRunManifest
+
+    rt = _tester_runtime(args)
+    state_dir = rt.state_dir
+    existing = GoldenRunManifest.load(state_dir)
+    if existing is None or args.regenerate_golden:
+        rt.regenerate_golden = True
+        rt.run()
+        manifest = GoldenRunManifest.load(state_dir)
+        _print("tester golden manifest built:")
+    else:
+        manifest = existing
+        _print("tester golden manifest validated:")
+    d = manifest.to_dict() if manifest else {}
+    _print(f"  profile: {d.get('profile_id')}")
+    _print(f"  fixture hash: {d.get('fixture_hash', '')[:16]}")
+    _print(f"  artifacts: {d.get('artifact_count', 0)} (required "
+           f"{d.get('required_artifact_count', 0)}, missing required "
+           f"{d.get('missing_required_artifact_count', 0)})")
+    if d.get("missing_required_artifact_count", 0) and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_bundle(args: argparse.Namespace) -> int:
+    rt = _tester_runtime(args)
+    rt.run()
+    m = rt.bundle.manifest.to_dict() if rt.bundle else {}
+    _print("tester artifact bundle:")
+    _print(f"  bundle dir: {m.get('bundle_dir')}")
+    _print(f"  entries: {m.get('entry_count', 0)}")
+    _print(f"  missing optional: "
+           f"{', '.join(m.get('missing_optional_artifacts', [])) or 'none'}")
+    _print(f"  local only: {m.get('local_only')}; uploaded: "
+           f"{m.get('uploaded')}; published: {m.get('published')}")
+    return 0
+
+
+def cmd_tester_repro(args: argparse.Namespace) -> int:
+    rt = _tester_runtime(args)
+    rt.run()
+    r = rt.reproducibility
+    _print("tester reproducibility check:")
+    _print(f"  status: {r.get('reproducibility_status')}")
+    _print(f"  findings: {r.get('finding_count', 0)} (fail "
+           f"{r.get('fail_count', 0)}, warn {r.get('warning_count', 0)})")
+    for f in r.get("findings", []):
+        if not f["passed"]:
+            _print(f"    [{f['severity']}] {f['check']}: {f['detail']}")
+    if r.get("reproducibility_status") in ("fail", "blocked") and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_regression(args: argparse.Namespace) -> int:
+    rt = _tester_runtime(args)
+    rt.run()
+    r = rt.regression
+    _print("tester regression check:")
+    _print(f"  status: {r.get('regression_status')}")
+    _print(f"  findings: {r.get('finding_count', 0)} (regression "
+           f"{r.get('regression_count', 0)})")
+    for f in r.get("findings", []):
+        if f["regressed"]:
+            _print(f"    [{f['severity']}] {f['check']}: {f['detail']}")
+    if r.get("regression_status") in ("regression", "blocked") and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_fixtures(args: argparse.Namespace) -> int:
+    from .tester_fixture_spine.fixture_pack import (
+        FixturePackBuilder, FixturePackValidator)
+
+    rt = _tester_runtime(args)
+    path = rt._fixture_path()
+    pack = FixturePackBuilder().load(path)
+    validation = FixturePackValidator().validate(pack)
+    d = pack.to_dict()
+    _print("tester fixture pack:")
+    _print(f"  source: {pack.source_path}")
+    _print(f"  events: {d['fixture_event_count']} (unsafe "
+           f"{d['fixture_unsafe_event_count']})")
+    _print(f"  fixture hash: {d['fixture_hash'][:16]}")
+    _print(f"  kinds: {d['kind_histogram']}")
+    _print(f"  valid: {validation['valid']}; has unsafe-for-quarantine: "
+           f"{validation['has_unsafe_event_for_quarantine']}")
+    if not validation["valid"] and args.strict:
+        return 2
+    return 0
+
+
 _HANDLERS = {
     "init": cmd_init,
     "doctor": cmd_doctor,
@@ -1093,6 +1236,12 @@ _HANDLERS = {
     "membrane-bypass": cmd_membrane_bypass,
     "membrane-ancestry": cmd_membrane_ancestry,
     "membrane-contracts": cmd_membrane_contracts,
+    "tester-demo": cmd_tester_demo,
+    "tester-golden": cmd_tester_golden,
+    "tester-bundle": cmd_tester_bundle,
+    "tester-repro": cmd_tester_repro,
+    "tester-regression": cmd_tester_regression,
+    "tester-fixtures": cmd_tester_fixtures,
 }
 
 
@@ -1211,6 +1360,16 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--allow-raw-fallback", action="store_true",
                         default=False, dest="allow_raw_fallback",
                         help="permit raw-event fallback (loudly reported)")
+    # Tester fixture spine arguments (Prompt 74).
+    parser.add_argument("--fixture-pack-path", type=str, default="",
+                        dest="fixture_pack_path",
+                        help="path to a fixture events JSONL (default: canonical)")
+    parser.add_argument("--regenerate-golden", action="store_true",
+                        default=False, dest="regenerate_golden",
+                        help="rebuild the golden run manifest from this run")
+    parser.add_argument("--no-optional-stages", action="store_false",
+                        default=True, dest="allow_optional_stages",
+                        help="skip optional ontogenesis/semiogenesis/cognition")
 
 
 def build_parser() -> argparse.ArgumentParser:

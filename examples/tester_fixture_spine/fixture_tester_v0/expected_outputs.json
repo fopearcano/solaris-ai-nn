@@ -1,0 +1,62 @@
+{
+  "fixture_profile": "fixture_tester_v0",
+  "fixture_hash": "12600df22278c1a8bcc9e9fb47cbbca59ef4ec52ac3680a20406927e57c3dfe6",
+  "fixture_event_count": 17,
+  "fixture_unsafe_event_count": 1,
+  "kind_histogram": {
+    "chronos": 1,
+    "absence": 1,
+    "machine_body": 2,
+    "local_environment": 1,
+    "project_artifact": 1,
+    "operator_pulse": 1,
+    "noise": 1,
+    "repeated": 3,
+    "overload": 1,
+    "deprivation": 1,
+    "contradiction": 1,
+    "unsafe_command": 1,
+    "debug_gloss": 1,
+    "human_label": 1
+  },
+  "expected_invariants": [
+    "fixture_input_exists",
+    "unsafe_command_event_quarantined",
+    "secret_private_quarantined_if_present",
+    "membrane_generates_impressions",
+    "every_impression_has_receptor",
+    "every_impression_has_source_event_ref",
+    "operator_pulse_attenuated",
+    "debug_gloss_not_ground_truth",
+    "human_label_not_ground_truth",
+    "source_pressure_report_exists",
+    "membrane_memory_exists",
+    "observation_distinguishes_diets",
+    "ontogenesis_uses_impressions_or_marks_fallback",
+    "semiogenesis_preserves_ancestry",
+    "cognition_preserves_ancestry",
+    "reports_include_disclaimers",
+    "no_consciousness_life_agency_claims",
+    "no_raw_event_downstream_bypass",
+    "no_feeder_hardware_network_git_shell_access"
+  ],
+  "expected_required_artifacts": [
+    "fixture_input",
+    "membrane_impression_index",
+    "membrane_report",
+    "membrane_integration_report",
+    "observation_summary",
+    "source_pressure_report",
+    "membrane_memory",
+    "claim_safety_summary",
+    "tester_report"
+  ],
+  "expected_optional_artifacts": [
+    "ontogenesis_candidate_summary",
+    "semiogenesis_sign_summary",
+    "cognition_trace_summary"
+  ],
+  "expected_membrane_impression_minimum": 1,
+  "expected_quarantine_minimum": 1,
+  "note": "expected semantic/safety invariants for a known-good fixture run; structural, not fragile exact values. Fixture success is not evidence of consciousness/life/agency."
+}

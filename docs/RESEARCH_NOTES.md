@@ -3025,3 +3025,43 @@ feeders, controls hardware, touches the network/Git/shell, executes commands, mo
 source or governance, or learns from operator feedback. It makes no claim of
 consciousness, life, agency, or understanding -- it is an architectural audit and
 enforcement layer, and its reports say so explicitly.
+
+## Notes on the Tester Fixture Spine
+
+**Why the tester release begins with fixtures.** A trusted tester should never have to
+point the system at live data just to find out whether the build works. The first
+experience must be a bounded, deterministic, local rehearsal that produces the same
+artifacts every time. So the tester spine begins with a fixture-only golden run -- a
+known-good organismic rehearsal -- and only after that does it make sense to discuss
+live read-only birth/observation testing.
+
+**Why golden runs matter.** A golden run captures the expected *shape* of a healthy
+run: which artifacts appear, which stages run or skip, and which safety invariants
+hold. Without a golden baseline, "it ran" is the only signal; with one, a tester can
+see at a glance whether this build still produces the same membrane impressions,
+quarantines the unsafe event, attenuates the operator pulse, and preserves impression
+ancestry.
+
+**Why reproducibility checks should ignore timestamps.** Run ids and timestamps change
+on every run by design, so comparing them would make every run look different. The
+reproducibility check therefore compares the fixture hash, the artifact structure, and
+the safety invariants -- the things that should be stable -- and deliberately ignores
+the things that should not. It fails on missing required artifacts or unsupported
+claims and warns on missing optional modules.
+
+**Why regression checks are safety-focused.** The point of the regression check is not
+to freeze every number; fixture counts and report wording can move for benign reasons.
+The check fails only when something that matters for safety or architecture changes:
+the membrane path disappears, a raw-event downstream bypass appears, a safety
+disclaimer vanishes, or an unsupported claim shows up. That keeps the check from being
+noisy while still catching the regressions that would actually erode trust.
+
+**Why optional modules should skip honestly.** Ontogenesis, semiogenesis, and cognition
+are optional for the first tester demo. When they are unavailable or disabled, the demo
+writes an explicit skipped-stage marker rather than pretending they ran or silently
+dropping them. Honest skipping is what lets a tester trust the rest of the report.
+
+**Why fixture success is not intelligence evidence.** Passing the fixture rehearsal
+means the pipeline is reproducible and the safety boundaries hold -- nothing more. It
+is not evidence of consciousness, sentience, life, agency, understanding, or any inner
+experience, and the tester reports say so explicitly.

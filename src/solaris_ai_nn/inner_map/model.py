@@ -629,6 +629,14 @@ class InnerMapModel:
     # converts validated events into sensory impressions, controls no feeders,
     # and makes no consciousness/life/agency claim.
     environmental_membrane: Optional[Dict[str, Any]] = None
+    # Tester fixture spine status (Prompt 74); None when not attached. Keys:
+    # tester_demo_run_id, fixture_pack_hash, tester_profile,
+    # artifact_bundle_path, reproducibility_status, regression_status,
+    # membrane_status, skipped_optional_stages, latest_tester_report_path. The
+    # tester fixture spine is a fixture-only, local, bounded known-good rehearsal;
+    # it requires no live data, trains on no tester feedback, and makes no
+    # consciousness/life/agency claim.
+    tester_fixture_spine: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""
