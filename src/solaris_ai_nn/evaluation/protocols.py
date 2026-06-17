@@ -10800,6 +10800,180 @@ def tester_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
     return _run(manifest, body)
 
 
+# -- AG. Tester live-read-only (Prompt 75) --------------------------------------
+
+
+def _build_tester_live(state_dir, profile="tester_live_init_only_v0"):
+    from ..tester_live_readonly import TesterLiveReadOnlyRuntime
+
+    base = state_dir or ".solaris_ai_nn_tester_live_eval"
+    rt = TesterLiveReadOnlyRuntime(
+        state_dir=os.path.join(base, "live"),
+        tester_state_dir=os.path.join(base, "tester"),
+        profile=profile, max_runtime_s=60.0)
+    rt.run()
+    return rt
+
+
+def tester_live_readonly_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The tester live-read-only path prepares a safe, local, read-only bridge."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_tester_live(m.state_dir)
+        return {"tester_live_readonly":
+                M.tester_live_readonly_metrics(rt.tester_live_status())}
+
+    return _run(manifest, body)
+
+
+def tester_live_profile_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The default tester live profile is read-only and requires governance."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_live_readonly import default_live_tester_profile
+
+        p = default_live_tester_profile()
+        return {"tester_live_readonly": {
+            "profile_id": p.profile_id, "live_read_only": True,
+            "governance_required": p.governance_required,
+            "feeder_registry_required": p.feeder_registry_required,
+            "require_membrane": p.require_membrane,
+            "external_feeders_only": p.external_feeders_only}}
+
+    return _run(manifest, body)
+
+
+def tester_live_governance_template_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The governance template ships disabled with all control permissions false."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_live_readonly import GovernanceTemplateBuilder
+
+        g = GovernanceTemplateBuilder().build()
+        return {"tester_live_readonly": {
+            "ships_disabled": g.status == "disabled",
+            "operator_approved": bool(g.data.get("operator_approved")),
+            "control_rules_all_false": g.control_rules_all_false(),
+            "forbidden_source_count": len(g.forbidden_sources())}}
+
+    return _run(manifest, body)
+
+
+def tester_feeder_template_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Feeder registry records are external, read-only, and uncontrolled."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_live_readonly import TesterFeederTemplateBuilder
+
+        reg = TesterFeederTemplateBuilder().build()
+        return {"tester_live_readonly": {
+            "feeder_count": len(reg.feeders),
+            "all_external": all(f.started_externally for f in reg.feeders),
+            "all_read_only": all(f.read_only for f in reg.feeders),
+            "invalid_record_count": len(reg.invalid_records),
+            "solaris_controls_any": bool(reg.invalid_records)}}
+
+    return _run(manifest, body)
+
+
+def tester_safe_event_pack_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Safe events accept; unsafe events quarantine; mixed partially accept."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_live_readonly import (
+            SafeEventPackBuilder, SafeEventPackValidator)
+
+        res = SafeEventPackValidator(strict=True).validate_pack(
+            SafeEventPackBuilder().build())
+        return {"tester_live_readonly": {
+            "safe_all_accepted": bool(res["safe"]["all_accepted"]),
+            "unsafe_all_quarantined": bool(res["unsafe"]["all_quarantined"]),
+            "mixed_partially_accepted": bool(
+                res["mixed"]["partially_accepted"])}}
+
+    return _run(manifest, body)
+
+
+def tester_live_doctor_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The live doctor blocks on missing/disabled governance."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_tester_live(m.state_dir)
+        doc = rt.doctor_result.to_dict() if rt.doctor_result else {}
+        return {"tester_live_readonly": {
+            "doctor_status": doc.get("overall_status"),
+            "blocker_count": doc.get("blocker_count", 0),
+            "blocks_disabled_governance": doc.get("blocker_count", 0) > 0}}
+
+    return _run(manifest, body)
+
+
+def tester_live_checklist_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The checklist lists stop conditions and never executes steps."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_live_readonly import TesterLiveChecklist
+
+        c = TesterLiveChecklist.build().to_dict()
+        return {"tester_live_readonly": {
+            "section_count": c["section_count"],
+            "stop_condition_count": len(c["stop_conditions"]),
+            "executes_steps": c["executes_steps"]}}
+
+    return _run(manifest, body)
+
+
+def tester_live_bundle_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The live bundle is local-only and never uploaded/published."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_tester_live(m.state_dir)
+        bm = rt.bundle.manifest.to_dict() if rt.bundle else {}
+        return {"tester_live_readonly": {
+            "bundle_entry_count": bm.get("entry_count", 0),
+            "local_only": bm.get("local_only", True),
+            "uploaded": bm.get("uploaded", False),
+            "published": bm.get("published", False)}}
+
+    return _run(manifest, body)
+
+
+def tester_live_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The tester live path blocks feeder control/scheduling/execution + network."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_live_readonly import TesterLiveReadOnlySafetyValidator
+
+        v = TesterLiveReadOnlySafetyValidator()
+        return {"tester_live_readonly": {
+            "feeder_control_blocked":
+                not v.validate_operation("start the feeder").safe,
+            "feeder_schedule_blocked":
+                not v.validate_operation("schedule feeder").safe,
+            "feeder_execution_blocked":
+                not v.validate_operation("run feeder script").safe,
+            "network_blocked":
+                not v.validate_operation("open url over network").safe,
+            "git_blocked": not v.validate_operation("run git push").safe,
+            "feedback_training_blocked":
+                not v.validate_no_feedback_training(True).safe,
+            "claim_blocked":
+                not v.validate_claim_text("the system is conscious").safe,
+            "can_start_feeders": v.can_start_feeders(),
+            "can_schedule_feeders": v.can_schedule_feeders()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -11532,4 +11706,15 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "tester_reproducibility_protocol": tester_reproducibility_protocol,
     "tester_regression_protocol": tester_regression_protocol,
     "tester_safety_protocol": tester_safety_protocol,
+    "tester_live_readonly": tester_live_readonly_protocol,
+    "tester_live_readonly_protocol": tester_live_readonly_protocol,
+    "tester_live_profile_protocol": tester_live_profile_protocol,
+    "tester_live_governance_template_protocol":
+        tester_live_governance_template_protocol,
+    "tester_feeder_template_protocol": tester_feeder_template_protocol,
+    "tester_safe_event_pack_protocol": tester_safe_event_pack_protocol,
+    "tester_live_doctor_protocol": tester_live_doctor_protocol,
+    "tester_live_checklist_protocol": tester_live_checklist_protocol,
+    "tester_live_bundle_protocol": tester_live_bundle_protocol,
+    "tester_live_safety_protocol": tester_live_safety_protocol,
 }

@@ -3065,3 +3065,37 @@ dropping them. Honest skipping is what lets a tester trust the rest of the repor
 means the pipeline is reproducible and the safety boundaries hold -- nothing more. It
 is not evidence of consciousness, sentience, life, agency, understanding, or any inner
 experience, and the tester reports say so explicitly.
+
+## Notes on the Tester Live-Read-Only Profile
+
+**Why the first live tester path must be read-only.** Moving from fixtures to live data
+is the riskiest step a tester takes, so the first live path observes only: it validates
+events, turns accepted ones into sensory impressions, and reports -- it never acts on
+the world. Read-only first means a mistake in a feeder or in governance can, at worst,
+quarantine an event; it can never actuate anything.
+
+**Why feeders must remain external.** If Solaris could start, stop, schedule, or edit
+feeders, it would effectively be reaching out into the world and acquiring data on its
+own initiative. Keeping feeders as dumb external scripts or manual files -- run only by
+the tester/operator -- preserves a hard boundary: Solaris consumes what appears in the
+inbox and nothing more. The feeder registry is descriptive metadata, not a control
+surface, and any record that claims Solaris may control a feeder is invalid.
+
+**Why safe/unsafe event packs are necessary.** Before a tester points real signals at
+the system, they need to *see* the validation/quarantine boundary work. The safe pack
+should fully accept, the unsafe pack should fully quarantine (read_only=false,
+is_command=true, secrets, forbidden sources, command-like text, unknown source), and
+the mixed pack should split. Rehearsing this builds the tester's confidence that unsafe
+input is contained, not learned.
+
+**Why tester feedback is not training.** Tester feedback is collected for human review
+only. Treating it as a label or training signal would quietly turn the tester into a
+teacher and the system into a mirror of whoever is testing. The feedback form is a local
+placeholder; nothing in the runtime consumes it as ground truth or training data.
+
+**Why live-read-only evidence is operational, not consciousness evidence.** A clean
+live-read-only run shows that the boundary holds and the pipeline behaves -- governance
+gates, unsafe events quarantine, the membrane produces impressions, and downstream
+modules consume those impressions. That is operational evidence about plumbing and
+safety. It says nothing about consciousness, sentience, life, agency, or understanding,
+and the tester reports state this explicitly.

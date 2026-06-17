@@ -889,6 +889,27 @@ DESCRIPTIONS = {
         "structural/safety regression; fails if membrane path/disclaimers lost",
     "tester_safety_protocol":
         "no live data/feeder/network/Git/command/feedback-training; bounded",
+    "tester_live_readonly":
+        "safe bridge to live-read-only testing; external manual feeders; "
+        "governance required; Solaris controls no feeder",
+    "tester_live_readonly_protocol":
+        "bounded local live-read-only tester run; external feeders only",
+    "tester_live_profile_protocol":
+        "tester live profile is read-only; governance + feeder registry required",
+    "tester_live_governance_template_protocol":
+        "governance template ships disabled; all control permissions false",
+    "tester_feeder_template_protocol":
+        "feeder records external, read-only, uncontrolled by Solaris",
+    "tester_safe_event_pack_protocol":
+        "safe accept; unsafe quarantine; mixed partial accept",
+    "tester_live_doctor_protocol":
+        "live doctor blocks on missing/disabled governance",
+    "tester_live_checklist_protocol":
+        "checklist lists stop conditions; never executes steps",
+    "tester_live_bundle_protocol":
+        "local-only live tester bundle; no upload/publish",
+    "tester_live_safety_protocol":
+        "no feeder control/scheduling/execution; no network/Git; bounded",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -1317,11 +1338,16 @@ class ExperimentRegistry:
             or name.startswith("membrane_")
             or bool(merged.get("environmental_membrane", False)))
         features["tester_fixture_spine"] = (
-            name.startswith("tester_")
+            (name.startswith("tester_") and "live" not in name)
             or name.startswith("fixture_pack")
             or name.startswith("golden_")
             or name.startswith("expected_outputs")
             or bool(merged.get("tester_fixture_spine", False)))
+        features["tester_live_readonly"] = (
+            name.startswith("tester_live")
+            or name.startswith("tester_feeder")
+            or name.startswith("tester_safe_event")
+            or bool(merged.get("tester_live_readonly", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

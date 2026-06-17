@@ -376,6 +376,34 @@ from fixture text, train on tester feedback, or make claims about consciousness,
 sentience, biological life, personhood, agency, free will, emotion, feeling,
 understanding, self-awareness, autonomous self-improvement, or subjective experience.
 
+## Tester Live-Read-Only
+
+The Tester Live-Read-Only path (Prompt 75) is the safe bridge from the fixture-only
+tester demo to trusted live-read-only testing. **Solaris does not run feeders.** Feeders
+are dumb external scripts (`tools/external_feeders/`) or manual files that the tester/
+operator runs by hand; Solaris never starts, stops, schedules, controls, or edits them.
+The correct path is: tester/operator writes feeder events -> JSONL files appear in
+`.solaris_ai_nn_live/inbox/` -> Solaris validates events -> the Environmental Membrane
+creates sensory impressions -> observation/reporting consume impressions -> the tester
+bundle records what happened. Approved governance and a feeder registry are required,
+and the Environmental Membrane is required before any downstream module.
+
+```bash
+python -m solaris_ai_nn tester-live-init --state-dir .solaris_ai_nn_live --tester-state-dir .solaris_ai_nn_tester/live
+python -m solaris_ai_nn tester-live-doctor --state-dir .solaris_ai_nn_live --tester-state-dir .solaris_ai_nn_tester/live
+python -m solaris_ai_nn tester-live-samples --state-dir .solaris_ai_nn_live --tester-state-dir .solaris_ai_nn_tester/live
+python -m solaris_ai_nn tester-live-run --state-dir .solaris_ai_nn_live --tester-state-dir .solaris_ai_nn_tester/live --run-birth --run-membrane --run-integration --run-observation --max-events 500
+python -m solaris_ai_nn tester-live-bundle --state-dir .solaris_ai_nn_live --tester-state-dir .solaris_ai_nn_tester/live
+```
+
+The Tester Live-Read-Only Profile lets trusted testers prepare governance, feeder
+registry templates, safe event packs, and local live-read-only runs. Solaris does not
+start, stop, schedule, or control feeders; does not control hardware; does not access
+network/shell/Git/GitHub/browser/OS; does not publish/upload; does not train on tester
+feedback; and does not make claims about consciousness, sentience, biological life,
+personhood, agency, free will, emotion, feeling, understanding, self-awareness,
+autonomous self-improvement, or subjective experience.
+
 ## Run the minimal experiment
 
 ```bash
@@ -2076,6 +2104,15 @@ src/solaris_ai_nn/
                 live testing; membrane required; raw events are not perception;
                 no live data/feeders/hardware/network/Git/publish; tester
                 feedback is not training; not consciousness evidence)
+  tester_live_readonly/  safe bridge from fixtures to live-read-only testing
+                (Prompt 75): tester live profile, SAFE-OFF governance + feeder
+                registry templates, safe/unsafe/mixed event packs, live tester
+                doctor, non-executing checklist, bounded runtime, local bundle,
+                reports, safety (Solaris does NOT run feeders -- feeders are
+                dumb external/manual scripts under tools/external_feeders/;
+                governance + feeder registry required; membrane required before
+                downstream; local-only; no feeder/hardware/network/Git/publish;
+                tester feedback is not training; not consciousness evidence)
   cli.py        unified `python -m solaris_ai_nn` Alpha CLI (local-only, bounded)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo

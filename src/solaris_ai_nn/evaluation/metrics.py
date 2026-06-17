@@ -2926,3 +2926,53 @@ def tester_fixture_spine_metrics(
         "note": "fixture-only tester-spine metrics; the tester demo is a "
                 "known-good rehearsal, not evidence of consciousness/life/agency",
     }
+
+
+def tester_live_readonly_metrics(
+        ts: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective tester-live-read-only metrics (the safe bridge to live testing).
+
+    These describe the bounded, local, live-read-only tester run: init/doctor
+    pass/block counts, safe/unsafe sample behavior, governance/feeder-registry
+    blocks, the birth/membrane/observation run counts, the bundle count, and the
+    safety/claim-safety blocks. Solaris never starts/controls feeders, controls
+    hardware, accesses the network/Git, trains on tester feedback, or makes a
+    consciousness/life/agency claim.
+    """
+    if not ts:
+        return {"present": False}
+
+    def _i(key: str) -> int:
+        return int(ts.get(key, 0) or 0)
+
+    doctor = str(ts.get("live_doctor_status", "unknown"))
+    gov = str(ts.get("governance_status", "missing"))
+    return {
+        "present": True,
+        "tester_live_init_count": 1,
+        "tester_live_doctor_pass_count": 1 if doctor in (
+            "pass", "pass_with_warnings") else 0,
+        "tester_live_doctor_block_count": 1 if doctor == "blocked" else 0,
+        "tester_live_safe_sample_count": _i("safe_sample_count"),
+        "tester_live_unsafe_sample_quarantine_count": _i(
+            "unsafe_sample_quarantine_count"),
+        "tester_live_governance_block_count": 1 if gov in (
+            "missing", "disabled", "enabled_but_unapproved") else 0,
+        "tester_live_feeder_registry_block_count": 1 if ts.get(
+            "solaris_controls_any_feeder") else 0,
+        "tester_live_birth_run_count": _i("birth_run_count"),
+        "tester_live_membrane_run_count": 1 if ts.get(
+            "membrane_impression_count") else 0,
+        "tester_live_observation_run_count": _i("observation_run_count"),
+        "tester_live_bundle_count": 1 if ts.get(
+            "latest_tester_live_bundle_path") else 0,
+        "tester_live_safety_block_count": _i("tester_live_safety_block_count"),
+        "tester_live_claim_safety_block_count": _i("critical_blocker_count"),
+        "live_read_only": True, "starts_feeders": False,
+        "controls_hardware": False, "accesses_network": False,
+        "runs_git": False, "trains_on_feedback": False,
+        "is_consciousness_or_personhood": False,
+        "note": "tester live-read-only metrics; external feeders are manual and "
+                "Solaris controls nothing. Operational evidence, not "
+                "consciousness/life/agency.",
+    }

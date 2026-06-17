@@ -4710,3 +4710,52 @@ treats the operator pulse as teaching, trains on tester feedback, or claims
 consciousness, sentience, biological life, personhood, agency, free will, emotion,
 feeling, understanding, self-awareness, autonomous self-improvement, or subjective
 experience. Fixture success is a reproducibility signal, not evidence of inner life.
+
+## Tester Live-Read-Only Profile
+
+The `tester_live_readonly` package (Prompt 75) is the safe bridge from the fixture-only
+tester demo (Prompt 74) to trusted live-read-only testing. Trusted testers may run
+live-read-only testing **only after** the fixture demo, and only through external,
+manual, dumb feeders.
+
+**Solaris does not run feeders.** Feeders are dumb external scripts (under
+`tools/external_feeders/`) or manual files created by the tester/operator. The external
+scripts may read simple local/public-safe signals and write JSONL events, but the
+Solaris runtime never starts, stops, schedules, controls, or edits them. The correct
+path is: the tester/operator manually runs or writes feeder events -> JSONL files appear
+in `.solaris_ai_nn_live/inbox/` -> Solaris validates the events -> the Environmental
+Membrane creates sensory impressions -> observation/reporting consume the impressions ->
+the tester bundle records what happened. Feeder outputs are JSONL only.
+
+**Governance and a feeder registry are required.** The package ships a SAFE-OFF
+governance template (`live_readonly_enabled=false`, `operator_approved=false`) that the
+tester must enable and approve **by hand**; forbidden sources (raw microphone/camera,
+browser/shell/OS control, Git/GitHub, credentials, clipboard, screen capture, …) are
+explicit, and the tester is told never to approve a source they do not understand. The
+feeder registry is descriptive metadata only: every record is external, read-only, and
+uncontrolled, and any record with `solaris_may_control=true` or
+`started_by_solaris=true` is invalid. A safe/unsafe/mixed event pack lets the tester
+rehearse the validation/quarantine boundary (safe accepts, unsafe quarantines, mixed
+partially accepts) before any real feeder use.
+
+**The Environmental Membrane is required before downstream modules.** The bounded,
+local `TesterLiveReadOnlyRuntime` runs the live tester doctor (which blocks on missing/
+disabled governance, a feeder-control permission, or a forbidden source allowed) and --
+only when explicitly requested and only over the local inbox -- runs Live Birth ->
+Environmental Membrane -> Membrane Integration -> Live Observation. Downstream modules
+consume sensory impressions, never raw events; a critical membrane bypass blocks the
+run in strict mode. The live tester bundle is **local only**: it is never zipped
+automatically, uploaded, or published, and approver identity / private payloads are
+redacted. The Alpha system surfaces a read-only `tester_live_status()`, the Inner MAP
+records a `tester_live_readonly` entry, and Evaluation adds `tester_live_readonly`
+metrics and protocols.
+
+**The tester live path controls nothing.** It is bounded and local-only; it never
+starts/stops/schedules/controls/executes feeders, controls hardware, accesses the
+network/shell/browser/OS/Git/GitHub, runs external services, publishes/uploads, executes
+commands, treats feeder/sensory text as a command, treats human labels/debug gloss as
+ground truth or the operator pulse as teaching, trains on tester feedback, or claims
+consciousness, sentience, biological life, personhood, agency, free will, emotion,
+feeling, understanding, self-awareness, autonomous self-improvement, or subjective
+experience. A successful live-read-only run is operational evidence, not evidence of
+inner life.

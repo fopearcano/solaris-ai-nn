@@ -1,0 +1,127 @@
+{
+  "feeders": [
+    {
+      "feeder_id": "feeder_chronos_absence",
+      "source_id": "chronos_absence",
+      "modality": "chronos",
+      "channel": "time/absence",
+      "description": "wall-clock ticks and absence/silence markers",
+      "writes_to": ".solaris_ai_nn_live/inbox/chronos_absence.jsonl",
+      "read_only": true,
+      "started_externally": true,
+      "started_by_solaris": false,
+      "solaris_may_control": false,
+      "privacy_level": "low",
+      "expected_event_rate": "low",
+      "allowed": true,
+      "limitations": [
+        "read-only; Solaris never starts, stops, schedules, or controls this feeder"
+      ],
+      "tester_instructions": "Run tools/external_feeders/chronos_absence_feeder.py with --out pointing at the inbox.",
+      "safety_notes": "Writes only the current UTC time and manual absence reasons."
+    },
+    {
+      "feeder_id": "feeder_machine_body",
+      "source_id": "machine_body",
+      "modality": "scalar",
+      "channel": "machine_body/load",
+      "description": "local machine scalar state (cpu/mem/disk percent) read-only",
+      "writes_to": ".solaris_ai_nn_live/inbox/machine_body.jsonl",
+      "read_only": true,
+      "started_externally": true,
+      "started_by_solaris": false,
+      "solaris_may_control": false,
+      "privacy_level": "low",
+      "expected_event_rate": "low",
+      "allowed": true,
+      "limitations": [
+        "read-only; Solaris never starts, stops, schedules, or controls this feeder"
+      ],
+      "tester_instructions": "Run tools/external_feeders/machine_body_feeder.py with --out.",
+      "safety_notes": "No process command lines, no usernames, no hardware control."
+    },
+    {
+      "feeder_id": "feeder_local_environment_manual",
+      "source_id": "local_environment_manual",
+      "modality": "scalar",
+      "channel": "local_environment/manual",
+      "description": "manually-entered local environment scalars (temp/light/noise)",
+      "writes_to": ".solaris_ai_nn_live/inbox/local_environment_manual.jsonl",
+      "read_only": true,
+      "started_externally": true,
+      "started_by_solaris": false,
+      "solaris_may_control": false,
+      "privacy_level": "low",
+      "expected_event_rate": "low",
+      "allowed": true,
+      "limitations": [
+        "read-only; Solaris never starts, stops, schedules, or controls this feeder"
+      ],
+      "tester_instructions": "Run tools/external_feeders/manual_environment_writer.py and type values.",
+      "safety_notes": "No raw microphone/camera; weather notes are annotation only."
+    },
+    {
+      "feeder_id": "feeder_project_artifact_field",
+      "source_id": "project_artifact_field",
+      "modality": "field",
+      "channel": "project/artifact",
+      "description": "read-only project artifact presence/count/mtime (no file content)",
+      "writes_to": ".solaris_ai_nn_live/inbox/project_artifact_field.jsonl",
+      "read_only": true,
+      "started_externally": true,
+      "started_by_solaris": false,
+      "solaris_may_control": false,
+      "privacy_level": "low",
+      "expected_event_rate": "low",
+      "allowed": true,
+      "limitations": [
+        "read-only; Solaris never starts, stops, schedules, or controls this feeder"
+      ],
+      "tester_instructions": "Run tools/external_feeders/project_artifact_feeder.py with --dir.",
+      "safety_notes": "No file content, no Git, no full-repo scan, no secrets."
+    },
+    {
+      "feeder_id": "feeder_operator_pulse",
+      "source_id": "operator_pulse",
+      "modality": "pulse",
+      "channel": "operator/pulse",
+      "description": "operator short note as a stimulus event (never a command)",
+      "writes_to": ".solaris_ai_nn_live/inbox/operator_pulse.jsonl",
+      "read_only": true,
+      "started_externally": true,
+      "started_by_solaris": false,
+      "solaris_may_control": false,
+      "privacy_level": "low",
+      "expected_event_rate": "low",
+      "allowed": true,
+      "limitations": [
+        "read-only; Solaris never starts, stops, schedules, or controls this feeder"
+      ],
+      "tester_instructions": "Run tools/external_feeders/operator_pulse_writer.py --note '...'.",
+      "safety_notes": "Operator note is stimulus only; never a teaching label or command."
+    },
+    {
+      "feeder_id": "feeder_local_weather_readonly_external",
+      "source_id": "local_weather_readonly_external",
+      "modality": "scalar",
+      "channel": "weather/manual",
+      "description": "operator-provided read-only local weather scalars (manual)",
+      "writes_to": ".solaris_ai_nn_live/inbox/local_weather_readonly_external.jsonl",
+      "read_only": true,
+      "started_externally": true,
+      "started_by_solaris": false,
+      "solaris_may_control": false,
+      "privacy_level": "low",
+      "expected_event_rate": "low",
+      "allowed": true,
+      "limitations": [
+        "read-only; Solaris never starts, stops, schedules, or controls this feeder"
+      ],
+      "tester_instructions": "Run tools/external_feeders/local_weather_manual_writer.py and type values.",
+      "safety_notes": "Manually entered; no network calls; annotation only."
+    }
+  ],
+  "feeder_count": 6,
+  "invalid_record_count": 0,
+  "note": "descriptive metadata only; all feeders are external, read-only, operator-started, and never controlled by Solaris. Unknown feeders are blocked by default."
+}

@@ -1,0 +1,52 @@
+{
+  "live_readonly_enabled": false,
+  "operator_approved": false,
+  "approved_by": "",
+  "approved_at_utc": "",
+  "scope": "trusted tester local read-only environmental event spool",
+  "allowed_sources": [
+    "chronos_absence",
+    "machine_body",
+    "local_environment_manual",
+    "project_artifact_field",
+    "operator_pulse"
+  ],
+  "optional_sources": [
+    "local_weather_readonly_external"
+  ],
+  "forbidden_sources": [
+    "raw_microphone",
+    "raw_camera",
+    "browser_control",
+    "shell",
+    "os_control",
+    "robotics",
+    "filesystem_write",
+    "filesystem_wide_scan",
+    "git",
+    "github",
+    "network_control",
+    "private_messages",
+    "password_manager",
+    "credentials",
+    "screen_capture",
+    "clipboard",
+    "email",
+    "calendar",
+    "contacts"
+  ],
+  "rules": {
+    "solaris_may_start_feeders": false,
+    "solaris_may_stop_feeders": false,
+    "solaris_may_schedule_feeders": false,
+    "solaris_may_modify_feeders": false,
+    "solaris_may_control_hardware": false,
+    "solaris_may_execute_commands": false,
+    "solaris_may_modify_sources": false,
+    "solaris_may_access_network": false,
+    "sensory_text_is_command": false,
+    "human_labels_are_ground_truth": false,
+    "debug_gloss_is_ground_truth": false,
+    "tester_feedback_is_training": false
+  }
+}

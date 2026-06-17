@@ -40,7 +40,10 @@ _ALPHA_COMMANDS = ("doctor", "init", "modules", "run-demo", "artifact-index",
                    "membrane-integrate", "membrane-audit", "membrane-bypass",
                    "membrane-ancestry", "membrane-contracts",
                    "tester-demo", "tester-golden", "tester-bundle",
-                   "tester-repro", "tester-regression", "tester-fixtures")
+                   "tester-repro", "tester-regression", "tester-fixtures",
+                   "tester-live-init", "tester-live-doctor",
+                   "tester-live-samples", "tester-live-run",
+                   "tester-live-bundle", "tester-live-checklist")
 
 
 def _integration_runtime(args: argparse.Namespace):
@@ -61,6 +64,26 @@ def _integration_runtime(args: argparse.Namespace):
         allow_raw_fallback=args.allow_raw_fallback,
         require_claimguard=args.require_claimguard,
         operator_note=args.operator_note)
+
+
+def _tester_live_runtime(args: argparse.Namespace, **overrides):
+    from .tester_live_readonly import TesterLiveReadOnlyRuntime
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_live"
+    kwargs = dict(
+        state_dir=state_dir, tester_state_dir=args.tester_state_dir,
+        profile=args.profile, max_runtime_s=args.max_runtime_s,
+        max_events=args.max_events, strict=args.strict, dry_run=args.dry_run,
+        report_only=args.report_only, write_templates=args.write_templates,
+        copy_safe_samples_to_inbox=args.copy_safe_samples_to_inbox,
+        run_birth=args.run_birth, run_membrane=args.run_membrane,
+        run_integration=args.run_integration,
+        run_observation=args.run_observation,
+        require_claimguard=args.require_claimguard)
+    kwargs.update(overrides)
+    return TesterLiveReadOnlyRuntime(**kwargs)
 
 
 def _tester_runtime(args: argparse.Namespace):
@@ -1190,6 +1213,132 @@ def cmd_tester_fixtures(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_tester_live_init(args: argparse.Namespace) -> int:
+    rt = _tester_live_runtime(
+        args, profile="tester_live_init_only_v0", write_templates=True,
+        run_birth=False, run_membrane=False, run_integration=False,
+        run_observation=False)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"tester live init refused: {result.get('reason')}")
+        return 2
+    st = rt.tester_live_status()
+    _print("tester live-read-only init:")
+    _print(f"  run id: {st['tester_live_run_id']} ({st['tester_live_profile']})")
+    _print(f"  state dir: {rt.state_dir}; tester state: {rt.tester_state_dir}")
+    _print(f"  governance: {st['governance_status']} (templates written; edit "
+           "by hand to enable)")
+    _print(f"  feeder registry present: {st['feeder_registry_present']}")
+    _print(f"  live doctor: {st['live_doctor_status']}")
+    for step in result["recommended_next_steps"]:
+        _print(f"  next: {step}")
+    return 0
+
+
+def cmd_tester_live_doctor(args: argparse.Namespace) -> int:
+    rt = _tester_live_runtime(args, write_templates=False, run_birth=False,
+                              run_membrane=False, run_integration=False,
+                              run_observation=False)
+    doc = rt.run_doctor()
+    _print("tester live doctor:")
+    _print(f"  overall status: {doc.get('overall_status')}")
+    _print(f"  blockers: {doc.get('blocker_count', 0)}; warnings: "
+           f"{doc.get('warning_count', 0)}")
+    for f in doc.get("findings", []):
+        if f["status"] in ("blocked", "unsafe", "missing"):
+            _print(f"    [{f['status']}] {f['check']}: {f['detail']}")
+    if not doc.get("passed") and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_live_samples(args: argparse.Namespace) -> int:
+    from .tester_live_readonly import SafeEventPackBuilder, SafeEventPackValidator
+
+    res = SafeEventPackValidator(strict=True).validate_pack(
+        SafeEventPackBuilder().build())
+    _print("tester live sample event packs:")
+    _print(f"  safe accepted: {res['safe']['accepted_count']}/"
+           f"{res['safe']['event_count']} (all accepted "
+           f"{bool(res['safe']['all_accepted'])})")
+    _print(f"  unsafe quarantined: {res['unsafe']['quarantined_count']}/"
+           f"{res['unsafe']['event_count']} (all quarantined "
+           f"{bool(res['unsafe']['all_quarantined'])})")
+    _print(f"  mixed: accepted {res['mixed']['accepted_count']}, quarantined "
+           f"{res['mixed']['quarantined_count']} (partial "
+           f"{res['mixed']['partially_accepted']})")
+    ok = (res["safe"]["all_accepted"] and res["unsafe"]["all_quarantined"]
+          and res["mixed"]["partially_accepted"])
+    if not ok and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_live_run(args: argparse.Namespace) -> int:
+    rt = _tester_live_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"tester live run refused: {result.get('reason')}")
+        return 2
+    st = rt.tester_live_status()
+    _print("tester live-read-only run:")
+    _print(f"  run id: {st['tester_live_run_id']} ({st['tester_live_profile']})")
+    _print(f"  governance: {st['governance_status']} (enabled+approved "
+           f"{st['governance_enabled_and_approved']})")
+    _print(f"  live doctor: {st['live_doctor_status']}")
+    _print(f"  membrane impressions: {st['membrane_impression_count']}; "
+           f"quarantined: {st['quarantine_count']}")
+    _print(f"  solaris controls any feeder: "
+           f"{st['solaris_controls_any_feeder']}")
+    _print(f"  blocked: {st['tester_live_blocked']}")
+    for b in result["blockers"]:
+        _print(f"    blocker: {b}")
+    _print(f"  tester report: {result['tester_live_report']}")
+    _print(f"  tester bundle: {result['tester_live_bundle']}")
+    for step in result["recommended_next_steps"]:
+        _print(f"  next: {step}")
+    if result["blocked"] and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_live_bundle(args: argparse.Namespace) -> int:
+    rt = _tester_live_runtime(args, write_templates=False, run_birth=False,
+                              run_membrane=False, run_integration=False,
+                              run_observation=False)
+    rt.run()
+    m = rt.bundle.manifest.to_dict() if rt.bundle else {}
+    _print("tester live bundle:")
+    _print(f"  bundle dir: {m.get('bundle_dir', rt.bundle_dir)}")
+    _print(f"  entries: {m.get('entry_count', 0)}")
+    _print(f"  redactions: {', '.join(m.get('redactions', [])) or 'none'}")
+    _print(f"  missing artifacts: "
+           f"{', '.join(m.get('missing_artifacts', [])) or 'none'}")
+    _print(f"  local only: {m.get('local_only')}; uploaded: {m.get('uploaded')}; "
+           f"published: {m.get('published')}")
+    return 0
+
+
+def cmd_tester_live_checklist(args: argparse.Namespace) -> int:
+    import os
+
+    from .tester_live_readonly import TesterLiveChecklist
+
+    checklist = TesterLiveChecklist.build()
+    base = os.path.join(args.tester_state_dir, "checklists")
+    os.makedirs(base, exist_ok=True)
+    path = os.path.join(base, "TESTER_LIVE_CHECKLIST.md")
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(checklist.to_markdown())
+    _print("tester live checklist:")
+    _print(f"  written: {path}")
+    _print(f"  sections: {len(checklist.sections)}; stop conditions: "
+           f"{len(checklist.stop_conditions())}")
+    for sc in checklist.stop_conditions():
+        _print(f"    STOP: {sc}")
+    return 0
+
+
 _HANDLERS = {
     "init": cmd_init,
     "doctor": cmd_doctor,
@@ -1242,6 +1391,12 @@ _HANDLERS = {
     "tester-repro": cmd_tester_repro,
     "tester-regression": cmd_tester_regression,
     "tester-fixtures": cmd_tester_fixtures,
+    "tester-live-init": cmd_tester_live_init,
+    "tester-live-doctor": cmd_tester_live_doctor,
+    "tester-live-samples": cmd_tester_live_samples,
+    "tester-live-run": cmd_tester_live_run,
+    "tester-live-bundle": cmd_tester_live_bundle,
+    "tester-live-checklist": cmd_tester_live_checklist,
 }
 
 
@@ -1370,6 +1525,25 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--no-optional-stages", action="store_false",
                         default=True, dest="allow_optional_stages",
                         help="skip optional ontogenesis/semiogenesis/cognition")
+    # Tester live-read-only arguments (Prompt 75).
+    parser.add_argument("--tester-state-dir", type=str,
+                        default=".solaris_ai_nn_tester/live",
+                        dest="tester_state_dir",
+                        help="tester live state directory root")
+    parser.add_argument("--no-write-templates", action="store_false",
+                        default=True, dest="write_templates",
+                        help="do not write governance/feeder templates")
+    parser.add_argument("--copy-safe-samples", action="store_true",
+                        default=False, dest="copy_safe_samples_to_inbox",
+                        help="copy safe sample events into the local inbox")
+    parser.add_argument("--run-birth", action="store_true", default=False,
+                        dest="run_birth", help="run Live Birth over the inbox")
+    parser.add_argument("--run-membrane", action="store_true", default=False,
+                        dest="run_membrane", help="run the Environmental Membrane")
+    parser.add_argument("--run-integration", action="store_true", default=False,
+                        dest="run_integration", help="run the membrane integration")
+    parser.add_argument("--run-observation", action="store_true", default=False,
+                        dest="run_observation", help="run Live Observation")
 
 
 def build_parser() -> argparse.ArgumentParser:

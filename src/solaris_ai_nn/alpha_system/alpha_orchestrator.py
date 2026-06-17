@@ -782,6 +782,54 @@ class AlphaResearchOrchestrator:
                     "alpha system never runs it, learns, or controls feeders",
         }
 
+    def tester_live_status(
+            self, tester_live_state_dir: str = ".solaris_ai_nn_tester/live",
+            ) -> Dict[str, Any]:
+        """Read-only view of the latest tester live-read-only run (Prompt 75).
+
+        Surfaces whether a tester live-read-only run is available, the latest
+        report and bundle, the live-doctor and governance status, the membrane
+        status, the quarantine count, and the critical blocker count. This is a
+        read-only view; the alpha system never runs the tester live path, starts
+        feeders, learns, or controls hardware.
+        """
+        base = os.path.join(tester_live_state_dir, "reports")
+        if not os.path.isdir(base):
+            return {"tester_live_available": False,
+                    "note": "no tester live state present; run "
+                            "`python -m solaris_ai_nn tester-live-init` first"}
+        summaries = sorted(f for f in os.listdir(base)
+                           if f.startswith("TESTER_LIVE_RUN_SUMMARY_")
+                           and f.endswith(".json"))
+        if not summaries:
+            return {"tester_live_available": False}
+        with open(os.path.join(base, summaries[-1]), encoding="utf-8") as fh:
+            summary = json.load(fh)
+        gov = summary.get("governance_status", {}) or {}
+        doctor = summary.get("live_doctor", {}) or {}
+        membrane = summary.get("membrane_status", {}) or {}
+        return {
+            "tester_live_available": True,
+            "tester_live_profile_available": True,
+            "tester_live_run_id": summary.get("tester_live_run_id"),
+            "latest_tester_live_report_path": os.path.join(
+                base, f"TESTER_LIVE_READONLY_REPORT_"
+                      f"{summary.get('tester_live_run_id')}.md"),
+            "latest_tester_live_summary_path": os.path.join(
+                base, summaries[-1]),
+            "live_doctor_status": doctor.get("overall_status", "unknown"),
+            "governance_status": gov.get("status", "missing"),
+            "membrane_status": ("present" if membrane.get(
+                "membrane_impression_count") else "absent"),
+            "quarantine_count": (summary.get("quarantine_summary", {}) or {}).get(
+                "quarantined_count", 0),
+            "critical_blocker_count": len(summary.get("blockers", []) or []),
+            "live_read_only": True, "starts_feeders": False,
+            "controls_hardware": False, "learns": False, "runs_git": False,
+            "note": "read-only view of the latest tester live-read-only run; the "
+                    "alpha system never runs it, starts feeders, or learns",
+        }
+
     def snapshot(self) -> Dict[str, Any]:
         return self.alpha_status()
 

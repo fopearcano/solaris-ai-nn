@@ -22,6 +22,7 @@ htmlcov/
 !examples/environmental_membrane/*.jsonl
 !examples/membrane_integration/**/*.jsonl
 !examples/tester_fixture_spine/**/*.jsonl
+!examples/tester_live_readonly/**/*.jsonl
 runs/
 artifacts/
 

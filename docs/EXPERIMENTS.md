@@ -3496,3 +3496,38 @@ Generates a local tester artifact bundle with the optional learning stages disab
 prints the manifest, including the entries and the missing optional artifacts. The
 bundle is local-only and human-readable; nothing is zipped automatically, uploaded, or
 published.
+
+## 404. Tester Live Init Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_live_init_demo.py --state-dir .solaris_ai_nn_live/test_live_init --tester-state-dir .solaris_ai_nn_tester/live/test_live_init`
+Writes the SAFE-OFF governance template, the feeder registry template, the safe/unsafe
+event packs, and the checklist, and runs the live tester doctor. It performs no live
+run; Solaris starts no feeder.
+
+## 405. Tester Live Doctor Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_live_doctor_demo.py --state-dir .solaris_ai_nn_live/test_live_doctor --tester-state-dir .solaris_ai_nn_tester/live/test_live_doctor`
+Shows the live tester doctor blocking on missing/disabled governance, passing on an
+approved-and-safe config, and blocking when a forbidden source is allowed.
+
+## 406. Tester Live Samples Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_live_samples_demo.py --state-dir .solaris_ai_nn_live/test_live_samples --tester-state-dir .solaris_ai_nn_tester/live/test_live_samples`
+Validates the safe/unsafe/mixed event packs using the same checks Live Birth applies:
+safe events accept, unsafe events quarantine, and mixed events partially accept and
+partially quarantine.
+
+## 407. Tester Live Run Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_live_run_demo.py --state-dir .solaris_ai_nn_live/test_live_run --tester-state-dir .solaris_ai_nn_tester/live/test_live_run`
+Initializes the live state, simulates the tester's manual governance approval, copies
+the safe sample events into the local inbox, then runs Live Birth -> Environmental
+Membrane -> Membrane Integration -> Live Observation and generates the reports + bundle.
+Solaris starts no feeder.
+
+## 408. Tester Live Bundle Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_live_bundle_demo.py --state-dir .solaris_ai_nn_live/test_live_bundle --tester-state-dir .solaris_ai_nn_tester/live/test_live_bundle`
+Builds the local tester live bundle and prints the manifest, including redactions and
+missing artifacts. The bundle is local-only; nothing is zipped automatically, uploaded,
+or published.

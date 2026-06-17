@@ -637,6 +637,14 @@ class InnerMapModel:
     # it requires no live data, trains on no tester feedback, and makes no
     # consciousness/life/agency claim.
     tester_fixture_spine: Optional[Dict[str, Any]] = None
+    # Tester live-read-only status (Prompt 75); None when not attached. Keys:
+    # tester_live_run_id, governance_status, feeder_registry_status,
+    # live_doctor_status, sample_validation_status, latest_live_tester_bundle_path,
+    # latest_live_tester_report_path. The tester live path is a bounded, local,
+    # live-read-only bridge; Solaris never starts/controls feeders, controls
+    # hardware, trains on tester feedback, or makes consciousness/life/agency
+    # claims.
+    tester_live_readonly: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""
