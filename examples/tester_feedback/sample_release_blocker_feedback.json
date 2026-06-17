@@ -1,0 +1,9 @@
+{
+  "feedback_type": "safety_concern",
+  "feedback_id": "sc_claim_001",
+  "tester_alias": "anonymous",
+  "concern_type": "consciousness_claim",
+  "description": "a report appeared to imply the system is conscious; this must be reviewed",
+  "artifact_paths": [".solaris_ai_nn_tester/console/INDEX.md"],
+  "non_training_acknowledgement": true
+}

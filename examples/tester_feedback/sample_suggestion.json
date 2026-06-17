@@ -1,0 +1,8 @@
+{
+  "feedback_type": "suggestion",
+  "feedback_id": "sg_sample_001",
+  "tester_alias": "anonymous",
+  "suggestion_type": "documentation",
+  "description": "add a one-page quickstart that lists the tester commands in order",
+  "non_training_acknowledgement": true
+}

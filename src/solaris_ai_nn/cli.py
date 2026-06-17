@@ -45,7 +45,10 @@ _ALPHA_COMMANDS = ("doctor", "init", "modules", "run-demo", "artifact-index",
                    "tester-live-samples", "tester-live-run",
                    "tester-live-bundle", "tester-live-checklist",
                    "tester-console", "tester-console-md", "tester-console-html",
-                   "tester-console-status", "tester-console-runs")
+                   "tester-console-status", "tester-console-runs",
+                   "tester-feedback-init", "tester-feedback-ingest",
+                   "tester-feedback-report", "tester-feedback-ledger",
+                   "tester-feedback-bundle", "tester-feedback-blockers")
 
 
 def _integration_runtime(args: argparse.Namespace):
@@ -66,6 +69,20 @@ def _integration_runtime(args: argparse.Namespace):
         allow_raw_fallback=args.allow_raw_fallback,
         require_claimguard=args.require_claimguard,
         operator_note=args.operator_note)
+
+
+def _tester_feedback_runtime(args: argparse.Namespace, **overrides):
+    from .tester_feedback import TesterFeedbackRuntime
+
+    kwargs = dict(
+        tester_state_dir=args.tester_state_dir, feedback_dir=args.feedback_dir,
+        profile=args.profile, max_runtime_s=args.max_runtime_s,
+        strict=args.strict, dry_run=args.dry_run, report_only=args.report_only,
+        forms_only=args.forms_only, ingest_path=args.ingest_path,
+        build_bundle=args.build_bundle, privacy_redact=args.privacy_redact,
+        require_claimguard=args.require_claimguard)
+    kwargs.update(overrides)
+    return TesterFeedbackRuntime(**kwargs)
 
 
 def _tester_console_runtime(args: argparse.Namespace, **overrides):
@@ -1445,6 +1462,116 @@ def cmd_tester_console_runs(args: argparse.Namespace) -> int:
     return 0
 
 
+def _print_feedback_summary(result) -> None:
+    _print(f"  entries: {result['entry_count']} (bugs "
+           f"{result['bug_report_count']}, safety "
+           f"{result['safety_concern_count']})")
+    _print(f"  release blockers: {result['release_blocker_count']} "
+           f"(stop-testing {result['stop_testing_count']})")
+    _print(f"  redactions: {result['redaction_count']}")
+    _print(f"  next action: {result['recommended_next_action']}")
+
+
+def cmd_tester_feedback_init(args: argparse.Namespace) -> int:
+    import os
+
+    rt = _tester_feedback_runtime(args, profile="tester_feedback_forms_only_v0",
+                                  forms_only=True)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"tester feedback init refused: {result.get('reason')}")
+        return 2
+    _print("tester feedback init:")
+    _print(f"  forms: {os.path.join(rt.feedback_dir, 'forms')}")
+    _print(f"  ledger: {rt.ledger.jsonl_path}")
+    _print("  feedback is LOCAL QA evidence only -- not training, not RLHF, "
+           "not ground truth, not a command.")
+    return 0
+
+
+def cmd_tester_feedback_ingest(args: argparse.Namespace) -> int:
+    if not args.ingest_path:
+        _print("tester feedback ingest: --ingest-path is required")
+        return 2
+    rt = _tester_feedback_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"tester feedback ingest refused: {result.get('reason')}")
+        return 2
+    _print("tester feedback ingest:")
+    _print(f"  ingested: {args.ingest_path}")
+    _print_feedback_summary(result)
+    for w in rt.warnings:
+        _print(f"  warning: {w}")
+    if result["stop_testing_count"] and args.strict:
+        return 2
+    if result["release_blocker_count"] and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_feedback_report(args: argparse.Namespace) -> int:
+    rt = _tester_feedback_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"tester feedback report refused: {result.get('reason')}")
+        return 2
+    _print("tester feedback report:")
+    _print(f"  report: {result['latest_feedback_report_path']}")
+    _print_feedback_summary(result)
+    if result["release_blocker_count"] and args.strict:
+        return 2
+    return 0
+
+
+def cmd_tester_feedback_ledger(args: argparse.Namespace) -> int:
+    rt = _tester_feedback_runtime(args, profile="tester_feedback_ledger_v0",
+                                  dry_run=True)
+    rt.run()
+    index = rt.ledger_index().to_dict()
+    _print("tester feedback ledger:")
+    _print(f"  entries: {index['entry_count']}; by type: {index['by_type']}")
+    _print(f"  release blockers: {index['release_blocker_count']} "
+           f"(stop-testing {index['stop_testing_count']})")
+    _print(f"  safety concerns: {index['safety_concern_count']}; redactions: "
+           f"{index['redaction_count']}")
+    _print(f"  ledger: {rt.ledger.jsonl_path}")
+    return 0
+
+
+def cmd_tester_feedback_bundle(args: argparse.Namespace) -> int:
+    rt = _tester_feedback_runtime(args, build_bundle=True)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"tester feedback bundle refused: {result.get('reason')}")
+        return 2
+    m = rt.bundle.manifest.to_dict() if rt.bundle else {}
+    _print("tester feedback bundle:")
+    _print(f"  bundle dir: {m.get('bundle_dir', rt.bundle_dir)}")
+    _print(f"  entries: {m.get('entry_count', 0)}; redactions: "
+           f"{m.get('redaction_count', 0)}")
+    _print(f"  local only: {m.get('local_only')}; uploaded: {m.get('uploaded')}; "
+           f"published: {m.get('published')}")
+    return 0
+
+
+def cmd_tester_feedback_blockers(args: argparse.Namespace) -> int:
+    rt = _tester_feedback_runtime(args, dry_run=True)
+    rt.run()
+    index = rt.ledger_index()
+    _print("tester feedback release blockers:")
+    _print(f"  release blockers: {index.release_blocker_count} "
+           f"(stop-testing {index.stop_testing_count})")
+    for e in index.entries:
+        if e.release_blocker_status in ("release_blocker", "stop_testing"):
+            _print(f"  - [{e.release_blocker_status}] {e.feedback_id} "
+                   f"({e.release_blocker_reason})")
+    _print(f"  next action: {rt.recommended_next_action()}")
+    if index.release_blocker_count and args.strict:
+        return 2
+    return 0
+
+
 _HANDLERS = {
     "init": cmd_init,
     "doctor": cmd_doctor,
@@ -1508,6 +1635,12 @@ _HANDLERS = {
     "tester-console-html": cmd_tester_console_html,
     "tester-console-status": cmd_tester_console_status,
     "tester-console-runs": cmd_tester_console_runs,
+    "tester-feedback-init": cmd_tester_feedback_init,
+    "tester-feedback-ingest": cmd_tester_feedback_ingest,
+    "tester-feedback-report": cmd_tester_feedback_report,
+    "tester-feedback-ledger": cmd_tester_feedback_ledger,
+    "tester-feedback-bundle": cmd_tester_feedback_bundle,
+    "tester-feedback-blockers": cmd_tester_feedback_blockers,
 }
 
 
@@ -1662,6 +1795,20 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
                         help="tester console output directory")
     parser.add_argument("--no-html", action="store_false", default=True,
                         dest="html", help="do not generate the static HTML page")
+    # Tester feedback arguments (Prompt 77).
+    parser.add_argument("--feedback-dir", type=str, default="",
+                        dest="feedback_dir",
+                        help="feedback directory (default: <tester>/feedback)")
+    parser.add_argument("--ingest-path", type=str, default="",
+                        dest="ingest_path",
+                        help="local feedback JSON/Markdown file to ingest")
+    parser.add_argument("--forms-only", action="store_true", default=False,
+                        dest="forms_only", help="generate feedback forms only")
+    parser.add_argument("--build-bundle", action="store_true", default=False,
+                        dest="build_bundle", help="build the local feedback bundle")
+    parser.add_argument("--no-privacy-redact", action="store_false",
+                        default=True, dest="privacy_redact",
+                        help="do not redact obvious secret markers (not advised)")
 
 
 def build_parser() -> argparse.ArgumentParser:

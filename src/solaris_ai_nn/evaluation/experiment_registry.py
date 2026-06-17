@@ -931,6 +931,29 @@ DESCRIPTIONS = {
         "append-only run index; latest run marked",
     "console_safety_protocol":
         "no server/browser/feeder/artifact-execution; read-only; bounded",
+    "tester_feedback":
+        "local non-training tester QA ledger; not RLHF/ground-truth/command; "
+        "does not modify behaviour",
+    "tester_feedback_protocol":
+        "local append-only feedback ledger; bounded; non-training",
+    "feedback_form_protocol":
+        "feedback form states not-training and warns on privacy",
+    "bug_report_protocol":
+        "bug report validates; patches/auto-fixes nothing; no GitHub issue",
+    "safety_concern_protocol":
+        "unsupported-claim/feeder-control concerns escalate to release blockers",
+    "confusion_report_protocol":
+        "confusion reports are UX evidence, not teaching signals",
+    "suggestion_report_protocol":
+        "suggestions are review items, not ground truth, never auto-applied",
+    "feedback_ledger_protocol":
+        "append-only local feedback ledger; old entries preserved",
+    "release_blocker_classifier_protocol":
+        "claims/feeder-control/privacy default to release blockers",
+    "feedback_bundle_protocol":
+        "local-only feedback bundle; no upload/publish",
+    "feedback_safety_protocol":
+        "no training/command/auto-issue/upload from feedback; bounded",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -1373,6 +1396,13 @@ class ExperimentRegistry:
             name.startswith("tester_console")
             or name.startswith("console_")
             or bool(merged.get("tester_console", False)))
+        features["tester_feedback"] = (
+            name.startswith("tester_feedback")
+            or name.startswith("feedback_")
+            or name in ("bug_report_protocol", "safety_concern_protocol",
+                        "confusion_report_protocol", "suggestion_report_protocol",
+                        "release_blocker_classifier_protocol")
+            or bool(merged.get("tester_feedback", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

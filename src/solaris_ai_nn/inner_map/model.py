@@ -652,6 +652,13 @@ class InnerMapModel:
     # static dashboard; it controls no feeders/hardware/network and makes no
     # consciousness/life/agency claim.
     tester_console: Optional[Dict[str, Any]] = None
+    # Tester feedback ledger status (Prompt 77); None when not attached. Keys:
+    # feedback_system_initialized, feedback_count, safety_concern_count,
+    # release_blocker_count, latest_feedback_report_path,
+    # latest_feedback_bundle_path. The feedback ledger is local QA evidence
+    # only; it is never training, RLHF, ground truth, or a command, and it never
+    # modifies Solaris behaviour or makes consciousness/life/agency claims.
+    tester_feedback: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

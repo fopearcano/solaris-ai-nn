@@ -3565,3 +3565,39 @@ the run index with run records and the latest-run marker. Old runs are preserved
 Shows how the recommended next action changes across an empty state (run the fixture
 demo), a clean fixture run (prepare live testing), and a safety blocker (fix the blocker
 / stop). Next actions are recommendations only.
+
+## 414. Tester Feedback Init Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_feedback_init_demo.py --tester-state-dir .solaris_ai_nn_tester/test_feedback_init`
+Generates the local feedback forms (bug/safety/confusion/suggestion + the main form) and
+initializes the append-only ledger. Feedback is local QA evidence only -- not training,
+not RLHF, not ground truth, not a command.
+
+## 415. Tester Feedback Ingest Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_feedback_ingest_demo.py --tester-state-dir .solaris_ai_nn_tester/test_feedback_ingest`
+Ingests the sample bug report, safety concern, confusion report, and suggestion into the
+local append-only ledger and prints the running counts. Nothing is uploaded or turned
+into a remote issue.
+
+## 416. Tester Feedback Blocker Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_feedback_blocker_demo.py --tester-state-dir .solaris_ai_nn_tester/test_feedback_blocker`
+Classifies feedback with the release-blocker classifier: an unsupported consciousness
+claim becomes a stop-testing release blocker, a feeder-control risk becomes a release
+blocker, and a minor documentation confusion is not a blocker. Classifications are
+developer review items, not automatic actions.
+
+## 417. Tester Feedback Bundle Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_feedback_bundle_demo.py --tester-state-dir .solaris_ai_nn_tester/test_feedback_bundle`
+Ingests the sample bug + safety concern, builds the local feedback bundle, and prints the
+manifest including the redaction count. The bundle is local only -- nothing is uploaded
+or published.
+
+## 418. Tester Feedback Console Demo ✅ (implemented)
+
+**Run:** `python examples/run_tester_feedback_console_demo.py --tester-state-dir .solaris_ai_nn_tester/test_feedback_console`
+Ingests a release-blocker safety concern, then builds the tester console and shows that
+it discovers the feedback report and surfaces the feedback release blocker in its safety
+panel and next actions.

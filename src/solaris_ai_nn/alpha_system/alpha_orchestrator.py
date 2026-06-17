@@ -863,6 +863,49 @@ class AlphaResearchOrchestrator:
                     "system never runs the console or any control",
         }
 
+    def tester_feedback_status(
+            self, tester_state_dir: str = ".solaris_ai_nn_tester",
+            ) -> Dict[str, Any]:
+        """Read-only view of the local tester feedback ledger (Prompt 77).
+
+        Surfaces whether the feedback system is available, the form/ledger/report
+        paths, the entry count, the release-blocker count, and the safety-concern
+        count. Feedback is local QA evidence only -- never training, RLHF, ground
+        truth, or a command -- and it never modifies Solaris behaviour.
+        """
+        feedback_dir = os.path.join(tester_state_dir, "feedback")
+        ledger_json = os.path.join(feedback_dir, "ledger",
+                                   "TESTER_FEEDBACK_LEDGER.json")
+        form = os.path.join(feedback_dir, "forms", "TESTER_FEEDBACK_FORM.md")
+        if not os.path.isdir(feedback_dir):
+            return {"feedback_available": False,
+                    "note": "no tester feedback present; run "
+                            "`python -m solaris_ai_nn tester-feedback-init`"}
+        data: Dict[str, Any] = {}
+        if os.path.isfile(ledger_json):
+            try:
+                with open(ledger_json, encoding="utf-8") as fh:
+                    data = json.load(fh)
+            except Exception:
+                data = {}
+        report = os.path.join(feedback_dir, "reports",
+                              "TESTER_FEEDBACK_REPORT.md")
+        return {
+            "feedback_available": True,
+            "feedback_form_path": form if os.path.isfile(form) else None,
+            "feedback_ledger_path": os.path.join(
+                feedback_dir, "ledger", "TESTER_FEEDBACK_LEDGER.jsonl"),
+            "latest_feedback_report_path": report
+            if os.path.isfile(report) else None,
+            "feedback_entry_count": data.get("entry_count", 0),
+            "release_blocker_count": data.get("release_blocker_count", 0),
+            "safety_concern_count": data.get("safety_concern_count", 0),
+            "local_only": True, "trains_on_feedback": False,
+            "creates_github_issue": False, "uploads": False,
+            "note": "read-only view of the local tester feedback ledger; "
+                    "feedback is QA evidence only and never modifies behaviour",
+        }
+
     def snapshot(self) -> Dict[str, Any]:
         return self.alpha_status()
 

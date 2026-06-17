@@ -3132,3 +3132,35 @@ a server or auto-opening a browser would add network surface, background process
 a feeling of "an app that does things". The first tester release should be inspectable
 with nothing more than a text editor opening a local file. The HTML is optional, static,
 and offline; the Markdown is the primary output.
+
+## Notes on the Tester Feedback Ledger
+
+**Why tester feedback must not become training data.** The fastest way to corrupt a
+careful, claim-constrained system is to let whoever is testing it quietly become its
+teacher. If tester feedback were treated as training data, RLHF signal, or ground truth,
+the system would start optimizing for tester approval rather than for the boundaries it
+is supposed to respect. So feedback is recorded as QA evidence and nothing more -- it is
+never training, never RLHF, never ground truth, and it never modifies Solaris behaviour.
+
+**Why feedback is not ontology.** A tester's label ("this looks like a concept", "this
+feels conscious") is an observation about the tester's experience, not a fact about the
+system. Treating bug reports or notes as ontology would let casual language redefine the
+system's concepts, signs, or claims. The ledger keeps feedback as developer-review
+evidence and refuses to let it touch concepts, signs, cognition traces, membrane
+thresholds, governance, or scientific claims.
+
+**Why safety concerns should become release blockers.** The cheapest moment to catch a
+feeder-control permission, a membrane bypass, a secret exposure, or an overclaim is when
+a tester first notices it. Elevating those concerns to release blockers -- and stopping
+testing on consciousness/life/agency claims or secret exposure -- ensures they are
+reviewed before the release proceeds, rather than buried under suggestions.
+
+**Why suggestions must remain review items.** A good suggestion is still a proposal, not
+an instruction. If suggestions auto-applied, the system would implement whatever a tester
+asked for, including changes that violate its own boundaries. Each suggestion carries a
+developer-controlled disposition and never triggers implementation automatically.
+
+**Why feedback must stay local unless manually shared.** Feedback can contain paths,
+environment details, or accidental sensitive text. Keeping it local by default -- never
+uploaded, never turned into a remote issue automatically, with obvious secret markers
+redacted -- means the tester, not the system, decides what leaves their machine.

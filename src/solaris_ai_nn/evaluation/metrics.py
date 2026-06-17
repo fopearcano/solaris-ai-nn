@@ -3014,3 +3014,47 @@ def tester_console_metrics(ts: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "note": "read-only static console metrics; the console controls nothing "
                 "and proves nothing about consciousness/life/agency",
     }
+
+
+def tester_feedback_metrics(ts: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective tester-feedback metrics (a local, non-training QA ledger).
+
+    These describe the local feedback ledger: init/entry counts, per-type counts
+    (bugs, safety concerns, confusion, suggestions), release-blocker and
+    stop-testing counts, the bundle count, and safety/privacy-redaction counts.
+    Feedback is local QA evidence only -- never training, RLHF, ground truth, or
+    a command -- and it never modifies Solaris behaviour or makes consciousness/
+    life/agency claims.
+    """
+    if not ts:
+        return {"present": False}
+
+    def _i(key: str) -> int:
+        return int(ts.get(key, 0) or 0)
+
+    by_type = ts.get("by_type", {}) or {}
+    return {
+        "present": True,
+        "tester_feedback_init_count": 1,
+        "tester_feedback_entry_count": _i("entry_count"),
+        "tester_bug_report_count": int(by_type.get("bug_report", 0) or 0)
+        or _i("bug_report_count"),
+        "tester_safety_concern_count": _i("safety_concern_count"),
+        "tester_confusion_report_count": int(
+            by_type.get("confusion_report", 0) or 0)
+        or _i("confusion_report_count"),
+        "tester_suggestion_count": int(by_type.get("suggestion", 0) or 0)
+        or _i("suggestion_count"),
+        "tester_feedback_release_blocker_count": _i("release_blocker_count"),
+        "tester_feedback_stop_testing_count": _i("stop_testing_count"),
+        "tester_feedback_bundle_count": 1 if ts.get(
+            "latest_feedback_bundle_path") else 0,
+        "tester_feedback_safety_block_count": _i("feedback_safety_block_count"),
+        "tester_feedback_privacy_redaction_count": _i("redaction_count"),
+        "local_only": True, "trains_on_feedback": False,
+        "is_rlhf": False, "modifies_solaris_behavior": False,
+        "creates_github_issue": False, "uploads": False,
+        "is_consciousness_or_personhood": False,
+        "note": "local non-training feedback metrics; feedback is QA evidence "
+                "only and never modifies behaviour or implies consciousness",
+    }

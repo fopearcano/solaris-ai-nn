@@ -1,0 +1,9 @@
+{
+  "feedback_type": "confusion_report",
+  "feedback_id": "cf_sample_001",
+  "tester_alias": "anonymous",
+  "area": "fixture_vs_live_distinction",
+  "severity": "minor",
+  "description": "unclear when to use the tester state dir vs the live state dir",
+  "non_training_acknowledgement": true
+}

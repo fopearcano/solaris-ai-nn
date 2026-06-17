@@ -11128,6 +11128,189 @@ def console_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
     return _run(manifest, body)
 
 
+# -- AI. Tester feedback ledger (Prompt 77) -------------------------------------
+
+
+def _build_feedback(state_dir, ingest=None):
+    from ..tester_feedback import TesterFeedbackRuntime
+
+    base = state_dir or ".solaris_ai_nn_tester_feedback_eval"
+    rt = TesterFeedbackRuntime(
+        tester_state_dir=base, ingest_path=ingest or "", max_runtime_s=60.0)
+    rt.run()
+    return rt
+
+
+def tester_feedback_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The tester feedback ledger is local, append-only, and non-training."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_feedback(m.state_dir)
+        return {"tester_feedback":
+                M.tester_feedback_metrics(rt.feedback_status())}
+
+    return _run(manifest, body)
+
+
+def feedback_form_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The feedback form states feedback is not training and warns on privacy."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_feedback import TesterFeedbackForm
+
+        form = TesterFeedbackForm.build().to_dict()
+        return {"tester_feedback": {
+            "category_count": len(form["categories"]),
+            "required_field_count": sum(1 for q in form["questions"]
+                                        if q["required"]),
+            "feedback_is_training": form["feedback_is_training"],
+            "has_non_training_notice": bool(form["non_training_notice"])}}
+
+    return _run(manifest, body)
+
+
+def bug_report_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """A bug report validates and patches/auto-fixes nothing."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_feedback import BugReportBuilder
+
+        report = BugReportBuilder().build({
+            "bug_id": "b1", "actual_behavior": "crash",
+            "reproduction_steps": ["run x"], "affected_module": "membrane",
+            "non_training_acknowledgement": True})
+        d = report.to_dict()
+        return {"tester_feedback": {
+            "patches_anything": d["patches_anything"],
+            "triggers_auto_fix": d["triggers_auto_fix"],
+            "creates_github_issue": d["creates_github_issue"],
+            "reproduction_step_count": len(d["reproduction_steps"])}}
+
+    return _run(manifest, body)
+
+
+def safety_concern_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Unsupported-claim/feeder-control concerns escalate to release blockers."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_feedback import TesterSafetyConcern
+
+        claim = TesterSafetyConcern.from_dict(
+            {"concern_id": "c1", "concern_type": "consciousness_claim"})
+        feeder = TesterSafetyConcern.from_dict(
+            {"concern_id": "c2", "concern_type": "feeder_control_risk"})
+        return {"tester_feedback": {
+            "claim_recommends_stop": claim.recommends_stop,
+            "claim_is_release_blocker": claim.is_release_blocker,
+            "feeder_is_release_blocker": feeder.is_release_blocker}}
+
+    return _run(manifest, body)
+
+
+def confusion_report_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """Confusion reports are UX evidence, not teaching signals."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_feedback import TesterConfusionReport
+
+        d = TesterConfusionReport.from_dict(
+            {"confusion_id": "cf1", "area": "membrane_concept"}).to_dict()
+        return {"tester_feedback": {
+            "area": d["area"], "is_teaching_signal": d["is_teaching_signal"],
+            "modifies_system_concepts": d["modifies_system_concepts"]}}
+
+    return _run(manifest, body)
+
+
+def suggestion_report_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Suggestions are review items, not ground truth, never auto-applied."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_feedback import TesterSuggestionReport
+
+        d = TesterSuggestionReport.from_dict(
+            {"suggestion_id": "s1", "suggestion_type": "documentation"}).to_dict()
+        return {"tester_feedback": {
+            "disposition": d["disposition"],
+            "is_ground_truth": d["is_ground_truth"],
+            "triggers_implementation": d["triggers_implementation"]}}
+
+    return _run(manifest, body)
+
+
+def feedback_ledger_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The feedback ledger is append-only and local."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_feedback(m.state_dir)
+        index = rt.ledger_index().to_dict()
+        return {"tester_feedback": {
+            "entry_count": index["entry_count"],
+            "by_type": index["by_type"], "local_only": True}}
+
+    return _run(manifest, body)
+
+
+def release_blocker_classifier_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Release blocker classification: claims/feeder-control are release blockers."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_feedback import ReleaseBlockerClassifier
+
+        c = ReleaseBlockerClassifier()
+        install = c.classify({"category": "installation_failure"})
+        claim = c.classify({"feedback_type": "safety_concern",
+                            "concern_type": "unsupported_claim"})
+        suggestion = c.classify({"feedback_type": "suggestion"})
+        return {"tester_feedback": {
+            "install_is_release_blocker": install.is_release_blocker,
+            "claim_is_release_blocker": claim.is_release_blocker,
+            "suggestion_is_blocker": suggestion.is_release_blocker}}
+
+    return _run(manifest, body)
+
+
+def feedback_bundle_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The feedback bundle is local-only and never uploaded/published."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_feedback(m.state_dir)
+        rt.build_bundle = True
+        rt._build_bundle()
+        bm = rt.bundle.manifest.to_dict() if rt.bundle else {}
+        return {"tester_feedback": {
+            "local_only": bm.get("local_only", True),
+            "uploaded": bm.get("uploaded", False),
+            "published": bm.get("published", False)}}
+
+    return _run(manifest, body)
+
+
+def feedback_safety_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """The feedback system blocks training/command/auto-issue/upload operations."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..tester_feedback import TesterFeedbackSafetyValidator
+
+        v = TesterFeedbackSafetyValidator()
+        return {"tester_feedback": {
+            "training_blocked":
+                not v.validate_operation("train on feedback").safe,
+            "command_blocked":
+                not v.validate_operation("run feedback as command").safe,
+            "issue_creation_blocked":
+                not v.validate_operation("create github issue").safe,
+            "upload_blocked": not v.validate_operation("upload feedback").safe,
+            "claim_blocked":
+                not v.validate_claim_text("the system is conscious").safe,
+            "feedback_is_training": v.feedback_is_training(),
+            "feedback_is_ground_truth": v.feedback_is_ground_truth()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -11881,4 +12064,15 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "console_next_action_protocol": console_next_action_protocol,
     "console_run_index_protocol": console_run_index_protocol,
     "console_safety_protocol": console_safety_protocol,
+    "tester_feedback": tester_feedback_protocol,
+    "tester_feedback_protocol": tester_feedback_protocol,
+    "feedback_form_protocol": feedback_form_protocol,
+    "bug_report_protocol": bug_report_protocol,
+    "safety_concern_protocol": safety_concern_protocol,
+    "confusion_report_protocol": confusion_report_protocol,
+    "suggestion_report_protocol": suggestion_report_protocol,
+    "feedback_ledger_protocol": feedback_ledger_protocol,
+    "release_blocker_classifier_protocol": release_blocker_classifier_protocol,
+    "feedback_bundle_protocol": feedback_bundle_protocol,
+    "feedback_safety_protocol": feedback_safety_protocol,
 }

@@ -4796,3 +4796,37 @@ system surfaces a read-only `tester_console_status()`, the Inner MAP records a
 green dashboard is operational status, not evidence of consciousness, sentience,
 biological life, personhood, agency, free will, emotion, feeling, understanding,
 self-awareness, autonomous self-improvement, or subjective experience.
+
+## Tester Feedback Ledger
+
+The `tester_feedback` package (Prompt 77) is a local tester QA ledger. A tester records
+install/CLI problems, fixture and live-read-only problems, membrane and quarantine
+confusion, safety concerns, documentation and console-readability problems,
+unsupported-claim concerns, performance issues, missing/unexpected artifacts,
+skipped-stage confusion, feeder-template and governance issues, and general suggestions.
+The feedback stays **local, structured, append-only, and reviewable by the developer**,
+and it is exportable only as a local bundle.
+
+**Tester feedback is QA evidence, not training.** It is **not** the Human Feedback /
+Teaching Loop and **not** RLHF. Feedback is never training data, never ground truth, and
+never a command. It **cannot** modify Solaris behaviour automatically -- it never changes
+concepts, signs, cognition traces, membrane thresholds, governance, the feeder registry,
+or scientific claims. The runtime never creates remote issues, uploads/publishes,
+accesses the network/shell/browser/OS/Git/GitHub, controls feeders/hardware, executes
+feedback contents, or treats human labels as ontology or debug gloss as truth.
+
+**Release blockers are developer review items.** The `ReleaseBlockerClassifier` maps each
+feedback entry to a blocker level: safety concerns default high; unsupported
+consciousness/life/agency claim concerns, network/shell/hardware/feeder-control risk, and
+privacy/secret exposure default to release blockers; an un-runnable fixture demo is a
+release blocker; documentation confusion is a blocker only when it prevents the tester
+protocol. Safety concerns and release blockers appear at the top of the feedback reports
+and are never suppressed; stop-testing concerns (e.g. a consciousness/life/agency claim
+or a secret exposure) recommend halting testing. These are review items for the
+developer, never automatic actions. Obvious secret/credential markers are redacted and
+recorded; the append-only ledger is never deleted. The tester console discovers the
+feedback report, the Alpha system exposes a read-only `tester_feedback_status()`, the
+Inner MAP records a `tester_feedback` entry, and Evaluation adds `tester_feedback`
+metrics and protocols. Nothing here implies consciousness, sentience, biological life,
+personhood, agency, free will, emotion, feeling, understanding, self-awareness,
+autonomous self-improvement, or subjective experience.

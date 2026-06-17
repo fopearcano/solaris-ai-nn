@@ -1,0 +1,16 @@
+{
+  "feedback_type": "bug_report",
+  "feedback_id": "bug_sample_001",
+  "tester_alias": "anonymous",
+  "affected_command": "tester-demo",
+  "affected_module": "tester_fixture",
+  "category": "fixture_demo_failure",
+  "severity": "major",
+  "expected_behavior": "fixture demo runs and reports reproducibility=pass",
+  "actual_behavior": "fixture demo exited with a traceback before writing the report",
+  "reproduction_steps": ["run tester-demo --profile fixture_tester_v0", "observe traceback"],
+  "error_message": "KeyError: 'reproducibility_status'",
+  "artifact_paths": [".solaris_ai_nn_tester/reports/"],
+  "workaround": "none known",
+  "non_training_acknowledgement": true
+}

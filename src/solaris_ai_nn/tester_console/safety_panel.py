@@ -153,6 +153,19 @@ class SafetyPanelBuilder:
                 add("unsupported_claim", "blocker",
                     f"{forbidden} unsupported/forbidden claim(s) detected")
 
+        # Tester feedback release blockers / stop-testing concerns.
+        fb = discovery.latest(K.TESTER_FEEDBACK_LEDGER) \
+            or discovery.latest(K.TESTER_FEEDBACK_REPORT)
+        if fb is not None:
+            stop = fb.summary.get("stop_testing_count", 0)
+            blockers = fb.summary.get("release_blocker_count", 0)
+            if stop:
+                add("feedback_stop_testing", "blocker",
+                    f"{stop} tester feedback stop-testing concern(s) recorded")
+            elif blockers:
+                add("feedback_release_blocker", "blocker",
+                    f"{blockers} tester feedback release blocker(s) recorded")
+
         # Always-present structural reassurances.
         add("console_read_only", "info",
             "the console is read-only and controls no feeders/hardware/network")

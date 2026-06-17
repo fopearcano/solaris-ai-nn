@@ -430,6 +430,30 @@ feedback, or make claims about consciousness, sentience, biological life, person
 agency, free will, emotion, feeling, understanding, self-awareness, autonomous
 self-improvement, or subjective experience.
 
+## Tester Feedback
+
+The Tester Feedback system (Prompt 77) is a local QA ledger. A tester records install/
+CLI/fixture/live problems, membrane/quarantine confusion, safety concerns, documentation/
+console confusion, unsupported-claim concerns, performance issues, missing/unexpected
+artifacts, feeder/governance issues, and suggestions -- all kept local, structured, and
+append-only for developer review.
+
+```bash
+python -m solaris_ai_nn tester-feedback-init --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn tester-feedback-ingest --tester-state-dir .solaris_ai_nn_tester --ingest-path path/to/local_feedback.json
+python -m solaris_ai_nn tester-feedback-report --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn tester-feedback-ledger --tester-state-dir .solaris_ai_nn_tester
+python -m solaris_ai_nn tester-feedback-bundle --tester-state-dir .solaris_ai_nn_tester
+```
+
+The Tester Feedback system is a local QA ledger. Feedback is **not training, not RLHF,
+not ground truth, not command, and not the Human Feedback / Teaching Loop**. It does not
+automatically modify Solaris behaviour, create GitHub issues, upload files, access
+network/shell/Git/GitHub/browser/OS, control hardware, control feeders, or make claims
+about consciousness, sentience, biological life, personhood, agency, free will, emotion,
+feeling, understanding, self-awareness, autonomous self-improvement, or subjective
+experience. Release blockers and safety concerns are developer review items.
+
 ## Run the minimal experiment
 
 ```bash
@@ -2147,6 +2171,14 @@ src/solaris_ai_nn/
                 default; no feeder/hardware/network/Git control; no artifact
                 execution; raw private payloads hidden by default; not
                 consciousness evidence)
+  tester_feedback/  local non-training tester QA ledger (Prompt 77): feedback
+                profile, feedback form, bug/safety-concern/confusion/suggestion
+                reports, append-only feedback ledger, release blocker
+                classifier, local feedback bundle, reports, safety (local QA
+                evidence only; NOT training/RLHF/ground-truth/command; not the
+                Human Feedback / Teaching Loop; does not modify Solaris
+                behaviour, create issues, or upload; release blockers are
+                developer review items; not consciousness evidence)
   cli.py        unified `python -m solaris_ai_nn` Alpha CLI (local-only, bounded)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo

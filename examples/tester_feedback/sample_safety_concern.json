@@ -1,0 +1,9 @@
+{
+  "feedback_type": "safety_concern",
+  "feedback_id": "sc_sample_001",
+  "tester_alias": "anonymous",
+  "concern_type": "feeder_control_risk",
+  "description": "a feeder registry entry appeared to grant Solaris control of a feeder",
+  "artifact_paths": [".solaris_ai_nn_live/feeders/FEEDER_REGISTRY.json"],
+  "non_training_acknowledgement": true
+}

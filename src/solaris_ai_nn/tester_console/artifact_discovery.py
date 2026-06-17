@@ -30,6 +30,10 @@ class ArtifactKind:
     TESTER_REGRESSION_REPORT = "tester_regression_report"
     TESTER_LIVE_REPORT = "tester_live_report"
     TESTER_LIVE_BUNDLE = "tester_live_bundle"
+    TESTER_FEEDBACK_REPORT = "tester_feedback_report"
+    TESTER_FEEDBACK_LEDGER = "tester_feedback_ledger"
+    TESTER_FEEDBACK_RELEASE_BLOCKER = "tester_feedback_release_blocker"
+    TESTER_FEEDBACK_BUNDLE = "tester_feedback_bundle"
     LIVE_GOVERNANCE = "live_governance"
     FEEDER_REGISTRY = "feeder_registry"
     LIVE_BIRTH_REPORT = "live_birth_report"
@@ -70,6 +74,12 @@ _DISCOVERY_SPECS = (
      "live/reports/TESTER_LIVE_RUN_SUMMARY_*.json"),
     (ArtifactKind.TESTER_LIVE_BUNDLE, "tester",
      "live/bundles/LIVE_TESTER_BUNDLE_*/BUNDLE_MANIFEST.json"),
+    (ArtifactKind.TESTER_FEEDBACK_REPORT, "tester",
+     "feedback/reports/TESTER_FEEDBACK_REPORT.json"),
+    (ArtifactKind.TESTER_FEEDBACK_LEDGER, "tester",
+     "feedback/ledger/TESTER_FEEDBACK_LEDGER.json"),
+    (ArtifactKind.TESTER_FEEDBACK_BUNDLE, "tester",
+     "feedback/bundles/FEEDBACK_BUNDLE_*/BUNDLE_MANIFEST.json"),
     (ArtifactKind.LIVE_GOVERNANCE, "live",
      "governance/LIVE_READONLY_GOVERNANCE.json"),
     (ArtifactKind.FEEDER_REGISTRY, "live", "feeders/FEEDER_REGISTRY.json"),
@@ -242,6 +252,8 @@ _SAFE_SUMMARY_KEYS = (
     "overall_status", "blocked", "entry_count", "local_only", "uploaded",
     "published", "membrane_present", "source_pressure_status",
     "feeder_count", "accepted_event_count", "quarantined_event_count",
+    "entry_count", "release_blocker_count", "stop_testing_count",
+    "safety_concern_count", "redaction_count",
 )
 
 

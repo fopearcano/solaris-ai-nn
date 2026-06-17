@@ -31,12 +31,13 @@ class SummaryCardKind:
     REPRODUCIBILITY = "reproducibility"
     REGRESSION = "regression"
     ARTIFACT_BUNDLE = "artifact_bundle"
+    FEEDBACK = "feedback"
     NEXT_ACTION = "next_action"
 
     ALL = (FIXTURE_DEMO, LIVE_TESTER, GOVERNANCE, FEEDER_REGISTRY, QUARANTINE,
            MEMBRANE, MEMBRANE_INTEGRATION, SENSORY_IMPRESSIONS, SOURCE_PRESSURE,
            OBSERVATION, ONTOGENESIS, SEMIOGENESIS, COGNITION, SAFETY, CLAIMS,
-           REPRODUCIBILITY, REGRESSION, ARTIFACT_BUNDLE, NEXT_ACTION)
+           REPRODUCIBILITY, REGRESSION, ARTIFACT_BUNDLE, FEEDBACK, NEXT_ACTION)
 
 
 class SummarySeverity:
@@ -253,6 +254,27 @@ class SummaryCardBuilder:
             status=S.OK if bundle else S.NOT_RUN,
             explanation="local-only; nothing uploaded or published",
             report_path=bundle.path if bundle else ""))
+
+        # Tester feedback (QA ledger).
+        fb = discovery.latest(K.TESTER_FEEDBACK_LEDGER) \
+            or discovery.latest(K.TESTER_FEEDBACK_REPORT)
+        fb_blockers = fb.summary.get("release_blocker_count", 0) if fb else 0
+        fb_entries = fb.summary.get("entry_count", 0) if fb else 0
+        cards.append(Card(
+            SummaryCardKind.FEEDBACK, "Tester feedback (QA ledger)",
+            status=S.BLOCKER if fb_blockers else (S.OK if fb else S.NOT_RUN),
+            explanation="local QA evidence only; not training, not a command",
+            metrics={"entry_count": fb_entries,
+                     "release_blocker_count": fb_blockers,
+                     "safety_concern_count": fb.summary.get(
+                         "safety_concern_count", 0) if fb else 0},
+            blockers=[f"{fb_blockers} feedback release blocker(s)"]
+            if fb_blockers else [],
+            report_path=fb.path if fb else "",
+            next_action="fill a feedback form (`tester-feedback-init`)"
+            if not fb else "review feedback release blockers"
+            if fb_blockers else "",
+            disclaimer="feedback does not modify Solaris behaviour"))
 
         # Safety card (always present, prominent).
         cards.append(Card(
