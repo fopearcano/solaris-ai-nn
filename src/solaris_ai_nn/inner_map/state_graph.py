@@ -2175,4 +2175,44 @@ def build_default_state_graph() -> StateGraph:
                "gate decisions are recorded in append-only concept memory")
     g.add_edge("FirstLiveOntogenesisRuntime", "inner_map",
                "live ontogenesis status feeds Inner MAP")
+
+    # First live semiogenesis (Prompt 70): private sign formation over stable
+    # live proto-concepts. It never enables cognition/action/developmental
+    # autonomy, treats no sign as language, and controls no feeders.
+    for name, role in [
+        ("LiveSemiogenesisProfile",
+         "candidate-first profile; no cognition by default"),
+        ("ConceptInputLoader",
+         "loads born/stable proto-concepts; excludes contaminated"),
+        ("LivePrivateSignGenerator",
+         "opaque deterministic private tokens; labels never identity"),
+        ("LiveSignUtilityAssessment",
+         "conservative sign utility; a sign must be internally useful"),
+        ("PrivateSyntaxGraph",
+         "operational relation structure, not language grammar"),
+        ("LiveSignContaminationFilter",
+         "labels/gloss annotate, never define; tokens never store secrets"),
+        ("LiveSignBirthGate",
+         "conservative sign birth gate; no cognition/language/action claim"),
+        ("LiveSignMemory",
+         "append-only local metadata; false starts preserved; evidence-linked"),
+        ("FirstLiveSemiogenesisRuntime",
+         "bounded read-only semiogenesis; no cognition/feeders/network/Git"),
+        ("LiveSemiogenesisSafetyValidator",
+         "no sign birth without concept / from label-gloss-operator alone / "
+         "secret token; no language claim; bounded"),
+    ]:
+        g.add_node(name, role)
+    g.add_edge("FirstLiveOntogenesisRuntime", "FirstLiveSemiogenesisRuntime",
+               "only born/stable proto-concepts can receive private signs")
+    g.add_edge("ConceptInputLoader", "LivePrivateSignGenerator",
+               "eligible proto-concepts are given private sign candidates")
+    g.add_edge("LiveSignUtilityAssessment", "LiveSignBirthGate",
+               "sign utility gates sign birth")
+    g.add_edge("LiveSignContaminationFilter", "LiveSignBirthGate",
+               "sign contamination gates sign birth")
+    g.add_edge("LiveSignBirthGate", "LiveSignMemory",
+               "gate decisions are recorded in append-only sign memory")
+    g.add_edge("FirstLiveSemiogenesisRuntime", "inner_map",
+               "live semiogenesis status feeds Inner MAP")
     return g

@@ -790,6 +790,31 @@ DESCRIPTIONS = {
     "live_ontogenesis_safety":
         "no semiogenesis/single-event/operator-only/gloss-only/contaminated "
         "birth; bounded; no hiding",
+    "live_semiogenesis":
+        "first live semiogenesis (private sign formation over proto-concepts)",
+    "live_semiogenesis_protocol":
+        "private sign formation + utility gate; no cognition by default",
+    "live_semiogenesis_evaluation": "live semiogenesis state check",
+    "live_concept_input":
+        "load eligible born/stable proto-concepts; exclude contaminated",
+    "live_sign_candidate":
+        "private sign candidate with preserved evidence; not a sign before gate",
+    "live_sign_generation":
+        "opaque deterministic sign tokens; labels never used as identity",
+    "live_sign_utility":
+        "conservative sign utility; label-mirroring signs have low utility",
+    "live_private_syntax":
+        "operational relation structure (not language grammar); blocks "
+        "contaminated relations",
+    "live_sign_contamination_filter":
+        "human-label/gloss/operator/secret sign contamination detection",
+    "live_sign_birth_gate":
+        "conservative sign birth gate; births useful signs, blocks contamination",
+    "live_sign_memory":
+        "append-only sign memory; preserves false starts; links concept evidence",
+    "live_semiogenesis_safety":
+        "no sign birth without concept / from label-gloss-operator alone / "
+        "secret token; no language claim; bounded; no hiding",
 }
 
 SAFE_DEFAULTS: Dict[str, Any] = {
@@ -1193,6 +1218,12 @@ class ExperimentRegistry:
             or name.startswith("live_contamination")
             or name.startswith("live_concept")
             or bool(merged.get("live_ontogenesis", False)))
+        features["live_semiogenesis"] = (
+            name.startswith("live_semiogenesis")
+            or name.startswith("live_sign")
+            or name.startswith("live_private_syntax")
+            or name.startswith("live_concept_input")
+            or bool(merged.get("live_semiogenesis", False)))
         return ExperimentManifest(
             name=name,
             description=DESCRIPTIONS.get(name, ""),

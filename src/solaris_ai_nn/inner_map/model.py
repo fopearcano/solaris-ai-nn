@@ -598,6 +598,16 @@ class InnerMapModel:
     # semiogenesis / action-reaction / developmental autonomy, controls
     # feeders/hardware/network, or makes any consciousness/life/agency claim.
     live_ontogenesis: Optional[Dict[str, Any]] = None
+    # First live semiogenesis status (Prompt 70); None when not attached. Keys:
+    # live_semiogenesis_enabled, semiogenesis_run_id, live_eligible_concept_count,
+    # live_sign_candidate_count, live_born_sign_count,
+    # live_contaminated_sign_count, live_private_syntax_relation_count,
+    # live_sign_birth_gate_status, latest_sign_memory_path,
+    # latest_semiogenesis_report_path. Private signs are operational internal
+    # reference structures -- never enables cognition / action-reaction /
+    # developmental autonomy, never treats signs as language understanding, and
+    # never makes any consciousness/life/agency claim.
+    live_semiogenesis: Optional[Dict[str, Any]] = None
 
     def touch(self) -> None:
         """Mark the model as freshly updated."""

@@ -2862,3 +2862,46 @@ becomes a shaky little language. So ontogenesis only *recommends* semiogenesis (
 enough proto-concepts are born and the field is clean); it never starts it, and the
 default configuration keeps semiogenesis, action-reaction learning, and developmental
 autonomy off.
+
+## Notes on First Live Semiogenesis
+
+**Why signs must be private and evidence-linked.** A sign is only as trustworthy as
+the concept it points to and the evidence behind it. First live semiogenesis mints
+opaque, deterministic, private tokens (``sig_live_<hash>``) and links every sign to a
+born/stable proto-concept and its supporting/contradicting events. Keeping signs
+private and internal -- rather than borrowing a human word -- prevents the system from
+smuggling in meanings it has not earned. Append-only sign memory preserves the
+evidence trail, including false starts, so a sign can always be traced back to why it
+was (or was not) born.
+
+**Why sign utility matters.** It is trivial to mint a token for every concept; that
+would just be a second, redundant naming layer. A sign earns its place only if it
+does something internally useful: compresses a recurring pattern, makes retrieval
+cheaper, reduces ambiguity, or links patterns across sources. The utility gate is
+deliberately conservative -- merely naming a concept scores low, and a sign that adds
+no internal leverage is withheld. This keeps the sign inventory small, meaningful,
+and grounded.
+
+**Why label-derived signs are dangerous.** If a sign's identity is copied from a
+human label, a debug gloss, or an operator phrase, the system is no longer grounding
+signs in its own observed structure -- it is parroting the human, and worse, treating
+the human's word as truth. That is the fast path from feature-grounded reference to
+ungrounded language imitation. So labels and gloss may annotate a sign (as
+non-ground-truth debug aliases) but never define it; a label-derived request is
+refused and the candidate is marked label-dependent; and the operator pulse is
+stimulus, never teaching.
+
+**Why private syntax is not language.** The relations between signs (co-occurrence,
+contrast, absence-linkage) form an operational structure that is useful for internal
+organization, but it is not grammar and carries no semantics. Calling it "syntax" is
+an engineering convenience. Relations require evidence, weak ones are marked
+uncertain, and contaminated ones are blocked. Treating this structure as a language
+would be an unsupported claim, so the layer explicitly disclaims it.
+
+**Why live cognition must wait for stable signs.** Cognition -- reasoning, prediction,
+and eventually action -- would build on top of signs. If those signs are unstable,
+label-contaminated, or merely decorative, cognition built on them would inherit and
+amplify the flaws. So semiogenesis only *recommends* a live cognition candidate phase
+once enough useful signs are born and the field is clean; it never starts cognition,
+and the default configuration keeps full cognition, action-reaction learning, and
+developmental autonomy off.

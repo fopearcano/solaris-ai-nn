@@ -107,6 +107,7 @@ class InnerMapObserver:
     live_birth: Any = None  # optional dict/object of live read-only birth status
     live_observation: Any = None  # optional dict/object of live observation status
     live_ontogenesis: Any = None  # optional dict/object of live ontogenesis status
+    live_semiogenesis: Any = None  # optional dict/object of live semiogenesis status
     boundaries: BoundaryRegistry = field(default_factory=BoundaryRegistry)
     system_name: str = "solaris-ai-nn"
     version: str = "0.1.0"
@@ -1004,6 +1005,17 @@ class InnerMapObserver:
                 model.live_ontogenesis = ontogenesis.ontogenesis_status()
             elif hasattr(ontogenesis, "snapshot"):
                 model.live_ontogenesis = ontogenesis.snapshot()
+        semiogenesis = self.live_semiogenesis
+        if semiogenesis is None and self.runner is not None:
+            semiogenesis = getattr(self.runner, "live_semiogenesis", None)
+        if semiogenesis is not None:
+            # First live semiogenesis status (private sign reference structures).
+            if isinstance(semiogenesis, dict):
+                model.live_semiogenesis = dict(semiogenesis)
+            elif hasattr(semiogenesis, "semiogenesis_status"):
+                model.live_semiogenesis = semiogenesis.semiogenesis_status()
+            elif hasattr(semiogenesis, "snapshot"):
+                model.live_semiogenesis = semiogenesis.snapshot()
         if self.bridge is not None and getattr(self.bridge, "enable_language_trace", False) \
                 and self.bridge.meaning_trace_builder is not None:
             builder = self.bridge.meaning_trace_builder

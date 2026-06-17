@@ -1,0 +1,54 @@
+{
+  "relations": [
+    {
+      "source_sign": "sig_live_aaaa",
+      "target_sign": "sig_live_bbbb",
+      "relation_type": "co_occurs_with",
+      "strength": "weak",
+      "evidence": [
+        "shared source machine_body"
+      ],
+      "blocked": false
+    },
+    {
+      "source_sign": "sig_live_aaaa",
+      "target_sign": "sig_live_cccc",
+      "relation_type": "contrasts_with",
+      "strength": "weak",
+      "evidence": [
+        "different modality"
+      ],
+      "blocked": false
+    },
+    {
+      "source_sign": "sig_live_cccc",
+      "target_sign": "sig_live_dddd",
+      "relation_type": "absence_linked",
+      "strength": "weak",
+      "evidence": [
+        "both link absence"
+      ],
+      "blocked": false
+    },
+    {
+      "source_sign": "sig_live_eeee",
+      "target_sign": "sig_live_ffff",
+      "relation_type": "uncertain_relation",
+      "strength": "uncertain",
+      "evidence": [
+        "insufficient evidence"
+      ],
+      "blocked": false
+    },
+    {
+      "source_sign": "sig_live_gggg",
+      "target_sign": "(none)",
+      "relation_type": "blocked_relation",
+      "strength": "uncertain",
+      "evidence": [
+        "contaminated candidate; relation blocked"
+      ],
+      "blocked": true
+    }
+  ]
+}

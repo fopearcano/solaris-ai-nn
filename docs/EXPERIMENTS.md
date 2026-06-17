@@ -3300,3 +3300,43 @@ Runs the pipeline on the stable, inconclusive, and contaminated fixtures and pri
 the conservative concept birth gate decision per candidate: born, deferred,
 contaminated, or a specific blocked-by status. The gate is conservative -- it does
 not enable semiogenesis, create language, or claim understanding.
+
+## 379. Live Semiogenesis Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_semiogenesis_demo.py --state-dir .solaris_ai_nn_live/semio_demo`
+Sets up governance, a feeder registry, a (demo) birth certificate, and a sample event
+stream; runs post-birth observation and first live ontogenesis to produce stable
+proto-concepts; then runs the bounded first live semiogenesis runtime and prints
+eligible-concept/sign-candidate counts, born private signs, the private-syntax
+relation count, the sign-birth-gate status, and the recommended next phase. No
+cognition is enabled; signs are private; Solaris never controls the source.
+
+## 380. Live Sign Generator Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_sign_generator_demo.py --state-dir .solaris_ai_nn_live/siggen_demo`
+Generates private sign tokens directly: tokens are opaque (`sig_live_<hash>` +
+`LSigma-<n>`), deterministic for a given feature signature, and a requested
+label/gloss-derived token is refused as identity (the opaque token is kept and the
+candidate is marked label-dependent / contaminated).
+
+## 381. Live Sign Utility Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_sign_utility_demo.py --state-dir .solaris_ai_nn_live/sigutil_demo`
+Prints each sign candidate's utility score and verdict over the safe and contaminated
+concept fixtures. A sign must do something internally useful; merely naming a concept
+is not enough; a label-mirroring sign has low or blocked utility.
+
+## 382. Live Private Syntax Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_private_syntax_demo.py --state-dir .solaris_ai_nn_live/syntax_demo`
+Builds an operational private-syntax graph over generated sign candidates (signs that
+share a source/modality become related) and prints an illustrative relation fixture
+including an uncertain relation and a blocked contaminated relation. Private syntax is
+operational relation structure -- not language grammar and not semantics.
+
+## 383. Live Sign Birth Gate Demo ✅ (implemented)
+
+**Run:** `python examples/run_live_sign_birth_gate_demo.py --state-dir .solaris_ai_nn_live/siggate_demo`
+Prints the conservative sign birth gate decision per candidate over the safe and
+contaminated fixtures: born, deferred, contaminated, or a specific blocked-by status.
+The gate is conservative -- it does not enable cognition, language, or action.

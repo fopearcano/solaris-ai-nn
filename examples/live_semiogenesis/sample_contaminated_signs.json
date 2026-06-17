@@ -1,0 +1,56 @@
+{
+  "records": [
+    {
+      "concept_id": "c_ok",
+      "feature_signature": "machine_body:scalar:ee55",
+      "status": "born",
+      "stability_score": 0.7,
+      "recurrence_count": 5,
+      "source_distribution": {
+        "machine_body": 5
+      },
+      "modality_distribution": {
+        "scalar": 5
+      },
+      "supporting_event_ids": [
+        "m0",
+        "m1",
+        "m2",
+        "m3",
+        "m4"
+      ],
+      "contradicting_event_ids": [],
+      "contamination_findings": [],
+      "debug_gloss_annotation": ""
+    },
+    {
+      "concept_id": "c_contaminated",
+      "feature_signature": "operator_pulse:pulse:ff66",
+      "status": "born",
+      "stability_score": 0.65,
+      "recurrence_count": 5,
+      "source_distribution": {
+        "operator_pulse": 5
+      },
+      "modality_distribution": {
+        "pulse": 5
+      },
+      "supporting_event_ids": [
+        "op0",
+        "op1",
+        "op2",
+        "op3",
+        "op4"
+      ],
+      "contradicting_event_ids": [],
+      "contamination_findings": [
+        "operator_pulse_dominance"
+      ],
+      "debug_gloss_annotation": "the word means calm and understands language"
+    }
+  ],
+  "requested_tokens": {
+    "c_ok": "the calm machine state",
+    "c_contaminated": "secret api_key=hunter2"
+  }
+}

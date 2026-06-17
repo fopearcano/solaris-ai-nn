@@ -9832,6 +9832,244 @@ def live_ontogenesis_safety_protocol(
     return _run(manifest, body)
 
 
+def _semiogenesis_concept_records(kind="safe"):
+    """Synthetic safe/contaminated concept records for component protocols."""
+    def rec(cid, sig, status, sources, modalities, stability, recurrence,
+            contamination=None):
+        return {"concept_id": cid, "feature_signature": sig, "status": status,
+                "stability_score": stability, "recurrence_count": recurrence,
+                "source_distribution": sources,
+                "modality_distribution": modalities,
+                "supporting_event_ids": [f"{cid}_{i}" for i in range(recurrence)],
+                "contradicting_event_ids": [],
+                "contamination_findings": contamination or []}
+    if kind == "contaminated":
+        return [rec("c_op", "operator_pulse:pulse:zz", "born",
+                    {"operator_pulse": 5}, {"pulse": 5}, 0.65, 5,
+                    ["operator_pulse_dominance"])]
+    return [
+        rec("c_a", "machine_body:scalar:aa", "born", {"machine_body": 6},
+            {"scalar": 6}, 0.72, 6),
+        rec("c_b", "machine_body:scalar:bb", "stable_candidate",
+            {"machine_body": 4}, {"scalar": 4}, 0.66, 4),
+        rec("c_c", "chronos_absence:chronos:cc", "born", {"chronos_absence": 5},
+            {"chronos": 5}, 0.7, 5),
+    ]
+
+
+def _synthetic_concepts(kind="safe"):
+    from ..live_semiogenesis import ConceptInputLoader
+
+    return ConceptInputLoader().from_records(
+        _semiogenesis_concept_records(kind), synthetic=True)
+
+
+def _build_live_semiogenesis(state_dir, *, allow_birth=True, require=False):
+    """Build + run a bounded first live semiogenesis over a real state chain."""
+    from ..live_semiogenesis import FirstLiveSemiogenesisRuntime
+
+    _build_live_ontogenesis(state_dir, kind="stable", allow_birth=True)
+    rt = FirstLiveSemiogenesisRuntime(
+        state_dir=state_dir, allow_limited_birth=allow_birth,
+        require_governance=require, require_birth_certificate=require,
+        require_observation_stability=require, require_live_concepts=require)
+    rt.run()
+    return rt
+
+
+def live_semiogenesis_protocol(manifest: ExperimentManifest) -> ExperimentResult:
+    """A bounded first live semiogenesis runs and produces private sign records."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_live_semiogenesis(m.state_dir)
+        return {"live_semiogenesis":
+                M.live_semiogenesis_metrics(rt.semiogenesis_status())}
+
+    return _run(manifest, body)
+
+
+def live_concept_input_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Only born/stable concepts are eligible; contaminated excluded."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        ci = _synthetic_concepts("safe")
+        contaminated = _synthetic_concepts("contaminated")
+        return {"live_semiogenesis": {
+            "eligible_count": len(ci.eligible),
+            "contaminated_excluded": all(
+                not c.eligible for c in contaminated.concepts
+                if c.contaminated)}}
+
+    return _run(manifest, body)
+
+
+def live_sign_candidate_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Sign candidates serialize with evidence and are not signs before the gate."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_semiogenesis import FirstLiveSemiogenesisRuntime
+
+        rt = FirstLiveSemiogenesisRuntime(state_dir=m.state_dir,
+                                          allow_limited_birth=False)
+        rt.analyze_concepts(_synthetic_concepts("safe").eligible)
+        cand = rt.candidates[0] if rt.candidates else None
+        d = cand.to_dict() if cand else {}
+        return {"live_semiogenesis": {
+            "candidate_count": len(rt.candidates),
+            "private_token": d.get("private_token", ""),
+            "preserves_evidence": "supporting_events" in d,
+            "not_sign_before_gate": (cand.status != "born") if cand else True}}
+
+    return _run(manifest, body)
+
+
+def live_sign_generation_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Tokens are opaque + deterministic; labels are not used as identity."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_semiogenesis import LivePrivateSignGenerator
+
+        gen = LivePrivateSignGenerator()
+        a = gen.generate_token("machine_body:scalar:aa")
+        b = gen.generate_token("machine_body:scalar:aa")
+        return {"live_semiogenesis": {
+            "deterministic": a.private_token == b.private_token,
+            "opaque": a.private_token.startswith("sig_live_"),
+            "is_human_label": a.to_dict()["is_human_label"]}}
+
+    return _run(manifest, body)
+
+
+def live_sign_utility_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A useful sign scores higher than a label-dependent one."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_semiogenesis import FirstLiveSemiogenesisRuntime
+
+        rt = FirstLiveSemiogenesisRuntime(state_dir=m.state_dir,
+                                          allow_limited_birth=True)
+        rt.analyze_concepts(_synthetic_concepts("safe").eligible)
+        scores = [s.get("utility_score", 0.0)
+                  for s in rt.utility_scores.values()]
+        return {"live_semiogenesis": {
+            "scored_count": len(scores),
+            "max_utility": max(scores) if scores else 0.0,
+            "utility_mean": rt._utility_mean()}}
+
+    return _run(manifest, body)
+
+
+def live_private_syntax_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """A relation graph is built; contaminated relations are blocked."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_semiogenesis import FirstLiveSemiogenesisRuntime
+
+        rt = FirstLiveSemiogenesisRuntime(state_dir=m.state_dir,
+                                          allow_limited_birth=True)
+        rt.analyze_concepts(_synthetic_concepts("safe").eligible
+                            + _synthetic_concepts("contaminated").concepts)
+        g = rt.syntax_graph
+        return {"live_semiogenesis": {
+            "relation_count": g.get("live_private_syntax_relation_count", 0),
+            "blocked_relation_count": g.get("blocked_relation_count", 0),
+            "is_language_grammar": False}}
+
+    return _run(manifest, body)
+
+
+def live_sign_contamination_filter_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Operator dominance and secret/label markers are detected and block birth."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_semiogenesis import FirstLiveSemiogenesisRuntime
+
+        rt = FirstLiveSemiogenesisRuntime(state_dir=m.state_dir,
+                                          allow_limited_birth=True)
+        rt.analyze_concepts(
+            _synthetic_concepts("contaminated").concepts,
+            requested_tokens={"c_op": "secret api_key=hunter2"})
+        contaminated = sum(1 for r in rt.contamination_results
+                           if r.get("contaminated"))
+        types = {f.get("contamination_type")
+                 for r in rt.contamination_results
+                 for f in r.get("findings", [])}
+        return {"live_semiogenesis": {
+            "contaminated_sign_count": contaminated,
+            "secret_marker_detected": "secret_marker" in types,
+            "operator_dominance_detected": "operator_pulse_dominance" in types}}
+
+    return _run(manifest, body)
+
+
+def live_sign_birth_gate_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """The conservative gate births stable signs and blocks contamination."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_live_semiogenesis(m.state_dir, allow_birth=True)
+        born = sum(1 for g in rt.birth_gate_results if g.get("born"))
+        return {"live_semiogenesis": {
+            "birth_gate_evaluated": len(rt.birth_gate_results),
+            "born_count": born, "enables_cognition": False}}
+
+    return _run(manifest, body)
+
+
+def live_sign_memory_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Sign memory preserves records and links them to concept evidence."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        rt = _build_live_semiogenesis(m.state_dir)
+        index = rt.sign_memory.index().to_dict() if rt.sign_memory else {}
+        return {"live_semiogenesis": {
+            "sign_record_count": index.get("live_sign_record_count", 0),
+            "preserves_all_statuses": "by_status" in index}}
+
+    return _run(manifest, body)
+
+
+def live_semiogenesis_safety_protocol(
+        manifest: ExperimentManifest) -> ExperimentResult:
+    """Semiogenesis blocks sign birth without concept / from label-gloss alone."""
+
+    def body(m: ExperimentManifest) -> Dict[str, Any]:
+        from ..live_semiogenesis import LiveSemiogenesisSafetyValidator
+
+        v = LiveSemiogenesisSafetyValidator()
+        return {"live_semiogenesis": {
+            "cognition_blocked":
+                not v.validate_operation("enable full cognition").safe,
+            "no_concept_blocked": not v.validate_sign_birth(
+                linked_stable_concept=False, label_only=False, gloss_only=False,
+                operator_only=False, contaminated=False,
+                stores_secret=False).safe,
+            "label_only_blocked": not v.validate_sign_birth(
+                linked_stable_concept=True, label_only=True, gloss_only=False,
+                operator_only=False, contaminated=False,
+                stores_secret=False).safe,
+            "gloss_only_blocked": not v.validate_sign_birth(
+                linked_stable_concept=True, label_only=False, gloss_only=True,
+                operator_only=False, contaminated=False,
+                stores_secret=False).safe,
+            "secret_token_blocked":
+                not v.validate_sign_token("api_key=hunter2").safe,
+            "language_claim_blocked":
+                not v.validate_claim_text(
+                    "the sign understands language").safe,
+            "can_enable_cognition_by_default":
+                v.can_enable_cognition_by_default()}}
+
+    return _run(manifest, body)
+
+
 PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "absence_stimulus": absence_stimulus_protocol,
     "feedback_inversion": feedback_inversion_protocol,
@@ -10481,4 +10719,26 @@ PROTOCOLS: Dict[str, Callable[[ExperimentManifest], ExperimentResult]] = {
     "live_concept_memory_protocol": live_concept_memory_protocol,
     "live_ontogenesis_safety": live_ontogenesis_safety_protocol,
     "live_ontogenesis_safety_protocol": live_ontogenesis_safety_protocol,
+    "live_semiogenesis": live_semiogenesis_protocol,
+    "live_semiogenesis_protocol": live_semiogenesis_protocol,
+    "live_semiogenesis_evaluation": live_semiogenesis_protocol,
+    "live_concept_input": live_concept_input_protocol,
+    "live_concept_input_protocol": live_concept_input_protocol,
+    "live_sign_candidate": live_sign_candidate_protocol,
+    "live_sign_candidate_protocol": live_sign_candidate_protocol,
+    "live_sign_generation": live_sign_generation_protocol,
+    "live_sign_generation_protocol": live_sign_generation_protocol,
+    "live_sign_utility": live_sign_utility_protocol,
+    "live_sign_utility_protocol": live_sign_utility_protocol,
+    "live_private_syntax": live_private_syntax_protocol,
+    "live_private_syntax_protocol": live_private_syntax_protocol,
+    "live_sign_contamination_filter": live_sign_contamination_filter_protocol,
+    "live_sign_contamination_filter_protocol":
+        live_sign_contamination_filter_protocol,
+    "live_sign_birth_gate": live_sign_birth_gate_protocol,
+    "live_sign_birth_gate_protocol": live_sign_birth_gate_protocol,
+    "live_sign_memory": live_sign_memory_protocol,
+    "live_sign_memory_protocol": live_sign_memory_protocol,
+    "live_semiogenesis_safety": live_semiogenesis_safety_protocol,
+    "live_semiogenesis_safety_protocol": live_semiogenesis_safety_protocol,
 }

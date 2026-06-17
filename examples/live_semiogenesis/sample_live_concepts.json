@@ -1,0 +1,94 @@
+{
+  "records": [
+    {
+      "concept_id": "c_rhythm",
+      "feature_signature": "machine_body:scalar:aa11",
+      "status": "born",
+      "stability_score": 0.72,
+      "recurrence_count": 6,
+      "source_distribution": {
+        "machine_body": 6
+      },
+      "modality_distribution": {
+        "scalar": 6
+      },
+      "supporting_event_ids": [
+        "b0",
+        "b1",
+        "b2",
+        "b3",
+        "b4",
+        "b5"
+      ],
+      "contradicting_event_ids": [],
+      "contamination_findings": [],
+      "debug_gloss_annotation": "DEBUG ONLY (not ground truth): stable scalar rhythm"
+    },
+    {
+      "concept_id": "c_load2",
+      "feature_signature": "machine_body:scalar:bb22",
+      "status": "stable_candidate",
+      "stability_score": 0.66,
+      "recurrence_count": 4,
+      "source_distribution": {
+        "machine_body": 4
+      },
+      "modality_distribution": {
+        "scalar": 4
+      },
+      "supporting_event_ids": [
+        "l0",
+        "l1",
+        "l2",
+        "l3"
+      ],
+      "contradicting_event_ids": [],
+      "contamination_findings": [],
+      "debug_gloss_annotation": "DEBUG ONLY (not ground truth): a second machine pattern"
+    },
+    {
+      "concept_id": "c_absence",
+      "feature_signature": "chronos_absence:chronos:cc33",
+      "status": "born",
+      "stability_score": 0.7,
+      "recurrence_count": 5,
+      "source_distribution": {
+        "chronos_absence": 5
+      },
+      "modality_distribution": {
+        "chronos": 5
+      },
+      "supporting_event_ids": [
+        "ab0",
+        "ab1",
+        "ab2",
+        "ab3",
+        "ab4"
+      ],
+      "contradicting_event_ids": [],
+      "contamination_findings": [],
+      "debug_gloss_annotation": "DEBUG ONLY (not ground truth): recurring absence"
+    },
+    {
+      "concept_id": "c_noise",
+      "feature_signature": "local_weather_readonly_external:scalar:dd44",
+      "status": "stable_candidate",
+      "stability_score": 0.62,
+      "recurrence_count": 3,
+      "source_distribution": {
+        "local_weather_readonly_external": 3
+      },
+      "modality_distribution": {
+        "scalar": 3
+      },
+      "supporting_event_ids": [
+        "w0",
+        "w1",
+        "w2"
+      ],
+      "contradicting_event_ids": [],
+      "contamination_findings": [],
+      "debug_gloss_annotation": "DEBUG ONLY (not ground truth): mild-noise weather concept"
+    }
+  ]
+}

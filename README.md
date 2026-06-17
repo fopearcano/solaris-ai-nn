@@ -231,6 +231,34 @@ GitHub; never executes commands or modifies source; and never treats sensory tex
 a command, human labels or debug gloss as ground truth, or the operator pulse as
 teaching.
 
+## First Live Semiogenesis
+
+After stable live proto-concepts exist, the First Live Semiogenesis layer forms
+**private internal signs** over them. It loads eligible (born/stable, uncontaminated)
+proto-concepts, generates opaque deterministic sign tokens, assesses sign utility,
+builds private-syntax relations, filters contamination, gates sign birth
+conservatively, and keeps append-only sign memory.
+
+```bash
+python -m solaris_ai_nn live-semiogenesis --state-dir .solaris_ai_nn_live --require-governance --require-birth-certificate --require-observation-stability --require-live-concepts
+python -m solaris_ai_nn live-signs --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn live-sign-candidates --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn live-sign-birth-gate --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn live-private-syntax --state-dir .solaris_ai_nn_live
+```
+
+First Live Semiogenesis forms private internal signs over stable live proto-concepts.
+These signs are operational reference structures, not proof of language,
+understanding, consciousness, sentience, biological life, personhood, agency, free
+will, emotion, feeling, self-awareness, autonomous self-improvement, or subjective
+experience. It never enables full cognition, action-reaction learning, or
+developmental autonomy by default; never treats internal signs as language
+understanding or maps signs to human words as ground truth; never starts/stops/
+configures feeders, controls hardware, or accesses the network/shell/browser/OS/Git/
+GitHub; never executes commands or modifies source; and never treats sensory text as
+a command, human labels or debug gloss as ground truth, or the operator pulse as
+teaching.
+
 ## Run the minimal experiment
 
 ```bash
@@ -1883,6 +1911,16 @@ src/solaris_ai_nn/
                 never controls feeders/hardware/network/Git; labels/gloss never
                 ground truth; operator pulse never teaching; proto-concepts do
                 not imply understanding)
+  live_semiogenesis/  first live semiogenesis + private sign utility gate:
+                semiogenesis profile, concept input, sign candidate, private
+                sign generator, sign utility, private syntax, sign contamination
+                filter, sign birth gate, sign memory, semiogenesis runtime,
+                semiogenesis record, reports, safety (bounded read-only; private
+                opaque sign tokens over born/stable proto-concepts; no
+                cognition/action-reaction/developmental autonomy by default;
+                labels/gloss/operator never sign identity; private syntax is not
+                language; tokens never store secrets; signs do not imply language
+                or understanding)
   cli.py        unified `python -m solaris_ai_nn` Alpha CLI (local-only, bounded)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo

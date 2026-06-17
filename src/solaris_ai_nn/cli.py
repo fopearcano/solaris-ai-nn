@@ -30,7 +30,31 @@ _ALPHA_COMMANDS = ("doctor", "init", "modules", "run-demo", "artifact-index",
                    "birth-certificate", "live-observe", "live-source-health",
                    "live-source-diet", "live-metabolism-calibration",
                    "live-stability-gate", "live-ontogenesis", "live-concepts",
-                   "live-concept-candidates", "live-concept-birth-gate")
+                   "live-concept-candidates", "live-concept-birth-gate",
+                   "live-semiogenesis", "live-signs", "live-sign-candidates",
+                   "live-sign-birth-gate", "live-private-syntax")
+
+
+def _semiogenesis_runtime(args: argparse.Namespace):
+    from .live_semiogenesis.semiogenesis_runtime import (
+        FirstLiveSemiogenesisRuntime,
+    )
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_live"
+    return FirstLiveSemiogenesisRuntime(
+        state_dir=state_dir, profile=args.profile,
+        max_runtime_s=args.max_runtime_s, max_concepts=args.max_concepts,
+        max_signs=args.max_signs, min_utility=args.min_utility,
+        strict=args.strict, dry_run=args.dry_run, report_only=args.report_only,
+        require_governance=args.require_governance,
+        require_birth_certificate=args.require_birth_certificate,
+        require_observation_stability=args.require_observation_stability,
+        require_live_concepts=args.require_live_concepts,
+        allow_limited_birth=args.allow_limited_birth,
+        require_claimguard=args.require_claimguard,
+        operator_note=args.operator_note)
 
 
 def _ontogenesis_runtime(args: argparse.Namespace):
@@ -576,6 +600,102 @@ def cmd_live_concept_birth_gate(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_live_semiogenesis(args: argparse.Namespace) -> int:
+    rt = _semiogenesis_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"live semiogenesis refused: {result.get('reason')}")
+        return 2
+    st = rt.semiogenesis_status()
+    _print("first live semiogenesis:")
+    _print(f"  run id: {st['semiogenesis_run_id']}")
+    _print(f"  blocked: {result['blocked']}")
+    for b in result["blockers"]:
+        _print(f"    blocker: {b}")
+    _print(f"  eligible concepts: {st['live_eligible_concept_count']}")
+    _print(f"  sign candidates: {st['live_sign_candidate_count']} (stable "
+           f"{st['live_stable_sign_candidate_count']}, born "
+           f"{st['live_born_sign_count']}, contaminated "
+           f"{st['live_contaminated_sign_count']})")
+    _print(f"  private syntax relations: "
+           f"{st['live_private_syntax_relation_count']}")
+    _print(f"  sign utility mean: {st['live_sign_utility_score_mean']}")
+    _print(f"  sign birth gate status: {st['live_sign_birth_gate_status']}")
+    _print(f"  recommended next phase: {st['recommended_next_phase']}")
+    _print(f"  sign memory: {st['latest_sign_memory_path']}")
+    _print(f"  enables cognition / signs=language: {st['enables_cognition']} / "
+           f"{st['signs_are_language_understanding']}")
+    if result["blocked"] and args.strict:
+        return 2
+    return 0
+
+
+def cmd_live_signs(args: argparse.Namespace) -> int:
+    import os as _os
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_live"
+    index = _os.path.join(state_dir, "semiogenesis", "signs",
+                          "LIVE_SIGN_MEMORY.json")
+    _print("live sign memory:")
+    if not _os.path.isfile(index):
+        _print("  (no sign memory yet; run live-semiogenesis first)")
+        return 0
+    with open(index, encoding="utf-8") as fh:
+        data = json.load(fh)
+    _print(f"  sign records: {data.get('live_sign_record_count', 0)}")
+    _print(f"  by status: {data.get('by_status', {})}")
+    _print(f"  born: {data.get('born_count', 0)}")
+    return 0
+
+
+def cmd_live_sign_candidates(args: argparse.Namespace) -> int:
+    rt = _semiogenesis_runtime(args)
+    rt.run()
+    _print("live sign candidates:")
+    if not rt.candidates:
+        _print("  (no candidates; field may be blocked or lack eligible "
+               "concepts)")
+    for c in sorted(rt.candidates, key=lambda x: -x.utility_score)[:25]:
+        _print(f"  - [{c.status}] token={c.private_token} "
+               f"utility={c.utility_score:.2f} "
+               f"concepts={len(c.linked_concept_ids)}")
+    return 0
+
+
+def cmd_live_sign_birth_gate(args: argparse.Namespace) -> int:
+    rt = _semiogenesis_runtime(args)
+    rt.run()
+    _print("live sign birth gate (conservative):")
+    born = [g for g in rt.birth_gate_results if g.get("born")]
+    blocked = [g for g in rt.birth_gate_results if g.get("blocked")]
+    _print(f"  candidates evaluated: {len(rt.birth_gate_results)}")
+    _print(f"  born: {len(born)}; blocked/contaminated: {len(blocked)}")
+    for g in rt.birth_gate_results[:25]:
+        _print(f"  - {g['sign_id']}: {g['sign_birth_gate_status']} "
+               f"(born={g['born']})")
+    if rt.blocked and args.strict:
+        return 2
+    return 0
+
+
+def cmd_live_private_syntax(args: argparse.Namespace) -> int:
+    rt = _semiogenesis_runtime(args)
+    rt.run()
+    g = rt.syntax_graph
+    _print("live private syntax (operational relation structure, not language):")
+    _print(f"  relations: {g.get('live_private_syntax_relation_count', 0)} "
+           f"(blocked {g.get('blocked_relation_count', 0)})")
+    _print(f"  co-occurs: {g.get('co_occurs_count', 0)}; contrasts: "
+           f"{g.get('contrasts_count', 0)}; absence-linked: "
+           f"{g.get('absence_linked_count', 0)}")
+    for rel in g.get("relations", [])[:25]:
+        _print(f"  - {rel['relation_type']} ({rel['strength']}) "
+               f"blocked={rel['blocked']}")
+    return 0
+
+
 _HANDLERS = {
     "init": cmd_init,
     "doctor": cmd_doctor,
@@ -602,6 +722,11 @@ _HANDLERS = {
     "live-concepts": cmd_live_concepts,
     "live-concept-candidates": cmd_live_concept_candidates,
     "live-concept-birth-gate": cmd_live_concept_birth_gate,
+    "live-semiogenesis": cmd_live_semiogenesis,
+    "live-signs": cmd_live_signs,
+    "live-sign-candidates": cmd_live_sign_candidates,
+    "live-sign-birth-gate": cmd_live_sign_birth_gate,
+    "live-private-syntax": cmd_live_private_syntax,
 }
 
 
@@ -675,8 +800,20 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
                         help="require an unblocked observation stability gate")
     parser.add_argument("--allow-limited-birth", action="store_true",
                         default=False, dest="allow_limited_birth",
-                        help="allow conservative proto-concept birth (else "
+                        help="allow conservative proto-concept/sign birth (else "
                              "candidate-only)")
+    # First live semiogenesis arguments (Prompt 70).
+    parser.add_argument("--max-concepts", type=int, default=200,
+                        dest="max_concepts",
+                        help="bounded max eligible concepts consumed for signs")
+    parser.add_argument("--max-signs", type=int, default=200, dest="max_signs",
+                        help="bounded max private sign candidates")
+    parser.add_argument("--min-utility", type=float, default=0.6,
+                        dest="min_utility",
+                        help="minimum sign utility score for sign birth")
+    parser.add_argument("--require-live-concepts", action="store_true",
+                        default=False, dest="require_live_concepts",
+                        help="require eligible live proto-concepts before signs")
 
 
 def build_parser() -> argparse.ArgumentParser:

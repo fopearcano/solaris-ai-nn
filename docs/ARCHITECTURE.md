@@ -4422,3 +4422,64 @@ never executes commands or modifies source; never treats sensory text as a comma
 human labels or debug gloss as ground truth, or the operator pulse as teaching; and
 never claims consciousness, sentience, biological life, personhood, agency, free
 will, emotion, feeling, understanding, self-awareness, or subjective experience.**
+
+## First Live Semiogenesis
+
+The `live_semiogenesis` package (Prompt 70) implements the first live semiogenesis
+phase: Solaris generates **private internal signs** for stable live proto-concepts.
+**It begins only after stable live proto-concepts exist** (Prompt 69), which
+themselves require birth (Prompt 67) and observation stability (Prompt 68). It
+answers: which proto-concepts are stable enough to receive signs; which sign
+candidates are internally useful (reduce ambiguity, compression cost, or retrieval
+friction, or relate recurring patterns across sources); which signs are contaminated
+by human labels, debug gloss, or operator text; which are merely source artifacts;
+and which should be born, deferred, suspended, or rejected. This is private sign
+formation over feature-grounded proto-concepts -- **not** language acquisition,
+semantic understanding, a proof of symbolic intelligence, consciousness, or
+biological development.
+
+**Private signs are internal reference structures.** The `ConceptInputLoader` loads
+only born/stable, uncontaminated proto-concepts from the live concept memory
+(rejected concepts remain visible as counterevidence). The `LivePrivateSignGenerator`
+mints a deterministic opaque token (``sig_live_<hash>`` plus a compact ``LSigma-<n>``
+code) from each concept's feature signature -- tokens are never copied from human
+labels, debug gloss, operator notes, command text, private data, or secrets, and a
+human-readable alias may exist only as a non-ground-truth debug annotation. The
+`LiveSignUtilityAssessment` scores each candidate conservatively across compression,
+retrieval, ambiguity reduction, cross-source/cross-modality linking, prediction
+potential, stability, and low label/gloss/operator dependence: **a sign must do
+something internally useful -- merely naming a concept is not enough**, and a sign
+that only mirrors a human label has low or blocked utility.
+
+**Private syntax is relation structure, not language.** The `PrivateSyntaxGraph`
+records operational relations between signs (co-occurrence, contrast, rhythm /
+absence / source / modality linkage). This is **not** grammar and **not** semantics:
+relations require evidence, weak relations are marked weak or uncertain, and
+contaminated relations are blocked. The `LiveSignContaminationFilter` flags label /
+gloss / operator-phrase copies, human-text or operator-pulse dominance, command-like
+text, private/secret markers in a token, forbidden sources, fixture-marker leakage,
+source artifacts, and unsupported language claims; contaminated signs cannot be born
+and a token never stores private data or secrets. The `LiveSignBirthGate` then
+requires valid governance, a birth certificate, an unblocked observation stability
+gate, a present ontogenesis report, a linked born/stable uncontaminated concept, a
+private token, utility above threshold, no label/gloss/operator dependence, no
+forbidden source, and more supporting evidence than counterevidence before a
+candidate may be *born*. The `LiveSignMemory` records every sign -- born, weak,
+rejected, contaminated -- as append-only local metadata linked to its concept
+evidence; false starts are never deleted and tokens are sanitized of any secret.
+
+The layer is reached via `python -m solaris_ai_nn live-semiogenesis / live-signs /
+live-sign-candidates / live-sign-birth-gate / live-private-syntax`, feeds Inner MAP
+(`model.live_semiogenesis`) and Evaluation (the `live_semiogenesis_*` protocols and
+`live_semiogenesis_metrics`), records operational-only evidence for the Research
+Cycle and Scientific Claims, and is surfaced read-only by the Alpha system
+(`live_semiogenesis_status()`); the default alpha system stays fixture-only.
+**Cognition is not enabled by default.** First live semiogenesis never enables full
+cognition, action-reaction learning, or developmental autonomy; never treats internal
+signs as language understanding or maps signs to human words as ground truth; never
+starts/stops/configures feeders, controls hardware, or accesses the network/shell/
+browser/OS/camera/microphone/Git/GitHub; never executes commands or modifies source;
+never treats sensory text as a command, human labels or debug gloss as ground truth,
+or the operator pulse as teaching; and never claims consciousness, sentience,
+biological life, personhood, agency, free will, emotion, feeling, understanding,
+self-awareness, or subjective experience.

@@ -562,6 +562,50 @@ class AlphaResearchOrchestrator:
                     "semiogenesis, or controls feeders",
         }
 
+    def live_semiogenesis_status(self,
+                                 live_state_dir: str = ".solaris_ai_nn_live",
+                                 ) -> Dict[str, Any]:
+        """Read-only view of the latest first live semiogenesis run (Prompt 70).
+
+        The default alpha system stays fixture-only: this never runs
+        semiogenesis, never learns, and never controls feeders. It only reads the
+        latest semiogenesis index written by the live_semiogenesis runtime (if
+        present) to surface the run id, sign-candidate / born counts, the
+        sign-birth-gate status, the sign-memory path, and the recommended next
+        phase. Returns ``{"live_semiogenesis_enabled": False}`` when no
+        semiogenesis state exists.
+        """
+        index_dir = os.path.join(live_state_dir, "semiogenesis", "index")
+        if not os.path.isdir(index_dir):
+            return {"live_semiogenesis_enabled": False,
+                    "note": "no first live semiogenesis state present; the "
+                            "default alpha system remains fixture-only and never "
+                            "runs semiogenesis, learns, or controls feeders"}
+        files = sorted(f for f in os.listdir(index_dir) if f.endswith(".json"))
+        if not files:
+            return {"live_semiogenesis_enabled": False}
+        with open(os.path.join(index_dir, files[-1]), encoding="utf-8") as fh:
+            status = json.load(fh)
+        return {
+            "live_semiogenesis_enabled": True,
+            "semiogenesis_run_id": status.get("semiogenesis_run_id"),
+            "live_sign_candidate_count": status.get(
+                "live_sign_candidate_count", 0),
+            "live_born_sign_count": status.get("live_born_sign_count", 0),
+            "live_contaminated_sign_count": status.get(
+                "live_contaminated_sign_count", 0),
+            "live_sign_birth_gate_status": status.get(
+                "live_sign_birth_gate_status"),
+            "recommended_next_phase": status.get("recommended_next_phase"),
+            "latest_sign_memory_path": status.get("latest_sign_memory_path"),
+            "enables_cognition": False,
+            "signs_are_language_understanding": False,
+            "learns": False, "controls_feeders": False, "runs_git": False,
+            "note": "read-only view of the latest live semiogenesis; the alpha "
+                    "system never runs semiogenesis, learns, enables cognition, "
+                    "or controls feeders",
+        }
+
     def snapshot(self) -> Dict[str, Any]:
         return self.alpha_status()
 

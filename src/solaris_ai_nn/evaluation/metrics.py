@@ -2702,3 +2702,62 @@ def live_ontogenesis_metrics(lo: Optional[Dict[str, Any]]) -> Dict[str, Any]:
                 "semiogenesis/action-reaction/developmental autonomy is "
                 "enabled; nothing about consciousness/life/agency is proven",
     }
+
+
+def live_semiogenesis_metrics(ls: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Objective first-live-semiogenesis metrics (conservative, read-only).
+
+    These describe bounded private sign formation over stable live proto-concepts:
+    eligible concepts, sign candidates, stable candidates, born signs,
+    rejected/contaminated/label-dependent signs, private-syntax relations, the mean
+    sign-utility score, and birth-gate pass/block counts. Private signs are
+    operational internal reference structures. No full cognition / action-reaction /
+    developmental autonomy is enabled, signs are not language understanding, no
+    feeder/hardware/network is controlled, and no consciousness/life/agency claim is
+    made.
+    """
+    if not ls:
+        return {"present": False}
+    gate = ls.get("live_sign_birth_gate_status", "")
+    born = int(ls.get("live_born_sign_count", 0) or 0)
+    return {
+        "present": True,
+        "live_semiogenesis_run_count": 1,
+        "live_semiogenesis_blocked_count": 1 if ls.get(
+            "live_semiogenesis_blocked") else 0,
+        "live_eligible_concept_count": int(
+            ls.get("live_eligible_concept_count", 0) or 0),
+        "live_sign_candidate_count": int(
+            ls.get("live_sign_candidate_count", 0) or 0),
+        "live_stable_sign_candidate_count": int(
+            ls.get("live_stable_sign_candidate_count", 0) or 0),
+        "live_born_sign_count": born,
+        "live_rejected_sign_count": int(
+            ls.get("live_rejected_sign_count", 0) or 0),
+        "live_contaminated_sign_count": int(
+            ls.get("live_contaminated_sign_count", 0) or 0),
+        "live_label_dependent_sign_count": int(
+            ls.get("live_label_dependent_sign_count", 0) or 0),
+        "live_private_syntax_relation_count": int(
+            ls.get("live_private_syntax_relation_count", 0) or 0),
+        "live_sign_utility_score_mean": float(
+            ls.get("live_sign_utility_score_mean", 0.0) or 0.0),
+        "live_sign_birth_gate_pass_count": born,
+        "live_sign_birth_gate_block_count": int(
+            ls.get("live_contaminated_sign_count", 0) or 0)
+        + (1 if str(gate) == "blocked" else 0),
+        "live_sign_birth_gate_status": gate,
+        "recommended_next_phase": ls.get("recommended_next_phase"),
+        "live_semiogenesis_safety_block_count": int(
+            ls.get("live_semiogenesis_safety_block_count", 0) or 0),
+        "enables_cognition": False, "enables_action_reaction": False,
+        "enables_developmental_autonomy": False,
+        "signs_are_language_understanding": False,
+        "starts_feeders": False, "controls_hardware": False,
+        "accesses_network": False, "runs_git": False,
+        "is_consciousness_or_personhood": False,
+        "note": "bounded private sign formation; private signs are operational "
+                "internal reference structures, not language or understanding; no "
+                "cognition/action-reaction/developmental autonomy is enabled; "
+                "nothing about consciousness/life/agency is proven",
+    }
