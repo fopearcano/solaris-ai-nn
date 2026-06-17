@@ -3418,3 +3418,42 @@ permeability but never modifies feeders.
 Builds append-only membrane (boundary) memory across updates for a reliable source
 and a toxic source, showing reliability/toxicity accumulation and that toxic history
 is never deleted. Membrane memory is boundary memory, not cognition.
+
+## 394. Membrane Integration Demo ✅ (implemented)
+
+**Run:** `python examples/run_membrane_integration_demo.py --state-dir .solaris_ai_nn_live/integ_demo`
+Stages a clean membrane pipeline (sensory impressions plus a proto-concept, private
+sign, and cognition trace that reference impression ancestry), runs the bounded
+membrane integration runtime, and prints ancestry chains, bypass findings, and the
+pipeline-audit status. Raw events remain audit material; downstream artifacts preserve
+impression ancestry.
+
+## 395. Membrane Bypass Demo ✅ (implemented)
+
+**Run:** `python examples/run_membrane_bypass_demo.py --state-dir .solaris_ai_nn_live/bypass_demo`
+Stages a pipeline whose proto-concept has no impression ancestry (its source events
+were never produced by the membrane), runs the integration runtime in strict enforced
+mode, and prints the bypass findings and blocker status. Missing impression ancestry
+is critical and a direct raw-event downstream path is a blocker; nothing is hidden.
+
+## 396. Membrane Ancestry Demo ✅ (implemented)
+
+**Run:** `python examples/run_membrane_ancestry_demo.py --state-dir .solaris_ai_nn_live/anc_demo`
+Reconstructs and prints the ancestry chain cognition_trace -> private_sign ->
+proto_concept -> sensory_impression -> receptor -> source_event -> source for each
+downstream artifact, showing which impressions support each concept/sign/trace.
+
+## 397. Membrane Contracts Demo ✅ (implemented)
+
+**Run:** `python examples/run_membrane_contracts_demo.py --state-dir .solaris_ai_nn_live/contracts_demo`
+Evaluates the per-module downstream contracts (live_birth, live_observation,
+live_ontogenesis, live_semiogenesis, live_cognition, scientific_claims,
+research_cycle) and prints each module's satisfied / satisfied-with-warnings /
+violated status against the membrane.
+
+## 398. Membrane Pipeline Audit Demo ✅ (implemented)
+
+**Run:** `python examples/run_membrane_pipeline_audit_demo.py --state-dir .solaris_ai_nn_live/audit_demo`
+Walks the live perceptual pipeline stage by stage and prints, per stage, the status,
+impression count, raw-fallback count, and bypass findings. Fallback, missing
+artifacts, and bypasses are all visible.

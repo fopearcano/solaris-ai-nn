@@ -1,0 +1,23 @@
+{
+  "records": [
+    {
+      "concept_id": "c_bypass",
+      "feature_signature": "x",
+      "status": "born",
+      "stability_score": 0.7,
+      "recurrence_count": 2,
+      "source_distribution": {
+        "machine_body": 2
+      },
+      "modality_distribution": {
+        "scalar": 2
+      },
+      "supporting_event_ids": [
+        "ev_missing1",
+        "ev_missing2"
+      ],
+      "contradicting_event_ids": [],
+      "contamination_findings": []
+    }
+  ]
+}

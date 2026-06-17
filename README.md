@@ -316,6 +316,39 @@ ontogenesis/semiogenesis/cognition, or make claims about consciousness, sentienc
 biological life, personhood, agency, free will, emotion, feeling, understanding,
 self-awareness, autonomous self-improvement, or subjective experience.
 
+## Membrane Integration Across the Live Pipeline
+
+Membrane integration (Prompt 73) is an integration and refactor pass, not a new
+theory layer: it wires the Environmental Membrane into the live pipeline and audits
+the result. The enforced path is external feeders -> Live Birth inbox -> event
+validator -> **Environmental Membrane** -> sensory impressions -> Plural Sensorium ->
+Perceptual Metabolism -> Live Observation -> Live Ontogenesis -> Live Semiogenesis ->
+Live Cognition -> Scientific Claims / Research Cycle / Reports. **Raw events are not
+perception** -- they remain audit material, and downstream organismic modules
+primarily consume membrane-filtered sensory impressions. The layer reconstructs the
+ancestry chain (cognition_trace -> private_sign -> proto_concept -> sensory_impression
+-> receptor -> source_event -> source), evaluates per-module downstream contracts,
+and detects bypasses; in strict mode a direct raw-event downstream path is a blocker
+and missing impression ancestry is critical.
+
+```bash
+python -m solaris_ai_nn membrane-integrate --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn membrane-audit --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn membrane-bypass --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn membrane-ancestry --state-dir .solaris_ai_nn_live
+python -m solaris_ai_nn membrane-contracts --state-dir .solaris_ai_nn_live
+```
+
+The integration layer is bounded and read-only. It does not start/stop/configure
+feeders, control hardware, access network/shell/browser/OS/Git/GitHub, execute
+commands, modify source or governance, let raw events silently bypass the membrane
+into ontogenesis/semiogenesis/cognition, hide bypass findings / raw fallback /
+contamination, treat sensory text as a command or human labels/debug gloss as ground
+truth, or make claims about consciousness, sentience, biological life, personhood,
+agency, free will, emotion, feeling, understanding, self-awareness, autonomous
+self-improvement, or subjective experience. It is an architectural audit/enforcement
+layer, not evidence of inner life.
+
 ## Run the minimal experiment
 
 ```bash
@@ -1999,6 +2032,15 @@ src/solaris_ai_nn/
                 valid/invalid; operator pulse attenuated, debug gloss never
                 truth; no feeder/hardware/network/Git control; no raw-event
                 bypass downstream; boundary records, not consciousness evidence)
+  membrane_integration/  integrates the membrane into the live pipeline (Prompt 73):
+                integration profile, sensory-impression loader, ancestry builder,
+                downstream contracts, bypass detector, module adapters, pipeline
+                audit, runtime, reports, safety (raw events are not perception ->
+                downstream modules consume sensory impressions; ancestry
+                cognition->sign->concept->impression->receptor->source; strict
+                mode blocks raw-event bypass and missing ancestry; bounded and
+                read-only; no feeder/hardware/network/Git control; audit/
+                enforcement layer, not consciousness evidence)
   cli.py        unified `python -m solaris_ai_nn` Alpha CLI (local-only, bounded)
   experiments/  minimal ESN, absence bridge, soak, restart, inner map, plasticity,
                 substrates, sidecar, embodiment, language trace demo

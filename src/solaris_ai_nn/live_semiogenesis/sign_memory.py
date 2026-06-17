@@ -39,6 +39,9 @@ class LiveSignRecord:
     contamination_findings: List[str] = field(default_factory=list)
     birth_gate_status: str = ""
     debug_alias: str = ""
+    # Membrane ancestry refs (Prompt 73): impression/receptor/source-event ids
+    # this sign's concept(s) trace back to. Empty when the membrane is absent.
+    ancestry_refs: List[str] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
 
     def sanitized_token(self) -> str:
@@ -59,6 +62,7 @@ class LiveSignRecord:
             "contamination_findings": list(self.contamination_findings),
             "birth_gate_status": self.birth_gate_status,
             "debug_alias": self.debug_alias,
+            "ancestry_refs": list(self.ancestry_refs),
             "debug_alias_is_ground_truth": False,
             "is_live_readonly": True, "implies_language_understanding": False,
             "created_at": self.created_at,

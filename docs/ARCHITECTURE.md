@@ -4599,3 +4599,58 @@ as teaching, or claims consciousness, sentience, biological life, personhood, ag
 free will, emotion, feeling, understanding, self-awareness, or subjective experience.
 Sensory impressions are operational boundary records, not evidence of consciousness/
 life/agency.
+
+## Membrane Integration Across Live Pipeline
+
+The `membrane_integration` package (Prompt 73) is an integration and refactor pass,
+not a new theory layer. Prompt 72 created the Environmental Membrane; this layer wires
+it into the live pipeline so the correct path is enforced and audited: external
+feeders -> Live Birth inbox -> event validator -> **Environmental Membrane** ->
+sensory impressions -> Plural Sensorium -> Perceptual Metabolism -> Live Observation
+-> Live Ontogenesis -> Live Semiogenesis -> Live Cognition -> Scientific Claims /
+Research Cycle / Reports. **Raw events are not perception.** They remain available as
+audit and debugging material, but downstream organismic modules (ontogenesis,
+semiogenesis, cognition) must primarily consume membrane-filtered sensory impressions;
+when impressions exist, raw events may not silently flow downstream.
+
+**The integration layer answers concrete questions.** Did a module use impressions or
+raw events; which membrane report, receptor, and permeability decision were involved;
+which impression supported each proto-concept / private sign / cognition trace; did
+contamination or operator-text dominance propagate downstream; and did any module
+bypass the membrane (and was that bypass allowed, warned, or blocked). The
+`SensoryImpressionLoader` reads the membrane impression index and reports;
+`MembraneAncestryBuilder` reconstructs the ancestry chain `cognition_trace ->
+private_sign -> proto_concept -> sensory_impression -> receptor -> source_event ->
+source/feeder`; `evaluate_contracts` checks the per-module downstream contracts
+(live_birth, live_observation, live_ontogenesis, live_semiogenesis, live_cognition,
+scientific_claims, research_cycle); `MembraneBypassDetector` flags raw-event direct
+paths, missing impression ancestry, unmarked raw fallback, and unpropagated
+contamination; and `MembranePipelineAudit` walks every pipeline stage. In strict live
+mode a direct raw-event downstream path is a blocker and missing impression ancestry
+(when the membrane exists) is critical; raw fallback is always loudly reported, never
+hidden.
+
+**The refactors are additive and conservative.** The Live Birth certificate records
+environmental-membrane status (and that birth never bypasses the membrane); Live
+Observation distinguishes an impression diet from a raw event diet; Live Ontogenesis
+forms proto-concepts from sensory impressions and flags any raw fallback loudly
+(`used_membrane_impressions` / `raw_event_fallback`); Live Semiogenesis and Live
+Cognition records carry `ancestry_refs` back to impressions and contaminated ancestry
+downgrades or blocks promotion; Scientific Claims type their evidence (raw event vs
+validated event vs membrane-filtered impression vs ancestry-backed concept/sign/
+cognition vs raw-fallback vs bypass-warning), and raw events never support birth
+claims; the Alpha system surfaces `membrane_integration_status()` read-only. The
+bounded `MembraneIntegrationRuntime` orchestrates the audit and writes the integration
+report set, reachable via `python -m solaris_ai_nn membrane-integrate / membrane-audit
+/ membrane-bypass / membrane-ancestry / membrane-contracts`.
+
+**The integration layer controls nothing.** It is bounded and local-only; it never
+starts/stops/configures feeders, controls hardware, accesses the network/shell/
+browser/OS/camera/microphone/Git/GitHub, executes commands, modifies source or
+governance, lets raw events silently bypass the membrane into ontogenesis/
+semiogenesis/cognition, hides bypass findings / raw fallback / contamination / source
+dominance, treats sensory text as a command or human labels/debug gloss as ground
+truth or the operator pulse as teaching, or claims consciousness, sentience,
+biological life, personhood, agency, free will, emotion, feeling, understanding,
+self-awareness, or subjective experience. Membrane integration is an architectural
+audit/enforcement layer, not evidence of inner life.

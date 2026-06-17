@@ -693,6 +693,46 @@ class AlphaResearchOrchestrator:
                     "feeders",
         }
 
+    def membrane_integration_status(
+            self, live_state_dir: str = ".solaris_ai_nn_live") -> Dict[str, Any]:
+        """Read-only view of the latest membrane integration run (Prompt 73).
+
+        Surfaces whether the membrane integration layer ran, the latest report,
+        the sensory-impression count, bypass/critical-bypass counts, raw-fallback
+        count, and ancestry-validation status. The default fixture alpha runs
+        without a live membrane, but tester/live profiles should warn if the
+        membrane is absent.
+        """
+        base = os.path.join(live_state_dir, "membrane", "integration")
+        if not os.path.isdir(base):
+            return {"membrane_integration_available": False,
+                    "membrane_module_available": os.path.isdir(
+                        os.path.join(live_state_dir, "membrane")),
+                    "note": "no membrane integration state present; the default "
+                            "fixture alpha runs without a live membrane"}
+        files = sorted(f for f in os.listdir(base)
+                       if f.startswith("integ_") and f.endswith(".json"))
+        if not files:
+            return {"membrane_integration_available": False}
+        with open(os.path.join(base, files[-1]), encoding="utf-8") as fh:
+            status = json.load(fh)
+        return {
+            "membrane_integration_available": True,
+            "membrane_module_available": status.get("membrane_present", False),
+            "latest_integration_report_path": status.get(
+                "latest_integration_report_path"),
+            "impression_count": status.get("impression_count", 0),
+            "bypass_count": status.get("bypass_finding_count", 0),
+            "critical_bypass_count": status.get("critical_bypass_count", 0),
+            "raw_fallback_count": status.get("raw_fallback_count", 0),
+            "ancestry_validation_status": status.get(
+                "ancestry_validation_status"),
+            "learns": False, "controls_feeders": False, "runs_git": False,
+            "note": "read-only view of the latest membrane integration; the "
+                    "alpha system never runs integration, learns, or controls "
+                    "feeders",
+        }
+
     def snapshot(self) -> Dict[str, Any]:
         return self.alpha_status()
 

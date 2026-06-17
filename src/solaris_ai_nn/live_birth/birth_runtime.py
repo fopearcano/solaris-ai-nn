@@ -236,7 +236,8 @@ class LiveReadOnlyBirthRuntime:
             metabolism_status=self.metabolism_status,
             first_safety_block=first_safety_block,
             safety_status=("blocked" if self.blocked else "pass"),
-            operator_note=self.operator_note)
+            operator_note=self.operator_note,
+            environmental_membrane=self.environmental_membrane_status())
         self._certificate_obj = certificate
         if not self.dry_run:
             self.certificate = builder.write(certificate)

@@ -88,7 +88,9 @@ class BirthCertificateBuilder:
               forbidden_sources: List[str], inbox_result: Dict[str, Any],
               membrane: Dict[str, Any], metabolism_status: str = "",
               first_safety_block: str = "", safety_status: str = "pass",
-              operator_note: str = "") -> BirthCertificate:
+              operator_note: str = "",
+              environmental_membrane: Optional[Dict[str, Any]] = None,
+              ) -> BirthCertificate:
         fields = {
             "created_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ",
                                             time.gmtime()),
@@ -113,6 +115,8 @@ class BirthCertificateBuilder:
             "membrane_activation_status": (
                 "activated" if membrane.get("membrane_activated") else "not "
                 "activated"),
+            # Environmental Membrane (Prompt 72/73) reference, if available.
+            "environmental_membrane": dict(environmental_membrane or {}),
             "metabolism_status": metabolism_status,
             "safety_status": safety_status,
             "operator_note": operator_note,

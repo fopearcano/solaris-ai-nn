@@ -521,10 +521,17 @@ class FirstLiveOntogenesisRuntime:
 
     def ontogenesis_status(self) -> Dict[str, Any]:
         counts = self._counts()
+        # Membrane integration (Prompt 73): whether features came from membrane
+        # sensory impressions, or fell back to raw events (loudly reported).
+        used_impressions = any(
+            ev.get("membrane_impression_id") for ev in self.accepted_events)
+        raw_fallback = bool(self.accepted_events) and not used_impressions
         return {
             "live_ontogenesis_enabled": True,
             "ontogenesis_run_id": self.run_id,
             "live_ontogenesis_blocked": self.blocked,
+            "used_membrane_impressions": used_impressions,
+            "raw_event_fallback": raw_fallback,
             "live_feature_vector_count": self.feature_result.get(
                 "live_feature_vector_count", 0),
             "live_recurrence_pattern_count": self.recurrence_summary.get(

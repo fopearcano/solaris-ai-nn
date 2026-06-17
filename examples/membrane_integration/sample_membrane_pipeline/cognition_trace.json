@@ -1,0 +1,22 @@
+{
+  "records": [
+    {
+      "trace_id": "t_machine",
+      "kind": "anticipation",
+      "status": "useful",
+      "linked_sign_ids": [
+        "s_machine"
+      ],
+      "linked_concept_ids": [
+        "c_machine"
+      ],
+      "uncertainty": 0.3,
+      "prediction_outcome": "matched",
+      "supporting_refs": [
+        "s_machine"
+      ],
+      "contradicting_refs": [],
+      "contamination_findings": []
+    }
+  ]
+}

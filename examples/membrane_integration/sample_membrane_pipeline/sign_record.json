@@ -1,0 +1,21 @@
+{
+  "records": [
+    {
+      "sign_id": "s_machine",
+      "private_token": "sig_live_aa",
+      "status": "born",
+      "linked_concept_ids": [
+        "c_machine"
+      ],
+      "utility_score": 0.8,
+      "source_distribution": {
+        "machine_body": 2
+      },
+      "supporting_refs": [
+        "c_machine"
+      ],
+      "contradicting_refs": [],
+      "contamination_findings": []
+    }
+  ]
+}

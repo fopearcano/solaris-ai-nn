@@ -1,0 +1,23 @@
+{
+  "records": [
+    {
+      "concept_id": "c_machine",
+      "feature_signature": "machine_body:scalar:aa",
+      "status": "born",
+      "stability_score": 0.72,
+      "recurrence_count": 2,
+      "source_distribution": {
+        "machine_body": 2
+      },
+      "modality_distribution": {
+        "scalar": 2
+      },
+      "supporting_event_ids": [
+        "ev_b1",
+        "ev_b2"
+      ],
+      "contradicting_event_ids": [],
+      "contamination_findings": []
+    }
+  ]
+}

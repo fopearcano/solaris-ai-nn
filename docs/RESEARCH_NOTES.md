@@ -2994,3 +2994,34 @@ respond consistently over time. This is immune-like bookkeeping, not thought. It
 append-only, never deletes toxic history, and never silently forgives a bad source;
 it recommends review rather than imposing permanent blocks, which remain the province
 of governance and safety.
+
+## Notes on Membrane Integration Across the Live Pipeline
+
+**Why this is integration, not a new layer.** Prompt 72 built the Environmental
+Membrane as an organ; Prompt 73 makes the rest of the organism actually breathe
+through it. The risk after adding an organ is that the existing modules keep consuming
+the old raw input out of habit, leaving the membrane as a side computation. So this
+pass wires impressions into the live path and adds an audit/enforcement layer that can
+detect, warn about, or (in strict mode) block any module that bypasses the boundary.
+
+**Why raw events are not perception.** A validated raw event is a fact that arrived at
+the boundary; a sensory impression is what the organism actually perceived after the
+membrane filtered, attenuated, and contextualized it. Letting ontogenesis or cognition
+read raw events directly would skip perception entirely and let unfiltered source
+dominance and operator text shape the ontology. Raw events therefore remain audit and
+debugging material, and the integration layer treats a silent raw-event downstream
+path as a bypass.
+
+**Why ancestry matters.** Every proto-concept, private sign, and cognition trace
+should trace back through impressions to receptors and source events. The ancestry
+chain makes this auditable: if a concept cannot be traced to an impression while the
+membrane exists, that is a missing-ancestry finding (critical in strict mode) rather
+than a silently accepted concept. Contaminated ancestry downgrades or blocks
+promotion, so operator-text or secret contamination cannot quietly become structure.
+
+**Why the layer controls nothing.** The integration runtime is bounded and read-only:
+it audits and enforces the perceptual contract but never starts/stops/configures
+feeders, controls hardware, touches the network/Git/shell, executes commands, modifies
+source or governance, or learns from operator feedback. It makes no claim of
+consciousness, life, agency, or understanding -- it is an architectural audit and
+enforcement layer, and its reports say so explicitly.

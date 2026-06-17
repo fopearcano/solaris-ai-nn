@@ -36,7 +36,29 @@ _ALPHA_COMMANDS = ("doctor", "init", "modules", "run-demo", "artifact-index",
                    "live-cognition", "live-cognition-traces",
                    "live-anticipations", "live-predictions",
                    "live-cognition-gate", "membrane-doctor", "membrane-run",
-                   "membrane-impressions", "membrane-report", "membrane-memory")
+                   "membrane-impressions", "membrane-report", "membrane-memory",
+                   "membrane-integrate", "membrane-audit", "membrane-bypass",
+                   "membrane-ancestry", "membrane-contracts")
+
+
+def _integration_runtime(args: argparse.Namespace):
+    from .membrane_integration.integration_runtime import (
+        MembraneIntegrationRuntime,
+    )
+
+    state_dir = args.state_dir
+    if state_dir == ".solaris_ai_nn_alpha":
+        state_dir = ".solaris_ai_nn_live"
+    return MembraneIntegrationRuntime(
+        state_dir=state_dir, profile=args.profile,
+        max_runtime_s=args.max_runtime_s, report_only=args.report_only,
+        dry_run=args.dry_run, strict=args.strict,
+        require_membrane=args.require_membrane,
+        require_impressions=args.require_impressions,
+        require_ancestry=args.require_ancestry,
+        allow_raw_fallback=args.allow_raw_fallback,
+        require_claimguard=args.require_claimguard,
+        operator_note=args.operator_note)
 
 
 def _membrane_runtime(args: argparse.Namespace):
@@ -938,6 +960,93 @@ def cmd_membrane_memory(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_membrane_integrate(args: argparse.Namespace) -> int:
+    rt = _integration_runtime(args)
+    result = rt.run()
+    if result.get("refused"):
+        _print(f"membrane integration refused: {result.get('reason')}")
+        return 2
+    st = rt.integration_status()
+    _print("membrane integration:")
+    _print(f"  run id: {st['integration_run_id']} ({st['integration_profile']})")
+    _print(f"  blocked: {result['blocked']}")
+    for b in result["blockers"]:
+        _print(f"    blocker: {b}")
+    _print(f"  membrane present: {st['membrane_present']}; impressions: "
+           f"{st['impression_count']}")
+    _print(f"  ancestry chains: {st['ancestry_chain_count']} (with ancestry "
+           f"{st['with_impression_ancestry']}, missing {st['missing_ancestry']})")
+    _print(f"  bypass findings: {st['bypass_finding_count']} (critical "
+           f"{st['critical_bypass_count']})")
+    _print(f"  raw fallback: {st['raw_fallback_count']}; pipeline: "
+           f"{st['pipeline_status']}")
+    _print(f"  recommended next action: {rt.recommended_next_action()}")
+    if (result["blocked"] or st["critical_bypass_count"]) and args.strict:
+        return 2
+    return 0
+
+
+def cmd_membrane_audit(args: argparse.Namespace) -> int:
+    rt = _integration_runtime(args)
+    rt.run()
+    au = rt.audit.to_dict() if rt.audit else {}
+    _print("membrane pipeline audit:")
+    _print(f"  overall status: {au.get('overall_status')}")
+    for stg in au.get("stages", []):
+        _print(f"  - {stg['stage']}: {stg['status']} "
+               f"(impressions {stg['impression_count']}, fallback "
+               f"{stg['fallback_count']}, bypass {stg['bypass_findings']})")
+    if rt.blocked and args.strict:
+        return 2
+    return 0
+
+
+def cmd_membrane_bypass(args: argparse.Namespace) -> int:
+    from .membrane_integration import MembraneBypassDetector
+
+    rt = _integration_runtime(args)
+    rt.run()
+    summ = MembraneBypassDetector.summary(rt.bypass_findings)
+    _print("membrane bypass report:")
+    _print(f"  findings: {summ['bypass_finding_count']} (worst "
+           f"{summ['worst_severity']})")
+    _print(f"  by severity: {summ['by_severity']}")
+    for f in summ["findings"][:25]:
+        _print(f"  - [{f['severity']}] {f['finding']}: {f['detail']}")
+    if MembraneBypassDetector.has_blocking(rt.bypass_findings) and args.strict:
+        return 2
+    return 0
+
+
+def cmd_membrane_ancestry(args: argparse.Namespace) -> int:
+    rt = _integration_runtime(args)
+    rt.run()
+    a = rt.ancestry.to_dict() if rt.ancestry else {}
+    _print("membrane ancestry index:")
+    _print(f"  chains: {a.get('ancestry_chain_count', 0)}")
+    _print(f"  with impression ancestry: {a.get('with_impression_ancestry', 0)}")
+    _print(f"  missing ancestry: {a.get('missing_ancestry', 0)}")
+    _print(f"  contaminated ancestry: {a.get('contaminated_ancestry', 0)}")
+    _print(f"  by artifact type: {a.get('by_artifact_type', {})}")
+    return 0
+
+
+def cmd_membrane_contracts(args: argparse.Namespace) -> int:
+    from .membrane_integration.downstream_contracts import summary
+
+    rt = _integration_runtime(args)
+    rt.run()
+    s = summary(rt.contracts) if rt.contracts else {}
+    _print("membrane downstream contracts:")
+    _print(f"  contracts: {s.get('contract_count', 0)}; violated: "
+           f"{s.get('violated_count', 0)}")
+    for c in s.get("contracts", []):
+        _print(f"  - {c['module']}: {c['status']}")
+    if s.get("violated_count", 0) and args.strict:
+        return 2
+    return 0
+
+
 _HANDLERS = {
     "init": cmd_init,
     "doctor": cmd_doctor,
@@ -979,6 +1088,11 @@ _HANDLERS = {
     "membrane-impressions": cmd_membrane_impressions,
     "membrane-report": cmd_membrane_report,
     "membrane-memory": cmd_membrane_memory,
+    "membrane-integrate": cmd_membrane_integrate,
+    "membrane-audit": cmd_membrane_audit,
+    "membrane-bypass": cmd_membrane_bypass,
+    "membrane-ancestry": cmd_membrane_ancestry,
+    "membrane-contracts": cmd_membrane_contracts,
 }
 
 
@@ -1084,6 +1198,19 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--require-live-signs", action="store_true",
                         default=False, dest="require_live_signs",
                         help="require eligible live signs before cognition")
+    # Membrane integration arguments (Prompt 73).
+    parser.add_argument("--require-membrane", action="store_true",
+                        default=False, dest="require_membrane",
+                        help="require membrane artifacts for integration")
+    parser.add_argument("--require-impressions", action="store_true",
+                        default=False, dest="require_impressions",
+                        help="require sensory impressions for integration")
+    parser.add_argument("--require-ancestry", action="store_true",
+                        default=False, dest="require_ancestry",
+                        help="require impression ancestry for promoted artifacts")
+    parser.add_argument("--allow-raw-fallback", action="store_true",
+                        default=False, dest="allow_raw_fallback",
+                        help="permit raw-event fallback (loudly reported)")
 
 
 def build_parser() -> argparse.ArgumentParser:

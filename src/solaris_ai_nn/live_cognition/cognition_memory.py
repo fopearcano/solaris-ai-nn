@@ -38,6 +38,9 @@ class LiveCognitionRecord:
     supporting_refs: List[str] = field(default_factory=list)
     contradicting_refs: List[str] = field(default_factory=list)
     contamination_findings: List[str] = field(default_factory=list)
+    # Membrane ancestry refs (Prompt 73): impression/sign/concept ids this
+    # trace traces back to. Empty when the membrane is absent.
+    ancestry_refs: List[str] = field(default_factory=list)
     created_at: float = field(default_factory=time.time)
 
     def safe_trace_id(self) -> str:
@@ -57,6 +60,7 @@ class LiveCognitionRecord:
             "supporting_refs": self.supporting_refs[:50],
             "contradicting_refs": self.contradicting_refs[:50],
             "contamination_findings": list(self.contamination_findings),
+            "ancestry_refs": list(self.ancestry_refs),
             "is_live_readonly": True, "implies_reasoning": False,
             "implies_understanding": False, "created_at": self.created_at,
             "note": "operational sign-based anticipation/relation record linked "
